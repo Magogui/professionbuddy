@@ -1,0 +1,9 @@
+Professionbuddy 1.0.0.37
+* The 'Post if below MinBuyOut' property from the 'Sell Item On Ah' action now works properly
+* 'Cast Spell' now works properly if it's property 'Repeat Type' is set to 'Craftable'
+* all Action properties that take an NPC ID now have a button that will autofill the property value with current targets ID when button is pressed.
+* Added SubRoutine support. Use the new 'Call SubRoutine' action to execute SubRoutines.
+* Added RefreshDataStore() to the API. It Imports a fresh copy of the DataStore database.
+* 'Get Mail' action no longer checks for the ingame 'New Mail' indicator
+* 'Buy Item' action will now subtract materials bot has in its bag.
+
