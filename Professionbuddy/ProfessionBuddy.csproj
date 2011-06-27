@@ -131,7 +131,7 @@
       <DependentUpon>MaterialListForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -140,7 +140,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Document\Guide.rtf" />
     <None Include="Guide.rtf" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -178,10 +177,6 @@ if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.txt"  "$(ProjectDir)..\..
 if $(ConfigurationName) == Dll xcopy "$(ProjectDir)*.xml"  "$(ProjectDir)..\..\..\Honorbuddy\Plugins\$(TargetName)" /I /S /Y
 if $(ConfigurationName) == Dll xcopy "$(ProjectDir)*.zip" "$(ProjectDir)..\..\..\Honorbuddy\Plugins\$(TargetName)" /I /S /Y
 if $(ConfigurationName) == Dll xcopy "$(TargetPath)" "$(ProjectDir)..\..\..\Honorbuddy\Plugins\$(TargetName)" /I /S /Y
-
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.*"  "$(ProjectDir)..\..\SVN\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug rmdir  /S/Q "$(ProjectDir)..\..\SVN\$(TargetName)\obj" 
-if $(ConfigurationName) == Debug rmdir  /S/Q "$(ProjectDir)..\..\SVN\$(TargetName)\bin" 
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

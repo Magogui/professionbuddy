@@ -1,5 +1,6 @@
 ﻿//!CompilerOption:Optimize:On
 //!CompilerOption:AddRef:WindowsBase.dll
+// Professionbuddy plugin by HighVoltz
 
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 0, 0, 37); } }
+        public override Version Version { get { return new Version(1, 37); } }
 
         public override bool WantButton { get { return true; } }
 
