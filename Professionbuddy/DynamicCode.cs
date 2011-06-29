@@ -361,7 +361,7 @@ namespace HighVoltz
                     if (ts.Recipes.ContainsKey(RecipeID))
                     {
                         return (ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count)
-                            && Util.CalculateRecipeRepeat(ts.Recipes[RecipeID]) > 0;
+                            && ts.Recipes[RecipeID].CanRepeatNum > 0;
                     }
                 }
                 return false;
