@@ -21,7 +21,7 @@ namespace HighVoltz
     public class TradeSkillFrame : Frame
     {
         // needs to be moved to offsets enum
-        
+
         //private static uint TradeskillOffset = 0xA92550; // wow 4.1
         private static uint TradeskillOffset = 0xB0AAE8; // wow 4.2
         internal struct SkillOffset
@@ -55,24 +55,48 @@ namespace HighVoltz
             public const uint IsLinked = 0x58; // 0x0001 = any linked profession, 0x0010 = guild profession, though this is bugged on live and not working
             public const uint LoadedSkill = 0x5C; // skill id, presists after tradeskill frame is closed
 
-            public const uint Unknown3 = 0x60; // related to recipeArraySize, often same number
-            public const uint RecipeArraySize = 0x64; // use TotalRecipeCount instead since there can be linkering recipes from a previously loaded tradeskill
-            public const uint RecipeArray = 0x68; // array of pointers
-            public const uint Unknown4 = 0x6C;     // nothing important, cba to reverse it
+            //public const uint NewUnknown1 = 0x60;      // (Added WoW 4.2) hmm what could this be? cba to check 
+            //public const uint NewUnknown2 = 0x64;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown3 = 0x68;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown4 = 0x6C;      // (Added WoW 4.2) hmm what could this be? cba to check
 
-            public const uint Unknown5 = 0x70;       // probably has a similar purpose as Unknown3
-            public const uint FilterArraySize = 0x74;// use SubClassFilterNum instead since there can be linkering filters not yet disposed
-            public const uint FilterArrayPtr = 0x78; // filters... cba to reverse
-            public const uint Unknown6 = 0x7C;       // probably has a similar purpose as Unknown4
+            //public const uint NewUnknown5 = 0x70;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown6 = 0x74;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown7 = 0x78;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown8 = 0x7C;      // (Added WoW 4.2) hmm what could this be? cba to check
 
-            public const uint Unknown7 = 0x80;       // hmm what could this be? cba to check.. looks like its 64bit(long)
-            public const uint Unknown9 = 0x88;       // hmm what could this be? cba to check
-            public const uint Unknown10 = 0x8C;      // hmm what could this be? cba to check
+            //public const uint NewUnknown9 = 0x80;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown10 = 0x84;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown11 = 0x88;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown12 = 0x8C;      // (Added WoW 4.2) hmm what could this be? cba to check
 
-            public const uint Unknown11 = 0x90;      // hmm what could this be? cba to check
-            public const uint Unknown12 = 0x94;      // hmm what could this be? cba to check
-            public const uint Unknown13 = 0x98;      // hmm what could this be? cba to check
-            public const uint Unknown14 = 0x9C;      // hmm what could this be? cba to check
+            //public const uint NewUnknown13 = 0x90;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown14 = 0x94;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown15 = 0x98;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown16 = 0x9C;      // (Added WoW 4.2) hmm what could this be? cba to check
+
+            //public const uint NewUnknown17 = 0xA0;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown18 = 0xA4;      // (Added WoW 4.2) hmm what could this be? cba to check
+            //public const uint NewUnknown19 = 0xA8;      // (Added WoW 4.2) hmm what could this be? cba to check
+            public const uint Unknown3 = 0xAC; // related to recipeArraySize, often same number
+
+            public const uint RecipeArraySize = 0xB0; // use TotalRecipeCount instead since there can be linkering recipes from a previously loaded tradeskill
+            public const uint RecipeArray = 0xB4; // array of pointers
+            public const uint Unknown4 = 0xB8;     // nothing important, cba to reverse it
+            public const uint Unknown5 = 0xBC;       // probably has a similar purpose as Unknown3
+
+            public const uint FilterArraySize = 0xC0;// use SubClassFilterNum instead since there can be linkering filters not yet disposed
+            public const uint FilterArrayPtr = 0xC4; // filters... cba to reverse
+            public const uint Unknown6 = 0xC8;       // probably has a similar purpose as Unknown4
+            public const uint Unknown7 = 0xCC;       // hmm what could this be? cba to check.. looks like its 64bit(long)
+
+            public const uint Unknown9 = 0xD4;       // hmm what could this be? cba to check
+            public const uint Unknown10 = 0xD8;      // hmm what could this be? cba to check
+            public const uint Unknown11 = 0xDC;      // hmm what could this be? cba to check
+
+            public const uint Unknown12 = 0xE0;      // hmm what could this be? cba to check
+            public const uint Unknown13 = 0xE4;      // hmm what could this be? cba to check
+            public const uint Unknown14 = 0xE8;      // hmm what could this be? cba to check
         }
 
         public readonly static List<SkillLine> SupportedSkills = new List<SkillLine>
@@ -158,6 +182,7 @@ namespace HighVoltz
             if (!TreeRoot.IsRunning)
                 ObjectManager.Update();
             WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
+
             TradeSkill tradeSkill = new TradeSkill(wowSkill);
 
             //lets copy over to a local variable for performance
@@ -475,6 +500,13 @@ namespace HighVoltz
             public const uint TurnsGrayLevel = 7;
             public const uint Skillups = 8;
         }
+        enum SpellDB
+        { 
+            NamePtr = 21, 
+            SpellCastingReqIndex = 34,
+            SpellReagentsIndex = 43,
+            SpellTotemsIndex = 46,
+        };
         public enum RecipeDifficulty
         {
             optimal, medium, easy, trivial
@@ -554,7 +586,7 @@ namespace HighVoltz
                 SpelldbRow = SpelldbTable.GetRow((uint)recipeID);
                 if (SpelldbRow != null)
                 {
-                    uint reagentIndex = SpelldbRow.GetField<uint>(42);
+                    uint reagentIndex = SpelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);// Changed to 43 in WoW 4.2
                     WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
                         reagentIndex >= reagentDbTable.MinIndex)
@@ -616,7 +648,7 @@ namespace HighVoltz
             string name = null;
             WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.Spell];
             WoWDb.Row r = t.GetRow((uint)ID);
-            uint stringPtr = r.GetField<uint>(20);
+            uint stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
             if (stringPtr != 0)
             {
                 name = ObjectManager.Wow.Read<string>(stringPtr);
@@ -630,7 +662,7 @@ namespace HighVoltz
             tools = new List<Tool>();
             WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.Spell];
             WoWDb.Row spellDbRow = t.GetRow((uint)ID);
-            uint spellReqIndex = spellDbRow.GetField<uint>(33);
+            uint spellReqIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellCastingReqIndex); // changed from 33 to 34 in WOW 4.2
             if (spellReqIndex != 0)
             {
                 t = StyxWoW.Db[Styx.Patchables.ClientDb.SpellCastingRequirements];
@@ -654,7 +686,7 @@ namespace HighVoltz
                     }
                 }
             }
-            uint spellTotemsIndex = spellDbRow.GetField<uint>(45);
+            uint spellTotemsIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellTotemsIndex); // changed from 45 to 46 in WOW 4.2
             if (spellTotemsIndex != 0)
             {
                 t = StyxWoW.Db[Styx.Patchables.ClientDb.SpellTotems];

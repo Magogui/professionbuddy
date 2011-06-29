@@ -899,6 +899,7 @@ namespace HighVoltz
         }
 
         private void TradeDataView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
+
             if (TradeDataView.Columns[e.ColumnIndex].HeaderText == "")
             {
                 TradeSkillRecipeCell tsrc = TradeDataView.Rows[e.RowIndex].Cells[0].Value as TradeSkillRecipeCell;
