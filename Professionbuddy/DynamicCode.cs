@@ -168,6 +168,7 @@ namespace HighVoltz
             public static Helpers.TradeskillHelper Enchanting { get { return Helpers.Enchanting;} }
             public static Helpers.TradeskillHelper Engineering { get { return Helpers.Engineering;} }
             public static Helpers.TradeskillHelper FirstAid { get { return Helpers.FirstAid;} }
+            public static Helpers.TradeskillHelper Fishing { get { return Helpers.Fishing;} }
             public static Helpers.TradeskillHelper Inscription { get { return Helpers.Inscription;} }
             public static Helpers.TradeskillHelper Herbalism { get { return Helpers.Herbalism;} }
             public static Helpers.TradeskillHelper Jewelcrafting { get { return Helpers.Jewelcrafting;} }
@@ -285,6 +286,7 @@ namespace HighVoltz
             Enchanting = new TradeskillHelper(SkillLine.Enchanting);
             Engineering = new TradeskillHelper(SkillLine.Engineering);
             FirstAid = new TradeskillHelper(SkillLine.FirstAid);
+            Fishing = new TradeskillHelper(SkillLine.Fishing);
             Herbalism = new TradeskillHelper(SkillLine.Herbalism);
             Inscription = new TradeskillHelper(SkillLine.Inscription);
             Jewelcrafting = new TradeskillHelper(SkillLine.Jewelcrafting);
@@ -401,6 +403,7 @@ namespace HighVoltz
         public static TradeskillHelper Enchanting { get; private set; }
         public static TradeskillHelper Engineering { get; private set; }
         public static TradeskillHelper FirstAid { get; private set; }
+        public static TradeskillHelper Fishing { get; private set; }
         public static TradeskillHelper Herbalism { get; private set; }
         public static TradeskillHelper Inscription { get; private set; }
         public static TradeskillHelper Jewelcrafting { get; private set; }

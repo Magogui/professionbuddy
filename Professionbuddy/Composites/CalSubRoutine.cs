@@ -24,7 +24,7 @@ namespace HighVoltz.Composites
         protected override RunStatus Run(object context) {
             if (!IsDone)
             {
-                if (_sub == null )
+                if (_sub == null)
                 {
                     if (!GetSubRoutine())
                     {
@@ -41,12 +41,17 @@ namespace HighVoltz.Composites
                 {
                     if (!_ps.IsRunning)
                         _ps.Start(null);
-                    RunStatus ret = _ps.Tick(null);
+                    try
+                    {
+                        _ps.Tick(null);
+                    }
+                    catch { IsDone = true; _sub.Reset(); return RunStatus.Failure; }
                     IsDone = _sub.IsDone;
                     // we need to reset so calls to the sub from other places can
                     if (IsDone)
                         _sub.Reset();
-                    return ret;
+                    else
+                        return RunStatus.Running;
                 }
             }
             return RunStatus.Failure;
@@ -64,7 +69,7 @@ namespace HighVoltz.Composites
         }
 
         SubRoutine FindSubRoutineByName(string subName, Composite comp) {
-            
+
             if (comp is SubRoutine && ((SubRoutine)comp).SubRoutineName == subName)
                 return (SubRoutine)comp;
             if (comp is GroupComposite)

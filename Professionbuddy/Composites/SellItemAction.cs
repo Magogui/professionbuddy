@@ -131,7 +131,8 @@ namespace HighVoltz.Composites
                         unit.Interact();
                     }
 
-                    if (GossipFrame.Instance != null && GossipFrame.Instance.IsVisible)
+                    if (GossipFrame.Instance != null && GossipFrame.Instance.IsVisible && 
+                        GossipFrame.Instance.GossipOptionEntries != null)
                     {
                         foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
                         {

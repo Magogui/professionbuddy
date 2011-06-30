@@ -1,3 +1,10 @@
+Professionbuddy 1.0.0.38
+* Tweaked the [Alchemist](1-500)(Dalaran AH) profile
+* Fix a bug with CanCraft()
+* Added a wrapper for the Fishing skill. Fishing.MaxLevel and Fishing.Level can now be used from Conditionals
+* Added a 1-525 fishing profile, based in Dalaran, buys pole if none in bag, trains, venders,throws coins(experimental)
+* Fixed a bug that prevented 'BuyItem', 'SellItem' and 'Train Skill' from working properly while interacting with a NPC
+
 Professionbuddy 1.0.0.37
 * The 'Sell Item On Ah' now behaves correctly when its property 'Post if below MinBuyOut' property is set to false
 * 'Cast Spell' now works properly if it's property 'Repeat Type' is set to 'Craftable'
@@ -7,3 +14,4 @@ Professionbuddy 1.0.0.37
 * 'Get Mail' action no longer checks for the ingame 'New Mail' indicator
 * 'Buy Item' action will now subtract materials that bot has in its bag.
 
+        private static List<uint> GoldCoins = new List<uint>{43641,43639,43637,43635,43634,43632,43627,43629,43640,43638,43636,43628,43633,43631,43630};

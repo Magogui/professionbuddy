@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Professionbuddy ChildrenCount="14">
+  <Comment Text="Port to dalaran before starting" />
+  <Comment Text="list of gold coins" />
+  <CustomAction Code="var2 = new List&lt;uint&gt;{43641,43639,43637,43635,43634,43632,43627,43629,43640,43638,43636,43628,43633,43631,43630};" />
+  <Comment Text="load empty profile" />
+  <LoadProfileAction Path="" ProfileType="Honorbuddy" />
+  <CallSubRoutine SubRoutineName="EquipFishingPole" />
+  <Comment Text="Equip a fishing pole" />
+  <CallSubRoutine SubRoutineName="MoveToFishingSpot" />
+  <While Condition="Fishing.Level &lt; 525" IgnoreCanRun="True" ChildrenCount="9">
+    <Comment Text="Train if our fishing level is 25 or less from current max level " />
+    <Comment Text="Or if max level is 0 or bags are full then we vendor" />
+    <While Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Fishing.MaxLevel == 0 || Me.BagsFull" IgnoreCanRun="True" ChildrenCount="2">
+      <CallSubRoutine SubRoutineName="VenderAndTrain" />
+      <CallSubRoutine SubRoutineName="MoveToFishingSpot" />
+    </While>
+    <Comment Text="Use Coins if we have them and don't have 'Lucky' buff" />
+    <CustomAction Code="var3 =  Me.BagItems.FirstOrDefault(i =&gt; ((List&lt;uint&gt;)var2).Contains(i.Entry));" />
+    <While Condition="var3 != null &amp;&amp; !Me.HasAura(&quot;Lucky&quot;)" IgnoreCanRun="True" ChildrenCount="1">
+      <CustomAction Code="((WoWItem)var3).UseContainerItem();" />
+    </While>
+    <CustomAction Code="var1 = ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(u =&gt; u.SubType == WoWGameObjectType.FishingBobber &amp;&amp; u.CreatedByGuid == Me.Guid);" />
+    <If Condition="var1 != null &amp;&amp; ((WoWFishingBobber)((WoWGameObject)var1).SubObj).IsBobbing" IgnoreCanRun="True" ChildrenCount="1">
+      <CustomAction Code="((WoWGameObject)var1).Interact();" />
+    </If>
+    <If Condition="var1 == null &amp;&amp; !Me.IsCasting" IgnoreCanRun="True" ChildrenCount="2">
+      <CustomAction Code="SpellManager.Cast(&quot;Fishing&quot;);" />
+      <WaitAction Condition="false" Timeout="1000" />
+    </If>
+  </While>
+  <CustomAction Code="Log(&quot;Level 525 fishing!! Logging out&quot;);" />
+  <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="8">
+    <CustomAction Code="Log(&quot;Moving to fishing spot&quot;);" />
+    <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.623" Y="622.0644" Z="646.2601" />
+    <While Condition="DistanceTo(5701.623, 622.0644, 646.2601) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
+      <CustomAction Code="CTM(5701.623, 622.0644, 646.2601);" />
+    </While>
+    <WaitAction Condition="false" Timeout="2000" />
+    <CustomAction Code="Me.SetFacing(4.738818f);" />
+    <Comment Text="Update facing on server.." />
+    <CustomAction Code="WoWMovement.Move(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
+    <CustomAction Code="WoWMovement.MoveStop(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
+  </SubRoutine>
+  <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
+  <SubRoutine SubRoutineName="VenderAndTrain" ChildrenCount="5">
+    <CustomAction Code="Log(&quot;Training and Vendoring&quot;);" />
+    <TrainSkillAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" />
+    <WaitAction Condition="false" Timeout="2000" />
+    <SellItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" Entry="0" Count="0" SellItemType="Greys" />
+    <SellItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" Entry="0" Count="0" SellItemType="Whites" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="EquipFishingPole" ChildrenCount="2">
+    <CustomAction Code="Log(&quot;Equipting Fishing Pole&quot;);" />
+    <If Condition="Me.Inventory.Equipped.MainHand == null || Me.Inventory.Equipped.MainHand.ItemInfo.WeaponClass != WoWItemWeaponClass.FishingPole" IgnoreCanRun="True" ChildrenCount="6">
+      <CustomAction Code="var1 = Me.BagItems.FirstOrDefault(i =&gt; i.ItemInfo.WeaponClass == WoWItemWeaponClass.FishingPole);" />
+      <Comment Text="We have a fishing pole in bags, use it." />
+      <If Condition="var1 != null" IgnoreCanRun="True" ChildrenCount="1">
+        <CustomAction Code="((WoWItem)var1).UseContainerItem();" />
+      </If>
+      <Comment Text="No fishing pole in bags, lets go buy one." />
+      <If Condition="var1 == null" IgnoreCanRun="True" ChildrenCount="4">
+        <CustomAction Code="Log(&quot;Buying Fishing Pole&quot;);" />
+        <BuyItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" Entry="6256" Count="1" BuyItemType="SpecificItem" />
+        <WaitAction Condition="false" Timeout="3000" />
+        <CustomAction Code="Me.BagItems.FirstOrDefault(i =&gt; i.ItemInfo.WeaponClass == WoWItemWeaponClass.FishingPole).UseContainerItem();" />
+      </If>
+      <WaitAction Condition="false" Timeout="2000" />
+    </If>
+  </SubRoutine>
+</Professionbuddy>
