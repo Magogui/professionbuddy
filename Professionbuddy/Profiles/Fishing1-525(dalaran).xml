@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Professionbuddy ChildrenCount="14">
+<Professionbuddy ChildrenCount="13">
   <Comment Text="Port to dalaran before starting" />
   <Comment Text="list of gold coins" />
   <CustomAction Code="var2 = new List&lt;uint&gt;{43641,43639,43637,43635,43634,43632,43627,43629,43640,43638,43636,43628,43633,43631,43630};" />
@@ -29,7 +29,10 @@
       <WaitAction Condition="false" Timeout="1000" />
     </If>
   </While>
-  <CustomAction Code="Log(&quot;Level 525 fishing!! Logging out&quot;);" />
+  <If Condition="Fishing.Level == 525" IgnoreCanRun="True" ChildrenCount="2">
+    <CustomAction Code="Log(&quot;Level 525 fishing!! Logging out&quot;);" />
+    <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
+  </If>
   <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="8">
     <CustomAction Code="Log(&quot;Moving to fishing spot&quot;);" />
     <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.623" Y="622.0644" Z="646.2601" />
@@ -42,7 +45,6 @@
     <CustomAction Code="WoWMovement.Move(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
     <CustomAction Code="WoWMovement.MoveStop(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
   </SubRoutine>
-  <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
   <SubRoutine SubRoutineName="VenderAndTrain" ChildrenCount="5">
     <CustomAction Code="Log(&quot;Training and Vendoring&quot;);" />
     <TrainSkillAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" />
