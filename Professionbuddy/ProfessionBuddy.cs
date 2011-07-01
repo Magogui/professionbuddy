@@ -72,7 +72,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 38); } }
+        public override Version Version { get { return new Version(1, 39); } }
 
         public override bool WantButton { get { return true; } }
 
@@ -482,7 +482,8 @@ namespace HighVoltz
             Log("Importing from DataStore...");
             int tableSize, tableIndex = 1;
             DataStore = new Dictionary<uint, int>();
-            string tableName = Util.RandomString;
+            if (MySettings.DataStoreTable == null)
+                MySettings.DataStoreTable=Util.RandomString;
             string storeInTableLua =
             "if DataStoreDB and DataStore_ContainersDB  and DataStore_AuctionsDB and DataStore_MailsDB then " +
                "local realm = GetRealmName() " +
@@ -542,12 +543,12 @@ namespace HighVoltz
                      "end " +
                   "end " +
                "end " +
-               tableName + " = {} " +
+               MySettings.DataStoreTable + " = {} " +
                "for k,v in pairs(items) do " +
-                  "table.insert(" + tableName + ",k) " +
-                  "table.insert(" + tableName + ",v) " +
+                  "table.insert(" + MySettings.DataStoreTable + ",k) " +
+                  "table.insert(" + MySettings.DataStoreTable + ",v) " +
                "end " +
-               "return #" + tableName + " " +
+               "return #" + MySettings.DataStoreTable + " " +
             "end " +
             "return 0 ";
 
@@ -562,14 +563,14 @@ namespace HighVoltz
                     {
                         string getTableDataLua =
                             "local retVals = {" + tableIndex + "} " +
-                            "for i=retVals[1], #" + tableName + " do " +
-                              "table.insert(retVals," + tableName + "[i]) " +
+                            "for i=retVals[1], #" + MySettings.DataStoreTable + " do " +
+                              "table.insert(retVals," + MySettings.DataStoreTable + "[i]) " +
                               "if #retVals >= 501 then " +
                                 "retVals[1] = i +1 " +
                                 "return unpack(retVals) " +
                               "end " +
                             "end " +
-                            "retVals[1] = #" + tableName + " " +
+                            "retVals[1] = #" + MySettings.DataStoreTable + " " +
                             "return unpack(retVals) ";
                         retVals = Lua.GetReturnValues(getTableDataLua);
                         int.TryParse(retVals[0], out tableIndex);
@@ -583,7 +584,7 @@ namespace HighVoltz
                         if (retVals == null || tableIndex >= tableSize)
                             break;
                     }
-                    Lua.DoString(tableName + "={}");
+                    Lua.DoString(MySettings.DataStoreTable + "={}");
                     Log("Imported DataStore");
                 }
                 else

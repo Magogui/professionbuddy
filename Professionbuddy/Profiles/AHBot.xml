@@ -5,9 +5,10 @@
   <Settings Type="String" DefaultValue="" Name="InscribeBanker" Summary="Name of your Incriptionist" />
   <Settings Type="String" DefaultValue="" Name="JCBanker" Summary="Name of your JewelCrafter" />
   <CustomAction Code="var1 = true;" />
-  <While Condition="(bool)var1" IgnoreCanRun="True" ChildrenCount="20">
+  <While Condition="(bool)var1" IgnoreCanRun="True" ChildrenCount="21">
     <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="False" X="-8860.81" Y="637.1594" Z="96.19888" MinFreeBagSlots="2" />
     <WaitAction Condition="false" Timeout="2000" />
+    <SellItemOnAhAction ItemName="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Cloth" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
     <SellItemOnAhAction ItemName="0" MinBuyout="6g0s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="3" StackSize="1" AmountType="Amount" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Glyph" SubCategoryType="WoWItemGlyphClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
     <SellItemOnAhAction ItemName="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
     <SellItemOnAhAction ItemName="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Armor" SubCategoryType="WoWItemArmorClass" SubCategory="Misc" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />

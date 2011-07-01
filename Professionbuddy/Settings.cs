@@ -23,6 +23,9 @@ namespace HighVoltz
 
         [Setting, DefaultValue(false)]
         public bool IsRunning { get; set; }
+
+        [Setting, DefaultValue(null)]
+        public string DataStoreTable { get; set; }
     }
 
     public class PbProfileSettings

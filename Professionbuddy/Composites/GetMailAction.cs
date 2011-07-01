@@ -101,6 +101,7 @@ namespace HighVoltz.Composites
         Stopwatch WaitForContentToShowSW = new Stopwatch();
         Stopwatch ConcludingSW = new Stopwatch();
         Stopwatch TimeoutSW = new Stopwatch();
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)

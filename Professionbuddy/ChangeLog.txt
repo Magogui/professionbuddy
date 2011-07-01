@@ -1,3 +1,7 @@
+Professionbuddy 1.0.0.39
+* Tweaked the [Alchemist](1-500)(Dalaran AH) profile
+* Added DataStore Propery to the api, read Guide for more info.
+
 Professionbuddy 1.0.0.38
 * Tweaked the [Alchemist](1-500)(Dalaran AH) profile
 * Fix a bug with CanCraft()
