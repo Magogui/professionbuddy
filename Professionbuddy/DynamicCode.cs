@@ -174,7 +174,7 @@ namespace HighVoltz
             public static Helpers.TradeskillHelper Leatherworking { get { return Helpers.Leatherworking;} }
             public static Helpers.TradeskillHelper Mining { get { return Helpers.Mining;} }
             public static Helpers.TradeskillHelper Tailoring { get { return Helpers.Tailoring;} }
-            readonly public static Dictionary<uint,int> DataStore {get{return Professionbuddy.Instance.DataStore;}}
+            public static Dictionary<uint,int> DataStore {get{return Professionbuddy.Instance.DataStore;}}
             uint CanRepeatNum (uint id){  return Helpers.TradeskillHelper.CanRepeatNum(id);}
             bool CanCraft (uint id){  return Helpers.TradeskillHelper.CanCraft(id);}
             bool HasMats (uint id){  return Helpers.TradeskillHelper.HasMats(id);}

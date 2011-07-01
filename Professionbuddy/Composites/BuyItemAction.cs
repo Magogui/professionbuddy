@@ -167,13 +167,13 @@ namespace HighVoltz.Composites
                     int leftovers = (int)(count % 20);
                     if (count > 20)
                     {
-                        using (new FrameLock())
-                        {
+                        //using (new FrameLock()) // framelock was causing DCs
+                        //{
                             for (int i = 0; i < stacks; i++)
                                 MerchantFrame.Instance.BuyItem(mi.Index, 20);
                             if (leftovers > 0)
                                 MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
-                        }
+                        //}
                     }
                     else
                         MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
