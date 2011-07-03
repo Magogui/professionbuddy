@@ -72,7 +72,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 39); } }
+        public override Version Version { get { return new Version(1,40); } }
 
         public override bool WantButton { get { return true; } }
 

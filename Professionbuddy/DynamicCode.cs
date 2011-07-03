@@ -148,6 +148,8 @@ namespace HighVoltz
         using Styx.Logic.BehaviorTree;
         using Styx.Logic.Inventory.Frames.Gossip;
         using Styx.Logic.Inventory.Frames.LootFrame;
+        using Styx.Logic.Inventory.Frames.MailBox;
+        using Styx.Logic.Inventory.Frames.Merchant;
         using Styx.Logic.Pathing;
         using Styx.Logic.Profiles;
         using Styx.Plugins;
@@ -180,8 +182,8 @@ namespace HighVoltz
             bool HasMats (uint id){  return Helpers.TradeskillHelper.HasMats(id);}
             bool HasTools (uint id){  return Helpers.TradeskillHelper.HasTools(id);}
             bool HasRecipe (uint id){  return Helpers.TradeskillHelper.HasRecipe(id);}
-            bool HasNewMail { get{ return Helpers.HasNewMail;}}
-            int MailCount { get{ return Helpers.MailCount;}}
+            bool HasNewMail { get{ return MailFrame.Instance.HasNewMail;}}
+            int MailCount { get{ return MailFrame.Instance.MailCount;}}
             bool HasItem (uint id) {return InbagCount(id) > 0; }
             uint InbagCount (uint id) {return Helpers.InbagCount(id); }
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
@@ -295,8 +297,6 @@ namespace HighVoltz
             Mining = new TradeskillHelper(SkillLine.Mining);
             Tailoring = new TradeskillHelper(SkillLine.Tailoring);
         }
-        public static bool HasNewMail { get { return MailFrame.Instance.HasNewMail; } }
-        public static int MailCount { get { return MailFrame.Instance.MailCount; } }
         public static void Log(string f, params object[] args)
         {
             Logging.Write(f, args);
