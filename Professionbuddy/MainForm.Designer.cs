@@ -41,6 +41,7 @@
             this.PbToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripOpen = new System.Windows.Forms.ToolStripButton();
             this.toolStripSave = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSettings = new System.Windows.Forms.ToolStripButton();
             this.toolStripHelp = new System.Windows.Forms.ToolStripButton();
             this.toolStripSecretButton = new System.Windows.Forms.ToolStripButton();
             this.MainSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -56,6 +57,7 @@
             this.toolStripAddCombo = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripAddNum = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripAddBtn = new System.Windows.Forms.ToolStripButton();
+            this.toolStripReloadBtn = new System.Windows.Forms.ToolStripButton();
             this.TradeSkillTabControl = new System.Windows.Forms.TabControl();
             this.IngredientsView = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -67,7 +69,6 @@
             this.ActionGrid = new System.Windows.Forms.PropertyGrid();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.toolStripSettings = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             this.PbToolStrip.SuspendLayout();
@@ -235,6 +236,15 @@
             this.toolStripSave.ToolTipText = "Save";
             this.toolStripSave.Click += new System.EventHandler(this.toolStripSave_Click);
             // 
+            // toolStripSettings
+            // 
+            this.toolStripSettings.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSettings.Name = "toolStripSettings";
+            this.toolStripSettings.Size = new System.Drawing.Size(53, 22);
+            this.toolStripSettings.Text = "Settings";
+            this.toolStripSettings.ToolTipText = "Settings";
+            this.toolStripSettings.Click += new System.EventHandler(this.toolStripSettings_Click);
+            // 
             // toolStripHelp
             // 
             this.toolStripHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -391,7 +401,8 @@
             this.TradeSkillToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripAddCombo,
             this.toolStripAddNum,
-            this.toolStripAddBtn});
+            this.toolStripAddBtn,
+            this.toolStripReloadBtn});
             this.TradeSkillToolStrip.Location = new System.Drawing.Point(0, 341);
             this.TradeSkillToolStrip.Name = "TradeSkillToolStrip";
             this.TradeSkillToolStrip.Size = new System.Drawing.Size(267, 24);
@@ -420,6 +431,15 @@
             this.toolStripAddBtn.Text = "Add";
             this.toolStripAddBtn.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.toolStripAddBtn.Click += new System.EventHandler(this.toolStripAddBtn_Click);
+            // 
+            // toolStripReloadBtn
+            // 
+            this.toolStripReloadBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripReloadBtn.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripReloadBtn.Name = "toolStripReloadBtn";
+            this.toolStripReloadBtn.Size = new System.Drawing.Size(47, 21);
+            this.toolStripReloadBtn.Text = "Reload";
+            this.toolStripReloadBtn.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // TradeSkillTabControl
             // 
@@ -549,15 +569,6 @@
             this.openFileDialog.DefaultExt = "Profiles";
             this.openFileDialog.Filter = "Profiles|*.xml;*.package|All files|*.*";
             // 
-            // toolStripSettings
-            // 
-            this.toolStripSettings.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripSettings.Name = "toolStripSettings";
-            this.toolStripSettings.Size = new System.Drawing.Size(53, 22);
-            this.toolStripSettings.Text = "Settings";
-            this.toolStripSettings.ToolTipText = "Settings";
-            this.toolStripSettings.Click += new System.EventHandler(this.toolStripSettings_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -639,6 +650,7 @@
         private System.Windows.Forms.TreeView ActionTree;
         private System.Windows.Forms.SplitContainer MainSplitContainer;
         private System.Windows.Forms.ToolStripButton toolStripSettings;
+        private System.Windows.Forms.ToolStripButton toolStripReloadBtn;
     }
 }
 

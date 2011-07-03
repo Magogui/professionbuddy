@@ -197,7 +197,7 @@ namespace HighVoltz
                 if (changed)
                 {
                     Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
-                    loadTradeSkills();
+                    LoadTradeSkills();
                     if (MainForm.IsValid)
                         MainForm.Instance.InitTradeSkillTab();
                 }
@@ -329,7 +329,7 @@ namespace HighVoltz
                     MaterialList = new Dictionary<uint, int>();
                     TradeSkillList = new List<TradeSkill>();
                     LoadProtectedItems();
-                    loadTradeSkills();
+                    LoadTradeSkills();
                     BotEvents.OnBotChanged += BotEvents_OnBotChanged;
                     Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
                     Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
@@ -357,7 +357,7 @@ namespace HighVoltz
                 return skillList.ToArray();
             }
         }
-        private void loadTradeSkills() {
+        public void LoadTradeSkills() {
             try
             {
                 lock (TradeSkillList)

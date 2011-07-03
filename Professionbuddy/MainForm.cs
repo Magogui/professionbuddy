@@ -391,6 +391,7 @@ namespace HighVoltz
                 {
                     TradeSkillRecipeCell cell = (TradeSkillRecipeCell)row.Cells[0].Value;
                     row.Cells[1].Value = Util.CalculateRecipeRepeat(cell.Recipe);
+                    row.Cells[2].Value = cell.Recipe.Difficulty;
                 }
                 tv.TradeDataView.ResumeLayout();
             }
@@ -477,6 +478,10 @@ namespace HighVoltz
             {
                 if (ActionTree.SelectedNode != null)
                     RemoveSelectedNodes();
+            }
+            else if (e.KeyData == Keys.End)
+            {
+                toolStripSecretButton_Click(null, null);
             }
         }
         private void ActionTree_AfterSelect(object sender, TreeViewEventArgs e) {
@@ -803,6 +808,11 @@ namespace HighVoltz
 
         void MainForm_PropertyChanged(object sender, EventArgs e) {
             PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e) {
+            PB.LoadTradeSkills();
+            MainForm.Instance.InitTradeSkillTab();    
         }
 
     }
