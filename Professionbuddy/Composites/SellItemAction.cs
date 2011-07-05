@@ -13,54 +13,48 @@ using Styx.Logic.Inventory.Frames.Merchant;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using Styx.Logic.BehaviorTree;
+using System.Threading;
 
-namespace HighVoltz.Composites
-{
+namespace HighVoltz.Composites {
     #region SellItemAction
-    class SellItemAction : PBAction
-    {
-        public uint NpcEntry
-        {
+    class SellItemAction : PBAction {
+        public uint NpcEntry {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
         WoWPoint loc;
-        public string Location
-        {
+        public string Location {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-        public enum SellItemActionType
-        {
+        public enum SellItemActionType {
             Specific,
+            List,
             Greys,
             Whites,
             Greens,
         }
-        public SellItemActionType SellItemType
-        {
+        public SellItemActionType SellItemType {
             get { return (SellItemActionType)Properties["SellItemType"].Value; }
             set { Properties["SellItemType"].Value = value; }
         }
-        public uint Entry
-        {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
+        public string ItemID {
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
-        public uint Count
-        {
+        public uint Count {
             get { return (uint)Properties["Count"].Value; }
             set { Properties["Count"].Value = value; }
         }
-        public SellItemAction()
-        {
+        public SellItemAction() {
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["Count"] = new MetaProp("Count", typeof(uint));
             Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), new DisplayNameAttribute("Sell Item Type"));
-            
-            Entry = 0u;
+
+            ItemID = "";
             Count = 0u;
             loc = WoWPoint.Zero;
             Location = loc.ToString();
@@ -70,8 +64,7 @@ namespace HighVoltz.Composites
             Properties["SellItemType"].Value = SellItemActionType.Specific;
             Properties["SellItemType"].PropertyChanged += new EventHandler(SellItemAction_PropertyChanged);
         }
-        void LocationChanged(object sender, EventArgs e)
-        {
+        void LocationChanged(object sender, EventArgs e) {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
@@ -80,36 +73,30 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void SellItemAction_PropertyChanged(object sender, EventArgs e)
-        {
-            switch (SellItemType)
-            {
+        void SellItemAction_PropertyChanged(object sender, EventArgs e) {
+            switch (SellItemType) {
                 case SellItemActionType.Specific:
                     Properties["Count"].Show = true;
-                    Properties["Entry"].Show = true;
+                    Properties["ItemID"].Show = true;
                     break;
                 default:
                     Properties["Count"].Show = false;
-                    Properties["Entry"].Show = false;
+                    Properties["ItemID"].Show = false;
                     break;
             }
             RefreshPropertyGrid();
         }
 
         uint _entry = 0;
-        protected override RunStatus Run(object context)
-        {
-            if (!IsDone)
-            {
-                if (MerchantFrame.Instance == null || !MerchantFrame.Instance.IsVisible)
-                {
+        protected override RunStatus Run(object context) {
+            if (!IsDone) {
+                if (MerchantFrame.Instance == null || !MerchantFrame.Instance.IsVisible) {
                     WoWPoint movetoPoint = loc;
                     WoWUnit unit = null;
                     if (_entry == 0)
                         _entry = NpcEntry;
-                    if (_entry == 0)
-                    {
-                        MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestVendor,0);
+                    if (_entry == 0) {
+                        MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestVendor, 0);
                         var npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
                                                 ObjectManager.Me.Location, UnitNPCFlags.Vendor);
                         _entry = (uint)npcResults.Entry;
@@ -121,51 +108,54 @@ namespace HighVoltz.Composites
                         movetoPoint = unit.Location;
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
-                    if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
-                    {
+                    if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5) {
                         Util.MoveTo(movetoPoint);
                     }
-                    else if (unit != null)
-                    {
+                    else if (unit != null) {
                         unit.Target();
                         unit.Interact();
                     }
 
-                    if (GossipFrame.Instance != null && GossipFrame.Instance.IsVisible && 
-                        GossipFrame.Instance.GossipOptionEntries != null)
-                    {
-                        foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
-                        {
-                            if (ge.Type == GossipEntry.GossipEntryType.Vendor)
-                            {
+                    if (GossipFrame.Instance != null && GossipFrame.Instance.IsVisible &&
+                        GossipFrame.Instance.GossipOptionEntries != null) {
+                        foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries) {
+                            if (ge.Type == GossipEntry.GossipEntryType.Vendor) {
                                 GossipFrame.Instance.SelectGossipOption(ge.Index);
                                 return RunStatus.Running;
                             }
                         }
                     }
                 }
-                else
-                {
-                    if (SellItemType == SellItemActionType.Specific)
-                    {
-                        List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => u.Entry == Entry).Take((int)Count).ToList();
-                        if (itemList != null)
-                        {
-                            using (new FrameLock())
-                            {
+                else {
+                    if (SellItemType == SellItemActionType.Specific) {
+                        List<uint> idList = new List<uint>();
+                        string[] entries = ItemID.Split(',');
+                        if (entries != null && entries.Length > 0) {
+                            foreach (var entry in entries) {
+                                uint temp = 0;
+                                uint.TryParse(entry.Trim(), out temp);
+                                idList.Add(temp);
+                            }
+                        }
+                        else {
+                            Professionbuddy.Err("No ItemIDs are specified");
+                            IsDone = true;
+                            return RunStatus.Failure;
+                        }
+                        List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).Take((int)Count).ToList();
+                        if (itemList != null) {
+                            using (new FrameLock()) {
                                 foreach (WoWItem item in itemList)
                                     item.UseContainerItem();
                             }
                         }
                     }
-                    else
-                    {
+                    else {
                         List<WoWItem> itemList = null;
                         IEnumerable<WoWItem> itemQuery = from item in me.BagItems
                                                          where !Pb.ProtectedItems.Contains(item.Entry)
                                                          select item;
-                        switch (SellItemType)
-                        {
+                        switch (SellItemType) {
                             case SellItemActionType.Greys:
                                 itemList = itemQuery.Where(i => i.Quality == WoWItemQuality.Poor).ToList();
                                 break;
@@ -176,71 +166,58 @@ namespace HighVoltz.Composites
                                 itemList = itemQuery.Where(i => i.Quality == WoWItemQuality.Uncommon).ToList();
                                 break;
                         }
-                        if (itemList != null)
-                        {
-                            using (new FrameLock())
-                            {
-                                foreach (WoWItem item in itemList)
-                                {
+                        if (itemList != null) {
+                            using (new FrameLock()) {
+                                foreach (WoWItem item in itemList) {
                                     item.UseContainerItem();
                                 }
                             }
                         }
                     }
-                    Professionbuddy.Log("SellItemAction Completed ");
+                    Professionbuddy.Log("SellItemAction Completed for {0}", ItemID);
                     IsDone = true;
                 }
-                if (IsDone)
-                    Lua.DoString("CloseMerchant()");
                 return RunStatus.Running;
             }
             return RunStatus.Failure;
         }
 
-        public override void Reset()
-        {
+        public override void Reset() {
             base.Reset();
             _entry = 0;
         }
-        public override string Name
-        {
+        public override string Name {
             get { return "Sell Item"; }
         }
-        public override string Title
-        {
-            get
-            {
+        public override string Title {
+            get {
                 return string.Format("({0}) " +
-                  (SellItemType == SellItemActionType.Specific ? Entry.ToString() + " x{1} " : SellItemType.ToString()), Name, Count);
+                  (SellItemType == SellItemActionType.Specific ? ItemID.ToString() + " x{1} " : SellItemType.ToString()), Name, Count);
             }
         }
-        public override string Help
-        {
-            get
-            {
-                return "This action will sell items to a merchant. It will either sell a specified item x Count stacks, or sell all grey/white/green quality items. This action will find the closest vendor if NpcEntry is set to 0";
+        public override string Help {
+            get {
+                return "This action will sell items to a merchant. It will either sell a specified item x Count stacks, or sell all grey/white/green quality items. This action will find the closest vendor if NpcEntry is set to 0. ItemID can be a comma separated list of Items IDs";
             }
         }
-        public override object Clone()
-        {
-            return new SellItemAction() { Count = this.Count, Entry = this.Entry, SellItemType = this.SellItemType,NpcEntry = this.NpcEntry,Location = this.Location};
+        public override object Clone() {
+            return new SellItemAction() { Count = this.Count, ItemID = this.ItemID, SellItemType = this.SellItemType, NpcEntry = this.NpcEntry, Location = this.Location };
         }
         #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
+        public override void ReadXml(XmlReader reader) {
             uint num;
-            uint.TryParse(reader["Entry"], out num);
-            Entry = num;
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("Entry"))
+                ItemID = reader["Entry"];
             uint.TryParse(reader["Count"], out num);
             Count = num;
             SellItemType = (SellItemActionType)Enum.Parse(typeof(SellItemActionType), reader["SellItemType"]);
-            if (reader.MoveToAttribute("NpcEntry"))
-            {
+            if (reader.MoveToAttribute("NpcEntry")) {
                 uint.TryParse(reader["NpcEntry"], out num);
                 NpcEntry = num;
             }
-            if (reader.MoveToAttribute("X"))
-            {
+            if (reader.MoveToAttribute("X")) {
                 float x, y, z;
                 x = reader["X"].ToSingle();
                 y = reader["Y"].ToSingle();
@@ -250,14 +227,13 @@ namespace HighVoltz.Composites
             }
             reader.ReadStartElement();
         }
-        public override void WriteXml(XmlWriter writer)
-        {
+        public override void WriteXml(XmlWriter writer) {
             writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
             writer.WriteAttributeString("X", loc.X.ToString());
             writer.WriteAttributeString("Y", loc.Y.ToString());
             writer.WriteAttributeString("Z", loc.Z.ToString());
 
-            writer.WriteAttributeString("Entry", Entry.ToString());
+            writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("Count", Count.ToString());
             writer.WriteAttributeString("SellItemType", SellItemType.ToString());
         }

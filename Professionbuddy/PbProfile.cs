@@ -47,8 +47,17 @@ namespace HighVoltz
             ProfilePath = path;
             LoadFromFile(ProfilePath);
         }
+        /// <summary>
+        /// Path to a .xml or .package PB profile
+        /// </summary>
         public string ProfilePath { get; protected set; }
+        /// <summary>
+        /// Path to a .xml PB profile
+        /// </summary>
         public string XmlPath { get; protected set; }
+        /// <summary>
+        /// Profile behavior.
+        /// </summary>
         public PrioritySelector Branch { get; protected set; }
 
         public Professionbuddy.PBIdentityComposite LoadFromFile(string path) {

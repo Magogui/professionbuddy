@@ -3,9 +3,8 @@
   <CustomAction Code="CharacterSettings.Instance.LootMobs = false;" />
   <Settings Type="Boolean" DefaultValue="false" Name="Smelt Ore" Summary="If set to true this will smelt ore into bars when doing AH runs" />
   <Settings Type="Boolean" DefaultValue="true" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." />
-  <If Condition="TreeRoot.Current.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True" ChildrenCount="2">
-    <CustomAction Code="MessageBox.Show(&quot;Please switch bot to Gatherbuddy&quot;);" />
-    <CustomAction Code="TreeRoot.Stop();" />
+  <If Condition="TreeRoot.Current.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True" ChildrenCount="1">
+    <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
   </If>
   <Settings Type="Boolean" DefaultValue="true" Name="Herb" Summary="Set to true if you want to level herbalism" />
   <Settings Type="Boolean" DefaultValue="true" Name="Mining" Summary="Set to true if you want to level Mining" />
@@ -66,8 +65,8 @@
         </If>
       </If>
       <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
         <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -111,7 +110,7 @@
         <If Condition="InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0" IgnoreCanRun="True" ChildrenCount="3">
           <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8430.177" Y="695.1375" Z="96.31892" />
           <InteractionAction Entry="5514" InteractDelay="0" InteractType="NPC" GameObjectType="Mailbox" SpellFocus="Anvil" />
-          <BuyItemAction NpcEntry="0" X="0" Y="0" Z="0" Entry="2901" Count="1" BuyItemType="SpecificItem" />
+          <BuyItemAction NpcEntry="0" X="0" Y="0" Z="0" ItemID="2901" Count="1" BuyItemType="SpecificItem" />
         </If>
       </While>
       <While Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.MaxLevel-Mining.Level &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.MaxLevel - Herbalism.Level &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="7">
@@ -152,10 +151,10 @@
             <CastSpellAction Entry="16153" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
         <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -195,7 +194,7 @@
         <If Condition="InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0" IgnoreCanRun="True" ChildrenCount="3">
           <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="2087.52" Y="-4769.45" Z="27.92924" />
           <InteractionAction Entry="3358" InteractDelay="0" InteractType="NPC" GameObjectType="Mailbox" SpellFocus="Anvil" />
-          <BuyItemAction NpcEntry="0" X="0" Y="0" Z="0" Entry="2901" Count="1" BuyItemType="SpecificItem" />
+          <BuyItemAction NpcEntry="0" X="0" Y="0" Z="0" ItemID="2901" Count="1" BuyItemType="SpecificItem" />
         </If>
         <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.MaxLevel == 0" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
@@ -236,13 +235,13 @@
             <CastSpellAction Entry="16153" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
         </If>
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
         <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -276,8 +275,8 @@
         </If>
       </If>
       <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
         <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -329,8 +328,8 @@
           </If>
         </If>
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
         <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -404,10 +403,10 @@
             <CastSpellAction Entry="49258" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
         <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -446,8 +445,8 @@
           </If>
         </If>
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
         <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -513,8 +512,8 @@
         </If>
       </If>
       <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
         <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
@@ -549,7 +548,7 @@
               <CastSpellAction Entry="74529" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
             </If>
           </If>
-          <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
+          <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
           <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True" ChildrenCount="1">
             <TrainSkillAction NpcEntry="4254" X="-4707.961" Y="-1108.908" Z="504.4463" />
           </If>
@@ -587,14 +586,14 @@
             <CastSpellAction Entry="74529" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction Entry="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
         </If>
       </If>
       <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-        <SellItemOnAhAction ItemName="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+        <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
         <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />

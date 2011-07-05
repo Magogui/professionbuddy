@@ -195,6 +195,7 @@ namespace HighVoltz
             void CTM(double x,double y,double z) {Helpers.CTM(x,y,z); }
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.ImportDataStore(); }
+            void SwitchToBot(string botName) {Log(@""Switching to {0} BotBase"",botName);new Thread(()=>{ TreeRoot.Stop(); BotManager.Instance.SetCurrent(BotManager.Instance.Bots[botName]); TreeRoot.Start();}).Start();}
         }";
         #endregion
 

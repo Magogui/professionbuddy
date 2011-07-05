@@ -240,10 +240,6 @@ namespace HighVoltz.Composites
                 if (IsDone)
                 {
                     Professionbuddy.Log("Deposited Item with ID: {0} into {1} Bank", Entry, Bank);
-                    if (Bank == BankType.Guild)
-                        Lua.DoString("CloseGuildBankFrame()");
-                    else
-                        Lua.DoString("CloseBankFrame()");
                 }
                 else
                     return RunStatus.Running;

@@ -14,55 +14,46 @@ using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Reflection;
 
-namespace HighVoltz.Composites
-{
+namespace HighVoltz.Composites {
     #region MailItemAction
-    class MailItemAction : PBAction
-    {
+    class MailItemAction : PBAction {
         public enum SubCategoryType { None }; // use as a placeholder for item categories with no sub categories
 
-        public bool UseCategory
-        {
+        public bool UseCategory {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
-        public WoWItemClass Category
-        {
+        public WoWItemClass Category {
             get { return (WoWItemClass)Properties["Category"].Value; }
             set { Properties["Category"].Value = value; }
         }
-        public object SubCategory
-        {
+        public object SubCategory {
             get { return (object)Properties["SubCategory"].Value; }
             set { Properties["SubCategory"].Value = value; }
         }
-        public uint Entry
-        {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
+        public string ItemID {
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
-        public bool AutoFindMailBox
-        {
+        public bool AutoFindMailBox {
             get { return (bool)Properties["AutoFindMailBox"].Value; }
             set { Properties["AutoFindMailBox"].Value = value; }
         }
 
         WoWPoint loc;
-        public string Location
-        {
+        public string Location {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-        public MailItemAction()
-        {
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
+        public MailItemAction() {
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), new DisplayNameAttribute("Automatically find Mailbox"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
             Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
 
-            Entry = 0u;
+            ItemID = "";
             AutoFindMailBox = true;
             loc = WoWPoint.Zero;
             Location = loc.ToString();
@@ -71,7 +62,7 @@ namespace HighVoltz.Composites
             SubCategory = WoWItemTradeGoodsClass.None;
 
             Properties["Location"].Show = false;
-            Properties["Entry"].Show = false;
+            Properties["ItemID"].Show = false;
             Properties["AutoFindMailBox"].PropertyChanged += new EventHandler(AutoFindMailBoxChanged);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
@@ -79,8 +70,7 @@ namespace HighVoltz.Composites
         }
 
         #region Callbacks
-        void LocationChanged(object sender, EventArgs e)
-        {
+        void LocationChanged(object sender, EventArgs e) {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
@@ -88,25 +78,21 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             RefreshPropertyGrid();
         }
-        void UseCategoryChanged(object sender, EventArgs e)
-        {
-            if (UseCategory)
-            {
-                Properties["Entry"].Show = false;
+        void UseCategoryChanged(object sender, EventArgs e) {
+            if (UseCategory) {
+                Properties["ItemID"].Show = false;
                 Properties["Category"].Show = true;
                 Properties["SubCategory"].Show = true;
             }
-            else
-            {
-                Properties["Entry"].Show = true;
+            else {
+                Properties["ItemID"].Show = true;
                 Properties["Category"].Show = false;
                 Properties["SubCategory"].Show = false;
             }
             RefreshPropertyGrid();
         }
 
-        void CategoryChanged(object sender, EventArgs e)
-        {
+        void CategoryChanged(object sender, EventArgs e) {
             object subCategory = Callbacks.GetSubCategory(Category);
             Properties["SubCategory"] = new MetaProp("SubCategory", subCategory.GetType(),
                 new DisplayNameAttribute("Item SubCategory"));
@@ -114,8 +100,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void AutoFindMailBoxChanged(object sender, EventArgs e)
-        {
+        void AutoFindMailBoxChanged(object sender, EventArgs e) {
             if (AutoFindMailBox)
                 Properties["Location"].Show = false;
             else
@@ -126,20 +111,15 @@ namespace HighVoltz.Composites
         #endregion
 
         WoWGameObject _mailbox;
-        protected override RunStatus Run(object context)
-        {
-            if (!IsDone)
-            {
+        protected override RunStatus Run(object context) {
+            if (!IsDone) {
                 WoWPoint movetoPoint = loc;
-                if (MailFrame.Instance == null || !MailFrame.Instance.IsVisible)
-                {
-                    if (AutoFindMailBox || movetoPoint == WoWPoint.Zero)
-                    {
+                if (MailFrame.Instance == null || !MailFrame.Instance.IsVisible) {
+                    if (AutoFindMailBox || movetoPoint == WoWPoint.Zero) {
                         _mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox)
                             .OrderBy(o => o.Distance).FirstOrDefault();
                     }
-                    else
-                    {
+                    else {
                         _mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox
                             && o.Location.Distance(loc) < 10)
                             .OrderBy(o => o.Distance).FirstOrDefault();
@@ -150,35 +130,28 @@ namespace HighVoltz.Composites
                         return RunStatus.Failure;
                     if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
-                    else if (_mailbox != null)
-                    {
+                    else if (_mailbox != null) {
                         _mailbox.Interact();
                     }
                     return RunStatus.Running;
                 }
-                else
-                {
+                else {
                     List<WoWItem> ItemList = BuildItemList();
-                    if (ItemList == null || ItemList.Count == 0)
-                    {
+                    if (ItemList == null || ItemList.Count == 0) {
                         IsDone = true;
                         return RunStatus.Failure;
                     }
-                    using (new FrameLock())
-                    {
+                    using (new FrameLock()) {
                         MailFrame.Instance.SwitchToSendMailTab();
-                        foreach (WoWItem item in ItemList)
-                        {
+                        foreach (WoWItem item in ItemList) {
                             item.UseContainerItem();
                         }
                         Lua.DoString(string.Format("SendMail ('{0}',' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient));
                     }
-                    if (IsDone)
-                    {
+                    if (IsDone) {
                         Professionbuddy.Log("Done sending {0} via mail",
-                            UseCategory ? string.Format("Items that belong to category {0} and subcategory {1}", Category, SubCategory):
-                            string.Format("Items that match Id of {0}",Entry));
-                        Lua.DoString("CloseMail()");
+                            UseCategory ? string.Format("Items that belong to category {0} and subcategory {1}", Category, SubCategory) :
+                            string.Format("Items that match Id of {0}", ItemID));
                     }
                     else
                         return RunStatus.Running;
@@ -187,20 +160,32 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        List<WoWItem> BuildItemList()
-        {
+        List<WoWItem> BuildItemList() {
             IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
                                                where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
                                                select item;
             if (UseCategory)
                 return tmpItemlist.Where(i => !Pb.ProtectedItems.Contains(i.Entry) &&
                     i.ItemInfo.ItemClass == Category && subCategoryCheck(i)).Take(12).ToList();
-            else
-                return tmpItemlist.Where(i => i.Entry == Entry).Take(12).ToList();
+            else {
+                List<uint> idList = new List<uint>();
+                string[] entries = ItemID.Split(',');
+                if (entries != null && entries.Length > 0) {
+                    foreach (var entry in entries) {
+                        uint temp = 0;
+                        uint.TryParse(entry.Trim(), out temp);
+                        idList.Add(temp);
+                    }
+                }
+                else {
+                    Professionbuddy.Err("No ItemIDs are specified");
+                    IsDone = true;
+                }
+                return tmpItemlist.Where(i => idList.Contains(i.Entry)).Take(12).ToList();
+            }
         }
 
-        bool subCategoryCheck(WoWItem item)
-        {
+        bool subCategoryCheck(WoWItem item) {
             int sub = (int)SubCategory;
             if (sub == -1 || sub == 0)
                 return true;
@@ -212,37 +197,28 @@ namespace HighVoltz.Composites
                 return false;
         }
 
-        public override void Reset()
-        {
+        public override void Reset() {
             base.Reset();
         }
-        public override string Name
-        {
-            get
-            {
+        public override string Name {
+            get {
                 return "Mail Item";
             }
         }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: to:{1} {2} ", Name, CharacterSettings.Instance.MailRecipient, 
-                    UseCategory? string.Format("{0} {1}",Category,SubCategory):Entry.ToString());
+        public override string Title {
+            get {
+                return string.Format("{0}: to:{1} {2} ", Name, CharacterSettings.Instance.MailRecipient,
+                    UseCategory ? string.Format("{0} {1}", Category, SubCategory) : ItemID.ToString());
             }
         }
-        public override string Help
-        {
-            get
-            {
+        public override string Help {
+            get {
                 return "This action will mail either all items that match the specific ID or a specific amount.Setting Count to 0 will mail all items that match Entry. Note: Count = axact number, not stacks";
             }
         }
-        public override object Clone()
-        {
-            return new MailItemAction()
-            {
-                Entry = this.Entry,
+        public override object Clone() {
+            return new MailItemAction() {
+                ItemID = this.ItemID,
                 //Recipient = this.Recipient,
                 loc = this.loc,
                 AutoFindMailBox = this.AutoFindMailBox,
@@ -253,34 +229,29 @@ namespace HighVoltz.Composites
             };
         }
         #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint num;
-            uint.TryParse(reader["Entry"], out num);
-            Entry = num;
+        public override void ReadXml(XmlReader reader) {
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("Entry"))
+                ItemID = reader["Entry"];
             bool autofind;
             bool.TryParse(reader["AutoFindMailBox"], out autofind);
             AutoFindMailBox = autofind;
             bool boolVal = false;
-            if (reader.MoveToAttribute("UseCategory"))
-            {
+            if (reader.MoveToAttribute("UseCategory")) {
                 bool.TryParse(reader["UseCategory"], out boolVal);
                 UseCategory = boolVal;
             }
-            if (reader.MoveToAttribute("Category"))
-            {
+            if (reader.MoveToAttribute("Category")) {
                 Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
             }
             string subCatType = "";
-            if (reader.MoveToAttribute("SubCategoryType"))
-            {
+            if (reader.MoveToAttribute("SubCategoryType")) {
                 subCatType = reader["SubCategoryType"];
             }
-            if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType))
-            {
+            if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType)) {
                 Type t;
-                if (subCatType != "SubCategoryType")
-                {
+                if (subCatType != "SubCategoryType") {
                     string typeName = string.Format("Styx.{0}", subCatType);
                     t = Assembly.GetEntryAssembly().GetType(typeName);
                 }
@@ -299,16 +270,15 @@ namespace HighVoltz.Composites
             Location = loc.ToString();
             reader.ReadStartElement();
         }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Entry", Entry.ToString());
+        public override void WriteXml(XmlWriter writer) {
+            writer.WriteAttributeString("Entry", ItemID.ToString());
             writer.WriteAttributeString("AutoFindMailBox", AutoFindMailBox.ToString());
 
             writer.WriteAttributeString("UseCategory", UseCategory.ToString());
             writer.WriteAttributeString("Category", Category.ToString());
             writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
             writer.WriteAttributeString("SubCategory", SubCategory.ToString());
-            
+
             writer.WriteAttributeString("X", loc.X.ToString());
             writer.WriteAttributeString("Y", loc.Y.ToString());
             writer.WriteAttributeString("Z", loc.Z.ToString());

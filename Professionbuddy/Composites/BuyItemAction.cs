@@ -13,6 +13,7 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using Styx.Helpers;
+using System.Collections.Generic;
 
 namespace HighVoltz.Composites
 {
@@ -33,9 +34,9 @@ namespace HighVoltz.Composites
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-        public uint Entry {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
+        public string ItemID {
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
         public BuyItemActionType BuyItemType {
             get { return (BuyItemActionType)Properties["BuyItemType"].Value; }
@@ -48,18 +49,18 @@ namespace HighVoltz.Composites
         public BuyItemAction() {
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["Count"] = new MetaProp("Count", typeof(uint));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType), new DisplayNameAttribute("Buy"));
 
-            Entry = 0u;
+            ItemID = "";
             Count = 0u;
             BuyItemType = BuyItemActionType.Material;
             loc = WoWPoint.Zero;
             Location = loc.ToString();
             NpcEntry = 0u;
 
-            Properties["Entry"].Show = false;
+            Properties["ItemID"].Show = false;
             Properties["Count"].Show = false;
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             Properties["BuyItemType"].PropertyChanged += new EventHandler(BuyItemAction_PropertyChanged);
@@ -76,11 +77,11 @@ namespace HighVoltz.Composites
             switch (BuyItemType)
             {
                 case BuyItemActionType.Material:
-                    Properties["Entry"].Show = false;
+                    Properties["ItemID"].Show = false;
                     Properties["Count"].Show = false;
                     break;
                 case BuyItemActionType.SpecificItem:
-                    Properties["Entry"].Show = true;
+                    Properties["ItemID"].Show = true;
                     Properties["Count"].Show = true;
                     break;
             }
@@ -128,7 +129,22 @@ namespace HighVoltz.Composites
                     {
                         if (BuyItemType == BuyItemActionType.SpecificItem)
                         {
-                            buyItem(Entry, Count);
+                            List<uint> idList = new List<uint>();
+                            string[] entries = ItemID.Split(',');
+                            if (entries != null && entries.Length > 0) {
+                                foreach (var entry in entries) {
+                                    uint temp = 0;
+                                    uint.TryParse(entry.Trim(), out temp);
+                                    idList.Add(temp);
+                                }
+                            }
+                            else {
+                                Professionbuddy.Err("No ItemIDs are specified");
+                                IsDone = true;
+                                return RunStatus.Failure;
+                            }
+                            foreach (uint id in idList)
+                                buyItem(id, Count);
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {
@@ -148,9 +164,7 @@ namespace HighVoltz.Composites
                         IsDone = true;
                     }
                 }
-                if (IsDone)
-                    Lua.DoString("CloseMerchant()");
-                else
+                if (!IsDone)
                     return RunStatus.Running;
             }
             return RunStatus.Failure;
@@ -192,7 +206,7 @@ namespace HighVoltz.Composites
             get { return "Buy Item"; }
         }
         public override string Title {
-            get { return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"), Name, Entry, Count, BuyItemType); }
+            get { return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"), Name, ItemID, Count, BuyItemType); }
         }
 
         public override string Help {
@@ -205,7 +219,7 @@ namespace HighVoltz.Composites
             return new BuyItemAction()
             {
                 Count = this.Count,
-                Entry = this.Entry,
+                ItemID = this.ItemID,
                 BuyItemType = this.BuyItemType,
                 Location = this.Location,
                 NpcEntry = this.NpcEntry
@@ -213,16 +227,18 @@ namespace HighVoltz.Composites
         }
         #region XmlSerializer
         public override void ReadXml(XmlReader reader) {
-            uint num;
-            uint.TryParse(reader["Entry"], out num);
-            Entry = num;
-            uint.TryParse(reader["Count"], out num);
-            Count = num;
+            uint val;
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("Entry"))
+                ItemID = reader["Entry"]; 
+            uint.TryParse(reader["Count"], out val);
+            Count = val;
             BuyItemType = (BuyItemActionType)Enum.Parse(typeof(BuyItemActionType), reader["BuyItemType"]);
             if (reader.MoveToAttribute("NpcEntry"))
             {
-                uint.TryParse(reader["NpcEntry"], out num);
-                NpcEntry = num;
+                uint.TryParse(reader["NpcEntry"], out val);
+                NpcEntry = val;
             }
             if (reader.MoveToAttribute("X"))
             {
@@ -240,7 +256,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("X", loc.X.ToString());
             writer.WriteAttributeString("Y", loc.Y.ToString());
             writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("Entry", Entry.ToString());
+            writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("Count", Count.ToString());
             writer.WriteAttributeString("BuyItemType", BuyItemType.ToString());
         }

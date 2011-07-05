@@ -72,7 +72,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1,40); } }
+        public override Version Version { get { return new Version(1, 41); } }
 
         public override bool WantButton { get { return true; } }
 
@@ -318,7 +318,7 @@ namespace HighVoltz
                     Debug("Initializing ...");
                     if (!Directory.Exists(PluginPath))
                         Directory.CreateDirectory(PluginPath);
-                    WipeTempFolder();
+                    WipeTempFolder ();
                     // force Tripper.Tools.dll to load........
                     new Tripper.Tools.Math.Vector3(0, 0, 0);
                     MySettings = new ProfessionBuddySettings
@@ -339,10 +339,13 @@ namespace HighVoltz
                     ImportDataStore();
                     BotEvents_OnBotChanged(null);
                     if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                    {
                         LoadProfile(MySettings.LastProfile);
+                        if (IsRunning)
+                            PreLoadHbProfile(MySettings.LastProfile);
+                    }
                     else
                         ProfileSettings = new PbProfileSettings();
-
                     _init = true;
                 }
             }
@@ -394,7 +397,7 @@ namespace HighVoltz
                 lock (MaterialList)
                 {
                     MaterialList.Clear();
-                    List<CastSpellAction> castSpellList = 
+                    List<CastSpellAction> castSpellList =
                         CastSpellAction.GetCastSpellActionList(CurrentProfile.Branch);
                     if (castSpellList != null)
                     {
@@ -453,6 +456,20 @@ namespace HighVoltz
             return true;
         }
 
+        public static void PreLoadHbProfile(string path) {
+            if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.CurrentProfile.Branch != null)
+            {
+                Dictionary<string, Uri> dict = new Dictionary<string, Uri>();
+                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.CurrentProfile.Branch, dict);
+                if (dict.Count > 0)
+                {
+                    ProfileManager.LoadNew(dict.Keys.FirstOrDefault());
+                    return;
+                }
+            }
+            ProfileManager.LoadEmpty();
+        }
+
         void LoadProtectedItems() {
             List<uint> tempList = null;
             string path = Path.Combine(PluginPath, "Protected Items.xml");
@@ -483,7 +500,7 @@ namespace HighVoltz
             int tableSize, tableIndex = 1;
             DataStore = new Dictionary<uint, int>();
             if (MySettings.DataStoreTable == null)
-                MySettings.DataStoreTable=Util.RandomString;
+                MySettings.DataStoreTable = Util.RandomString;
             string storeInTableLua =
             "if DataStoreDB and DataStore_ContainersDB  and DataStore_AuctionsDB and DataStore_MailsDB then " +
                "local realm = GetRealmName() " +

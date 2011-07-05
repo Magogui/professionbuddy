@@ -81,10 +81,10 @@ namespace HighVoltz.Composites
             get { return (AmountBasedType)Properties["AmountType"].Value; }
             set { Properties["AmountType"].Value = value; }
         }
-        public uint ItemId
+        public string ItemID
         {
-            get { return (uint)Properties["ItemName"].Value; }
-            set { Properties["ItemName"].Value = value; }
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
         public PropertyBag.GoldEditor MinBuyout
         {
@@ -135,7 +135,7 @@ namespace HighVoltz.Composites
 
         public SellItemOnAhAction()
         {
-            Properties["ItemName"] = new MetaProp("ItemName", typeof(uint), new DisplayNameAttribute("Item ID"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute("Item ID List"));
             Properties["RunTime"] = new MetaProp("RunTime", typeof(RunTimeType), new DisplayNameAttribute("Auction Duration"));
             Properties["MinBuyout"] = new MetaProp("MinBuyout", typeof(PropertyBag.GoldEditor),
                 new DisplayNameAttribute("Min Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
@@ -153,7 +153,7 @@ namespace HighVoltz.Composites
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
             Properties["PostIfBelowMinBuyout"] = new MetaProp("PostIfBelowMinBuyout", typeof(bool), new DisplayNameAttribute("Post if Below MinBuyout"));
 
-            ItemId = 0u;
+            ItemID = "";
             MinBuyout = new PropertyBag.GoldEditor("0g10s0c");
             MaxBuyout = new PropertyBag.GoldEditor("100g0s0c");
             RunTime = RunTimeType._24_Hours;
@@ -176,7 +176,7 @@ namespace HighVoltz.Composites
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
 
-            Properties["ItemName"].Show = false;
+            Properties["ItemID"].Show = false;
             Properties["Amount"].Show = false;
             Properties["Location"].Show = false;
         }
@@ -214,13 +214,13 @@ namespace HighVoltz.Composites
         {
             if (UseCategory)
             {
-                Properties["ItemName"].Show = false;
+                Properties["ItemID"].Show = false;
                 Properties["Category"].Show = true;
                 Properties["SubCategory"].Show = true;
             }
             else
             {
-                Properties["ItemName"].Show = true;
+                Properties["ItemID"].Show = true;
                 Properties["Category"].Show = false;
                 Properties["SubCategory"].Show = false;
             }
@@ -491,7 +491,27 @@ namespace HighVoltz.Composites
             }
             else
             {
-                itemList = ObjectManager.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == ItemId).ToList();
+                List<uint> idList = new List<uint>();
+                string[] entries = ItemID.Split(',');
+                if (entries != null && entries.Length > 0) {
+                    foreach (var entry in entries) {
+                        uint temp = 0;
+                        uint.TryParse(entry.Trim(), out temp);
+                        idList.Add(temp);
+                    }
+                }
+                else {
+                    Professionbuddy.Err("No ItemIDs are specified");
+                    IsDone = true;
+                }
+                //List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).Take((int)Count).ToList();
+                //if (itemList != null) {
+                //    using (new FrameLock()) {
+                //        foreach (WoWItem item in itemList)
+                //            item.UseContainerItem();
+                //    }
+                //}
+                itemList = ObjectManager.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && idList.Contains(i.Entry)).ToList();
                 if (itemList != null && itemList.Count > 0)
                 {
                     tmpItemlist.Add(new AuctionEntry(itemList[0].Name, itemList[0].Entry, 0, 0));
@@ -532,7 +552,7 @@ namespace HighVoltz.Composites
                 return string.Format("{0}: {1}{2}", Name, UseCategory ?
                     string.Format("{0} {1}", Category,
                     (SubCategory != null && (int)SubCategory != -1 && (int)SubCategory != 0) ?
-                    "(" + SubCategory + ")" : "") : ItemId.ToString(),
+                    "(" + SubCategory + ")" : "") : ItemID,
                     AmountType == AmountBasedType.Amount ? " x" + Amount.ToString() : "");
             }
         }
@@ -540,14 +560,14 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will sell a specific item that matches Name/ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent";
+                return "This action will sell a specific item that matches Name/ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs";
             }
         }
         public override object Clone()
         {
             return new SellItemOnAhAction()
             {
-                ItemId = this.ItemId,
+                ItemID = this.ItemID,
                 MinBuyout = new PropertyBag.GoldEditor(this.MinBuyout.ToString()),
                 MaxBuyout = new PropertyBag.GoldEditor(this.MaxBuyout.ToString()),
                 Amount = this.Amount,
@@ -569,8 +589,10 @@ namespace HighVoltz.Composites
         public override void ReadXml(XmlReader reader)
         {
             uint val;
-            uint.TryParse(reader["ItemName"],out val);
-            ItemId = val;
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("ItemName"))
+                ItemID = reader["ItemName"];
             MinBuyout = new PropertyBag.GoldEditor(reader["MinBuyout"]);
             MaxBuyout = new PropertyBag.GoldEditor(reader["MaxBuyout"]);
             RunTime = (RunTimeType)Enum.Parse(typeof(RunTimeType), reader["RunTime"]);
@@ -628,7 +650,7 @@ namespace HighVoltz.Composites
         }
         public override void WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("ItemName", ItemId.ToString());
+            writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("MinBuyout", MinBuyout.ToString());
             writer.WriteAttributeString("MaxBuyout", MaxBuyout.ToString());
             writer.WriteAttributeString("RunTime", RunTime.ToString());

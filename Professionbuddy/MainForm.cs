@@ -138,7 +138,9 @@ namespace HighVoltz
                     PB.ProfileSettings.LoadDefaultValues();
                     PB.MySettings.IsRunning = PB.IsRunning = true;
                     PB.MySettings.Save();
-                    if (!TreeRoot.IsRunning)
+                    if (!string.IsNullOrEmpty(PB.CurrentProfile.ProfilePath))
+                        Professionbuddy.PreLoadHbProfile(PB.CurrentProfile.ProfilePath);
+                    if (!TreeRoot.IsRunning) 
                         TreeRoot.Start();
                 }
                 UpdateControls();
@@ -586,28 +588,9 @@ namespace HighVoltz
             {
                 Professionbuddy.LoadProfile(openFileDialog.FileName);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-                LoadFirstProfileAction(PB.CurrentProfile.Branch);
                 if (PB.ProfileSettings.Settings.Count > 0)
                     toolStripSettings.Enabled = true;
             }
-        }
-
-        bool LoadFirstProfileAction(Composite comp) {
-            if (comp is LoadProfileAction &&
-                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
-            {
-                ((LoadProfileAction)comp).Load();
-                return true;
-            }
-            else if (comp is GroupComposite)
-            {
-                foreach (Composite c in ((GroupComposite)comp).Children)
-                {
-                    if (LoadFirstProfileAction(c))
-                        return true;
-                }
-            }
-            return false;
         }
 
         private void toolStripSave_Click(object sender, EventArgs e) {
