@@ -14,18 +14,17 @@ namespace HighVoltz.Composites
     class While : If
     {
         public override RunStatus Tick(object context) {
-            if ((LastStatus == RunStatus.Running && IgnoreCanRun) || CanRun(null))
+            bool canRun = CanRun(null);
+            if ((LastStatus == RunStatus.Running && IgnoreCanRun) || canRun)
             {
                 if (!DecoratedChild.IsRunning)
                     DecoratedChild.Start(null);
                 LastStatus = DecoratedChild.Tick(null);
                 if (IsDone)
                 {
-                    if (LastStatus != RunStatus.Running)
-                        Reset();
+                    Reset();
                 }
-                else
-                    return RunStatus.Running;
+               return RunStatus.Running;
             }
             return RunStatus.Failure;
         }
