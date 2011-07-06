@@ -17,6 +17,7 @@ using TreeSharp;
 using Styx.Logic.BehaviorTree;
 using System.Xml;
 using HighVoltz.Composites;
+using Styx.Logic.Profiles;
 
 namespace HighVoltz
 {
@@ -138,7 +139,7 @@ namespace HighVoltz
                     PB.ProfileSettings.LoadDefaultValues();
                     PB.MySettings.IsRunning = PB.IsRunning = true;
                     PB.MySettings.Save();
-                    if (!string.IsNullOrEmpty(PB.CurrentProfile.ProfilePath))
+                    if (ProfileManager.CurrentProfile == null && !string.IsNullOrEmpty(PB.CurrentProfile.ProfilePath))
                         Professionbuddy.PreLoadHbProfile(PB.CurrentProfile.ProfilePath);
                     if (!TreeRoot.IsRunning) 
                         TreeRoot.Start();

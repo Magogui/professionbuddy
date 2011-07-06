@@ -37,9 +37,9 @@
   </If>
   <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="8">
     <CustomAction Code="Log(&quot;Moving to fishing spot&quot;);" />
-    <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.623" Y="622.0644" Z="646.2601" />
-    <While Condition="DistanceTo(5701.623, 622.0644, 646.2601) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
-      <CustomAction Code="CTM(5701.623, 622.0644, 646.2601);" />
+    <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.468" Y="621.2751" Z="646.241" />
+    <While Condition="DistanceTo(5701.468, 621.2751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
+      <CustomAction Code="CTM(5701.468, 621.2751, 646.241);" />
     </While>
     <WaitAction Condition="false" Timeout="2000" />
     <CustomAction Code="Me.SetFacing(4.738818f);" />

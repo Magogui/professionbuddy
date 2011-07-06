@@ -341,7 +341,7 @@ namespace HighVoltz
                     if (!string.IsNullOrEmpty(MySettings.LastProfile))
                     {
                         LoadProfile(MySettings.LastProfile);
-                        if (IsRunning)
+                        if (IsRunning && ProfileManager.CurrentProfile == null )
                             PreLoadHbProfile(MySettings.LastProfile);
                     }
                     else
