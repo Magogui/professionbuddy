@@ -6,22 +6,31 @@
   <If Condition="Fishing.MaxLevel == 0" IgnoreCanRun="True" ChildrenCount="1">
     <CallSubRoutine SubRoutineName="VenderAndTrain" />
   </If>
+  <Comment Text="Turn on Auto Looting" />
   <CustomAction Code="Lua.DoString(&quot;SetCVar(\&quot;AutoLootDefault\&quot;, 1)&quot;);" />
   <CallSubRoutine SubRoutineName="EquipFishingPole" />
   <Comment Text="Equip a fishing pole" />
-  <CallSubRoutine SubRoutineName="MoveToFishingSpot" />
-  <While Condition="Fishing.Level &lt; 525" IgnoreCanRun="True" ChildrenCount="9">
+  <While Condition="Fishing.Level &lt; 525" IgnoreCanRun="True" ChildrenCount="11">
     <Comment Text="Train if our fishing level is 25 or less from current max level " />
     <Comment Text="Or if max level is 0 or bags are full then we vendor" />
-    <While Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Me.BagsFull" IgnoreCanRun="True" ChildrenCount="2">
+    <If Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Me.BagsFull" IgnoreCanRun="True" ChildrenCount="1">
       <CallSubRoutine SubRoutineName="VenderAndTrain" />
+    </If>
+    <If Condition="DistanceTo(5701.468, 621.2751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
       <CallSubRoutine SubRoutineName="MoveToFishingSpot" />
-    </While>
+    </If>
+    <If Condition="Me.Rotation &lt;4.0 || Me.Rotation &gt; 5.5" IgnoreCanRun="True" ChildrenCount="5">
+      <WaitAction Condition="false" Timeout="2000" />
+      <CustomAction Code="Me.SetFacing(4.738818f);" />
+      <Comment Text="Update facing on server.." />
+      <CustomAction Code="WoWMovement.Move(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
+      <CustomAction Code="WoWMovement.MoveStop(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
+    </If>
     <Comment Text="Use Coins if we have them and don't have 'Lucky' buff" />
     <CustomAction Code="var3 =  Me.BagItems.FirstOrDefault(i =&gt; ((List&lt;uint&gt;)var2).Contains(i.Entry));" />
-    <While Condition="var3 != null &amp;&amp; !Me.HasAura(&quot;Lucky&quot;)" IgnoreCanRun="True" ChildrenCount="1">
+    <If Condition="var3 != null &amp;&amp; !Me.HasAura(&quot;Lucky&quot;)" IgnoreCanRun="True" ChildrenCount="1">
       <CustomAction Code="((WoWItem)var3).UseContainerItem();" />
-    </While>
+    </If>
     <CustomAction Code="var1 = ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(u =&gt; u.SubType == WoWGameObjectType.FishingBobber &amp;&amp; u.CreatedByGuid == Me.Guid);" />
     <If Condition="var1 != null &amp;&amp; ((WoWGameObject)var1).IsValid &amp;&amp; ((WoWFishingBobber)((WoWGameObject)var1).SubObj).IsBobbing" IgnoreCanRun="True" ChildrenCount="1">
       <CustomAction Code="((WoWGameObject)var1).Interact();" />
@@ -35,17 +44,12 @@
     <CustomAction Code="Log(&quot;Level 525 fishing!! Logging out&quot;);" />
     <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
   </If>
-  <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="8">
+  <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="3">
     <CustomAction Code="Log(&quot;Moving to fishing spot&quot;);" />
     <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.468" Y="621.2751" Z="646.241" />
     <While Condition="DistanceTo(5701.468, 621.2751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
       <CustomAction Code="CTM(5701.468, 621.2751, 646.241);" />
     </While>
-    <WaitAction Condition="false" Timeout="2000" />
-    <CustomAction Code="Me.SetFacing(4.738818f);" />
-    <Comment Text="Update facing on server.." />
-    <CustomAction Code="WoWMovement.Move(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
-    <CustomAction Code="WoWMovement.MoveStop(Styx.WoWInternals.WoWMovement.MovementDirection.ForwardBackMovement);" />
   </SubRoutine>
   <SubRoutine SubRoutineName="VenderAndTrain" ChildrenCount="7">
     <CustomAction Code="Log(&quot;Training and Vendoring&quot;);" />

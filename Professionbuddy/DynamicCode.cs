@@ -102,6 +102,7 @@ namespace HighVoltz
                 }
             }
         }
+    
         void StoreMethodName(Composite comp)
         {
             if (comp is GroupComposite)
@@ -120,6 +121,7 @@ namespace HighVoltz
                 WaitMethods["Wait" + Util.Rng.Next(int.MaxValue).ToString()] = (WaitAction)comp;
             }
         }
+        
         #region Strings
 
         static string prefix =
@@ -198,7 +200,7 @@ namespace HighVoltz
             void SwitchToBot(string botName) {Log(@""Switching to {0} BotBase"",botName);new Thread(()=>{ TreeRoot.Stop(); BotManager.Instance.SetCurrent(BotManager.Instance.Bots[botName]); TreeRoot.Start();}).Start();}
         }";
         #endregion
-
+        public StringBuilder CsharpStringBuilder { get; private set; }
         public Type CompileAndLoad()
         {
             CompilerResults results = null;
@@ -240,25 +242,24 @@ namespace HighVoltz
                 options.IncludeDebugInformation = false;
                 options.OutputAssembly = string.Format("{0}CodeAssembly{1:N}.dll", TempFolder, Guid.NewGuid());
                 options.CompilerOptions = "/optimize";
-                StringBuilder sb = new StringBuilder();
-                sb.Append(prefix);
+                CsharpStringBuilder = new StringBuilder();
+                CsharpStringBuilder.Append(prefix);
                 // genorate CanRun Methods
                 foreach (var met in DecoratorMethods)
                 {
-                    sb.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
+                    CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
                 }
                 foreach (var met in ActionMethods)
                 {
-                    sb.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code);
+                    CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code);
                 }
                 foreach (var met in WaitMethods)
                 {
-                    sb.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
+                    CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
                 }
-                sb.Append(postfix);
-                //Logging.Write(sb.ToString());
+                CsharpStringBuilder.Append(postfix);
                 results = provider.CompileAssemblyFromSource(
-                options, sb.ToString());
+                options, CsharpStringBuilder.ToString());
             }
             if (results.Errors.HasErrors)
             {

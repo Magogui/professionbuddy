@@ -753,6 +753,8 @@ namespace HighVoltz
                     printComposite(child, cnt + 1);
                 }
             }
+            if (PB.CsharpStringBuilder != null)
+                Logging.Write(PB.CsharpStringBuilder.ToString());
         }
 
         private void toolStripSettings_Click(object sender, EventArgs e) {
