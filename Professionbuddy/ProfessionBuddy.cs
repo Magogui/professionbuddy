@@ -72,7 +72,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 41); } }
+        public override Version Version { get { return new Version(1, 42); } }
 
         public override bool WantButton { get { return true; } }
 
@@ -89,7 +89,7 @@ namespace HighVoltz
                         MainForm.Instance.Activate();
                 }
                 else
-                    MessageBox.Show("You must enable " + Name + " before you can use it");
+                    MessageBox.Show("You must enable Professionbuddy before you can use it");
             }
             catch (Exception ex)
             {
@@ -488,11 +488,11 @@ namespace HighVoltz
         }
 
         public static void Log(string format, params object[] args) {
-            Logging.Write(System.Drawing.Color.SaddleBrown, "ProfessionBuddy: " + format, args);
+            Logging.Write(System.Drawing.Color.SaddleBrown, string.Format("PB {0}:",Instance.Version) + format, args);
         }
 
         public static void Debug(string format, params object[] args) {
-            Logging.WriteDebug(System.Drawing.Color.SaddleBrown, "ProfessionBuddy: " + format, args);
+            Logging.WriteDebug(System.Drawing.Color.SaddleBrown, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
         public void ImportDataStore() {
