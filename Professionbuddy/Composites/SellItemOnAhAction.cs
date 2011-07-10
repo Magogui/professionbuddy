@@ -281,15 +281,17 @@ namespace HighVoltz.Composites
                             Professionbuddy.Debug("PB: PostIfBelowMinBuyout:{0} ", PostIfBelowMinBuyout, MinBuyout.TotalCopper);
                             Professionbuddy.Debug("PB: lowestBo:{0}  MinBuyout.TotalCopper: {1}", lowestBo, MinBuyout.TotalCopper);
                             Professionbuddy.Debug("PB: tooLowBuyout:{0} enoughItemsPosted: {1}", enoughItemsPosted, enoughItemsPosted);
-                            
+
                             if (!enoughItemsPosted && !tooLowBuyout)
+                            {
                                 ToSellItemList.Add(ae);
+                            }
                             else
                                 Professionbuddy.Log("Skipping {0} since {1}",
-                                    ae.Name, tooLowBuyout ? string.Format("lowest buyout:{0} is below MinBuyout:{1}", 
-                                    AuctionEntry.GoldString(lowestBo), MinBuyout):
+                                    ae.Name, tooLowBuyout ? string.Format("lowest buyout:{0} is below MinBuyout:{1}",
+                                    AuctionEntry.GoldString(lowestBo), MinBuyout) :
                                     string.Format("{0} items from me are already posted. Max amount is {1}",
-                                    ae.myAuctions,Amount));
+                                    ae.myAuctions, Amount));
                             ToScanItemList.RemoveAt(0);
                         }
                         if (ToScanItemList.Count == 0)
@@ -304,12 +306,7 @@ namespace HighVoltz.Composites
                         }
                     }
                 }
-                if (IsDone)
-                {
-                    Lua.DoString("CloseAuctionHouse");
-                }
-                else
-                    return RunStatus.Running;
+                return RunStatus.Running;
             }
             return RunStatus.Failure;
         }
@@ -340,7 +337,7 @@ namespace HighVoltz.Composites
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo,ae.myAuctions,ae.Name);
+                            ae.LowestBo, ae.myAuctions, ae.Name);
                         //Logging.Write("****Copy Below this line****");
                         //Logging.Write(lua);
                         //Logging.Write("****End of copy/paste****");
@@ -493,14 +490,17 @@ namespace HighVoltz.Composites
             {
                 List<uint> idList = new List<uint>();
                 string[] entries = ItemID.Split(',');
-                if (entries != null && entries.Length > 0) {
-                    foreach (var entry in entries) {
+                if (entries != null && entries.Length > 0)
+                {
+                    foreach (var entry in entries)
+                    {
                         uint temp = 0;
                         uint.TryParse(entry.Trim(), out temp);
                         idList.Add(temp);
                     }
                 }
-                else {
+                else
+                {
                     Professionbuddy.Err("No ItemIDs are specified");
                     IsDone = true;
                 }
@@ -520,8 +520,7 @@ namespace HighVoltz.Composites
             return tmpItemlist;
         }
 
-        Func<WoWItem, IEnumerable<AuctionEntry>, bool> containsItem = (i, en) =>
-            { return en.Count(ae => ae.Id == i.Entry) > 0; };
+        Func<WoWItem, IEnumerable<AuctionEntry>, bool> containsItem = (i, en) => { return en.Count(ae => ae.Id == i.Entry) > 0; };
 
         bool subCategoryCheck(WoWItem item)
         {
