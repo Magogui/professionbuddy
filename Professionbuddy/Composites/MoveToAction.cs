@@ -164,12 +164,6 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override void Reset()
-        {
-            base.Reset();
-            loc = WoWPoint.Zero;
-        }
-
         static public WoWPoint GetLocationFromType(MoveToType type, uint entry)
         {
             WoWObject obj = null;
