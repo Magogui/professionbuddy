@@ -80,6 +80,7 @@
     <Compile Include="Composites\BuyItemFromAhAction.cs" />
     <Compile Include="Composites\CalSubRoutine.cs" />
     <Compile Include="Composites\CastSpellAction.cs" />
+    <Compile Include="Composites\PBIdentityComposite.cs" />
     <Compile Include="Composites\Comment.cs" />
     <Compile Include="Composites\CommonTypes.cs" />
     <Compile Include="Composites\ContinentMoveToAction.cs" />
@@ -127,6 +128,9 @@
     <Compile Include="PropertyBag.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tradeskill.cs" />
+    <Compile Include="TradeSkillListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

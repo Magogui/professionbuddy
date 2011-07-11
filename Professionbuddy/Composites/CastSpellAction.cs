@@ -186,12 +186,10 @@ namespace HighVoltz.Composites
                     IsDone = true;
                     return RunStatus.Failure;
                 }
-                if (me.IsFlying)
-                    return RunStatus.Failure;
                 if (me.IsCasting && me.CastingSpellId != Entry)
                     SpellManager.StopCasting();
                 // we should confirm the last recipe in list so we don't make an axtra
-                if (Casted + 1 < CalculatedRepeat || (Casted + 1 == CalculatedRepeat &&
+                if (!me.IsFlying && Casted + 1 < CalculatedRepeat || (Casted + 1 == CalculatedRepeat &&
                     (Confimed || !SpamControl.IsRunning || (SpamControl.ElapsedMilliseconds >= (recastTime + (recastTime / 2)) + waitTime &&
                     !ObjectManager.Me.IsCasting))))
                 {

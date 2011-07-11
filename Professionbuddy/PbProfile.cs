@@ -60,7 +60,7 @@ namespace HighVoltz
         /// </summary>
         public PrioritySelector Branch { get; protected set; }
 
-        public Professionbuddy.PBIdentityComposite LoadFromFile(string path) {
+        public PBIdentityComposite LoadFromFile(string path) {
             try
             {
                 if (File.Exists(path))
@@ -87,7 +87,7 @@ namespace HighVoltz
                         }
                     }
                     Branch.Children.Clear();
-                    Professionbuddy.PBIdentityComposite idComp;
+                    PBIdentityComposite idComp;
                     XmlReaderSettings settings = new XmlReaderSettings();
                     settings.IgnoreWhitespace = true;
                     settings.IgnoreProcessingInstructions = true;
@@ -95,7 +95,7 @@ namespace HighVoltz
 
                     using (XmlReader reader = XmlReader.Create(path, settings))
                     {
-                        idComp = new Professionbuddy.PBIdentityComposite(Branch);
+                        idComp = new PBIdentityComposite(Branch);
                         idComp.ReadXml(reader);
                     }
                     XmlPath = path;
@@ -116,7 +116,7 @@ namespace HighVoltz
             settings.Indent = true;
             using (XmlWriter writer = XmlWriter.Create(file, settings))
             {
-                ((Professionbuddy.PBIdentityComposite)_pb.Root).WriteXml(writer);
+                ((PBIdentityComposite)_pb.Root).WriteXml(writer);
             }
             XmlPath = file;
         }

@@ -22,7 +22,11 @@ namespace HighVoltz.Composites
                     DecoratedChild.Start(null);
                 status = DecoratedChild.Tick(null);
                 if (IsDone && status != RunStatus.Running)
+                {
                     Reset();
+                    ((PrioritySelector)DecoratedChild).Stop(context);
+                    return RunStatus.Success;
+                }
             }
             else
             {

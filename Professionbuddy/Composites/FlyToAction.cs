@@ -68,7 +68,6 @@ namespace HighVoltz.Composites
                         //Lua.DoString("Dismount() CancelShapeshiftForm()");
                     IsDone = true;
                     TreeRoot.StatusText = string.Format("Arrived at location {0}", loc);
-                    return RunStatus.Success;
                 }
                 return RunStatus.Running;
             }

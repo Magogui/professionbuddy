@@ -36,7 +36,8 @@ namespace HighVoltz
         // used to update GUI controls via other threads
 
         #region Initalize/update methods
-        public MainForm() {
+        public MainForm()
+        {
             Instance = this;
             PB = Professionbuddy.Instance;
             InitializeComponent();
@@ -50,7 +51,8 @@ namespace HighVoltz
         }
 
         private delegate void InitDelegate();
-        public void Initialize() {
+        public void Initialize()
+        {
             InitTradeSkillTab();
             InitActionTree();
             PopulateActionGridView();
@@ -89,7 +91,8 @@ namespace HighVoltz
             UpdateControls();
         }
 
-        public void InitTradeSkillTab() {
+        public void InitTradeSkillTab()
+        {
             if (!IsValid)
                 return;
             if (TradeSkillTabControl.InvokeRequired)
@@ -98,7 +101,8 @@ namespace HighVoltz
                 InitTradeSkillTabCallback();
         }
 
-        void InitTradeSkillTabCallback() {
+        void InitTradeSkillTabCallback()
+        {
             TradeSkillTabControl.SuspendLayout();
             TradeSkillTabControl.TabPages.Clear();
             for (int i = 0; i < PB.TradeSkillList.Count; i++)
@@ -108,7 +112,8 @@ namespace HighVoltz
             TradeSkillTabControl.ResumeLayout();
         }
 
-        bool IsChildNode(TreeNode parent, TreeNode child) {
+        bool IsChildNode(TreeNode parent, TreeNode child)
+        {
             if ((child == null && parent != null) || child.Parent == null)
                 return false;
             if (child.Parent == parent)
@@ -117,7 +122,8 @@ namespace HighVoltz
                 return IsChildNode(parent, child.Parent);
         }
 
-        void ToggleStart() {
+        void ToggleStart()
+        {
             try
             {
                 if (PB.IsRunning)
@@ -141,7 +147,7 @@ namespace HighVoltz
                     PB.MySettings.Save();
                     if (ProfileManager.CurrentProfile == null && !string.IsNullOrEmpty(PB.CurrentProfile.ProfilePath))
                         Professionbuddy.PreLoadHbProfile(PB.CurrentProfile.ProfilePath);
-                    if (!TreeRoot.IsRunning) 
+                    if (!TreeRoot.IsRunning)
                         TreeRoot.Start();
                 }
                 UpdateControls();
@@ -150,7 +156,8 @@ namespace HighVoltz
         }
 
         // locks/unlocks controls depending on if PB is running on not.
-        public void UpdateControls() {
+        public void UpdateControls()
+        {
             if (!IsValid)
                 return;
             if (this.InvokeRequired)
@@ -159,7 +166,8 @@ namespace HighVoltz
                 UpdateControlsCallback();
         }
 
-        void UpdateControlsCallback() {
+        void UpdateControlsCallback()
+        {
             if (PB.IsRunning)
             {
                 DisableControls();
@@ -178,7 +186,8 @@ namespace HighVoltz
             }
         }
 
-        void AddToActionTree(object action, TreeNode dest) {
+        void AddToActionTree(object action, TreeNode dest)
+        {
             bool ignoreRoot = (copyAction & CopyPasteOperactions.IgnoreRoot) == CopyPasteOperactions.IgnoreRoot ? true : false;
             bool cloneActions = (copyAction & CopyPasteOperactions.Copy) == CopyPasteOperactions.Copy ? true : false;
             TreeNode newNode = null;
@@ -249,7 +258,8 @@ namespace HighVoltz
             ActionTree.ResumeLayout();
         }
 
-        TreeNode RecursiveCloning(TreeNode node) {
+        TreeNode RecursiveCloning(TreeNode node)
+        {
             IPBComposite newComp = (IPBComposite)(((IPBComposite)node.Tag).Clone());
             TreeNode newNode = new TreeNode(newComp.Title);
             newNode.ForeColor = newComp.Color;
@@ -273,7 +283,8 @@ namespace HighVoltz
             return newNode;
         }
 
-        void DisableControls() {
+        void DisableControls()
+        {
             ActionTree.Enabled = false;
             toolStripAddBtn.Enabled = false;
             toolStripOpen.Enabled = false;
@@ -283,7 +294,8 @@ namespace HighVoltz
             toolStripPaste.Enabled = false;
             ActionGrid.Enabled = false;
         }
-        void EnableControls() {
+        void EnableControls()
+        {
             ActionTree.Enabled = true;
             toolStripAddBtn.Enabled = true;
             toolStripOpen.Enabled = true;
@@ -294,7 +306,8 @@ namespace HighVoltz
             ActionGrid.Enabled = true;
         }
 
-        public void RefreshActionTree() {
+        public void RefreshActionTree()
+        {
             // Don't update ActionTree while PB is running to improve performance.
             if (PB.IsRunning || !IsValid)
                 return;
@@ -303,7 +316,8 @@ namespace HighVoltz
             else
                 RefreshActionTreeCallback();
         }
-        void RefreshActionTreeCallback() {
+        void RefreshActionTreeCallback()
+        {
             ActionTree.SuspendLayout();
             foreach (TreeNode node in ActionTree.Nodes)
             {
@@ -312,7 +326,8 @@ namespace HighVoltz
             ActionTree.ResumeLayout();
         }
 
-        void UdateTreeNode(TreeNode node) {
+        void UdateTreeNode(TreeNode node)
+        {
             IPBComposite comp = (IPBComposite)node.Tag;
             node.Text = comp.Title;
             node.ForeColor = comp.Color;
@@ -325,7 +340,8 @@ namespace HighVoltz
             }
         }
 
-        public void InitActionTree() {
+        public void InitActionTree()
+        {
             if (!IsValid)
                 return;
             if (ActionTree.InvokeRequired)
@@ -333,7 +349,8 @@ namespace HighVoltz
             else
                 InitActionTreeCallback();
         }
-        public void InitActionTreeCallback() {
+        public void InitActionTreeCallback()
+        {
             ActionTree.SuspendLayout();
             int selectedIndex = -1;
             if (ActionTree.SelectedNode != null)
@@ -362,7 +379,8 @@ namespace HighVoltz
         }
 
         //void ActionTreeAddChildren(If ds, TreeNode node) {
-        void ActionTreeAddChildren(GroupComposite ds, TreeNode node) {
+        void ActionTreeAddChildren(GroupComposite ds, TreeNode node)
+        {
             foreach (IPBComposite child in ds.Children)
             {
                 TreeNode childNode = new TreeNode(child.Title);
@@ -377,7 +395,8 @@ namespace HighVoltz
             }
         }
 
-        public void RefreshTradeSkillTabs() {
+        public void RefreshTradeSkillTabs()
+        {
             if (!IsValid)
                 return;
             if (TradeSkillTabControl.InvokeRequired)
@@ -386,7 +405,8 @@ namespace HighVoltz
                 RefreshTradeSkillTabsCallback();
         }
 
-        private void RefreshTradeSkillTabsCallback() {
+        private void RefreshTradeSkillTabsCallback()
+        {
             foreach (TradeSkillListView tv in TradeSkillTabControl.TabPages)
             {
                 tv.TradeDataView.SuspendLayout();
@@ -399,7 +419,8 @@ namespace HighVoltz
                 tv.TradeDataView.ResumeLayout();
             }
         }
-        void PopulateActionGridView() {
+        void PopulateActionGridView()
+        {
             ActionGridView.Rows.Clear();
             Assembly asm = Assembly.GetExecutingAssembly();
             foreach (Type type in asm.GetTypes())
@@ -422,7 +443,8 @@ namespace HighVoltz
         #endregion
 
         #region Callbacks
-        void ActionTree_DragDrop(object sender, DragEventArgs e) {
+        void ActionTree_DragDrop(object sender, DragEventArgs e)
+        {
             copyAction = CopyPasteOperactions.Cut;
 
             if ((e.KeyState & 4) > 0) // shift key
@@ -450,7 +472,8 @@ namespace HighVoltz
             }
         }
 
-        void PasteAction(TreeNode source, TreeNode dest) {
+        void PasteAction(TreeNode source, TreeNode dest)
+        {
             if (dest != source && (!IsChildNode(source, dest) || dest == null))
             {
                 PrioritySelector ps = (PrioritySelector)((Composite)source.Tag).Parent;
@@ -463,15 +486,18 @@ namespace HighVoltz
             }
         }
 
-        void ActionTree_DragEnter(object sender, DragEventArgs e) {
+        void ActionTree_DragEnter(object sender, DragEventArgs e)
+        {
             e.Effect = DragDropEffects.Move;
         }
 
-        void ActionTree_ItemDrag(object sender, ItemDragEventArgs e) {
+        void ActionTree_ItemDrag(object sender, ItemDragEventArgs e)
+        {
             this.DoDragDrop(e.Item, DragDropEffects.Move);
         }
 
-        void ActionTree_KeyDown(object sender, KeyEventArgs e) {
+        void ActionTree_KeyDown(object sender, KeyEventArgs e)
+        {
             if (e.KeyData == Keys.Escape)
             {
                 ActionTree.SelectedNode = null;
@@ -482,12 +508,9 @@ namespace HighVoltz
                 if (ActionTree.SelectedNode != null)
                     RemoveSelectedNodes();
             }
-            else if (e.KeyData == Keys.End)
-            {
-                toolStripSecretButton_Click(null, null);
-            }
         }
-        private void ActionTree_AfterSelect(object sender, TreeViewEventArgs e) {
+        private void ActionTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
             if (!IsValid)
                 return;
             IPBComposite comp = (IPBComposite)e.Node.Tag;
@@ -497,7 +520,8 @@ namespace HighVoltz
             }
         }
 
-        public void OnTradeSkillsLoadedEventHandler(object sender, EventArgs e) {
+        public void OnTradeSkillsLoadedEventHandler(object sender, EventArgs e)
+        {
             // must create GUI elements on its parent thread
             if (this.IsHandleCreated)
                 this.BeginInvoke(new InitDelegate(Initialize));
@@ -508,12 +532,14 @@ namespace HighVoltz
             PB.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
         }
 
-        void MainForm_HandleCreated(object sender, EventArgs e) {
+        void MainForm_HandleCreated(object sender, EventArgs e)
+        {
             this.BeginInvoke(new InitDelegate(Initialize));
             this.HandleCreated -= MainForm_HandleCreated;
         }
 
-        private void MainForm_Load(object sender, EventArgs e) {
+        private void MainForm_Load(object sender, EventArgs e)
+        {
             if (!PB.IsTradeSkillsLoaded)
             {
                 PB.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
@@ -525,21 +551,25 @@ namespace HighVoltz
                 PB.GenorateDynamicCode();
         }
 
-        private void MainForm_ResizeBegin(object sender, EventArgs e) {
+        private void MainForm_ResizeBegin(object sender, EventArgs e)
+        {
             this.SuspendLayout();
         }
 
-        private void MainForm_ResizeEnd(object sender, EventArgs e) {
+        private void MainForm_ResizeEnd(object sender, EventArgs e)
+        {
             this.ResumeLayout();
         }
 
 
-        private void StartButton_Click(object sender, EventArgs e) {
+        private void StartButton_Click(object sender, EventArgs e)
+        {
             ToggleStart();
         }
 
 
-        private void ActionGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e) {
+        private void ActionGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
             if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction)ActionGrid.SelectedObject).IsRecipe)
             {
                 CastSpellAction ca = (CastSpellAction)ActionGrid.SelectedObject;
@@ -551,11 +581,13 @@ namespace HighVoltz
             RefreshActionTree();
         }
 
-        private void RemoveButton_Click(object sender, EventArgs e) {
+        private void RemoveButton_Click(object sender, EventArgs e)
+        {
             RemoveSelectedNodes();
         }
 
-        void RemoveSelectedNodes() {
+        void RemoveSelectedNodes()
+        {
             if (ActionTree.SelectedNode != null)
             {
                 Composite comp = (Composite)ActionTree.SelectedNode.Tag;
@@ -572,19 +604,22 @@ namespace HighVoltz
             }
         }
 
-        private void ActionGridView_MouseMove(object sender, MouseEventArgs e) {
+        private void ActionGridView_MouseMove(object sender, MouseEventArgs e)
+        {
             if (e.Button == MouseButtons.Left)
             {
                 this.ActionGridView.DoDragDrop(this.ActionGridView.CurrentRow, DragDropEffects.All);
             }
         }
 
-        private void ActionGridView_SelectionChanged(object sender, EventArgs e) {
+        private void ActionGridView_SelectionChanged(object sender, EventArgs e)
+        {
             if (ActionGridView.SelectedRows != null && ActionGridView.SelectedRows.Count > 0)
                 HelpTextBox.Text = ((IPBComposite)ActionGridView.SelectedRows[0].Tag).Help;
         }
 
-        private void toolStripOpen_Click(object sender, EventArgs e) {
+        private void toolStripOpen_Click(object sender, EventArgs e)
+        {
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Professionbuddy.LoadProfile(openFileDialog.FileName);
@@ -594,7 +629,8 @@ namespace HighVoltz
             }
         }
 
-        private void toolStripSave_Click(object sender, EventArgs e) {
+        private void toolStripSave_Click(object sender, EventArgs e)
+        {
             saveFileDialog.DefaultExt = "xml";
             saveFileDialog.FilterIndex = 1;
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -615,7 +651,8 @@ namespace HighVoltz
             }
         }
 
-        private void toolStripAddBtn_Click(object sender, EventArgs e) {
+        private void toolStripAddBtn_Click(object sender, EventArgs e)
+        {
             List<IPBComposite> compositeList = new List<IPBComposite>();
             // if the tradeskill tab is selected
             if (MainTabControl.SelectedTab == TradeSkillTab)
@@ -669,19 +706,23 @@ namespace HighVoltz
             RefreshTradeSkillTabs();
         }
 
-        private void toolStripDelete_Click(object sender, EventArgs e) {
+        private void toolStripDelete_Click(object sender, EventArgs e)
+        {
             RemoveSelectedNodes();
         }
 
-        private void toolStripStart_Click(object sender, EventArgs e) {
+        private void toolStripStart_Click(object sender, EventArgs e)
+        {
             ToggleStart();
         }
 
-        private void Materials_Click(object sender, EventArgs e) {
+        private void Materials_Click(object sender, EventArgs e)
+        {
             new MaterialListForm().ShowDialog();
         }
 
-        private void toolStripHelp_Click(object sender, EventArgs e) {
+        private void toolStripHelp_Click(object sender, EventArgs e)
+        {
             Form helpWindow = new Form();
             helpWindow.Height = 600;
             helpWindow.Width = 600;
@@ -698,26 +739,31 @@ namespace HighVoltz
             helpWindow.Show();
         }
 
-        private void toolStripCopy_Click(object sender, EventArgs e) {
+        private void toolStripCopy_Click(object sender, EventArgs e)
+        {
             copySource = ActionTree.SelectedNode;
             if (copySource != null)
                 copyAction = CopyPasteOperactions.Copy;
         }
 
-        private void toolStripPaste_Click(object sender, EventArgs e) {
+        private void toolStripPaste_Click(object sender, EventArgs e)
+        {
             if (copySource != null && ActionTree.SelectedNode != null)
                 PasteAction(copySource, ActionTree.SelectedNode);
         }
 
-        private void toolStripCut_Click(object sender, EventArgs e) {
+        private void toolStripCut_Click(object sender, EventArgs e)
+        {
             copySource = ActionTree.SelectedNode;
             if (copySource != null)
                 copyAction = CopyPasteOperactions.Cut;
         }
 
-        private void toolStripSecretButton_Click(object sender, EventArgs e) {
+        private void toolStripSecretButton_Click(object sender, EventArgs e)
+        {
             PrioritySelector ps = TreeRoot.Current.Root as PrioritySelector;
             int n = 0;
+
             Logging.Write("** BotBase **");
             foreach (var p in ps.Children)
             {
@@ -725,20 +771,28 @@ namespace HighVoltz
                 n = (n + 1) % 2;
                 Logging.Write("[{0}] {1}", p.GetType(), new string(' ', n));
             }
+
             Logging.Write("** Profile Settings **");
             foreach (var kv in PB.ProfileSettings.Settings)
                 Logging.Write("{0} {1}", kv.Key, kv.Value);
+
             Logging.Write("** ActionSelector **");
             printComposite(PB.CurrentProfile.Branch, 0);
+
             Logging.Write("** Material List **");
             foreach (var kv in PB.MaterialList)
                 Logging.Write("Ingredient ID: {0} Amount required:{1}", kv.Key, kv.Value);
+
             Logging.Write("** DataStore **");
             foreach (var kv in PB.DataStore)
                 Logging.Write("item ID: {0} Amount in bag/bank/ah/alts:{1}", kv.Key, kv.Value);
+
+            if (PB.CsharpStringBuilder != null)
+                Logging.Write(PB.CsharpStringBuilder.ToString());
         }
 
-        void printComposite(Composite comp, int cnt) {
+        void printComposite(Composite comp, int cnt)
+        {
             string name;
             if (comp.GetType().GetInterface("IPBComposite") != null)
                 name = ((IPBComposite)comp).Title;
@@ -753,11 +807,10 @@ namespace HighVoltz
                     printComposite(child, cnt + 1);
                 }
             }
-            if (PB.CsharpStringBuilder != null)
-                Logging.Write(PB.CsharpStringBuilder.ToString());
         }
 
-        private void toolStripSettings_Click(object sender, EventArgs e) {
+        private void toolStripSettings_Click(object sender, EventArgs e)
+        {
             Form settingWindow = new Form();
             settingWindow.Height = 300;
             settingWindow.Width = 300;
@@ -782,7 +835,8 @@ namespace HighVoltz
             settingWindow.Disposed += new EventHandler(settingWindow_Disposed);
         }
 
-        void settingWindow_Disposed(object sender, EventArgs e) {
+        void settingWindow_Disposed(object sender, EventArgs e)
+        {
             // cleanup 
             foreach (var kv in PB.ProfileSettings.Settings)
             {
@@ -792,197 +846,29 @@ namespace HighVoltz
             toolStripSettings.Enabled = true;
         }
 
-        void MainForm_PropertyChanged(object sender, EventArgs e) {
+        void MainForm_PropertyChanged(object sender, EventArgs e)
+        {
             PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e) {
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
             PB.LoadTradeSkills();
-            MainForm.Instance.InitTradeSkillTab();    
+            MainForm.Instance.InitTradeSkillTab();
         }
 
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            Logging.Write("MainForm_KeyDown {0}", e.KeyData);
+            if (e.KeyData == Keys.F12)
+            {
+                toolStripSecretButton_Click(null, null);
+                e.Handled = true;
+            }
+            else
+                e.Handled = false;
+        }
     }
         #endregion
-
-    #region TradeSkillListView
-    internal class TradeSkillListView : TabPage
-    {
-        public DataGridViewTextBoxColumn NameColumn { get; private set; }
-        public DataGridViewTextBoxColumn CraftableColumn { get; private set; }
-        public DataGridViewTextBoxColumn DifficultyColumn { get; private set; }
-        public DataGridView TradeDataView { get; private set; }
-        public TextBox FilterText { get; private set; }
-        public ComboBox CategoryCombo { get; private set; }
-        private TableLayoutPanel tabTableLayout;
-
-        public TradeSkillListView()
-            : this(0) {
-        }
-
-        public int TradeIndex {
-            get { return index; }
-        }
-
-        private int index; // index to Professionbuddy.Instance.TradeSkillList
-
-        public TradeSkillListView(int index) {
-            this.index = index;
-            // Filter TextBox
-            FilterText = new TextBox();
-            FilterText.Dock = DockStyle.Fill;
-            // Category Combobox
-            CategoryCombo = new ComboBox();
-            CategoryCombo.Dock = DockStyle.Fill;
-            // columns
-            NameColumn = new DataGridViewTextBoxColumn();
-            CraftableColumn = new DataGridViewTextBoxColumn();
-            DifficultyColumn = new DataGridViewTextBoxColumn();
-            NameColumn.HeaderText = "Name";
-            CraftableColumn.HeaderText = "#";
-            NameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            CraftableColumn.MinimumWidth = 25;
-            CraftableColumn.Width = 25;
-            DifficultyColumn.MinimumWidth = 25;
-            DifficultyColumn.Width = 25;
-            // DataGridView
-            TradeDataView = new DataGridView();
-            TradeDataView.Dock = DockStyle.Fill;
-            TradeDataView.AllowUserToAddRows = false;
-            TradeDataView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            TradeDataView.RowHeadersVisible = false;
-            TradeDataView.Columns.Add(NameColumn);
-            TradeDataView.Columns.Add(CraftableColumn);
-            TradeDataView.Columns.Add(DifficultyColumn);
-            TradeDataView.AllowUserToResizeRows = false;
-            TradeDataView.EditMode = DataGridViewEditMode.EditProgrammatically;
-            TradeDataView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            TradeDataView.ColumnHeadersHeight = 21;
-            TradeDataView.RowTemplate.Height = 16;
-            //table layout
-            tabTableLayout = new TableLayoutPanel();
-            tabTableLayout.ColumnCount = 2;
-            tabTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tabTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tabTableLayout.RowCount = 2;
-            tabTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tabTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tabTableLayout.Controls.Add(FilterText, 0, 0);
-            tabTableLayout.Controls.Add(CategoryCombo, 1, 0);
-            tabTableLayout.Controls.Add(TradeDataView, 0, 1);
-            tabTableLayout.Dock = DockStyle.Fill;
-            tabTableLayout.SetColumnSpan(TradeDataView, 2);
-            // tab
-            this.Controls.Add(tabTableLayout);
-            this.Text = Professionbuddy.Instance.TradeSkillList[index].Name;
-            // populate the controls with data
-            CategoryCombo.Items.Add(""); // blank line will show all headers...
-
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].Recipes)
-            {
-                if (!CategoryCombo.Items.Contains(kv.Value.Header))
-                {
-                    CategoryCombo.Items.Add(kv.Value.Header);
-                }
-                TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), Util.CalculateRecipeRepeat(kv.Value),
-                                       (int)kv.Value.Difficulty); // make color column sortable by dificulty..
-            }
-            TradeDataView_SelectionChanged(null, null);
-            // hook events
-            FilterText.TextChanged += new EventHandler(FilterText_TextChanged);
-            CategoryCombo.SelectedValueChanged += new EventHandler(SectionCombo_SelectedValueChanged);
-            TradeDataView.SelectionChanged += new EventHandler(TradeDataView_SelectionChanged);
-            TradeDataView.CellFormatting += new DataGridViewCellFormattingEventHandler(TradeDataView_CellFormatting);
-        }
-
-        private void TradeDataView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e) {
-
-            if (TradeDataView.Columns[e.ColumnIndex].HeaderText == "")
-            {
-                TradeSkillRecipeCell tsrc = TradeDataView.Rows[e.RowIndex].Cells[0].Value as TradeSkillRecipeCell;
-                e.CellStyle.ForeColor = tsrc.Recipe.Color;
-                e.CellStyle.BackColor = e.CellStyle.ForeColor;
-                e.CellStyle.SelectionBackColor = e.CellStyle.ForeColor;
-                e.CellStyle.SelectionForeColor = e.CellStyle.ForeColor;
-            }
-        }
-
-        private void TradeDataView_SelectionChanged(object sender, EventArgs e) {
-            if (MainForm.IsValid)
-            {
-                MainForm.Instance.IngredientsView.Rows.Clear();
-                if (TradeDataView.SelectedRows.Count > 0)
-                {
-                    TradeSkillRecipeCell cell = (TradeSkillRecipeCell)TradeDataView.SelectedRows[0].Cells[0].Value;
-                    Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].Recipes[cell.RecipeID];
-                    DataGridViewRow row = new DataGridViewRow();
-                    foreach (Ingredient ingred in _recipe.Ingredients)
-                    {
-                        uint inBags = ingred.InBagsCount;
-                        MainForm.Instance.IngredientsView.Rows.
-                            Add(ingred.Name, ingred.Required, inBags, Util.GetBankItemCount(ingred.ID, inBags));
-                        if (ingred.InBagsCount < ingred.Required)
-                        {
-                            MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
-                                Cells[2].Style.SelectionBackColor = Color.Red;
-                            MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
-                                Cells[2].Style.ForeColor = Color.Red;
-                        }
-                        MainForm.Instance.IngredientsView.ClearSelection();
-                    }
-                }
-            }
-        }
-
-        private void FilterText_TextChanged(object sender, EventArgs e) {
-            filterTradeDateView();
-        }
-
-        private void SectionCombo_SelectedValueChanged(object sender, EventArgs e) {
-            filterTradeDateView();
-        }
-
-        private void filterTradeDateView() {
-            TradeDataView.Rows.Clear();
-            string filter = FilterText.Text.ToUpper();
-            bool noFilter = string.IsNullOrEmpty(FilterText.Text);
-            bool showAllCategories = string.IsNullOrEmpty(CategoryCombo.Text);
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].Recipes)
-            {
-                if ((noFilter || kv.Value.Name.ToUpper().Contains(filter)) &&
-                    (showAllCategories || kv.Value.Header == CategoryCombo.Text))
-                {
-                    TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), kv.Value.CanRepeatNum,
-                                           kv.Value.Color);
-                }
-            }
-        }
-    }
-
-    // attached to the TradeSkillListView cell values
-
-    internal class TradeSkillRecipeCell
-    {
-        public TradeSkillRecipeCell(int index, uint id) {
-            TradeSkillIndex = index;
-            RecipeID = id;
-        }
-
-        public string RecipeName {
-            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].Recipes[RecipeID].Name; }
-        }
-
-        public uint RecipeID { get; private set; }
-
-        public Recipe Recipe {
-            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].Recipes[RecipeID]; }
-        }
-
-        public int TradeSkillIndex { get; private set; }
-
-        public override string ToString() {
-            return RecipeName;
-        }
-    }
-    #endregion
 
 }

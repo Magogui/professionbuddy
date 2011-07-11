@@ -64,7 +64,7 @@ namespace HighVoltz.Composites
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["MoveType"] = new MetaProp("MoveType", typeof(MoveToType), new DisplayNameAttribute("MoveTo Type"));
             Properties["Pathing"] = new MetaProp("Pathing", typeof(NavigationType), new DisplayNameAttribute("Use"));
-            
+
             Entry = 0u;
             loc = WoWPoint.Zero;
             Location = loc.ToString();
@@ -79,7 +79,6 @@ namespace HighVoltz.Composites
         void LocationChanged(object sender, EventArgs e)
         {
             MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
             Properties["Location"].Value = string.Format("<{0}, {1}, {2}>", loc.X, loc.Y, loc.Z);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -114,18 +113,28 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (MoveType != MoveToType.Location)
-                    loc = GetLocationFromType(MoveType, Entry);
-                if (loc == WoWPoint.Zero)
+
+                if (MoveType == MoveToType.Location && loc == WoWPoint.Zero)
+                    loc = Util.StringToWoWPoint(Location);
+                // find location from the NPC database or objectManager.
+                else
                 {
-                    if (locationDb == WoWPoint.Zero)
+                    loc = GetLocationFromType(MoveType, Entry);
+                    if (loc == WoWPoint.Zero)
                     {
-                        locationDb = GetLocationFromDB(MoveType, Entry);
+                        if (locationDb == WoWPoint.Zero)
+                        {
+                            locationDb = GetLocationFromDB(MoveType, Entry);
+                        }
+                        loc = locationDb;
                     }
-                    loc = locationDb;
+                    if (loc == WoWPoint.Zero)
+                    {
+                        Professionbuddy.Err("MoveToAction Failed.. Unable to find location from Database");
+                        IsDone = true;
+                        return RunStatus.Failure;
+                    }
                 }
-                if (loc == WoWPoint.Zero)
-                    return RunStatus.Failure;
                 if (Entry > 0 && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget.Entry != Entry))
                 {
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>(true).FirstOrDefault(u => u.Entry == Entry);
@@ -157,6 +166,12 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
+        public override void Reset()
+        {
+            base.Reset();
+            loc = WoWPoint.Zero;
+        }
+
         static public WoWPoint GetLocationFromType(MoveToType type, uint entry)
         {
             WoWObject obj = null;
@@ -178,8 +193,7 @@ namespace HighVoltz.Composites
                         obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsFlightMaster && u.IsFriendly && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestGB:
-                        obj = ObjectManager.ObjectList.Where(u =>
-                        {
+                        obj = ObjectManager.ObjectList.Where(u => {
                             if (u is WoWUnit)
                             {
                                 WoWUnit un = (WoWUnit)u;
