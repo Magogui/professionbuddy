@@ -79,6 +79,7 @@ namespace HighVoltz.Composites
         void LocationChanged(object sender, EventArgs e)
         {
             MetaProp mp = (MetaProp)sender;
+            loc = Util.StringToWoWPoint(Location);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
             Properties["Location"].Value = string.Format("<{0}, {1}, {2}>", loc.X, loc.Y, loc.Z);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -114,10 +115,7 @@ namespace HighVoltz.Composites
             if (!IsDone)
             {
 
-                if (MoveType == MoveToType.Location && loc == WoWPoint.Zero)
-                    loc = Util.StringToWoWPoint(Location);
-                // find location from the NPC database or objectManager.
-                else
+                if (MoveType != MoveToType.Location)
                 {
                     loc = GetLocationFromType(MoveType, Entry);
                     if (loc == WoWPoint.Zero)
