@@ -127,12 +127,12 @@ namespace HighVoltz
             uint.TryParse(str, out val);
             return val;
         }
-
+        static CultureInfo EnUS = new CultureInfo("en-US");
         public static float ToSingle(this string str)
         {
             float val;
-            float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign 
-            , CultureInfo.InvariantCulture, out val);
+            float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign
+            , EnUS, out val);
             return val;
         }
     }
