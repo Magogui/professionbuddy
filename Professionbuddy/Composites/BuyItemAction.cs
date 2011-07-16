@@ -52,7 +52,7 @@ namespace HighVoltz.Composites
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["Count"] = new MetaProp("Count", typeof(uint));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType), new DisplayNameAttribute("Buy"));
-
+            
             ItemID = "";
             Count = 0u;
             BuyItemType = BuyItemActionType.Material;
