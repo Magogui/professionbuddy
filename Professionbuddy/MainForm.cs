@@ -367,7 +367,7 @@ namespace HighVoltz
                 }
                 ActionTree.Nodes.Add(node);
             }
-            ActionTree.ExpandAll();
+            //ActionTree.ExpandAll();
             if (selectedIndex != -1)
             {
                 if (selectedIndex < ActionTree.Nodes.Count)
