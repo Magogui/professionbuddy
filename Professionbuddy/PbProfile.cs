@@ -39,9 +39,8 @@ namespace HighVoltz
     {
         Professionbuddy _pb = Professionbuddy.Instance;
         public PbProfile() {
-            ProfilePath = "";
+            ProfilePath = XmlPath = "";
             Branch = new PrioritySelector();
-            XmlPath = "";
         }
         public PbProfile(string path) {
             ProfilePath = path;
@@ -66,6 +65,8 @@ namespace HighVoltz
                 if (File.Exists(path))
                 {
                     Professionbuddy.Log("Loading profile {0}", path);
+                    ProfilePath = path;
+                    
                     if (Path.GetExtension(path).Equals(".package", StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (Package zipFile = Package.Open(path, FileMode.Open, FileAccess.Read))
