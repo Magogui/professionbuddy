@@ -322,7 +322,7 @@ namespace HighVoltz.Composites
             if (!queueTimer.IsRunning)
             {
                 string lua = string.Format("QueryAuctionItems(\"{0}\" ,nil,nil,nil,nil,nil,{1}) return 1",
-                    ae.Name, page);
+                    ae.Name.EncodeToUTF8(), page);
                 Lua.GetReturnVal<int>(lua, 0);
                 Professionbuddy.Debug("Searching AH for {0}", ae.Name);
                 queueTimer.Start();
@@ -337,7 +337,7 @@ namespace HighVoltz.Composites
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo, ae.myAuctions, ae.Name);
+                            ae.LowestBo, ae.myAuctions, ae.Name.EncodeToUTF8());
                         //Logging.Write("****Copy Below this line****");
                         //Logging.Write(lua);
                         //Logging.Write("****End of copy/paste****");

@@ -135,5 +135,16 @@ namespace HighVoltz
             , EnUS, out val);
             return val;
         }
+        public static string EncodeToUTF8(this string text)
+        {
+            Encoding encodeUTF8 = Encoding.UTF8;
+            StringBuilder buffer = new StringBuilder(encodeUTF8.GetByteCount(text));
+            byte[] utf8Encoded = encodeUTF8.GetBytes(text);
+            foreach (byte b in utf8Encoded)
+            {
+                buffer.Append(string.Format("\\{0:D3}", b));
+            }
+            return buffer.ToString();
+        }
     }
 }

@@ -146,7 +146,7 @@ namespace HighVoltz.Composites {
                         foreach (WoWItem item in ItemList) {
                             item.UseContainerItem();
                         }
-                        Lua.DoString(string.Format("SendMail ('{0}',' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient));
+                        Lua.DoString(string.Format("SendMail ('{0}',' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient.EncodeToUTF8()));
                     }
                     if (IsDone) {
                         Professionbuddy.Log("Done sending {0} via mail",
