@@ -212,8 +212,8 @@ namespace HighVoltz
             ActionTree.SuspendLayout();
             if (dest != null)
             {
-                int index = action is TreeNode && ((TreeNode)action).Parent == dest.Parent && ((TreeNode)action).Index < dest.Index ?
-                    dest.Index + 1 : dest.Index;
+                int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent && ((TreeNode)action).Index < dest.Index ?
+                    dest.Index +1  : dest.Index;
                 PrioritySelector ps = null;
                 // If, While and SubRoutines are Decorators...
                 if (!ignoreRoot && dest.Tag is Decorator)
@@ -230,24 +230,24 @@ namespace HighVoltz
                 }
                 else
                 {
-                    if (dest.Parent == null)
-                    {
-                        if (index >= ActionTree.Nodes.Count)
-                            ActionTree.Nodes.Add(newNode);
-                        else
-                            ActionTree.Nodes.Insert(index, newNode);
-                    }
-                    else
-                    {
-                        if (index >= dest.Parent.Nodes.Count)
-                            dest.Parent.Nodes.Add(newNode);
-                        else
-                            dest.Parent.Nodes.Insert(index, newNode);
-                    }
-                    if (index >= ps.Children.Count)
+                    if (dest.Index >= ps.Children.Count)
                         ps.AddChild((Composite)newNode.Tag);
                     else
-                        ps.InsertChild(index, (Composite)newNode.Tag);
+                        ps.InsertChild(dest.Index, (Composite)newNode.Tag); 
+                    if (dest.Parent == null)
+                    {
+                        if (treeIndex >= ActionTree.Nodes.Count)
+                            ActionTree.Nodes.Add(newNode);
+                        else
+                            ActionTree.Nodes.Insert(treeIndex, newNode);
+                    }
+                    else
+                    {
+                        if (treeIndex >= dest.Parent.Nodes.Count)
+                            dest.Parent.Nodes.Add(newNode);
+                        else
+                            dest.Parent.Nodes.Insert(treeIndex, newNode);
+                    }
                 }
             }
             else

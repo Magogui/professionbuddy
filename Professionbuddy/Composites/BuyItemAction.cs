@@ -151,7 +151,7 @@ namespace HighVoltz.Composites
                             foreach (var kv in Pb.MaterialList)
                             {
                                 // only buy items if we don't have enough in bags...
-                                int amount = kv.Value - (int)Ingredient.GetInBagCount(kv.Key);
+                                int amount = kv.Value - (int)Ingredient.GetInBagItemCount(kv.Key);
                                 if (amount > 0)
                                     buyItem(kv.Key, (uint)amount);
                             }

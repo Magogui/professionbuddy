@@ -309,7 +309,7 @@ namespace HighVoltz
         }
         public static uint InbagCount(uint id)
         {
-            return Ingredient.GetInBagCount(id); ;
+            return Ingredient.GetInBagItemCount(id); ;
         }
         public static float DistanceTo(double x, double y, double z)
         {

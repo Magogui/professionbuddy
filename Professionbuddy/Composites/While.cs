@@ -15,25 +15,23 @@ namespace HighVoltz.Composites
     {
         public override RunStatus Tick(object context)
         {
-            RunStatus status;
             if ((LastStatus == RunStatus.Running && IgnoreCanRun) || CanRun(null))
             {
                 if (!DecoratedChild.IsRunning)
                     DecoratedChild.Start(null);
-                status = DecoratedChild.Tick(null);
-                if (IsDone && status != RunStatus.Running)
+                DecoratedChild.Tick(null);
+                if (IsDone)
                 {
                     Reset();
                     ((PrioritySelector)DecoratedChild).Stop(context);
-                    return RunStatus.Success;
+                    LastStatus = RunStatus.Success;
                 }
+                else
+                    LastStatus = RunStatus.Running;
             }
             else
-            {
-                status = RunStatus.Failure;
-            }
-            LastStatus = status;
-            return status;
+                LastStatus = RunStatus.Failure;
+            return (RunStatus)LastStatus;
         }
         //public override RunStatus Tick(object context)
         //{

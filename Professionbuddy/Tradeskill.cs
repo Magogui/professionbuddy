@@ -124,29 +124,6 @@ namespace HighVoltz
         public TradeSkillFrame()
             : base("TradeSkillFrame") {
         }
-        // I'm making my own since version since StyxWoW.Cache[CacheDb.Item].GetInfoBlockById() calls the internal function.
-        // I prefer to just read memory if I can, the items should allready be loaded in the  cache when I open the tradeskill window
-        //public static string GetItemCacheName(uint id) {
-        //    uint ItemCacheAddress = StyxWoW.Cache[CacheDb.Item].Address;
-        //    string name = null;
-        //    uint minIndex = ObjectManager.Wow.Read<uint>(ItemCacheAddress + 0x10);
-        //    uint maxIndex = ObjectManager.Wow.Read<uint>(ItemCacheAddress + 0x14);
-        //    if (id > 0 && id >= minIndex && id <= maxIndex)
-        //    {
-        //        uint checkOffset = ObjectManager.Wow.Read<uint>(ItemCacheAddress + 0x3C);
-        //        byte check = ObjectManager.Wow.Read<byte>(checkOffset + 0x19);
-        //        uint offset = ObjectManager.Wow.Read<uint>(ItemCacheAddress + 0x2C) + (4 * ((uint)id - minIndex));
-        //        uint infoBlock = ObjectManager.Wow.Read<uint>(offset);
-        //        if (check != 0 && infoBlock != 0)
-        //        { // theres 4 different name offsets depending on type. I've only seen 
-        //            // this one used in all the tradeskill related functions that I reversed
-        //            uint stringPtr = ObjectManager.Wow.Read<uint>(infoBlock + 0x180);
-        //            if (stringPtr != 0)
-        //                name = ObjectManager.Wow.Read<string>(stringPtr);
-        //        }
-        //    }
-        //    return name;
-        //}
 
         public static string GetItemCacheName(uint id) {
             var cache = Styx.StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
@@ -543,7 +520,7 @@ namespace HighVoltz
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
-                    uint cnt = (uint)System.Math.Floor((double)(ingred.InBagsCount / ingred.Required));
+                    uint cnt = (uint)System.Math.Floor((double)(ingred.InBagItemCount / ingred.Required));
                     if (repeat > cnt)
                     {
                         repeat = cnt;
@@ -830,7 +807,7 @@ namespace HighVoltz
         /// updates the InBagsCount
         /// </summary>
         internal void UpdateInBagsCount() {
-            InBagsCount = Ingredient.GetInBagCount(parent.ID);
+            InBagsCount = Ingredient.GetInBagItemCount(parent.ID);
         }
     }
     #endregion
@@ -853,7 +830,7 @@ namespace HighVoltz
             }
             else
             {
-                subclass = new IngredientSubClass(this, GetInBagCount(id));
+                subclass = new IngredientSubClass(this, GetInBagItemCount(id));
                 masterList.Add(id, subclass);
             }
         }
@@ -871,19 +848,10 @@ namespace HighVoltz
         /// <summary>
         /// Number of this Reagent in players possession
         /// </summary>
-        public uint InBagsCount { get { return subclass.InBagsCount; } }
-        public static uint GetInBagCount(uint id) {
-            uint count = 0;
-            ObjectManager.Me.BagItems.Where(o =>
-            {
-                if (o != null && o.IsValid && o.Entry == id)
-                {
-                    count += o.StackCount;
-                    return true;
-                }
-                return false;
-            }).ToList();
-            return count;
+        public uint InBagItemCount { get { return subclass.InBagsCount; } }
+        
+        public static uint GetInBagItemCount(uint id) {
+            return (uint)ObjectManager.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
     }
     #endregion

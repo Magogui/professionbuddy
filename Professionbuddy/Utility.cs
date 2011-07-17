@@ -56,6 +56,11 @@ namespace HighVoltz
             Navigator.MoveTo(point);
         }
 
+        /// <summary>
+        /// Converts a string of 3 numbers to a WoWPoint.
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns></returns>
         static public WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
@@ -69,33 +74,36 @@ namespace HighVoltz
             }
             return loc;
         }
-
-        public static uint GetBankItemCount(uint itemID, uint inbagsCount)
+        /// <summary>
+        ///  Returns number items with a matching id that player has in personal bank
+        /// </summary>
+        /// <param name="itemID"></param>
+        /// <returns></returns>
+        public static uint GetBankItemCount(uint itemID)
         {
-            uint count = 0;
             try
             {
-                ObjectManager.GetObjectsOfType<WoWItem>().Where(o =>
-                {
-                    if (o != null && o.IsValid && o.Entry == itemID)
-                    {
-                        count += o.StackCount;
-                        return true;
-                    }
-                    return false;
-                }).ToList();
-                return count - inbagsCount;
+                return (uint)ObjectManager.GetObjectsOfType<WoWItem>().
+                    Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) - GetCarriedItemCount(itemID);
             }
             catch { return 0; }
         }
-
+        /// <summary>
+        /// Returns number items with a matching id that player is carrying
+        /// </summary>
+        /// <param name="id">Item ID</param>
+        /// <returns>Number of items in player Inventory</returns>
+        public static uint GetCarriedItemCount(uint id)
+        {
+            return (uint)ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+        }
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
             int ret = int.MaxValue;
             foreach (Ingredient ingred in recipe.Ingredients)
             {
-                int ingredCnt = (int)ingred.InBagsCount -
+                int ingredCnt = (int)ingred.InBagItemCount -
                                 (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
                                      ? Professionbuddy.Instance.MaterialList[ingred.ID]
                                      : 0);
@@ -127,24 +135,38 @@ namespace HighVoltz
             uint.TryParse(str, out val);
             return val;
         }
-        static CultureInfo EnUS = new CultureInfo("en-US");
+        static CultureInfo _enUS = new CultureInfo("en-US");
+        static Encoding _encodeUTF8 = Encoding.UTF8;
+
+        /// <summary>
+        /// Converts a string to a float using En-US based culture
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static float ToSingle(this string str)
         {
             float val;
             float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign
-            , EnUS, out val);
+            , _enUS, out val);
             return val;
         }
-        public static string EncodeToUTF8(this string text)
+
+
+        /// <summary>
+        /// Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing names into lua that are UTF-16 or higher.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string ToFormatedUTF8(this string text)
         {
-            Encoding encodeUTF8 = Encoding.UTF8;
-            StringBuilder buffer = new StringBuilder(encodeUTF8.GetByteCount(text));
-            byte[] utf8Encoded = encodeUTF8.GetBytes(text);
+            StringBuilder buffer = new StringBuilder(_encodeUTF8.GetByteCount(text));
+            byte[] utf8Encoded = _encodeUTF8.GetBytes(text);
             foreach (byte b in utf8Encoded)
             {
                 buffer.Append(string.Format("\\{0:D3}", b));
             }
             return buffer.ToString();
         }
+
     }
 }

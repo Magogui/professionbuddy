@@ -87,19 +87,17 @@ namespace HighVoltz.Composites
         }
         public override RunStatus Tick(object context)
         {
-            RunStatus status;
             if ((LastStatus == RunStatus.Running && IgnoreCanRun) || CanRun(null))
             {
                 if (!DecoratedChild.IsRunning)
                     DecoratedChild.Start(null);
-                status = DecoratedChild.Tick(null);
+                LastStatus = DecoratedChild.Tick(null);
             }
             else
             {
-                status = RunStatus.Failure;
+                LastStatus = RunStatus.Failure;
             }
-            LastStatus = status;
-            return status;
+            return (RunStatus)LastStatus;
         }
 
         public virtual object Clone()

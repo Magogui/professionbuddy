@@ -1,9 +1,13 @@
+Professionbuddy 1.0.0.42
+* While Condition now works properly.
+* 'BuyItemFromAh','SellItemOnAh' and 'MailItem' should now work with all wow clients regardless of language.
+* Fixed a 'drag and drop' bug
+
 Professionbuddy 1.0.0.41
 * SellItem,BuyItem,BuyItemFromAh,GetMail and MailItem Action's Entry propery have been renamed to ItemID and now accept a comma separated list of item ids.
 * SellItemOnAH Action's ItemName Property was renamed to ItemID and now accepts a comma separated list of item ids
 * Allot of actions that close a frame upon completion nolonger do so.
 * When the start button is press in PB's GUI, PB will automatically load a HB profile that the current PB profile uses or an empty profile.
-
 
 Professionbuddy 1.0.0.40
 * fixed a bug with'While Condition' where it sometimes allowed execution of actions below it when it's Condtion was still true.

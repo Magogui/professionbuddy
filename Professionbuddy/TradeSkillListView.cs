@@ -124,10 +124,10 @@ namespace HighVoltz
                     DataGridViewRow row = new DataGridViewRow();
                     foreach (Ingredient ingred in _recipe.Ingredients)
                     {
-                        uint inBags = ingred.InBagsCount;
+                        uint inBags = ingred.InBagItemCount;
                         MainForm.Instance.IngredientsView.Rows.
-                            Add(ingred.Name, ingred.Required, inBags, Util.GetBankItemCount(ingred.ID, inBags));
-                        if (ingred.InBagsCount < ingred.Required)
+                            Add(ingred.Name, ingred.Required, inBags);
+                        if (ingred.InBagItemCount < ingred.Required)
                         {
                             MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
                                 Cells[2].Style.SelectionBackColor = Color.Red;
