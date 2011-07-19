@@ -3,9 +3,9 @@
   <CustomAction Code="LevelbotSettings.Instance.GroundMountFarmingMode = true;" />
   <CustomAction Code="CharacterSettings.Instance.LootChests = false;" />
   <CustomAction Code="CharacterSettings.Instance.LootMobs = false;" />
-  <If Condition="TreeRoot.Current.Name != &quot;Questing&quot;" IgnoreCanRun="True" ChildrenCount="1">
-    <CustomAction Code="SwitchToBot(&quot;Questing&quot;);" />
-  </If>
+  <While Condition="TreeRoot.Current.Name != &quot;Questing&quot;" IgnoreCanRun="True" ChildrenCount="1">
+    <ChangeBotAction BotName="Questing" />
+  </While>
   <While Condition="Mining.Level != Mining.MaxLevel" IgnoreCanRun="True" ChildrenCount="1">
     <CustomAction Code="CharacterSettings.Instance.HarvestMinerals = true;" />
   </While>

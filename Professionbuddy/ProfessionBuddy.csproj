@@ -80,7 +80,7 @@
     <Compile Include="Composites\BuyItemFromAhAction.cs" />
     <Compile Include="Composites\CalSubRoutine.cs" />
     <Compile Include="Composites\CastSpellAction.cs" />
-    <Compile Include="Composites\Class1.cs" />
+    <Compile Include="Composites\ChangeBotAction.cs" />
     <Compile Include="Composites\PBIdentityComposite.cs" />
     <Compile Include="Composites\Comment.cs" />
     <Compile Include="Composites\CommonTypes.cs" />

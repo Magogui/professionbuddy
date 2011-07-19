@@ -26,7 +26,10 @@ namespace HighVoltz
         [Flags]
         enum CopyPasteOperactions { Cut = 0, IgnoreRoot = 1, Copy = 2 };
         CopyPasteOperactions copyAction = CopyPasteOperactions.Cut;
+
         TreeNode copySource = null;
+        FileSystemWatcher profileWatcher;
+
         public static MainForm Instance { get; private set; }
         public static bool IsValid { get { return Instance != null && Instance.Visible && !Instance.Disposing && !Instance.IsDisposed; } }
         private Professionbuddy PB;
@@ -41,18 +44,28 @@ namespace HighVoltz
             Instance = this;
             PB = Professionbuddy.Instance;
             InitializeComponent();
-            saveFileDialog.InitialDirectory = Professionbuddy.Instance.PluginPath + "\\Profiles";
+            saveFileDialog.InitialDirectory = PB.ProfilePath;
+            
+            profileWatcher = new FileSystemWatcher(PB.ProfilePath);
+            profileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+            profileWatcher.Changed += profileWatcher_Changed;
+            profileWatcher.Created += profileWatcher_Changed;
+            profileWatcher.Deleted += profileWatcher_Changed;
+            profileWatcher.Renamed += profileWatcher_Changed;
+            profileWatcher.EnableRaisingEvents = true;
+
             // used by the dev to display the 'Secret button', a button that dumps some debug info of the Task list.
             if (Environment.UserName == "highvoltz")
             {
                 toolStripSecretButton.Visible = true;
-                saveFileDialog.InitialDirectory = @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Professionbuddy\Profiles";
             }
         }
+
 
         private delegate void InitDelegate();
         public void Initialize()
         {
+            RefreshProfileList();
             InitTradeSkillTab();
             InitActionTree();
             PopulateActionGridView();
@@ -91,6 +104,44 @@ namespace HighVoltz
             UpdateControls();
         }
 
+        #region ProfileTab
+        public void RefreshProfileList()
+        {
+            if (!IsValid)
+                return;
+            if (ProfileTab.InvokeRequired)
+                ProfileTab.BeginInvoke(new guiInvokeCB(RefreshProfileListCallback));
+            else
+                RefreshProfileListCallback();
+        }
+
+        void RefreshProfileListCallback()
+        {
+            ProfileListView.SuspendLayout();
+            ProfileListView.Clear();
+            string[] profiles = Directory.GetFiles(PB.ProfilePath, "*.xml", SearchOption.TopDirectoryOnly).
+                Select(s => Path.GetFileName(s)).
+                Union(Directory.GetFiles(PB.ProfilePath, "*.package", SearchOption.TopDirectoryOnly)).
+                Select(s => Path.GetFileName(s)).
+                ToArray();
+            
+            // remove all profile names from ListView that are not in the 'profile' array
+            for (int i = 0; i < ProfileListView.Items.Count; i++)
+            {
+                if (!profiles.Contains(ProfileListView.Items[i].Name))
+                    ProfileListView.Items.RemoveAt(i);
+            }
+            // Add all profiles that are not in ListView
+            foreach (string profile in profiles)
+            {
+                if (!ProfileListView.Items.ContainsKey(profile))
+                    ProfileListView .Items.Add(profile,profile,null);
+            }
+            ProfileListView.ResumeLayout();
+        }
+        #endregion
+
+        #region TradeSkillTab
         public void InitTradeSkillTab()
         {
             if (!IsValid)
@@ -111,6 +162,129 @@ namespace HighVoltz
             }
             TradeSkillTabControl.ResumeLayout();
         }
+        #endregion
+
+        #region RefreshActionTree
+        public void RefreshActionTree()
+        {
+            // Don't update ActionTree while PB is running to improve performance.
+            if (PB.IsRunning || !IsValid)
+                return;
+            if (ActionTree.InvokeRequired)
+                ActionTree.BeginInvoke(new guiInvokeCB(RefreshActionTreeCallback));
+            else
+                RefreshActionTreeCallback();
+        }
+        void RefreshActionTreeCallback()
+        {
+            ActionTree.SuspendLayout();
+            foreach (TreeNode node in ActionTree.Nodes)
+            {
+                UdateTreeNode(node);
+            }
+            ActionTree.ResumeLayout();
+        }
+        #endregion
+
+        #region InitActionTree
+        public void InitActionTree()
+        {
+            if (!IsValid)
+                return;
+            if (ActionTree.InvokeRequired)
+                ActionTree.BeginInvoke(new guiInvokeCB(InitActionTreeCallback));
+            else
+                InitActionTreeCallback();
+        }
+        public void InitActionTreeCallback()
+        {
+            ActionTree.SuspendLayout();
+            int selectedIndex = -1;
+            if (ActionTree.SelectedNode != null)
+                selectedIndex = ActionTree.Nodes.IndexOf(ActionTree.SelectedNode);
+            ActionTree.Nodes.Clear();
+            foreach (IPBComposite composite in PB.CurrentProfile.Branch.Children)
+            {
+                TreeNode node = new TreeNode(composite.Title);
+                node.ForeColor = composite.Color;
+                node.Tag = composite;
+                if (composite is Decorator)
+                {
+                    ActionTreeAddChildren((GroupComposite)((Decorator)composite).DecoratedChild, node);
+                }
+                ActionTree.Nodes.Add(node);
+            }
+            //ActionTree.ExpandAll();
+            if (selectedIndex != -1)
+            {
+                if (selectedIndex < ActionTree.Nodes.Count)
+                    ActionTree.SelectedNode = ActionTree.Nodes[selectedIndex];
+                else
+                    ActionTree.SelectedNode = ActionTree.Nodes[ActionTree.Nodes.Count - 1];
+            }
+            ActionTree.ResumeLayout();
+        }
+        #endregion
+
+        #region RefreshTradeSkillTabs
+        public void RefreshTradeSkillTabs()
+        {
+            if (!IsValid)
+                return;
+            if (TradeSkillTabControl.InvokeRequired)
+                TradeSkillTabControl.BeginInvoke(new guiInvokeCB(RefreshTradeSkillTabsCallback));
+            else
+                RefreshTradeSkillTabsCallback();
+        }
+
+        private void RefreshTradeSkillTabsCallback()
+        {
+            foreach (TradeSkillListView tv in TradeSkillTabControl.TabPages)
+            {
+                tv.TradeDataView.SuspendLayout();
+                foreach (DataGridViewRow row in tv.TradeDataView.Rows)
+                {
+                    TradeSkillRecipeCell cell = (TradeSkillRecipeCell)row.Cells[0].Value;
+                    row.Cells[1].Value = Util.CalculateRecipeRepeat(cell.Recipe);
+                    row.Cells[2].Value = cell.Recipe.Difficulty;
+                }
+                tv.TradeDataView.ResumeLayout();
+            }
+        }
+        #endregion
+
+        #region UpdateControls
+        // locks/unlocks controls depending on if PB is running on not.
+        public void UpdateControls()
+        {
+            if (!IsValid)
+                return;
+            if (this.InvokeRequired)
+                this.BeginInvoke(new guiInvokeCB(UpdateControlsCallback));
+            else
+                UpdateControlsCallback();
+        }
+
+        void UpdateControlsCallback()
+        {
+            if (PB.IsRunning)
+            {
+                DisableControls();
+                this.Text = string.Format("Profession Buddy - Running {0}",
+                    !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
+                toolStripStart.BackColor = Color.Green;
+                toolStripStart.Text = "Running";
+            }
+            else
+            {
+                EnableControls();
+                this.Text = string.Format("Profession Buddy - Stopped {0}",
+                    !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
+                toolStripStart.BackColor = Color.Red;
+                toolStripStart.Text = "Stopped";
+            }
+        }
+        #endregion
 
         bool IsChildNode(TreeNode parent, TreeNode child)
         {
@@ -145,45 +319,14 @@ namespace HighVoltz
                     PB.ProfileSettings.LoadDefaultValues();
                     PB.MySettings.IsRunning = PB.IsRunning = true;
                     PB.MySettings.Save();
-                    if (ProfileManager.CurrentProfile == null && !string.IsNullOrEmpty(PB.CurrentProfile.ProfilePath))
-                        Professionbuddy.PreLoadHbProfile(PB.CurrentProfile.ProfilePath);
+                    Professionbuddy.PreLoadHbProfile();
+                    Professionbuddy.PreChangeBot();
                     if (!TreeRoot.IsRunning)
                         TreeRoot.Start();
                 }
                 UpdateControls();
             }
             catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
-        }
-
-        // locks/unlocks controls depending on if PB is running on not.
-        public void UpdateControls()
-        {
-            if (!IsValid)
-                return;
-            if (this.InvokeRequired)
-                this.BeginInvoke(new guiInvokeCB(UpdateControlsCallback));
-            else
-                UpdateControlsCallback();
-        }
-
-        void UpdateControlsCallback()
-        {
-            if (PB.IsRunning)
-            {
-                DisableControls();
-                this.Text = string.Format("Profession Buddy - Running {0}",
-                    !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
-                toolStripStart.BackColor = Color.Green;
-                toolStripStart.Text = "Running";
-            }
-            else
-            {
-                EnableControls();
-                this.Text = string.Format("Profession Buddy - Stopped {0}",
-                    !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
-                toolStripStart.BackColor = Color.Red;
-                toolStripStart.Text = "Stopped";
-            }
         }
 
         void AddToActionTree(object action, TreeNode dest)
@@ -213,7 +356,7 @@ namespace HighVoltz
             if (dest != null)
             {
                 int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent && ((TreeNode)action).Index < dest.Index ?
-                    dest.Index +1  : dest.Index;
+                    dest.Index + 1 : dest.Index;
                 PrioritySelector ps = null;
                 // If, While and SubRoutines are Decorators...
                 if (!ignoreRoot && dest.Tag is Decorator)
@@ -233,7 +376,7 @@ namespace HighVoltz
                     if (dest.Index >= ps.Children.Count)
                         ps.AddChild((Composite)newNode.Tag);
                     else
-                        ps.InsertChild(dest.Index, (Composite)newNode.Tag); 
+                        ps.InsertChild(dest.Index, (Composite)newNode.Tag);
                     if (dest.Parent == null)
                     {
                         if (treeIndex >= ActionTree.Nodes.Count)
@@ -293,7 +436,9 @@ namespace HighVoltz
             toolStripCut.Enabled = false;
             toolStripPaste.Enabled = false;
             ActionGrid.Enabled = false;
+            LoadProfileButton.Enabled = false;
         }
+
         void EnableControls()
         {
             ActionTree.Enabled = true;
@@ -304,26 +449,7 @@ namespace HighVoltz
             toolStripCut.Enabled = true;
             toolStripPaste.Enabled = true;
             ActionGrid.Enabled = true;
-        }
-
-        public void RefreshActionTree()
-        {
-            // Don't update ActionTree while PB is running to improve performance.
-            if (PB.IsRunning || !IsValid)
-                return;
-            if (ActionTree.InvokeRequired)
-                ActionTree.BeginInvoke(new guiInvokeCB(RefreshActionTreeCallback));
-            else
-                RefreshActionTreeCallback();
-        }
-        void RefreshActionTreeCallback()
-        {
-            ActionTree.SuspendLayout();
-            foreach (TreeNode node in ActionTree.Nodes)
-            {
-                UdateTreeNode(node);
-            }
-            ActionTree.ResumeLayout();
+            LoadProfileButton.Enabled = true;
         }
 
         void UdateTreeNode(TreeNode node)
@@ -338,44 +464,6 @@ namespace HighVoltz
                     UdateTreeNode(child);
                 }
             }
-        }
-
-        public void InitActionTree()
-        {
-            if (!IsValid)
-                return;
-            if (ActionTree.InvokeRequired)
-                ActionTree.BeginInvoke(new guiInvokeCB(InitActionTreeCallback));
-            else
-                InitActionTreeCallback();
-        }
-        public void InitActionTreeCallback()
-        {
-            ActionTree.SuspendLayout();
-            int selectedIndex = -1;
-            if (ActionTree.SelectedNode != null)
-                selectedIndex = ActionTree.Nodes.IndexOf(ActionTree.SelectedNode);
-            ActionTree.Nodes.Clear();
-            foreach (IPBComposite composite in PB.CurrentProfile.Branch.Children)
-            {
-                TreeNode node = new TreeNode(composite.Title);
-                node.ForeColor = composite.Color;
-                node.Tag = composite;
-                if (composite is Decorator)
-                {
-                    ActionTreeAddChildren((GroupComposite)((Decorator)composite).DecoratedChild, node);
-                }
-                ActionTree.Nodes.Add(node);
-            }
-            //ActionTree.ExpandAll();
-            if (selectedIndex != -1)
-            {
-                if (selectedIndex < ActionTree.Nodes.Count)
-                    ActionTree.SelectedNode = ActionTree.Nodes[selectedIndex];
-                else
-                    ActionTree.SelectedNode = ActionTree.Nodes[ActionTree.Nodes.Count - 1];
-            }
-            ActionTree.ResumeLayout();
         }
 
         //void ActionTreeAddChildren(If ds, TreeNode node) {
@@ -395,30 +483,6 @@ namespace HighVoltz
             }
         }
 
-        public void RefreshTradeSkillTabs()
-        {
-            if (!IsValid)
-                return;
-            if (TradeSkillTabControl.InvokeRequired)
-                TradeSkillTabControl.BeginInvoke(new guiInvokeCB(RefreshTradeSkillTabsCallback));
-            else
-                RefreshTradeSkillTabsCallback();
-        }
-
-        private void RefreshTradeSkillTabsCallback()
-        {
-            foreach (TradeSkillListView tv in TradeSkillTabControl.TabPages)
-            {
-                tv.TradeDataView.SuspendLayout();
-                foreach (DataGridViewRow row in tv.TradeDataView.Rows)
-                {
-                    TradeSkillRecipeCell cell = (TradeSkillRecipeCell)row.Cells[0].Value;
-                    row.Cells[1].Value = Util.CalculateRecipeRepeat(cell.Recipe);
-                    row.Cells[2].Value = cell.Recipe.Difficulty;
-                }
-                tv.TradeDataView.ResumeLayout();
-            }
-        }
         void PopulateActionGridView()
         {
             ActionGridView.Rows.Clear();
@@ -868,6 +932,23 @@ namespace HighVoltz
             else
                 e.Handled = false;
         }
+
+        void profileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            RefreshProfileList();
+        }
+
+        private void LoadProfileButton_Click(object sender, EventArgs e)
+        {
+            if (ProfileListView.SelectedItems != null && ProfileListView.SelectedItems.Count > 0)
+            {
+                Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath,ProfileListView.SelectedItems[0].Name));
+                // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
+                if (PB.ProfileSettings.Settings.Count > 0)
+                    toolStripSettings.Enabled = true;
+            }
+        }
+
     }
         #endregion
 

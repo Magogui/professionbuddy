@@ -50,8 +50,16 @@ namespace HighVoltz
         public Dictionary<uint, int> MaterialList { get; private set; }
         public List<uint> ProtectedItems { get; private set; }
         public bool IsTradeSkillsLoaded { get; private set; }
-        public string PluginPath { get { return Logging.ApplicationPath + @"\Plugins\" + Name; } }
-        public string TempFolder { get { return Path.Combine(PluginPath, "Temp\\"); } }
+
+        static string _pluginPath;
+        public string PluginPath { get { return _pluginPath; } }
+
+        static string _profilePath;
+        public string ProfilePath { get { return _profilePath; } }
+
+        static string _tempFolder;
+        public string TempFolder { get { return _tempFolder; } }
+
         public event EventHandler OnTradeSkillsLoaded;
         public readonly LocalPlayer Me = ObjectManager.Me;
         static public uint Ping { get { return StyxWoW.WoWClient.Latency; } }
@@ -62,23 +70,29 @@ namespace HighVoltz
         public bool IsRunning = false;
         // singleton instance
         public static Professionbuddy Instance { get; private set; }
-        public Professionbuddy() { Instance = this; }
+        public Professionbuddy()
+        {
+            Instance = this;
+        }
         #endregion
 
         #region Overrides
-        public override string Name {
-            get { return "ProfessionBuddy"; }
+        static readonly string _name = "ProfessionBuddy";
+        public override string Name
+        {
+            get { return _name; }
         }
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 42); } }
+        public override Version Version { get { return new Version(1, 43); } }
 
         public override bool WantButton { get { return true; } }
 
         public override string ButtonText { get { return Name; } }
 
-        public override void OnButtonPress() {
+        public override void OnButtonPress()
+        {
             try
             {
                 if (IsEnabled)
@@ -96,11 +110,13 @@ namespace HighVoltz
                 Log(ex.ToString());
             }
         }
-        public bool IsEnabled {
+        public bool IsEnabled
+        {
             get { return PluginManager.Plugins.Any(p => p.Name == Name && p.Author == Author && p.Enabled); }
         }
 
-        public override void Dispose() {
+        public override void Dispose()
+        {
             BotEvents.OnBotChanged -= BotEvents_OnBotChanged;
             IsRunning = false;
             //BotBaseCleanUp(null);
@@ -113,7 +129,8 @@ namespace HighVoltz
                 MainForm.Instance.Close();
         }
 
-        public override void Pulse() {
+        public override void Pulse()
+        {
             // Due to some non-thread safe HB api I need to make sure the callbacks are executed from main thread
             // Throttling the events so the callback doesn't get called repeatedly in a short time frame.
             if (OnBagUpdateSpamSW.ElapsedMilliseconds >= 1000)
@@ -136,7 +153,8 @@ namespace HighVoltz
             }
         }
 
-        public override void Initialize() {
+        public override void Initialize()
+        {
             Init();
         }
         #endregion
@@ -145,7 +163,8 @@ namespace HighVoltz
 
         #region OnBagUpdate
         Stopwatch OnBagUpdateSpamSW = new Stopwatch();
-        public void OnBagUpdate(object obj, LuaEventArgs args) {
+        public void OnBagUpdate(object obj, LuaEventArgs args)
+        {
             if (!OnBagUpdateSpamSW.IsRunning)
             {
                 Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
@@ -153,7 +172,8 @@ namespace HighVoltz
             }
         }
 
-        void OnBagUpdateTimerCB(Object stateInfo) {
+        void OnBagUpdateTimerCB(Object stateInfo)
+        {
             try
             {
                 Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
@@ -174,7 +194,8 @@ namespace HighVoltz
 
         #region OnSkillUpdate
         Stopwatch OnSkillUpdateSpamSW = new Stopwatch();
-        public void OnSkillUpdate(object obj, LuaEventArgs args) {
+        public void OnSkillUpdate(object obj, LuaEventArgs args)
+        {
             foreach (object o in args.Args)
                 Debug("spell changed {0}", o);
             if (!OnSkillUpdateSpamSW.IsRunning)
@@ -184,7 +205,8 @@ namespace HighVoltz
             }
         }
 
-        void OnSkillUpdateTimerCB(Object stateInfo) {
+        void OnSkillUpdateTimerCB(Object stateInfo)
+        {
             Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             try
             {
@@ -222,14 +244,16 @@ namespace HighVoltz
 
         #region OnSpellsChanged
         Stopwatch OnSpellsChangedSpamSW = new Stopwatch();
-        public void OnSpellsChanged(object obj, LuaEventArgs args) {
+        public void OnSpellsChanged(object obj, LuaEventArgs args)
+        {
             if (!OnSpellsChangedSpamSW.IsRunning)
             {
                 Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
                 OnSpellsChangedSpamSW.Start();
             }
         }
-        public void OnSpellsChangedCB(Object stateInfo) {
+        public void OnSpellsChangedCB(Object stateInfo)
+        {
             try
             {
                 Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
@@ -251,7 +275,8 @@ namespace HighVoltz
 
         #region OnBotChanged
 
-        void BotEvents_OnBotChanged(BotEvents.BotChangedEventArgs args) {
+        void BotEvents_OnBotChanged(BotEvents.BotChangedEventArgs args)
+        {
             if (TreeRoot.Current.Root is PrioritySelector)
             {
                 PrioritySelector botbase = TreeRoot.Current.Root as PrioritySelector;
@@ -265,20 +290,26 @@ namespace HighVoltz
 
         #region Behavior Tree
         PBIdentityComposite root;
-        public TreeSharp.Composite Root {
-            get {
+        public TreeSharp.Composite Root
+        {
+            get
+            {
                 return root ?? (root = new PBIdentityComposite(CurrentProfile.Branch));
             }
-            set {
+            set
+            {
                 root = (PBIdentityComposite)value;
             }
         }
         PbProfile _currentProfile;
-        public PbProfile CurrentProfile {
-            get {
+        public PbProfile CurrentProfile
+        {
+            get
+            {
                 return _currentProfile ?? (_currentProfile = new PbProfile());
             }
-            private set {
+            private set
+            {
                 _currentProfile = value;
             }
         }
@@ -286,7 +317,8 @@ namespace HighVoltz
 
         #region Misc
         // remove any occurance of IdentityComposite in the current BotBase, used on dispose or botbase change
-        void BotBaseCleanUp(PrioritySelector bot) {
+        void BotBaseCleanUp(PrioritySelector bot)
+        {
             PrioritySelector botbase = null;
             if (bot != null)
                 botbase = bot;
@@ -310,15 +342,22 @@ namespace HighVoltz
         }
 
         bool _init = false;
-        public void Init() {
+        public void Init()
+        {
             try
             {
                 if (!_init)
                 {
                     Debug("Initializing ...");
+                    _pluginPath = Logging.ApplicationPath + @"\Plugins\" + _name;
+                    _profilePath = Environment.UserName == "highvoltz" ?
+                        @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Professionbuddy\Profiles" :
+                        Path.Combine(_pluginPath, "Profiles");
+                    _tempFolder = Path.Combine(_pluginPath, "Temp");
+
                     if (!Directory.Exists(PluginPath))
                         Directory.CreateDirectory(PluginPath);
-                    WipeTempFolder ();
+                    WipeTempFolder();
                     // force Tripper.Tools.dll to load........
                     new Tripper.Tools.Math.Vector3(0, 0, 0);
                     MySettings = new ProfessionBuddySettings
@@ -341,8 +380,11 @@ namespace HighVoltz
                     if (!string.IsNullOrEmpty(MySettings.LastProfile))
                     {
                         LoadProfile(MySettings.LastProfile);
-                        if (IsRunning && ProfileManager.CurrentProfile == null )
-                            PreLoadHbProfile(MySettings.LastProfile);
+                        if (IsRunning)
+                        {
+                            PreLoadHbProfile();
+                            PreChangeBot();
+                        }
                     }
                     else
                         ProfileSettings = new PbProfileSettings();
@@ -352,15 +394,18 @@ namespace HighVoltz
             catch (Exception ex) { Logging.Write(System.Drawing.Color.Red, ex.ToString()); }
         }
 
-        WoWSkill[] SupportedTradeSkills {
-            get {
+        WoWSkill[] SupportedTradeSkills
+        {
+            get
+            {
                 IEnumerable<WoWSkill> skillList = from skill in TradeSkillFrame.SupportedSkills
                                                   where skill != SkillLine.Archaeology && Me.GetSkill(skill).MaxValue > 0
                                                   select Me.GetSkill(skill);
                 return skillList.ToArray();
             }
         }
-        public void LoadTradeSkills() {
+        public void LoadTradeSkills()
+        {
             try
             {
                 lock (TradeSkillList)
@@ -391,7 +436,8 @@ namespace HighVoltz
             catch (Exception ex) { Logging.Write(System.Drawing.Color.Red, ex.ToString()); }
         }
 
-        public void UpdateMaterials() {
+        public void UpdateMaterials()
+        {
             try
             {
                 lock (MaterialList)
@@ -422,7 +468,8 @@ namespace HighVoltz
             { Err(ex.ToString()); }
         }
 
-        public static bool LoadProfile(string path) {
+        public static bool LoadProfile(string path)
+        {
             if (File.Exists(path))
             {
                 Log("Loading profile {0}", path);
@@ -456,7 +503,8 @@ namespace HighVoltz
             return true;
         }
 
-        public static void PreLoadHbProfile(string path) {
+        public static void PreLoadHbProfile()
+        {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.CurrentProfile.Branch != null)
             {
                 Dictionary<string, Uri> dict = new Dictionary<string, Uri>();
@@ -467,10 +515,41 @@ namespace HighVoltz
                     return;
                 }
             }
-            ProfileManager.LoadEmpty();
+            if (ProfileManager.CurrentProfile == null)
+                ProfileManager.LoadEmpty();
         }
 
-        void LoadProtectedItems() {
+        public static void PreChangeBot()
+        {
+            List<ChangeBotAction> cbaList = GetListOfActionsByType<ChangeBotAction>(Instance.CurrentProfile.Branch, null);
+            if (cbaList.Count > 0 && !BotManager.Current.Name.Contains((cbaList[0].BotName)))
+            {
+                Professionbuddy.Debug("Changing to Bot {0}", cbaList[0].BotName);
+                cbaList[0].ChangeBot();
+            }
+
+        }
+
+        static internal List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
+        {
+            if (list == null)
+                list = new List<T>();
+            if (comp.GetType() == typeof(T))
+            {
+                list.Add((T)comp);
+            }
+            if (comp is GroupComposite)
+            {
+                foreach (Composite c in ((GroupComposite)comp).Children)
+                {
+                    GetListOfActionsByType<T>(c, list);
+                }
+            }
+            return list;
+        }
+
+        void LoadProtectedItems()
+        {
             List<uint> tempList = null;
             string path = Path.Combine(PluginPath, "Protected Items.xml");
             if (File.Exists(path))
@@ -483,19 +562,23 @@ namespace HighVoltz
         #endregion
 
         #region Utilies
-        public static void Err(string format, params object[] args) {
+        public static void Err(string format, params object[] args)
+        {
             Logging.Write(System.Drawing.Color.Red, "Err: " + format, args);
         }
 
-        public static void Log(string format, params object[] args) {
-            Logging.Write(System.Drawing.Color.SaddleBrown, string.Format("PB {0}:",Instance.Version) + format, args);
+        public static void Log(string format, params object[] args)
+        {
+            Logging.Write(System.Drawing.Color.SaddleBrown, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
-        public static void Debug(string format, params object[] args) {
+        public static void Debug(string format, params object[] args)
+        {
             Logging.WriteDebug(System.Drawing.Color.SaddleBrown, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
-        public void ImportDataStore() {
+        public void ImportDataStore()
+        {
             Log("Importing from DataStore...");
             int tableSize, tableIndex = 1;
             DataStore = new Dictionary<uint, int>();

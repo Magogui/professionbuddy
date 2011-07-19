@@ -240,7 +240,7 @@ namespace HighVoltz
                 options.GenerateExecutable = false;
                 options.TempFiles = new TempFileCollection(TempFolder, false);
                 options.IncludeDebugInformation = false;
-                options.OutputAssembly = string.Format("{0}CodeAssembly{1:N}.dll", TempFolder, Guid.NewGuid());
+                options.OutputAssembly = string.Format("{0}\\CodeAssembly{1:N}.dll", TempFolder, Guid.NewGuid());
                 options.CompilerOptions = "/optimize";
                 CsharpStringBuilder = new StringBuilder();
                 CsharpStringBuilder.Append(prefix);

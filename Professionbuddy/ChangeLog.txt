@@ -1,3 +1,9 @@
+Professionbuddy 1.0.0.43
+* Added a PB Profile list tab 
+* Adjusted included PB profiles to work with recent While Condition fixes.
+* Added a 'Change Bot' Action.
+
+
 Professionbuddy 1.0.0.42
 * While Condition now works properly.
 * 'BuyItemFromAh','SellItemOnAh' and 'MailItem' should now work with all wow clients regardless of language.
