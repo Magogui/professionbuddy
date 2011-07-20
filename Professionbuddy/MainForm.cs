@@ -45,7 +45,7 @@ namespace HighVoltz
             PB = Professionbuddy.Instance;
             InitializeComponent();
             saveFileDialog.InitialDirectory = PB.ProfilePath;
-            
+
             profileWatcher = new FileSystemWatcher(PB.ProfilePath);
             profileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             profileWatcher.Changed += profileWatcher_Changed;
@@ -124,7 +124,7 @@ namespace HighVoltz
                 Union(Directory.GetFiles(PB.ProfilePath, "*.package", SearchOption.TopDirectoryOnly)).
                 Select(s => Path.GetFileName(s)).
                 ToArray();
-            
+
             // remove all profile names from ListView that are not in the 'profile' array
             for (int i = 0; i < ProfileListView.Items.Count; i++)
             {
@@ -135,7 +135,7 @@ namespace HighVoltz
             foreach (string profile in profiles)
             {
                 if (!ProfileListView.Items.ContainsKey(profile))
-                    ProfileListView .Items.Add(profile,profile,null);
+                    ProfileListView.Items.Add(profile, profile, null);
             }
             ProfileListView.ResumeLayout();
         }
@@ -180,7 +180,7 @@ namespace HighVoltz
             ActionTree.SuspendLayout();
             foreach (TreeNode node in ActionTree.Nodes)
             {
-                UdateTreeNode(node);
+                UdateTreeNode(node, true);
             }
             ActionTree.ResumeLayout();
         }
@@ -452,16 +452,16 @@ namespace HighVoltz
             LoadProfileButton.Enabled = true;
         }
 
-        void UdateTreeNode(TreeNode node)
+        void UdateTreeNode(TreeNode node, bool recursive)
         {
             IPBComposite comp = (IPBComposite)node.Tag;
             node.Text = comp.Title;
             node.ForeColor = comp.Color;
-            if (node.Nodes != null)
+            if (node.Nodes != null && recursive)
             {
                 foreach (TreeNode child in node.Nodes)
                 {
-                    UdateTreeNode(child);
+                    UdateTreeNode(child, true);
                 }
             }
         }
@@ -640,9 +640,11 @@ namespace HighVoltz
                 PB.UpdateMaterials();
                 RefreshTradeSkillTabs();
             }
+           if (ActionTree.SelectedNode != null)
+                UdateTreeNode(ActionTree.SelectedNode, false);
+
             if (PB.CodeWasModified)
                 PB.GenorateDynamicCode();
-            RefreshActionTree();
         }
 
         private void RemoveButton_Click(object sender, EventArgs e)
@@ -942,7 +944,7 @@ namespace HighVoltz
         {
             if (ProfileListView.SelectedItems != null && ProfileListView.SelectedItems.Count > 0)
             {
-                Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath,ProfileListView.SelectedItems[0].Name));
+                Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
                 if (PB.ProfileSettings.Settings.Count > 0)
                     toolStripSettings.Enabled = true;
