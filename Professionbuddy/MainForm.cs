@@ -640,8 +640,12 @@ namespace HighVoltz
                 PB.UpdateMaterials();
                 RefreshTradeSkillTabs();
             }
-           if (ActionTree.SelectedNode != null)
+            if (ActionTree.SelectedNode != null)
+            {
+                ActionTree.SuspendLayout();
                 UdateTreeNode(ActionTree.SelectedNode, false);
+                ActionTree.ResumeLayout();
+            }
 
             if (PB.CodeWasModified)
                 PB.GenorateDynamicCode();
