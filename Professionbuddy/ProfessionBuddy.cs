@@ -367,6 +367,7 @@ namespace HighVoltz
                     IsRunning = MySettings.IsRunning;
                     MaterialList = new Dictionary<uint, int>();
                     TradeSkillList = new List<TradeSkill>();
+                    Instance.ProfileSettings = new PbProfileSettings();
                     LoadProtectedItems();
                     LoadTradeSkills();
                     BotEvents.OnBotChanged += BotEvents_OnBotChanged;
@@ -483,7 +484,6 @@ namespace HighVoltz
                     }
                     Instance.MySettings.LastProfile = path;
                     Instance.Root = idComp;
-                    Instance.ProfileSettings = new PbProfileSettings();
                     Instance.ProfileSettings.Load();
                     Instance.GenorateDynamicCode();
                     Instance.UpdateMaterials();
