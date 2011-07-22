@@ -348,6 +348,7 @@ namespace HighVoltz
             {
                 if (!_init)
                 {
+
                     Debug("Initializing ...");
                     _pluginPath = Logging.ApplicationPath + @"\Plugins\" + _name;
                     _profilePath = Environment.UserName == "highvoltz" ?
