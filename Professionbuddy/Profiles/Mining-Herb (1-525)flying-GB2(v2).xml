@@ -75,7 +75,7 @@
           <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
         </If>
       </While>
-      <If Condition="Me.IsAlliance" IgnoreCanRun="True" ChildrenCount="11">
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True" ChildrenCount="10">
         <If Condition="Me.MapId != 0" IgnoreCanRun="True" ChildrenCount="2">
           <CustomAction Code="MessageBox.Show(&quot;Please switch to Kalimdor continent&quot;);" />
           <CustomAction Code="TreeRoot.Stop();" />
@@ -83,19 +83,19 @@
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &lt;65) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &lt; 75)" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=75)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65 &amp;&amp; Mining.Level &lt;125)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=75 &amp;&amp; Herbalism.Level &lt; 120 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=120)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65 &amp;&amp; Mining.Level &lt;125)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=120 &amp;&amp; Herbalism.Level &lt;160)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=125)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=160)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=125 &amp;&amp; Mining.Level &lt;175)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=160 &amp;&amp; Herbalism.Level &lt; 200)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=175)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=200)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=175 &amp;&amp; Mining.Level &lt;235)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=200 &amp;&amp; Herbalism.Level &lt; 260)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=235)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=260)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=235 &amp;&amp; Mining.Level &lt; 250)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=260 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 235-255)(BlasstedLands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=250)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=260)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
@@ -163,7 +163,6 @@
             <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
           </If>
         </While>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.MaxLevel-Mining.Level &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.MaxLevel - Herbalism.Level &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="0" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True" ChildrenCount="9">
         <If Condition="Me.MapId != 1" IgnoreCanRun="True" ChildrenCount="2">
@@ -173,16 +172,16 @@
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &lt;50) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &lt; 50)" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=50)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=50)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=50 &amp;&amp; Mining.Level &lt; 65)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=50 &amp;&amp; Herbalism.Level &lt; 75)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=75)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=65 &amp;&amp; Mining.Level &lt; 125)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=75 &amp;&amp; Herbalism.Level &lt;150 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=125)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=150)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=125 &amp;&amp; Mining.Level &lt;175 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=150 &amp;&amp; Herbalism.Level &lt; 225)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=175)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=225)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=175 &amp;&amp; Mining.Level &lt; 235 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=225 &amp;&amp; Herbalism.Level &lt; 280)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; Mining.Level &gt;=235)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; Herbalism.Level &gt;=280)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
