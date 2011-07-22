@@ -6,7 +6,7 @@ using TreeSharp;
 namespace HighVoltz.Composites
 {
     #region WaitAction
-    public class WaitAction : PBAction
+    public class WaitAction : CsharpAction
     {
         virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
         public string Condition
@@ -19,7 +19,7 @@ namespace HighVoltz.Composites
             get { return (int)Properties["Timeout"].Value; }
             set { Properties["Timeout"].Value = value; }
         }
-        public WaitAction()
+        public WaitAction():base(CsharpCodeType.BoolExpression)
         {
             Properties["Timeout"] = new MetaProp("Timeout", typeof(int));
             Properties["Condition"] = new MetaProp("Condition", typeof(string));
@@ -73,6 +73,26 @@ namespace HighVoltz.Composites
         {
             return new WaitAction() { Condition = this.Condition, Timeout = this.Timeout };
         }
+        public override string Code
+        {
+            get
+            {
+                return Condition;
+            }
+        }
+
+        public override Delegate CompiledMethod
+        {
+            get
+            {
+                return CanRunDelegate;
+            }
+            set
+            {
+                CanRunDelegate = (CanRunDecoratorDelegate)value;
+            }
+        }
+
         #region XmlSerializer
         public override void ReadXml(XmlReader reader)
         {

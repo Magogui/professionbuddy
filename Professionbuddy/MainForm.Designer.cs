@@ -46,6 +46,10 @@
             this.toolStripSecretButton = new System.Windows.Forms.ToolStripButton();
             this.MainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.MainTabControl = new System.Windows.Forms.TabControl();
+            this.ProfileTab = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.ProfileListView = new System.Windows.Forms.ListView();
+            this.LoadProfileButton = new System.Windows.Forms.Button();
             this.ActionsTab = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.ActionGridView = new System.Windows.Forms.DataGridView();
@@ -69,10 +73,6 @@
             this.ActionGrid = new System.Windows.Forms.PropertyGrid();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.ProfileTab = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.LoadProfileButton = new System.Windows.Forms.Button();
-            this.ProfileListView = new System.Windows.Forms.ListView();
             this.tableLayoutPanel1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             this.PbToolStrip.SuspendLayout();
@@ -80,6 +80,8 @@
             this.MainSplitContainer.Panel2.SuspendLayout();
             this.MainSplitContainer.SuspendLayout();
             this.MainTabControl.SuspendLayout();
+            this.ProfileTab.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
             this.ActionsTab.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ActionGridView)).BeginInit();
@@ -90,8 +92,6 @@
             this.ActionSplitContainer.Panel1.SuspendLayout();
             this.ActionSplitContainer.Panel2.SuspendLayout();
             this.ActionSplitContainer.SuspendLayout();
-            this.ProfileTab.SuspendLayout();
-            this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -300,6 +300,55 @@
             this.MainTabControl.SelectedIndex = 0;
             this.MainTabControl.Size = new System.Drawing.Size(277, 526);
             this.MainTabControl.TabIndex = 16;
+            // 
+            // ProfileTab
+            // 
+            this.ProfileTab.Controls.Add(this.tableLayoutPanel4);
+            this.ProfileTab.Location = new System.Drawing.Point(4, 22);
+            this.ProfileTab.Name = "ProfileTab";
+            this.ProfileTab.Size = new System.Drawing.Size(269, 500);
+            this.ProfileTab.TabIndex = 2;
+            this.ProfileTab.Text = "Profiles";
+            this.ProfileTab.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 1;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Controls.Add(this.ProfileListView, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.LoadProfileButton, 0, 1);
+            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 2;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(269, 500);
+            this.tableLayoutPanel4.TabIndex = 25;
+            // 
+            // ProfileListView
+            // 
+            this.ProfileListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ProfileListView.HideSelection = false;
+            this.ProfileListView.Location = new System.Drawing.Point(3, 3);
+            this.ProfileListView.MultiSelect = false;
+            this.ProfileListView.Name = "ProfileListView";
+            this.ProfileListView.ShowGroups = false;
+            this.ProfileListView.Size = new System.Drawing.Size(263, 464);
+            this.ProfileListView.TabIndex = 25;
+            this.ProfileListView.UseCompatibleStateImageBehavior = false;
+            this.ProfileListView.View = System.Windows.Forms.View.List;
+            // 
+            // LoadProfileButton
+            // 
+            this.LoadProfileButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.LoadProfileButton.Location = new System.Drawing.Point(3, 473);
+            this.LoadProfileButton.Name = "LoadProfileButton";
+            this.LoadProfileButton.Size = new System.Drawing.Size(263, 24);
+            this.LoadProfileButton.TabIndex = 25;
+            this.LoadProfileButton.Text = "Load Profile";
+            this.LoadProfileButton.UseVisualStyleBackColor = true;
+            this.LoadProfileButton.Click += new System.EventHandler(this.LoadProfileButton_Click);
             // 
             // ActionsTab
             // 
@@ -576,55 +625,6 @@
             this.openFileDialog.DefaultExt = "Profiles";
             this.openFileDialog.Filter = "Profiles|*.xml;*.package|All files|*.*";
             // 
-            // ProfileTab
-            // 
-            this.ProfileTab.Controls.Add(this.tableLayoutPanel4);
-            this.ProfileTab.Location = new System.Drawing.Point(4, 22);
-            this.ProfileTab.Name = "ProfileTab";
-            this.ProfileTab.Size = new System.Drawing.Size(269, 500);
-            this.ProfileTab.TabIndex = 2;
-            this.ProfileTab.Text = "Profiles";
-            this.ProfileTab.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel4
-            // 
-            this.tableLayoutPanel4.ColumnCount = 1;
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.ProfileListView, 0, 0);
-            this.tableLayoutPanel4.Controls.Add(this.LoadProfileButton, 0, 1);
-            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 2;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(269, 500);
-            this.tableLayoutPanel4.TabIndex = 25;
-            // 
-            // LoadProfileButton
-            // 
-            this.LoadProfileButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LoadProfileButton.Location = new System.Drawing.Point(3, 473);
-            this.LoadProfileButton.Name = "LoadProfileButton";
-            this.LoadProfileButton.Size = new System.Drawing.Size(263, 24);
-            this.LoadProfileButton.TabIndex = 25;
-            this.LoadProfileButton.Text = "Load Profile";
-            this.LoadProfileButton.UseVisualStyleBackColor = true;
-            this.LoadProfileButton.Click += new System.EventHandler(this.LoadProfileButton_Click);
-            // 
-            // ProfileListView
-            // 
-            this.ProfileListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ProfileListView.HideSelection = false;
-            this.ProfileListView.Location = new System.Drawing.Point(3, 3);
-            this.ProfileListView.MultiSelect = false;
-            this.ProfileListView.Name = "ProfileListView";
-            this.ProfileListView.ShowGroups = false;
-            this.ProfileListView.Size = new System.Drawing.Size(263, 464);
-            this.ProfileListView.TabIndex = 25;
-            this.ProfileListView.UseCompatibleStateImageBehavior = false;
-            this.ProfileListView.View = System.Windows.Forms.View.List;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -650,6 +650,8 @@
             this.MainSplitContainer.Panel2.ResumeLayout(false);
             this.MainSplitContainer.ResumeLayout(false);
             this.MainTabControl.ResumeLayout(false);
+            this.ProfileTab.ResumeLayout(false);
+            this.tableLayoutPanel4.ResumeLayout(false);
             this.ActionsTab.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ActionGridView)).EndInit();
@@ -662,8 +664,6 @@
             this.ActionSplitContainer.Panel1.ResumeLayout(false);
             this.ActionSplitContainer.Panel2.ResumeLayout(false);
             this.ActionSplitContainer.ResumeLayout(false);
-            this.ProfileTab.ResumeLayout(false);
-            this.tableLayoutPanel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -706,7 +706,6 @@
         private System.Windows.Forms.ToolStripButton toolStripSecretButton;
         private System.Windows.Forms.SplitContainer ActionSplitContainer;
         internal System.Windows.Forms.PropertyGrid ActionGrid;
-        private System.Windows.Forms.TreeView ActionTree;
         private System.Windows.Forms.SplitContainer MainSplitContainer;
         private System.Windows.Forms.ToolStripButton toolStripSettings;
         private System.Windows.Forms.ToolStripButton toolStripReloadBtn;
@@ -714,6 +713,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         internal System.Windows.Forms.ListView ProfileListView;
         private System.Windows.Forms.Button LoadProfileButton;
+        internal System.Windows.Forms.TreeView ActionTree;
     }
 }
 

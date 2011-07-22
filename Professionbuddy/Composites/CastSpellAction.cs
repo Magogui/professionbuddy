@@ -256,7 +256,7 @@ namespace HighVoltz.Composites
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree();
+                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                     }
                 }
             }

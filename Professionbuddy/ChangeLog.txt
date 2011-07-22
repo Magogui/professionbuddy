@@ -1,3 +1,8 @@
+Professionbuddy 1.0.0.44
+* Any If/While Condition,Wait or Custom action errors will cause the effected actions's font turn red in color and the compiler error is shown as a CompileError property within the action.
+* Fixed a bug that sometimes prevented the current botbase from running when it should have.
+* Fixed the profile Mining-Merb (1-300)flying-GB2.xml
+
 Professionbuddy 1.0.0.43
 * Added a PB Profile list tab 
 * Adjusted included PB profiles to work with recent While Condition fixes.

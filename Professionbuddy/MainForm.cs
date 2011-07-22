@@ -18,6 +18,7 @@ using Styx.Logic.BehaviorTree;
 using System.Xml;
 using HighVoltz.Composites;
 using Styx.Logic.Profiles;
+using System.Threading;
 
 namespace HighVoltz
 {
@@ -34,8 +35,9 @@ namespace HighVoltz
         public static bool IsValid { get { return Instance != null && Instance.Visible && !Instance.Disposing && !Instance.IsDisposed; } }
         private Professionbuddy PB;
         private PropertyBag ProfilePropertyBag;
-        private delegate void guiInvokeCB();
 
+        private delegate void guiInvokeCB();
+        private delegate void refreshActionTreeDelegate(IPBComposite pbComposite, Type type);
         // used to update GUI controls via other threads
 
         #region Initalize/update methods
@@ -165,22 +167,41 @@ namespace HighVoltz
         #endregion
 
         #region RefreshActionTree
+        public void RefreshActionTree(Type type)
+        {
+            RefreshActionTreeCallback(null, type);
+        }
+
+        public void RefreshActionTree(IPBComposite pbComp)
+        {
+            RefreshActionTreeCallback(pbComp, null);
+        }
+
         public void RefreshActionTree()
+        {
+            RefreshActionTreeCallback(null, null);
+        }
+
+        /// <summary>
+        /// Refreshes all actions of specified type in ActionTree or all if type is null
+        /// </summary>
+        /// <param name="type"></param>
+        public void RefreshActionTree(IPBComposite pbComp, Type type)
         {
             // Don't update ActionTree while PB is running to improve performance.
             if (PB.IsRunning || !IsValid)
                 return;
             if (ActionTree.InvokeRequired)
-                ActionTree.BeginInvoke(new guiInvokeCB(RefreshActionTreeCallback));
+                ActionTree.BeginInvoke(new refreshActionTreeDelegate(RefreshActionTreeCallback), pbComp, type);
             else
-                RefreshActionTreeCallback();
+                RefreshActionTreeCallback(pbComp, type);
         }
-        void RefreshActionTreeCallback()
+        void RefreshActionTreeCallback(IPBComposite pbComp, Type type)
         {
             ActionTree.SuspendLayout();
             foreach (TreeNode node in ActionTree.Nodes)
             {
-                UdateTreeNode(node, true);
+                UdateTreeNode(node, pbComp, type, true);
             }
             ActionTree.ResumeLayout();
         }
@@ -452,21 +473,26 @@ namespace HighVoltz
             LoadProfileButton.Enabled = true;
         }
 
-        void UdateTreeNode(TreeNode node, bool recursive)
+        void UdateTreeNode(TreeNode node, IPBComposite pbComp, Type type, bool recursive)
         {
             IPBComposite comp = (IPBComposite)node.Tag;
-            node.Text = comp.Title;
-            node.ForeColor = comp.Color;
+            if ((pbComp == null && type == null) ||
+                (pbComp != null && pbComp == node.Tag) ||
+                (type != null && type.IsAssignableFrom(node.Tag.GetType()))
+                )
+            {
+                node.ForeColor = comp.Color;
+                node.Text = comp.Title;
+            }
             if (node.Nodes != null && recursive)
             {
                 foreach (TreeNode child in node.Nodes)
                 {
-                    UdateTreeNode(child, true);
+                    UdateTreeNode(child, pbComp, type, true);
                 }
             }
         }
 
-        //void ActionTreeAddChildren(If ds, TreeNode node) {
         void ActionTreeAddChildren(GroupComposite ds, TreeNode node)
         {
             foreach (IPBComposite child in ds.Children)
@@ -639,11 +665,12 @@ namespace HighVoltz
                 CastSpellAction ca = (CastSpellAction)ActionGrid.SelectedObject;
                 PB.UpdateMaterials();
                 RefreshTradeSkillTabs();
+                RefreshActionTree(typeof(CastSpellAction));
             }
-            if (ActionTree.SelectedNode != null)
+            else
             {
                 ActionTree.SuspendLayout();
-                UdateTreeNode(ActionTree.SelectedNode, false);
+                UdateTreeNode(ActionTree.SelectedNode, null, null, false);
                 ActionTree.ResumeLayout();
             }
 
@@ -864,11 +891,11 @@ namespace HighVoltz
         void printComposite(Composite comp, int cnt)
         {
             string name;
-            if (comp.GetType().GetInterface("IPBComposite") != null)
+            if (comp is IPBComposite)
                 name = ((IPBComposite)comp).Title;
             else
                 name = comp.GetType().ToString();
-            if (comp is IPBComposite)
+            if (typeof(IPBComposite).IsAssignableFrom(comp.GetType()))
                 Logging.Write("{0}{1} IsDone:{2} LastStatus:{3}", new string(' ', cnt * 4), ((IPBComposite)comp).Title, ((IPBComposite)comp).IsDone, comp.LastStatus);
             if (comp is GroupComposite)
             {

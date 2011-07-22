@@ -22,12 +22,10 @@ namespace HighVoltz.Composites
         public override RunStatus Tick(object context)
         {
             if (CanRun(null))
-                return base.Tick(context) != RunStatus.Running? RunStatus.Failure:RunStatus.Running;
+                LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
             else
-            {
                 LastStatus = RunStatus.Failure;
-                return RunStatus.Failure;
-            }
+            return (RunStatus)LastStatus;
         }
         // returns true if in combat or dead or low hp %
         public static bool ExitBehavior()

@@ -12,49 +12,23 @@ using PrioritySelector = TreeSharp.PrioritySelector;
 namespace HighVoltz.Composites
 {
 
-    public class If : Decorator, IPBComposite, IXmlSerializable
+    public class If : CsharpCondition
     {
-        virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
-        virtual public string Condition
-        {
-            get { return (string)Properties["Condition"].Value; }
-            set { Properties["Condition"].Value = value; }
-        }
         virtual public bool IgnoreCanRun
         {
             get { return (bool)Properties["IgnoreCanRun"].Value; }
             set { Properties["IgnoreCanRun"].Value = value; }
         }
         public If()
-            : base(new PrioritySelector())
+            : base(CsharpCodeType.BoolExpression)
         {
-            Properties = new PropertyBag();
-            this.CanRunDelegate = c => false;
-            Properties["Condition"] = new MetaProp("Condition", typeof(string));
             Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool), new DisplayNameAttribute("Ignore Condition until done"));
-            Condition = "";
             IgnoreCanRun = true;
-            Properties["Condition"].PropertyChanged += new EventHandler(PBDecorator_PropertyChanged);
         }
-        void PBDecorator_PropertyChanged(object sender, EventArgs e)
-        {
-            Professionbuddy.Instance.CodeWasModified = true;
-        }
-        protected override bool CanRun(object context)
-        {
-            try
-            {
-                return CanRunDelegate(context);
-            }
-            catch (Exception ex)
-            {
-                Professionbuddy.Err("If Condition: {0} ,Err:{1}", Condition, ex);
-                return false;
-            }
-        }
-        virtual public System.Drawing.Color Color { get { return System.Drawing.Color.Blue; } }
-        virtual public string Name { get { return "If Condition"; } }
-        virtual public string Title
+
+
+        override public string Name { get { return "If Condition"; } }
+        override public string Title
         {
             get
             {
@@ -63,28 +37,6 @@ namespace HighVoltz.Composites
             }
         }
 
-        virtual public PropertyBag Properties { get; private set; }
-        virtual public void Reset()
-        {
-            recursiveReset((PrioritySelector)DecoratedChild);
-        }
-        void recursiveReset(PrioritySelector ps)
-        {
-            foreach (IPBComposite comp in ps.Children)
-            {
-                comp.Reset();
-                if (comp is If)
-                    recursiveReset((PrioritySelector)((If)comp).DecoratedChild);
-            }
-        }
-        public bool IsDone
-        {
-            get
-            {
-                PrioritySelector ps = (PrioritySelector)DecoratedChild;
-                return ps.Children.Count(c => ((IPBComposite)c).IsDone) == ps.Children.Count || !CanRun(null);
-            }
-        }
         public override RunStatus Tick(object context)
         {
             if ((LastStatus == RunStatus.Running && IgnoreCanRun) || CanRun(null))
@@ -100,7 +52,7 @@ namespace HighVoltz.Composites
             return (RunStatus)LastStatus;
         }
 
-        public virtual object Clone()
+        public override object Clone()
         {
             If pd = new If()
             {
@@ -111,10 +63,10 @@ namespace HighVoltz.Composites
             return pd;
         }
 
-        virtual public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
+        override public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
 
         #region XmlSerializer
-        virtual public void ReadXml(XmlReader reader)
+        override public void ReadXml(XmlReader reader)
         {
             PrioritySelector ps = (PrioritySelector)DecoratedChild;
             Condition = reader["Condition"];
@@ -148,7 +100,7 @@ namespace HighVoltz.Composites
             }
         }
 
-        virtual public void WriteXml(XmlWriter writer)
+        override public void WriteXml(XmlWriter writer)
         {
             PrioritySelector ps = (PrioritySelector)DecoratedChild;
             writer.WriteAttributeString("Condition", Condition);
@@ -163,7 +115,7 @@ namespace HighVoltz.Composites
                 writer.WriteEndElement();
             }
         }
-        virtual public System.Xml.Schema.XmlSchema GetSchema() { return null; }
+
         #endregion
     }
 }

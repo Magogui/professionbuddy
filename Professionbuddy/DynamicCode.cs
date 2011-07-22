@@ -38,9 +38,10 @@ namespace HighVoltz
     public partial class Professionbuddy
     {
 
-        Dictionary<string, If> DecoratorMethods;
-        Dictionary<string, CustomAction> ActionMethods;
-        Dictionary<string, WaitAction> WaitMethods;
+        Dictionary<string, ICSharpCode> CsharpCodeDict;
+        //Dictionary<string, If> DecoratorMethods;
+        //Dictionary<string, CustomAction> ActionMethods;
+        //Dictionary<string, WaitAction> WaitMethods;
 
         public bool CodeWasModified = true;
 
@@ -75,50 +76,55 @@ namespace HighVoltz
 
         public void GenorateDynamicCode()
         {
-            DecoratorMethods = new Dictionary<string, If>();
-            ActionMethods = new Dictionary<string, CustomAction>();
-            WaitMethods = new Dictionary<string, WaitAction>();
+            CsharpCodeDict = new Dictionary<string, ICSharpCode>();
+            //DecoratorMethods = new Dictionary<string, If>();
+            //ActionMethods = new Dictionary<string, CustomAction>();
+            //WaitMethods = new Dictionary<string, WaitAction>();
             StoreMethodName(CurrentProfile.Branch);
             // check if theres anything to compile
-            if (DecoratorMethods.Count == 0 && ActionMethods.Count == 0 && WaitMethods.Count == 0)
+            if (CsharpCodeDict.Count == 0 )
                 return;
             Type dynamicType = CompileAndLoad();
             if (dynamicType != null)
             {
                 foreach (MethodInfo method in dynamicType.GetMethods())
                 {
-                    if (DecoratorMethods.ContainsKey(method.Name))
+                    if (CsharpCodeDict.ContainsKey(method.Name))
                     {
-                        DecoratorMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
+                        if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.BoolExpression)
+                            CsharpCodeDict[method.Name].CompiledMethod = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
+                        else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
+                            CsharpCodeDict[method.Name].CompiledMethod = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
                     }
-                    else if (ActionMethods.ContainsKey(method.Name))
-                    {
-                        ActionMethods[method.Name].Action = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
-                    }
-                    else if (WaitMethods.ContainsKey(method.Name))
-                    {
-                        WaitMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
-                    }
+                    //if (DecoratorMethods.ContainsKey(method.Name))
+                    //{
+                    //    DecoratorMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
+                    //}
+                    //else if (ActionMethods.ContainsKey(method.Name))
+                    //{
+                    //    ActionMethods[method.Name].Action = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
+                    //}
+                    //else if (WaitMethods.ContainsKey(method.Name))
+                    //{
+                    //    WaitMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
+                    //}
                 }
             }
         }
     
         void StoreMethodName(Composite comp)
         {
+
+            if (comp is ICSharpCode)
+            {
+                //CsharpAction csa = comp as CsharpAction;
+                CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString()] = (ICSharpCode)comp;
+                ((ICSharpCode)comp).CompileError = "";
+            }
             if (comp is GroupComposite)
             {
-                if (comp is If)
-                    DecoratorMethods["CanRun" + Util.Rng.Next(int.MaxValue).ToString()] = (If)comp;
                 foreach (Composite child in ((GroupComposite)comp).Children)
                     StoreMethodName(child);
-            }
-            else if (comp is CustomAction)
-            {
-                ActionMethods["Action" + Util.Rng.Next(int.MaxValue).ToString()] = (CustomAction)comp;
-            }
-            else if (comp is WaitAction)
-            {
-                WaitMethods["Wait" + Util.Rng.Next(int.MaxValue).ToString()] = (WaitAction)comp;
             }
         }
         
@@ -209,8 +215,6 @@ namespace HighVoltz
             }))
             {
                 
-                //#if DLL
-                // credits Apoc
                 CompilerParameters options = new CompilerParameters();
                 foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
@@ -218,23 +222,7 @@ namespace HighVoltz
                         options.ReferencedAssemblies.Add(asm.Location);
                 }
                 options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
-                //#else
-                //CompilerParameters options = new CompilerParameters(new string[]{
-                //    "System.dll",
-                //    "System.Data.dll",
-                //    "System.Core.dll",
-                //    "System.Drawing.dll",
-                //    "System.Xml.dll",
-                //    "System.Xml.Linq.dll",
-                //    hbPath,
-                //    tripperToolsPath,
-                //    "Tripper.Tools.dll",
-                //    "System.Windows.Forms.dll",
-                //    Assembly.GetExecutingAssembly().Location,
-                //    (hasGB2 ? GB2Path:""),
-                //    (hasAB ? AbPath:""),
-                //});
-                //#endif
+           
                 // disabled due to a bug in 2.0.0.3956;
                 //options.GenerateInMemory = true; 
                 options.GenerateExecutable = false;
@@ -244,18 +232,16 @@ namespace HighVoltz
                 options.CompilerOptions = "/optimize";
                 CsharpStringBuilder = new StringBuilder();
                 CsharpStringBuilder.Append(prefix);
+                // Line numbers are used to identify actions that genorated compile errors.
+                int currentLine = CsharpStringBuilder.ToString().Count(c => c == '\n') + 1;
                 // genorate CanRun Methods
-                foreach (var met in DecoratorMethods)
+                foreach (var met in CsharpCodeDict)
                 {
-                    CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
-                }
-                foreach (var met in ActionMethods)
-                {
-                    CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code);
-                }
-                foreach (var met in WaitMethods)
-                {
-                    CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Condition);
+                    if (met.Value.CodeType == CsharpCodeType.BoolExpression)
+                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code);
+                    else if (met.Value.CodeType == CsharpCodeType.Statements)
+                        CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code);
+                    met.Value.CodeLineNumber = currentLine++;
                 }
                 CsharpStringBuilder.Append(postfix);
                 results = provider.CompileAssemblyFromSource(
@@ -263,13 +249,21 @@ namespace HighVoltz
             }
             if (results.Errors.HasErrors)
             {
-                StringBuilder errorMessage = new StringBuilder();
-                foreach (CompilerError error in results.Errors)
+                if (results.Errors.Count > 0)
                 {
-                    errorMessage.AppendFormat("Compiler Error:{0}\n{1}", error.Line,
-                    error.ErrorText);
+                    foreach (CompilerError error in results.Errors)
+                    {
+                        ICSharpCode icsc = CsharpCodeDict.Values.FirstOrDefault(c => c.CodeLineNumber == error.Line);
+                        if (icsc != null)
+                        {
+                            Professionbuddy.Err("{0}\nCompile Error : {1}\n", ((IPBComposite)icsc).Title, error.ErrorText);
+                            icsc.CompileError = error.ErrorText;
+                        }
+                        else
+                            Logging.Write("Unable to link error with action");
+                    }
+                    MainForm.Instance.RefreshActionTree(typeof(ICSharpCode));
                 }
-                Logging.Write(System.Drawing.Color.Red, errorMessage.ToString());
                 return null;
             }
             else

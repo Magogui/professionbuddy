@@ -85,7 +85,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 43); } }
+        public override Version Version { get { return new Version(1, 44); } }
 
         public override bool WantButton { get { return true; } }
 
@@ -185,7 +185,7 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.RefreshTradeSkillTabs();
-                    MainForm.Instance.RefreshActionTree();
+                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                 }
             }
             catch (Exception ex) { Err(ex.ToString()); }
@@ -233,7 +233,7 @@ namespace HighVoltz
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree();
+                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                     }
                 }
             }
@@ -265,7 +265,7 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.InitTradeSkillTab();
-                    MainForm.Instance.RefreshActionTree();
+                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                 }
             }
             catch (Exception ex)

@@ -7,16 +7,16 @@ using TreeSharp;
 namespace HighVoltz.Composites
 {
     #region CustomAction
-    class CustomAction : PBAction
+    class CustomAction : CsharpAction
     {
         public System.Action<object> Action { get; set; }
-        public string Code
+        override public string Code
         {
             get { return (string)Properties["Code"].Value; }
             set { Properties["Code"].Value = value; }
         }
 
-        public CustomAction()
+        public CustomAction():base(CsharpCodeType.Statements)
         {
             this.Action = c => { ;};
             Properties["Code"] = new MetaProp("Code", typeof(string));
@@ -70,6 +70,19 @@ namespace HighVoltz.Composites
         {
             return new CustomAction() { Code = this.Code };
         }
+
+        public override Delegate CompiledMethod
+        {
+            get
+            {
+                return Action;
+            }
+            set
+            {
+                Action = (System.Action<object>)value;
+            }
+        }
+
         #region XmlSerializer
         public override void ReadXml(XmlReader reader)
         {
