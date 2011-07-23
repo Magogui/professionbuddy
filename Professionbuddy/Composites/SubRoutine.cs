@@ -11,12 +11,14 @@ namespace HighVoltz.Composites
 {
     class SubRoutine : GroupComposite, IPBComposite, IXmlSerializable
     {
-        virtual public string SubRoutineName {
+        virtual public string SubRoutineName
+        {
             get { return (string)Properties["SubRoutineName"].Value; }
             set { Properties["SubRoutineName"].Value = value; }
         }
         public SubRoutine()
-            : base() {
+            : base()
+        {
             Properties = new PropertyBag();
             Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string));
             SubRoutineName = "";
@@ -33,6 +35,11 @@ namespace HighVoltz.Composites
         {
             //lock (Locker) 
             //{  
+            if (context == null || !(context is string) || (string)context != SubRoutineName)
+            {
+                yield return RunStatus.Failure;
+                yield break;
+            }
             foreach (Composite node in Children)
             {
                 node.Start(context);
@@ -52,16 +59,17 @@ namespace HighVoltz.Composites
                     yield break;
                 }
             }
-            Reset();
             yield return RunStatus.Failure;
             yield break;
             //}
         }
 
-        virtual public void Reset() {
+        virtual public void Reset()
+        {
             recursiveReset(this);
         }
-        void recursiveReset(GroupComposite gc) {
+        void recursiveReset(GroupComposite gc)
+        {
             foreach (IPBComposite comp in gc.Children)
             {
                 comp.Reset();
@@ -69,13 +77,16 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as GroupComposite);
             }
         }
-        public bool IsDone {
-            get {
+        public bool IsDone
+        {
+            get
+            {
                 return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
             }
         }
 
-        public virtual object Clone() {
+        public virtual object Clone()
+        {
             SubRoutine pd = new SubRoutine()
             {
                 SubRoutineName = this.SubRoutineName,
@@ -86,7 +97,8 @@ namespace HighVoltz.Composites
         virtual public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
 
         #region XmlSerializer
-        virtual public void ReadXml(XmlReader reader) {
+        virtual public void ReadXml(XmlReader reader)
+        {
             SubRoutineName = reader["SubRoutineName"];
             reader.MoveToAttribute("ChildrenCount");
             int count = reader.ReadContentAsInt();
@@ -115,7 +127,8 @@ namespace HighVoltz.Composites
             }
         }
 
-        virtual public void WriteXml(XmlWriter writer) {
+        virtual public void WriteXml(XmlWriter writer)
+        {
             writer.WriteAttributeString("SubRoutineName", SubRoutineName);
             writer.WriteAttributeString("ChildrenCount", Children.Count.ToString());
 

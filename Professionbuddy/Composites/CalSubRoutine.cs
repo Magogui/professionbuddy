@@ -39,10 +39,10 @@ namespace HighVoltz.Composites
                 if (_sub != null)
                 {
                     if (!_sub.IsRunning)
-                        _sub.Start(null);
+                        _sub.Start(SubRoutineName);
                     try
                     {
-                        _sub.Tick(null);
+                        _sub.Tick(SubRoutineName);
                     }
                     catch { IsDone = true; _sub.Reset(); return RunStatus.Failure; }
                     IsDone = _sub.IsDone;
