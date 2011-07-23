@@ -96,18 +96,6 @@ namespace HighVoltz
                         else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
                             CsharpCodeDict[method.Name].CompiledMethod = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
                     }
-                    //if (DecoratorMethods.ContainsKey(method.Name))
-                    //{
-                    //    DecoratorMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
-                    //}
-                    //else if (ActionMethods.ContainsKey(method.Name))
-                    //{
-                    //    ActionMethods[method.Name].Action = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
-                    //}
-                    //else if (WaitMethods.ContainsKey(method.Name))
-                    //{
-                    //    WaitMethods[method.Name].CanRunDelegate = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
-                    //}
                 }
             }
         }
@@ -117,7 +105,6 @@ namespace HighVoltz
 
             if (comp is ICSharpCode)
             {
-                //CsharpAction csa = comp as CsharpAction;
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString()] = (ICSharpCode)comp;
                 ((ICSharpCode)comp).CompileError = "";
             }

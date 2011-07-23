@@ -82,7 +82,6 @@
     <Compile Include="Composites\CastSpellAction.cs" />
     <Compile Include="Composites\ChangeBotAction.cs" />
     <Compile Include="Composites\CsharpAction.cs" />
-    <Compile Include="Composites\CsharpCondition.cs" />
     <Compile Include="ICSharpCode.cs" />
     <Compile Include="Composites\PBIdentityComposite.cs" />
     <Compile Include="Composites\Comment.cs" />

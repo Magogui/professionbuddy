@@ -10,7 +10,6 @@ namespace HighVoltz.Composites
     class CallSubRoutine : PBAction
     {
         SubRoutine _sub;
-        PrioritySelector _ps;
         public string SubRoutineName {
             get { return (string)Properties["SubRoutineName"].Value; }
             set { Properties["SubRoutineName"].Value = value; }
@@ -39,11 +38,11 @@ namespace HighVoltz.Composites
                 }
                 if (_sub != null)
                 {
-                    if (!_ps.IsRunning)
-                        _ps.Start(null);
+                    if (!_sub.IsRunning)
+                        _sub.Start(null);
                     try
                     {
-                        _ps.Tick(null);
+                        _sub.Tick(null);
                     }
                     catch { IsDone = true; _sub.Reset(); return RunStatus.Failure; }
                     IsDone = _sub.IsDone;
@@ -60,11 +59,9 @@ namespace HighVoltz.Composites
         public override void Reset() {
             base.Reset();
             _sub = null;
-            _ps = null;
         }
         bool GetSubRoutine() {
             _sub = FindSubRoutineByName(SubRoutineName, Pb.CurrentProfile.Branch);
-            _ps = ((PrioritySelector)_sub.DecoratedChild);
             return _sub != null;
         }
 

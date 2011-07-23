@@ -46,6 +46,8 @@ namespace HighVoltz
             }
         }
 
+        static WoWPoint _lastPoint = WoWPoint.Zero;
+        static DateTime _lastMove = DateTime.Now;
         public static void MoveTo(WoWPoint point)
         {
             if (BotPoi.Current.Type != PoiType.None)
@@ -53,7 +55,17 @@ namespace HighVoltz
             if (!ObjectManager.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
                 Mount.MountUp();
             TreeRoot.StatusText = string.Format("PB: Moving to {0}", point);
+            _lastPoint = point;
+            _lastMove = DateTime.Now;
             Navigator.MoveTo(point);
+        }
+
+        public static WoWPoint GetMoveToDestination()
+        {
+            if (DateTime.Now.Subtract(_lastMove).TotalSeconds < 4 && _lastPoint != WoWPoint.Zero)
+                return _lastPoint;
+            else
+                return ObjectManager.Me.Location;
         }
 
         /// <summary>

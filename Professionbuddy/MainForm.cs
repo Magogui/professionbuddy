@@ -229,9 +229,9 @@ namespace HighVoltz
                 TreeNode node = new TreeNode(composite.Title);
                 node.ForeColor = composite.Color;
                 node.Tag = composite;
-                if (composite is Decorator)
+                if (composite is GroupComposite)
                 {
-                    ActionTreeAddChildren((GroupComposite)((Decorator)composite).DecoratedChild, node);
+                    ActionTreeAddChildren((GroupComposite)composite, node);
                 }
                 ActionTree.Nodes.Add(node);
             }
@@ -378,26 +378,26 @@ namespace HighVoltz
             {
                 int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent && ((TreeNode)action).Index < dest.Index ?
                     dest.Index + 1 : dest.Index;
-                PrioritySelector ps = null;
+                GroupComposite gc = null;
                 // If, While and SubRoutines are Decorators...
-                if (!ignoreRoot && dest.Tag is Decorator)
-                    ps = (PrioritySelector)((Decorator)dest.Tag).DecoratedChild;
+                if (!ignoreRoot && dest.Tag is GroupComposite)
+                    gc = (GroupComposite)dest.Tag;
                 else
-                    ps = (PrioritySelector)((Composite)dest.Tag).Parent;
+                    gc = (GroupComposite)((Composite)dest.Tag).Parent;
 
                 if ((dest.Tag is If || dest.Tag is SubRoutine) && !ignoreRoot)
                 {
                     dest.Nodes.Add(newNode);
-                    ps.AddChild((Composite)newNode.Tag);
+                    gc.AddChild((Composite)newNode.Tag);
                     if (!dest.IsExpanded)
                         dest.Expand();
                 }
                 else
                 {
-                    if (dest.Index >= ps.Children.Count)
-                        ps.AddChild((Composite)newNode.Tag);
+                    if (dest.Index >= gc.Children.Count)
+                        gc.AddChild((Composite)newNode.Tag);
                     else
-                        ps.InsertChild(dest.Index, (Composite)newNode.Tag);
+                        gc.InsertChild(dest.Index, (Composite)newNode.Tag);
                     if (dest.Parent == null)
                     {
                         if (treeIndex >= ActionTree.Nodes.Count)
@@ -432,14 +432,14 @@ namespace HighVoltz
             {
                 foreach (TreeNode child in node.Nodes)
                 {
-                    PrioritySelector ps = null;
+                    GroupComposite gc = null;
                     // If, While and SubRoutine are Decorators.
-                    if (newComp is Decorator)
+                    if (newComp is GroupComposite)
                     {
-                        ps = (PrioritySelector)((Decorator)newComp).DecoratedChild;
+                        gc = (GroupComposite)newComp;
 
                         TreeNode newChildNode = RecursiveCloning(child);
-                        ps.AddChild((Composite)newChildNode.Tag);
+                        gc.AddChild((Composite)newChildNode.Tag);
                         newNode.Nodes.Add(newChildNode);
                     }
                 }
@@ -501,9 +501,9 @@ namespace HighVoltz
                 childNode.ForeColor = child.Color;
                 childNode.Tag = child;
                 // If, While and SubRoutine are Decorators.
-                if (child is Decorator)
+                if (child is GroupComposite)
                 {
-                    ActionTreeAddChildren((GroupComposite)((Decorator)child).DecoratedChild, childNode);
+                    ActionTreeAddChildren((GroupComposite)child, childNode);
                 }
                 node.Nodes.Add(childNode);
             }
@@ -566,9 +566,9 @@ namespace HighVoltz
         {
             if (dest != source && (!IsChildNode(source, dest) || dest == null))
             {
-                PrioritySelector ps = (PrioritySelector)((Composite)source.Tag).Parent;
+                GroupComposite gc = (GroupComposite)((Composite)source.Tag).Parent;
                 if ((copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy)
-                    ps.Children.Remove((Composite)source.Tag);
+                    gc.Children.Remove((Composite)source.Tag);
                 AddToActionTree(source, dest);
                 if ((copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy) // ctrl key
                     source.Remove();
@@ -688,7 +688,7 @@ namespace HighVoltz
             if (ActionTree.SelectedNode != null)
             {
                 Composite comp = (Composite)ActionTree.SelectedNode.Tag;
-                ((PrioritySelector)comp.Parent).Children.Remove(comp);
+                ((GroupComposite)comp.Parent).Children.Remove(comp);
                 if (comp is CastSpellAction && ((CastSpellAction)comp).IsRecipe)
                 {
                     PB.UpdateMaterials();
@@ -869,23 +869,23 @@ namespace HighVoltz
                 Logging.Write("[{0}] {1}", p.GetType(), new string(' ', n));
             }
 
-            Logging.Write("** Profile Settings **");
-            foreach (var kv in PB.ProfileSettings.Settings)
-                Logging.Write("{0} {1}", kv.Key, kv.Value);
+            //Logging.Write("** Profile Settings **");
+            //foreach (var kv in PB.ProfileSettings.Settings)
+            //    Logging.Write("{0} {1}", kv.Key, kv.Value);
 
             Logging.Write("** ActionSelector **");
             printComposite(PB.CurrentProfile.Branch, 0);
 
-            Logging.Write("** Material List **");
-            foreach (var kv in PB.MaterialList)
-                Logging.Write("Ingredient ID: {0} Amount required:{1}", kv.Key, kv.Value);
+            //Logging.Write("** Material List **");
+            //foreach (var kv in PB.MaterialList)
+            //    Logging.Write("Ingredient ID: {0} Amount required:{1}", kv.Key, kv.Value);
 
-            Logging.Write("** DataStore **");
-            foreach (var kv in PB.DataStore)
-                Logging.Write("item ID: {0} Amount in bag/bank/ah/alts:{1}", kv.Key, kv.Value);
+            //Logging.Write("** DataStore **");
+            //foreach (var kv in PB.DataStore)
+            //    Logging.Write("item ID: {0} Amount in bag/bank/ah/alts:{1}", kv.Key, kv.Value);
 
-            if (PB.CsharpStringBuilder != null)
-                Logging.Write(PB.CsharpStringBuilder.ToString());
+            //if (PB.CsharpStringBuilder != null)
+            //    Logging.Write(PB.CsharpStringBuilder.ToString());
         }
 
         void printComposite(Composite comp, int cnt)

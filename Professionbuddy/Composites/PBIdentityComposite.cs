@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using Styx.WoWInternals.WoWObjects;
 using Styx.WoWInternals;
 using Styx;
+using Styx.Logic;
 
 namespace HighVoltz.Composites
 {
@@ -22,7 +23,18 @@ namespace HighVoltz.Composites
         public override RunStatus Tick(object context)
         {
             if (CanRun(null))
-                LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
+            {
+                try
+                {
+                    if (!base.IsRunning)
+                        base.Start(null);
+                    LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
+                }
+                catch 
+                {
+                    LastStatus = RunStatus.Failure;
+                }
+            }
             else
                 LastStatus = RunStatus.Failure;
             return (RunStatus)LastStatus;
@@ -30,7 +42,9 @@ namespace HighVoltz.Composites
         // returns true if in combat or dead or low hp %
         public static bool ExitBehavior()
         {
-            return !Professionbuddy.Instance.IsEnabled || Me.IsActuallyInCombat ||
+            return !Professionbuddy.Instance.IsEnabled ||
+                ((Me.IsActuallyInCombat && !Me.Mounted) ||
+                (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying && Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
                 !Me.IsAlive || Me.HealthPercent <= 40;
         }
 

@@ -44,12 +44,21 @@ namespace HighVoltz.Composites
                 Professionbuddy.Err("ChangeBotAction was unable to find the following bot {0}");
                 return false;
             }
-            bool botIsRunning = TreeRoot.IsRunning;
-            if (botIsRunning)
-                TreeRoot.Stop();
-            BotManager.Instance.SetCurrent(bot);
-            if (botIsRunning)
-                TreeRoot.Start();
+            new Thread(() => {
+                try
+                {
+                    TreeRoot.Stop();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Write(ex.ToString());
+                }
+                finally
+                {
+                    BotManager.Instance.SetCurrent(bot);
+                    TreeRoot.Start();
+                }
+            }).Start();
             return true;
         }
 

@@ -9,14 +9,14 @@ using Styx.Helpers;
 
 namespace HighVoltz.Composites
 {
-    class SubRoutine : Decorator, IPBComposite, IXmlSerializable
+    class SubRoutine : GroupComposite, IPBComposite, IXmlSerializable
     {
         virtual public string SubRoutineName {
             get { return (string)Properties["SubRoutineName"].Value; }
             set { Properties["SubRoutineName"].Value = value; }
         }
         public SubRoutine()
-            : base(c=> false,new PrioritySelector()) {
+            : base() {
             Properties = new PropertyBag();
             Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string));
             SubRoutineName = "";
@@ -27,22 +27,51 @@ namespace HighVoltz.Composites
         virtual public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
 
         virtual public PropertyBag Properties { get; private set; }
-        //public PrioritySelector Behavior { get; private set; }
+
+        // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
+        protected override IEnumerable<RunStatus> Execute(object context)
+        {
+            //lock (Locker) 
+            //{  
+            foreach (Composite node in Children)
+            {
+                node.Start(context);
+                // Keep stepping through the enumeration while it's returing RunStatus.Running
+                // or until CanRun() returns false if IgnoreCanRun is false..
+                while (node.Tick(context) == RunStatus.Running)
+                {
+                    Selection = node;
+                    yield return RunStatus.Running;
+                }
+
+                Selection = null;
+                node.Stop(context);
+                if (node.LastStatus == RunStatus.Success)
+                {
+                    yield return RunStatus.Success;
+                    yield break;
+                }
+            }
+            Reset();
+            yield return RunStatus.Failure;
+            yield break;
+            //}
+        }
 
         virtual public void Reset() {
-            recursiveReset(DecoratedChild as PrioritySelector);
+            recursiveReset(this);
         }
-        void recursiveReset(PrioritySelector ps) {
-            foreach (IPBComposite comp in ps.Children)
+        void recursiveReset(GroupComposite gc) {
+            foreach (IPBComposite comp in gc.Children)
             {
                 comp.Reset();
-                if (comp is If)
-                    recursiveReset((PrioritySelector)((If)comp).DecoratedChild);
+                if (comp is GroupComposite)
+                    recursiveReset(comp as GroupComposite);
             }
         }
         public bool IsDone {
             get {
-                return ((PrioritySelector)DecoratedChild).Children.Count(c => ((IPBComposite)c).IsDone) == ((PrioritySelector)DecoratedChild).Children.Count;
+                return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
             }
         }
 
@@ -73,7 +102,7 @@ namespace HighVoltz.Composites
                         if (comp != null)
                         {
                             comp.ReadXml(reader);
-                            ((PrioritySelector)DecoratedChild).AddChild((Composite)comp);
+                            AddChild((Composite)comp);
                         }
                     }
                     else
@@ -88,9 +117,9 @@ namespace HighVoltz.Composites
 
         virtual public void WriteXml(XmlWriter writer) {
             writer.WriteAttributeString("SubRoutineName", SubRoutineName);
-            writer.WriteAttributeString("ChildrenCount", ((PrioritySelector)DecoratedChild).Children.Count.ToString());
+            writer.WriteAttributeString("ChildrenCount", Children.Count.ToString());
 
-            foreach (IPBComposite comp in ((PrioritySelector)DecoratedChild).Children)
+            foreach (IPBComposite comp in Children)
             {
                 writer.WriteStartElement(comp.GetType().Name);
                 ((IXmlSerializable)comp).WriteXml(writer);
