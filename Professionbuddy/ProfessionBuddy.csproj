@@ -76,6 +76,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PBPlugin.cs" />
+    <None Include="SVN.template" />
     <Compile Include="Composites\BuyItemAction.cs" />
     <Compile Include="Composites\BuyItemFromAhAction.cs" />
     <Compile Include="Composites\CalSubRoutine.cs" />
@@ -130,6 +132,7 @@
     </Compile>
     <Compile Include="PropertyBag.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="SVN.cs" />
     <Compile Include="Tradeskill.cs" />
     <Compile Include="TradeSkillListView.cs">
       <SubType>Component</SubType>
@@ -184,6 +187,9 @@ if $(ConfigurationName) == Dll xcopy "$(ProjectDir)*.xml"  "$(ProjectDir)..\..\.
 if $(ConfigurationName) == Dll xcopy "$(ProjectDir)*.zip" "$(ProjectDir)..\..\..\Honorbuddy\Plugins\$(TargetName)" /I /S /Y
 if $(ConfigurationName) == Dll xcopy "$(TargetPath)" "$(ProjectDir)..\..\..\Honorbuddy\Plugins\$(TargetName)" /I /S /Y
 </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>SubWCRev.exe $(ProjectDir) $(ProjectDir)\SVN.template $(ProjectDir)\SVN.cs</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -39,7 +39,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz
 {
-    public partial class Professionbuddy : HBPlugin
+    public partial class Professionbuddy : PBPlugin
     {
         #region Declarations
         public ProfessionBuddySettings MySettings;
@@ -85,7 +85,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, 44); } }
+        public override Version Version { get { return new Version(1, Revision); } }
 
         public override bool WantButton { get { return true; } }
 
