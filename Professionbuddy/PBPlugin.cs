@@ -51,7 +51,7 @@ namespace HighVoltz
             {
                 if (_rev == -1)
                     int.TryParse(RevString, out _rev);
-                return _rev;
+                return _rev +1;
             }
         }
 
