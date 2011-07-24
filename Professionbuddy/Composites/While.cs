@@ -42,6 +42,7 @@ namespace HighVoltz.Composites
                     yield break;
                 }
             }
+            Reset();
             if (!CanRun(context))
             {
                 yield return RunStatus.Failure;
@@ -49,7 +50,6 @@ namespace HighVoltz.Composites
             }
             else
             {
-                Reset();
                 yield return RunStatus.Success;
                 //yield break;
             }

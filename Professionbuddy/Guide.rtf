@@ -1,4 +1,4 @@
-{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil Consolas;}{\f2\fnil\fcharset0 Consolas;}}
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset0 Arial Black;}{\f2\fnil\fcharset0 Consolas;}{\f3\fnil Consolas;}{\f4\fnil\fcharset0 Arial;}}
 {\colortbl ;\red0\green77\blue187;\red192\green80\blue77;}
 {\*\generator Msftedit 5.41.21.2509;}\viewkind4\uc1\pard\sa200\sl276\slmult1\cf1\lang9\ul\b\f0\fs24 Introduction\par
 \cf0\ulnone\b0 Professionbuddy is a plugin designed to automate Tradeskill related tasks including but not limited to automatically leveling Tradeskills, disenchanting items, milling herbs or crafting a list of items.\par
@@ -38,7 +38,7 @@ The second mode 'Craftable' will repeat the recipe until it runs out of mats. \p
 The third and final mode 'Banker' will only be available if The user has an Addon called DataStore installed. It's available on Curse gaming and comes with that Altaholic Addon. It basically keeps track of inventory, auctions, mail and bank items for all your characters, even has multiple account support. This mode is nice to restock your bankers with crafted goods to sell on AH for example. It checks to see how many  of the crafted items you have on your alts and then it deducts the 'Repeat' from it. For example if you had 12 Flask of Steelskin on your alts and your 'Repeat' number is 20 it would makes 8 flasks. (20-12 =8). \par
 \cf2\ul\b Task List\par
 \cf0\ulnone\b0 The Task List is where all your 'If Condition's and Actions are. To change the properties of an action you must select it and then change the settings in the Property grid below. There are several keybind that make editing easier.\par
-\ul\b Keybinds:\par
+\cf2\ul\b Keybinds\cf0 :\par
 \ulnone Shift + drag n drop\b0 : By default dropping an action on top of an 'If condition' places it inside that 'If Condition' this keybind cancels that effect.\par
 \b Ctrl + drag n drop: \b0 copies an action or an 'If Condition' and all of it's actions\par
 \b Delete: \b0 deletes selected action/If Condition\par
@@ -51,16 +51,27 @@ There is one common setting that might need an explanation, Location. The Locati
 The following tradeskills are currently supported and have wrappers for them \par
 Alchemy,Blacksmithing,Cooking,Enchanting,Engineering,FirstAid,Fishing,Herbalism,Inscription,Jewelcrafting,Leatherworking,Mining and Tailoring.\par
 Each of the listed tradeskills have the following Properties available. Example usage is \b\par
-\f1 Level\lang1033\f2  - \b0 returns current level of the tradeskill\par
-\b MaxLevel \b0 - returns the max level for that tradeskill depending on rank.\par
-\lang9\ul\b\i\f0 Generic Tradeskill API  \ulnone\b0\i0     \lang1033\f2\par
+\cf2\ul If/While\b0  \b Condition\cf0\ulnone\b0\par
+The '\ul If/While Condition' \ulnone runs the actions that they contain if an expression is true.\par
+Execution starts from the top action and goes down the list of actions that the\ul  If/While Condition \ulnone contains. If at anytime the Condition becomes false then execution stops right away unless the property 'Ignore Execution Until done' is set to true then excution will ignore Condition until it finishes executing the last action at the bottom of the list\par
+The "\ul While Condition\ulnone " will reset all of it's actions "IsDone" state to false once all of the actions that it contains have their "IsDone" state set to true so they will be executed repeatedly as long as the expression is true. The "While Condition" will also recursively reset any nested "If/While Condtion"s and all that actions they contain.\par
+A \ul While condition\ulnone  can repeatedly execute actions within while the \ul If Condition \ulnone can not (unless it's embeded within a \ul While Condition\ulnone )\par
+\cf2\ul\b\i\fs28 SubRoutines\cf0\ulnone\b0\i0\fs24\par
+Subroutines can contain a group of actions that you can execute by using 'Call Subroutine' action. This allows you to have more compact and organized profiles\par
+\cf2\ul\b\i\fs28 Packages\cf0\fs24\par
+\ulnone\b0\i0\fs22 A PB profile and any HB/GB2 profile that it uses can be saved and compressed into one file if you save the profile with a .package extension. There is one rule though, all HB/GB2 profiles must be in same directory or in a subdirectory of the PB profile since PB will use the same directory struction in the package file and the directory that the PB  profile is in will be used as the top level directory. The reason for this rule is because the 'LoadProfile' action requires a relative instead of an absolute path to a profile so there are no issues with sharing profiles publicly\par
+\par
+\cf2\ul\b\fs28 Useful stuff to use in If/While Conditions, Wait and Custom Actions\ulnone\b0\fs22\par
+\cf0\b\i\f1\fs24 Generic Tradeskill API \ul\f0  \ulnone\b0\i0     \lang1033\f2\par
+\b Mining.\lang9\f3 Level\lang1033\f2  - \b0\f0 returns current level for mining. Mining can be used for any profession\f2\par
+\b Mining.MaxLevel \b0 - \f0 returns the current max level Mining.Depending on the skill rank it's either 75,150,225,300,375,450 or 525. Mining can be used for any profession\f2 .\par
 \lang9\b\f0 CanRepeatNum (RecipeID)\b0   - returns the number of times the recipe can be repeated with current mats, RecipeID is the wowhead ID\par
 \b CanCraft (RecipeID) - \b0 checks if the player has the recipe, has the tools and mats to make it. returns a bool\par
 \b HasMats (RecipeID) \b0 - checks if the player has material for the recipe\par
 \b HasRecipe (RecipeID) \b0 - checks if the player has the specific recipe\par
 \b HasTools (RecipeID) \b0 - checks if the player has the tools need to craft the recipe.\par
-\ul\b\i\par
-Non TradeSkill related API\ulnone\b0\i0   \par
+\b\i\f1\par
+Non TradeSkill related API\i0  \b0\f0  \par
 \b HasNewMail  \b0 - This is a property that returns true if player has new mail.\par
 \b DataStore\b0  - This is a Dictionary<uint,int> that gets populated when PB starts up or when RefreshDataStore() is called. The Key is an item ID and Value is number of items total that are on that server/faction.\par
 \b MailCount  \b0 - This property returns the number of mail in the inbox, requires mailbox to be open.\par
@@ -73,17 +84,36 @@ Non TradeSkill related API\ulnone\b0\i0   \par
 \b RefreshDataStore() \b0 - Imports a fresh copy of the DataStore database.\par
 \b SwitchToBot(string botName) \b0 - Switches to a the specified Bot\par
 \b Me\b0  - The localplayer object. e.g. ObjectManager.Me\par
-\b var1,var2...var9 \b0 - I added 9 static 'object' type variables to store info to.\par
+\b var1,var2...var9 \b0 - I added 9 static 'object' type variables to store info to use later in code. \par
+\tab var1 = true;\par
+  \tab while (bool)var1 == true\par
+             \tab var1 = HasNewMail || MailCount > 0\par
 \b Settings["Name"] \b0 - This is used in conjuction of the Settings Action from the action list. It returns the current value assigned to a setting that can be edited by the end user from a gui.You use a Settings Action to give it a type and default value. Since the type returned is an object type you must cast to the real type when reading the value from it. Example \i (bool)Settings["Level Mining"]\par
-\i0\par
-\ul\b If/While\b0  \b Condition\ulnone\b0\par
-The 'If/While Condition' runs the actions that they contain if an expression is true.\par
-The "While Condition" will reset all of it's Actions "IsDone" state to false once all of the actions that it contains have their "IsDone" state set to true so they will be executed repeatedly as long as the expression is true. The "While Condition" will also recursively reset any nested "If/While Condtion"s and all that actions they contain.\par
-The If/While Condition also contain an "IsDone" state and it's set to true when the expression evaluates to 'false' or if all the actions they contain have their "IsDone" state set to true.\par
-Both the If and While Conditions have a property called 'Ignore Condition Until done". What this does if set to true is it 'Condition' evaluates to false while one of it's child action is still running then it keeps executing that child until it finishes.\par
-\ul\b\i\fs28 SubRoutines\ulnone\b0\i0\fs24\par
-Subroutines can contain a group of actions that you can execute by using 'Call Subroutine' action. This allows you to have more compact and organized profiles\par
-\ul\b\i\fs28 Packages\fs24\par
-\ulnone\b0\i0\fs22 A PB profile and any HB/GB2 profile that it uses can be saved and compressed into one file if you save the profile with a .package extension. There is one rule though, all HB/GB2 profiles must be in same directory or in a subdirectory of the PB profile since PB will use the same directory struction in the package file and the directory that the PB  profile is in will be used as the top level directory. The reason for this rule is because the 'LoadProfile' action requires a relative instead of an absolute path to a profile so there are no issues with sharing profiles publicly\fs16\par
+\b\f1\par
+Other Misc Stuff  from HB's API \b0\f4\fs18 - thanks to Inrego for the compilation.\i0\f0\fs22\par
+\b\fs24 Me.MapId == X       \b0\fs22 Check what continent I'm on.\par
+                                            0   = Eastern Kingdoms\par
+                                            1   = Kalimdor\par
+                                            530 = Outlands\par
+                                            571 = Northrend\par
+                             \par
+\pard\ri-900\sa200\sl240\slmult1\tx9720\b\fs24 Me.ZoneId == X \b0\fs22\tab\tab Check what zone I'm in. ZoneIDs can be found on Wowhead.com\par
+\pard\sa200\sl240\slmult1\b\fs24 Me.IsHorde / Me.IsAlliance  \tab\b0\fs22 Returns true/false.\par
+\b\fs24 TreeRoot.Current.Name \b0\fs22  \tab  Name of the current Botbase, \par
+\tab\tab\tab\tab e.g TreeRoot.Current.Name != "Gatherbuddy2"\par
+\b\fs24 Me.FreeNormalBagSlots\b0\fs22        \tab The number of free bag slots.\par
+\b\fs24 Lua.DoString(string.Format("RunMacroText(\\"\{0\}\\")", "/s hello"), 0);\fs22\par
+\b0 Input to the chat box. Chat strings can be inserted, or stuff like /use Hearthstone\par
+\b\fs24 Lua.DoString("RunMacro('Test')");\b0\fs22  \tab  Run the ingame macro named "test"\par
+\b Lua.DoString("UseItemByName(ItemID)");\b0  Use the item with given ItemID. ItemID can be found on Wowhead.com\par
+\b\fs24 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == #objectID ) != null && ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == #objectID ).Location.Distance(new WoWPoint(x,y,z)) < #distance\par
+\b0\fs22 This line checks if the given #objectID is within #distance yards of the (x,y,z) coord.\par
+Example:\par
+\i Wait(\par
+ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 190536 ) != null && ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 190536 ).Location.Distance(new WoWPoint(-8288.816, 1424.703, -0.01198259)) < 3\par
+)\i0\par
+Will wait until the the boat with objectID 190536 is within 3 yards of (-8288.816, 1424.703, -0.01198259).\par
+This can be used for all boats and zeppelins. You can find the objectIDs and their coords in HB Developer Tools.\par
+\fs16\par
 }
  
