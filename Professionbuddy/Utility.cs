@@ -76,7 +76,7 @@ namespace HighVoltz
         static public WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
-            Regex pattern = new Regex(@"-?\d+\.?(\d+)?");
+            Regex pattern = new Regex(@"-?\d+\.?(\d+)?",RegexOptions.CultureInvariant);
             MatchCollection matches = pattern.Matches(location);
             if (matches != null)
             {
@@ -147,7 +147,7 @@ namespace HighVoltz
             uint.TryParse(str, out val);
             return val;
         }
-        static CultureInfo _enUS = new CultureInfo("en-US");
+
         static Encoding _encodeUTF8 = Encoding.UTF8;
 
         /// <summary>
@@ -159,10 +159,9 @@ namespace HighVoltz
         {
             float val;
             float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign
-            , _enUS, out val);
+            , CultureInfo.InvariantCulture, out val);
             return val;
         }
-
 
         /// <summary>
         /// Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing names into lua that are UTF-16 or higher.
@@ -179,6 +178,14 @@ namespace HighVoltz
             }
             return buffer.ToString();
         }
-
+        /// <summary>
+        /// This is a fix for WoWPoint.ToString using current cultures decimal separator.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string ToInvariantString(this WoWPoint text)
+        {
+            return string.Format(CultureInfo.InvariantCulture,"{0},{1},{2}", text.X, text.Y, text.Z);
+        }
     }
 }

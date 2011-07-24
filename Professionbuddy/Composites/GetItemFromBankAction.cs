@@ -84,7 +84,7 @@ namespace HighVoltz.Composites
             Bank = BankType.Personal;
             AutoFindBank = true;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             NpcEntry = 0u;
             Properties["Amount"].Show = false;
             Properties["Entry"].Show = false;
@@ -435,7 +435,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             if (reader.MoveToAttribute("MinFreeBagSlots"))
             {
                 uint.TryParse(reader["MinFreeBagSlots"], out id);

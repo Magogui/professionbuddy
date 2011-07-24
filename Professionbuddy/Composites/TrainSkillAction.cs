@@ -33,7 +33,7 @@ namespace HighVoltz.Composites
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             NpcEntry = 0u;
 
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -127,7 +127,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             reader.ReadStartElement();
         }
         public override void WriteXml(XmlWriter writer)

@@ -75,7 +75,7 @@ namespace HighVoltz.Composites {
             ItemListType = ItemType.Item;
             AutoFindAh = true;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             MaxBuyout = new PropertyBag.GoldEditor("100g0s0c");
             BidOnItem = false;
 
@@ -325,7 +325,7 @@ namespace HighVoltz.Composites {
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             if (reader.MoveToAttribute("BidOnItem")) {
                 bool.TryParse(reader["BidOnItem"], out boolVal);
                 BidOnItem = boolVal;

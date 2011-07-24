@@ -63,7 +63,7 @@ namespace HighVoltz.Composites
             GetMailType = (GetMailActionType)GetMailActionType.AllItems;
             AutoFindMailBox = true;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             MinFreeBagSlots = 2u;
 
             Properties["GetMailType"].PropertyChanged += new EventHandler(GetMailAction_PropertyChanged);
@@ -263,7 +263,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             if (reader.MoveToAttribute("MinFreeBagSlots"))
             {
                 uint.TryParse(reader["MinFreeBagSlots"], out val);

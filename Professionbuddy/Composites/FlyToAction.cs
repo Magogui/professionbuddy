@@ -38,7 +38,7 @@ namespace HighVoltz.Composites
             Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), new DisplayNameAttribute("Dismount on Arrival"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             Dismount = true;
 
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -103,7 +103,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             reader.ReadStartElement();
         }
         public override void WriteXml(XmlWriter writer) {

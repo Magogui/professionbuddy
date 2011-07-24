@@ -57,7 +57,7 @@ namespace HighVoltz.Composites {
             ItemID = "";
             Count = 0u;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             NpcEntry = 0u;
 
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -223,7 +223,7 @@ namespace HighVoltz.Composites {
                 y = reader["Y"].ToSingle();
                 z = reader["Z"].ToSingle();
                 loc = new WoWPoint(x, y, z);
-                Location = loc.ToString();
+                Location = loc.ToInvariantString();
             }
             reader.ReadStartElement();
         }

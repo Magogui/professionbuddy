@@ -67,7 +67,7 @@ namespace HighVoltz.Composites
 
             Entry = 0u;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             MoveType = MoveToType.Location;
             Pathing = NavigationType.Navigator;
 
@@ -302,7 +302,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             reader.ReadStartElement();
         }
         public override void WriteXml(XmlWriter writer)

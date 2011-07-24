@@ -73,11 +73,8 @@ namespace HighVoltz
         public static Professionbuddy Instance { get; private set; }
 
         // test some culture specific stuff.
-        static CultureInfo _deDE = new CultureInfo("de-DE");
         public Professionbuddy()
         {
-            Thread.CurrentThread.CurrentCulture = _deDE;
-            Thread.CurrentThread.CurrentUICulture = _deDE;
             Instance = this;
         }
         #endregion

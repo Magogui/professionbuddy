@@ -91,7 +91,7 @@ namespace HighVoltz.Composites
             Bank = BankType.Personal;
             AutoFindBank = true;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             NpcEntry = 0u;
             GuildTab = 0u;
             UseCategory = true;
@@ -518,7 +518,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Properties["Location"].Value = loc.ToString();
+            Properties["Location"].Value = loc.ToInvariantString();
             reader.ReadStartElement();
         }
         public override void WriteXml(XmlWriter writer)

@@ -57,7 +57,7 @@ namespace HighVoltz.Composites
             Count = 0u;
             BuyItemType = BuyItemActionType.Material;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             NpcEntry = 0u;
 
             Properties["ItemID"].Show = false;
@@ -247,7 +247,7 @@ namespace HighVoltz.Composites
                 y = reader["Y"].ToSingle();
                 z = reader["Z"].ToSingle();
                 loc = new WoWPoint(x, y, z);
-                Location = loc.ToString();
+                Location = loc.ToInvariantString();
             }
             reader.ReadStartElement();
         }

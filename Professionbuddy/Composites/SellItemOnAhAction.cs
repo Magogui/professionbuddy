@@ -164,7 +164,7 @@ namespace HighVoltz.Composites
             BidPrecent = 95f;
             UndercutPrecent = 0.1f;
             loc = WoWPoint.Zero;
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             UseCategory = true;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
@@ -639,7 +639,7 @@ namespace HighVoltz.Composites
             y = reader["Y"].ToSingle();
             z = reader["Z"].ToSingle();
             loc = new WoWPoint(x, y, z);
-            Location = loc.ToString();
+            Location = loc.ToInvariantString();
             if (reader.MoveToAttribute("PostIfBelowMinBuyout"))
             {
                 bool.TryParse(reader["PostIfBelowMinBuyout"], out boolVal);
