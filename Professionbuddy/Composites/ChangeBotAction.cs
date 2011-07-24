@@ -41,9 +41,10 @@ namespace HighVoltz.Composites
             BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(BotName)).Value;
             if (bot == null)
             {
-                Professionbuddy.Err("ChangeBotAction was unable to find the following bot {0}");
+                Professionbuddy.Err("ChangeBotAction was unable to find the following bot {0}",BotName);
                 return false;
             }
+            Professionbuddy.Log("ChangeBotAction: Switching to {0}",BotName);
             new Thread(() => {
                 try
                 {
@@ -51,11 +52,12 @@ namespace HighVoltz.Composites
                 }
                 catch (Exception ex)
                 {
-                    Logging.Write(ex.ToString());
+                    Logging.Write("ChangeBot: " + ex.ToString());
                 }
                 finally
                 {
                     BotManager.Instance.SetCurrent(bot);
+                    Thread.Sleep(3000);
                     TreeRoot.Start();
                 }
             }).Start();

@@ -95,7 +95,9 @@ namespace HighVoltz
         {
             try
             {
-                if (IsEnabled)
+                if (!PluginManager.IsInitialized)
+                    MessageBox.Show("You must wait until plugins are initialized");
+                else if (IsEnabled)
                 {
                     if (!MainForm.IsValid)
                         new MainForm().Show();
@@ -381,12 +383,12 @@ namespace HighVoltz
                     BotEvents_OnBotChanged(null);
                     if (!string.IsNullOrEmpty(MySettings.LastProfile))
                     {
-                        LoadProfile(MySettings.LastProfile);
                         if (IsRunning)
                         {
-                            PreLoadHbProfile();
                             PreChangeBot();
-                        }
+                            PreLoadHbProfile();
+                        } 
+                        LoadProfile(MySettings.LastProfile);
                     }
                     else
                         ProfileSettings = new PbProfileSettings();

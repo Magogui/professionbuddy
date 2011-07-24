@@ -247,7 +247,9 @@ namespace HighVoltz
                             icsc.CompileError = error.ErrorText;
                         }
                         else
-                            Logging.Write("Unable to link error with action");
+                        {
+                            Professionbuddy.Err("Unable to link action that produced Error: {0}", error.ErrorText);
+                        }
                     }
                     MainForm.Instance.RefreshActionTree(typeof(ICSharpCode));
                 }
