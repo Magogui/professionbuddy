@@ -89,9 +89,10 @@ namespace HighVoltz.Composites
                 return false;
             }
         }
-        // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
+
         protected override IEnumerable<RunStatus> Execute(object context)
         {
+            // genorates some exeption.... besides I'm only accessing this from one thread
             //lock (Locker) 
             //{  
             if (IsDone)
@@ -101,9 +102,9 @@ namespace HighVoltz.Composites
             }
             foreach (Composite node in Children)
             {
-                node.Start(context);
                 // Keep stepping through the enumeration while it's returing RunStatus.Running
                 // or until CanRun() returns false if IgnoreCanRun is false..
+                node.Start(context);
                 while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
                     node.Tick(context) == RunStatus.Running)
                 {
@@ -112,17 +113,48 @@ namespace HighVoltz.Composites
                 }
 
                 Selection = null;
-                node.Stop(context);
+                //node.Stop(context);
                 if (node.LastStatus == RunStatus.Success)
                 {
                     yield return RunStatus.Success;
-                    yield break;
+                    //yield break; don't break iteration.. While Condition return sucess if at end of loop
                 }
             }
             yield return RunStatus.Failure;
             yield break;
             //}
         }
+        
+        //private IEnumerator<RunStatus> _current;
+        //public override RunStatus Tick(object context)
+        //{
+        //    //lock (Locker)
+        //    //{
+        //        if (LastStatus.HasValue && LastStatus != RunStatus.Running)
+        //        {
+        //            return LastStatus.Value;
+        //        }
+        //        if (_current == null)
+        //        {
+        //            LastStatus = null;
+        //            _current = Execute(context).GetEnumerator();
+        //        }
+        //        if (_current.MoveNext())
+        //        {
+        //            LastStatus = _current.Current;
+        //        }
+        //        //else
+        //        //{
+        //        //    throw new ApplicationException("Nothing to run? Somethings gone terribly, terribly wrong!");
+        //        //}
+
+        //        //if (LastStatus != RunStatus.Running)
+        //        //{
+        //        //    Stop(context);
+        //        //}
+        //        return LastStatus ?? RunStatus.Failure ;
+        //     //}
+        //}
 
         public virtual Delegate CompiledMethod
         {

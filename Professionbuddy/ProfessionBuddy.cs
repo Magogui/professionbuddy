@@ -36,6 +36,7 @@ using Styx.Logic.Profiles;
 using System.Collections.Specialized;
 using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Globalization;
 
 namespace HighVoltz
 {
@@ -70,8 +71,13 @@ namespace HighVoltz
         public bool IsRunning = false;
         // singleton instance
         public static Professionbuddy Instance { get; private set; }
+
+        // test some culture specific stuff.
+        static CultureInfo _deDE = new CultureInfo("de-DE");
         public Professionbuddy()
         {
+            Thread.CurrentThread.CurrentCulture = _deDE;
+            Thread.CurrentThread.CurrentUICulture = _deDE;
             Instance = this;
         }
         #endregion
@@ -688,10 +694,7 @@ namespace HighVoltz
                             break;
                     }
                     Lua.DoString(MySettings.DataStoreTable + "={}");
-                    Log("Imported DataStore");
                 }
-                else
-                    Log("No DataStore addon found");
             }
         }
 

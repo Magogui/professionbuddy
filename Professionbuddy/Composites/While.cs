@@ -14,7 +14,6 @@ namespace HighVoltz.Composites
 
     class While : If
     {
-        // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             //lock (_lockObject)
@@ -36,7 +35,7 @@ namespace HighVoltz.Composites
                     yield return RunStatus.Running;
                 }
                 Selection = null;
-                node.Stop(context);
+                //node.Stop(context); tick will call stop, so why do it twice?
                 if (node.LastStatus == RunStatus.Success)
                 {
                     yield return RunStatus.Success;
@@ -51,7 +50,8 @@ namespace HighVoltz.Composites
             else
             {
                 Reset();
-                yield return RunStatus.Running;
+                yield return RunStatus.Success;
+                //yield break;
             }
             //}
         }

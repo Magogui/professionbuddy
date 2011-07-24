@@ -19,7 +19,6 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-
     public interface IPBComposite : ICloneable, IXmlSerializable
     {
         PropertyBag Properties { get; }
@@ -38,9 +37,9 @@ namespace HighVoltz.Composites
         protected LocalPlayer me = ObjectManager.Me;
         protected PBAction()
         {
+            HasRunOnce = false;
             Pb = Professionbuddy.Instance;
             Properties = new PropertyBag();
-
         }
         virtual public string Help { get { return ""; } }
         virtual public string Name { get { return "PBAction"; } }
@@ -55,6 +54,14 @@ namespace HighVoltz.Composites
             }
         }
         public virtual bool IsDone { get; protected set; }
+        protected bool HasRunOnce { get; set; }
+        /// <summary>
+        /// If overriding this method call base method or set HasRunOnce to false.
+        /// </summary>
+        protected virtual void RunOnce()
+        {
+            HasRunOnce = true;
+        }
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()
@@ -64,6 +71,7 @@ namespace HighVoltz.Composites
         public virtual void Reset()
         {
             IsDone = false;
+            HasRunOnce = false;
         }
         #region XmlSerializer
         virtual public void ReadXml(XmlReader reader)
