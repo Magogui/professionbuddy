@@ -25,10 +25,10 @@
     <CustomAction Code="var9 = false;" />
   </While>
   <While Condition="(bool)var9 == false" IgnoreCanRun="True" ChildrenCount="11">
-    <CustomAction Code="var5 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining Level&quot;] : (int)var5;" />
-    <CustomAction Code="var6 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining MaxLevel&quot;] : (int)var6;" />
-    <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)var7;" />
-    <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int)var8;" />
+    <CustomAction Code="var5 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining Level&quot;] :(int) Mining.Level;" />
+    <CustomAction Code="var6 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining MaxLevel&quot;] :(int) Mining.MaxLevel;" />
+    <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
+    <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int)Herbalism.MaxLevel;" />
     <If Condition="TreeRoot.Current.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True" ChildrenCount="1">
       <ChangeBotAction BotName="Gatherbuddy2" />
     </If>
@@ -129,7 +129,8 @@
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;=250)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;=260)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
-      <While Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="True" ChildrenCount="4">
+      <While Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="True" ChildrenCount="5">
+        <CustomAction Code="Log(&quot;Herb MaxLevel: {0}&quot;,var8);" />
         <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
         <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="5566" X="-8969.993" Y="779.6597" Z="96.25022" />
@@ -181,7 +182,7 @@
             <CastSpellAction Entry="16153" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
           <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -264,7 +265,7 @@
             <CastSpellAction Entry="16153" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
         </If>
@@ -432,7 +433,7 @@
             <CastSpellAction Entry="49258" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True" ChildrenCount="2">
           <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
           <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -577,7 +578,7 @@
               <CastSpellAction Entry="74529" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
             </If>
           </If>
-          <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
+          <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="False" X="-4910.222" Y="-974.5382" Z="501.4499" MinFreeBagSlots="2" />
           <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True" ChildrenCount="1">
             <TrainSkillAction NpcEntry="4254" X="-4707.961" Y="-1108.908" Z="504.4463" />
           </If>
@@ -615,7 +616,7 @@
             <CastSpellAction Entry="74529" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
           </If>
         </If>
-        <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
         <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True" ChildrenCount="1">
           <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
         </If>
