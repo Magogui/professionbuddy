@@ -169,17 +169,17 @@ namespace HighVoltz
         #region RefreshActionTree
         public void RefreshActionTree(Type type)
         {
-            RefreshActionTreeCallback(null, type);
+            RefreshActionTree(null, type);
         }
 
         public void RefreshActionTree(IPBComposite pbComp)
         {
-            RefreshActionTreeCallback(pbComp, null);
+            RefreshActionTree(pbComp, null);
         }
 
         public void RefreshActionTree()
         {
-            RefreshActionTreeCallback(null, null);
+            RefreshActionTree(null, null);
         }
 
         /// <summary>
@@ -952,18 +952,6 @@ namespace HighVoltz
         {
             PB.LoadTradeSkills();
             MainForm.Instance.InitTradeSkillTab();
-        }
-
-        private void MainForm_KeyDown(object sender, KeyEventArgs e)
-        {
-            Logging.Write("MainForm_KeyDown {0}", e.KeyData);
-            if (e.KeyData == Keys.F12)
-            {
-                toolStripSecretButton_Click(null, null);
-                e.Handled = true;
-            }
-            else
-                e.Handled = false;
         }
 
         void profileWatcher_Changed(object sender, FileSystemEventArgs e)
