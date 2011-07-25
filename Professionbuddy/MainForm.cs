@@ -376,8 +376,9 @@ namespace HighVoltz
             ActionTree.SuspendLayout();
             if (dest != null)
             {
-                int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent && ((TreeNode)action).Index < dest.Index ?
-                    dest.Index + 1 : dest.Index;
+                int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent &&
+                    ((TreeNode)action).Index <= dest.Index && !cloneActions ?
+                        dest.Index + 1 : dest.Index;
                 GroupComposite gc = null;
                 // If, While and SubRoutines are Decorators...
                 if (!ignoreRoot && dest.Tag is GroupComposite)

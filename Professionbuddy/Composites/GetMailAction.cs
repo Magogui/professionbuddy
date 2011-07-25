@@ -35,6 +35,11 @@ namespace HighVoltz.Composites
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        public bool CheckNewMail
+        {
+            get { return (bool)Properties["CheckNewMail"].Value; }
+            set { Properties["CheckNewMail"].Value = value; }
+        }
         public uint MinFreeBagSlots
         {
             get { return (uint)Properties["MinFreeBagSlots"].Value; }
@@ -53,13 +58,16 @@ namespace HighVoltz.Composites
         }
         public GetMailAction()
         {
+            //CheckNewMail
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint), new DisplayNameAttribute("Min Free Bagslots"));
+            Properties["CheckNewMail"] = new MetaProp("CheckNewMail", typeof(bool), new DisplayNameAttribute("Check for New Mail"));
             Properties["GetMailType"] = new MetaProp("GetMailType", typeof(GetMailActionType), new DisplayNameAttribute("Get Mail"));
             Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), new DisplayNameAttribute("Auto find Mailbox"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
             ItemID = "";
+            CheckNewMail = true;
             GetMailType = (GetMailActionType)GetMailActionType.AllItems;
             AutoFindMailBox = true;
             loc = WoWPoint.Zero;
@@ -154,8 +162,8 @@ namespace HighVoltz.Composites
                     {
                         if (GetMailType == GetMailActionType.AllItems)
                         {
-                            string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then AutoLootMailItem(index) foundMail = foundMail + 1 break end end local beans = BeanCounterMail and BeanCounterMail:IsVisible() if foundMail == 0 then CloseMail() end if foundMail == 0 and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ",
-                                1);
+                            string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then AutoLootMailItem(index) foundMail = foundMail + 1 break end end local beans = BeanCounterMail and BeanCounterMail:IsVisible() if foundMail == 0 then CloseMail() end if foundMail == 0 {0}and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ",
+                                CheckNewMail ? "and HasNewMail() == nil " : "");
                                 //freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
                             if (Lua.GetReturnValues(lua)[0] == "1" || ObjectManager.Me.FreeNormalBagSlots <= MinFreeBagSlots)
                                 ConcludingSW.Start();
@@ -163,9 +171,9 @@ namespace HighVoltz.Composites
                         else
                         {
                             for (int i=0;i <_idList.Count;i++) {
-                                string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1,itemCnt do local itemlink = GetInboxItemLink(index, i2) if string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if foundMail == 0 then CloseMail() end if foundMail == 0  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
+                                string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1,itemCnt do local itemlink = GetInboxItemLink(index, i2) if string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if foundMail == 0 then CloseMail() end if (foundMail == 0 {1})  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
                                     //, Entry, freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
-                                _idList[i]);
+                                _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "");
 
                                 if (Lua.GetReturnValues(lua)[0] == "1" || ObjectManager.Me.FreeNormalBagSlots <= MinFreeBagSlots)
                                     _idList.RemoveAt(i);
@@ -243,6 +251,7 @@ namespace HighVoltz.Composites
                 AutoFindMailBox = this.AutoFindMailBox,
                 Location = this.Location,
                 MinFreeBagSlots = this.MinFreeBagSlots,
+                CheckNewMail = this.CheckNewMail,
             };
         }
         #region XmlSerializer
@@ -253,6 +262,12 @@ namespace HighVoltz.Composites
                 ItemID = reader["ItemID"];
             else if (reader.MoveToAttribute("Entry"))
                 ItemID = reader["Entry"];
+            if (reader.MoveToAttribute("CheckNewMail"))
+            {
+                bool boolVal;
+                bool.TryParse(reader["CheckNewMail"], out boolVal);
+                CheckNewMail = boolVal;
+            }
             GetMailType = (GetMailActionType)Enum.Parse(typeof(GetMailActionType), reader["GetMailType"]);
             bool autofind;
             bool.TryParse(reader["AutoFindMailBox"], out autofind);
@@ -274,6 +289,7 @@ namespace HighVoltz.Composites
         public override void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("ItemID", ItemID);
+            writer.WriteAttributeString("CheckNewMail", CheckNewMail.ToString());
             writer.WriteAttributeString("GetMailType", GetMailType.ToString());
             writer.WriteAttributeString("AutoFindMailBox", AutoFindMailBox.ToString());
             writer.WriteAttributeString("X", loc.X.ToString());
