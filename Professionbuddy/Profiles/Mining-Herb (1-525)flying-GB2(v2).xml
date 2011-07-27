@@ -24,7 +24,7 @@
   <While Condition="(bool)var9 ==true" IgnoreCanRun="True" ChildrenCount="1">
     <CustomAction Code="var9 = false;" />
   </While>
-  <While Condition="(bool)var9 == false" IgnoreCanRun="True" ChildrenCount="11">
+  <While Condition="(bool)var9 == false" IgnoreCanRun="True" ChildrenCount="10">
     <CustomAction Code="var5 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining Level&quot;] :(int) Mining.Level;" />
     <CustomAction Code="var6 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining MaxLevel&quot;] :(int) Mining.MaxLevel;" />
     <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
@@ -43,10 +43,6 @@
     </If>
     <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 != (int)var8" IgnoreCanRun="True" ChildrenCount="1">
       <CustomAction Code="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;" />
-    </If>
-    <If Condition="(int)var6 != (int)var8 &amp;&amp; (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True" ChildrenCount="2">
-      <CustomAction Code="MessageBox.Show(&quot;Herb and Mining max skill levels need to be the same if you choose to level both &quot;);" />
-      <CustomAction Code="TreeRoot.Stop();" />
     </If>
     <CustomAction Code="var9 = true;" />
   </While>
