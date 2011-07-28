@@ -162,7 +162,7 @@ namespace HighVoltz.Composites
                     {
                         if (GetMailType == GetMailActionType.AllItems)
                         {
-                            string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then AutoLootMailItem(index) foundMail = foundMail + 1 break end end local beans = BeanCounterMail and BeanCounterMail:IsVisible() if foundMail == 0 then CloseMail() end if foundMail == 0 {0}and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ",
+                            string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then AutoLootMailItem(index) foundMail = foundMail + 1 break end end local beans = BeanCounterMail and BeanCounterMail:IsVisible() if foundMail == 0 {0}and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ",
                                 CheckNewMail ? "and HasNewMail() == nil " : "");
                                 //freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
                             if (Lua.GetReturnValues(lua)[0] == "1" || ObjectManager.Me.FreeNormalBagSlots <= MinFreeBagSlots)
@@ -171,7 +171,7 @@ namespace HighVoltz.Composites
                         else
                         {
                             for (int i=0;i <_idList.Count;i++) {
-                                string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1,itemCnt do local itemlink = GetInboxItemLink(index, i2) if string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if foundMail == 0 then CloseMail() end if (foundMail == 0 {1})  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
+                                string lua = string.Format("local totalItems,numItems = GetInboxNumItems() local foundMail=0 for index=1,numItems do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1,itemCnt do local itemlink = GetInboxItemLink(index, i2) if string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if (foundMail == 0 {1})  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
                                     //, Entry, freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
                                 _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "");
 
