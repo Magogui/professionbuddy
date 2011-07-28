@@ -220,6 +220,7 @@ namespace HighVoltz.Composites
                 if (obj is WoWUnit && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget != obj))
                 {
                     entry = ((WoWUnit)obj).Entry;
+                    ((WoWUnit)obj).Target();
                 }
                 return obj.Location;
             }

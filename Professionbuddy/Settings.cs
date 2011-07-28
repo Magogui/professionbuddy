@@ -72,6 +72,7 @@ namespace HighVoltz
             }
         }
         public void Load() {
+
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
                 if (File.Exists(SettingsPath))
@@ -82,6 +83,8 @@ namespace HighVoltz
                         var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
                         if (temp != null)
                         {
+                            Settings = new Dictionary<string, object>();
+                            Summaries = new Dictionary<string, string>();
                             foreach (var kv in temp)
                             {
                                 Settings[kv.Key] = kv.Value;
