@@ -1,0 +1,119 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset0 Arial Black;}{\f2\fnil\fcharset0 Consolas;}{\f3\fnil Consolas;}{\f4\fnil\fcharset0 Arial;}}
+{\colortbl ;\red0\green77\blue187;\red192\green80\blue77;}
+{\*\generator Msftedit 5.41.21.2509;}\viewkind4\uc1\pard\sa200\sl276\slmult1\cf1\lang9\ul\b\f0\fs24 Introduction\par
+\cf0\ulnone\b0 Professionbuddy is a plugin designed to automate Tradeskill related tasks including but not limited to automatically leveling Tradeskills, disenchanting items, milling herbs or crafting a list of items.\par
+\pard\sa200\sl240\slmult1 Tasks are built by drag and dropping Actions  onto the right pane and editing the actions to the desired settings.The user can then save the tasks to a profile as well as load profiles. ProfessionBuddy supports loading .zip files as well as saving to .zip. When a profile is saved to a .zip file any Honorbuddy/GB gathering profiles that the ProfessionBuddy profile uses is automatically added to the zip. This makes distributing multiple files much easier.\par
+Having basic knowledge of the C# language is recommended to build advanced profiles as well as some knowledge of Honorbuddy's API\par
+\cf2\ul\b How do I use ProfessionBuddy?\cf0\ulnone\b0\par
+note: I will use PB as an acronym for ProfessionBuddy.\par
+\pard{\pntext\f0 1.\tab}{\*\pn\pnlvlbody\pnf0\pnindent0\pnstart1\pndec{\pntxta.}}
+\fi-360\li720\sa200\sl240\slmult1 Make sure HB has a profile loaded that the current bot can use.. for example if using Quest bot you need to load a valid quest order profile..\par
+{\pntext\f0 2.\tab}Make sure Professionbuddy is enabled in the plugin list\par
+{\pntext\f0 3.\tab}    Select Professionbuddy in the plugin list and then click the "ProfessionBuddy" button to open the GUI. A GUI similar to the screenshot above should appear\par
+{\pntext\f0 4.\tab}    Now click the "Open" button in the upper left corner the UI and browse to the PB profile that you wish to open. There are some profiles in the Honorbuddy/Plugin/Professionbuddy/Profiles/ folder. PB profiles are different then HB profiles.If you open a PB profile with a text editor you should see a Professionbuddy tag in it\par
+{\pntext\f0 5.\tab}    Now that you have a PB profile loaded click the red button with the word "Stopped" in the upper right corner of PB's screen. It should turn green and change to the word "Running"\par
+\pard\sa200\sl240\slmult1\par
+\cf2\ul\b How do I make profiles?\par
+\cf0\ulnone\b0\par
+You can drag and drop Actions from the Action List on the left to the Task List that's on the right side and then configure the action's settings to your likings in the PropertyGrid.\par
+\par
+There is a wide variety of Actions to choose from such as actions that will craft recipes, mill,disenchant,prospect, fly or run to locations, train, sell/buy from vendors and AH and more. There's also an "If Condition" and "While Condition" that can be use to perform actions under certain conditions.\par
+\par
+Once you have have all the actions that you need in the Task List hit the start button and Professionbuddy will perform all the actions in the Task List. If there's no HB profile loaded then you'll have to load one before you can start ProfessionBuddy, any profile will do.\par
+\par
+You can save the Task List to a .xml or .package profile for later use or to share with others. Saving to a .package is recommended when sharing your Professionbuddy profile with others if it loads other Profiles since it will bundle all the required files together and reduce clutter for the end user. They can then load the .package directly into PB via the 'Open' profile button.\par
+\par
+For more details click the 'Help' Button in the GUI or take a look at the Action Description in the lower left corner of the GUI.\par
+\par
+In order to make advanced profiles like one that levels a profession you need to know basic C#. If you have some experience with making quest orders then this shouldn't be a problem.\par
+Each Action has an "IsDone" state that is set to true when that action is finished.\par
+When an Action's "IsDone" state is set to true then the Action below it is executed and it keeps going down the list of Actions until they're all finished.\par
+\cf2\ul\b Action Tab\par
+\cf0\ulnone\b0 This tab shows a list of actions that can be placed in the task bar via drag and drop or using that add button. This list also includes an 'If Condition' which will execute all the actions it contains if the condition is true. It is possible to nest multiple 'If Condition's. Each of the actions are executed starting from the top going down. Once an action is finished the next action below it is executed and it keeps going down the list of actions and executing them till they're all completed. For more details on the different settings of the 'If Condition' and actions read the little text box below the list of actions.\par
+ \cf2\ul\b Tradeskill Tab\par
+\cf0\ulnone\b0 This Tab contains all your current tradeskills and all the learned recipes that go with them. There's a search filter text box to the upper left corner and a drop-down list of Categories to the upper right.\par
+The list has 3 different columns, Name,recipe repeatable count, and color representing the recipes difficulty. This list supports multiple selection which makes it easy add allot of recipes to the Task list. To add the Recipes to the Task List you need to select them and then click the 'Add' button that is below the list.  To the the left of the 'Add' button is a numeric value that represents the number of times the recipes will be repeated when added to the Task list.\par
+To the right of the 'Add' button is a drop down list with 'modes' the will alter the recipe's repeat behavior. The 1st and default mode, 'Specific' will attempt to repeat the recipe the specified number of times. \par
+The second mode 'Craftable' will repeat the recipe until it runs out of mats. \par
+The third and final mode 'Banker' will only be available if The user has an Addon called DataStore installed. It's available on Curse gaming and comes with that Altaholic Addon. It basically keeps track of inventory, auctions, mail and bank items for all your characters, even has multiple account support. This mode is nice to restock your bankers with crafted goods to sell on AH for example. It checks to see how many  of the crafted items you have on your alts and then it deducts the 'Repeat' from it. For example if you had 12 Flask of Steelskin on your alts and your 'Repeat' number is 20 it would makes 8 flasks. (20-12 =8). \par
+\cf2\ul\b Task List\par
+\cf0\ulnone\b0 The Task List is where all your 'If Condition's and Actions are. To change the properties of an action you must select it and then change the settings in the Property grid below. There are several keybind that make editing easier.\par
+\cf2\ul\b Keybinds\cf0 :\par
+\ulnone Shift + drag n drop\b0 : By default dropping an action on top of an 'If condition' places it inside that 'If Condition' this keybind cancels that effect.\par
+\b Ctrl + drag n drop: \b0 copies an action or an 'If Condition' and all of it's actions\par
+\b Delete: \b0 deletes selected action/If Condition\par
+\b Esc: \b0 Clears current selection\par
+\cf2\ul\b Property Grid\par
+\cf0\ulnone\b0 This control shows the settings of the currently selected Action in the Task list. The settings are pretty much self explanatory but if there's any doubt, check the Action detail window below the Action list.\par
+There is one common setting that might need an explanation, Location. The Location setting is used by many actions and it describes a location in WoW. It accepts a HotSpot style Tag or any combination of 3 numbers and automatically converts them to the correct format. Also the button with 3 dots '...' will automatically place the location of the player in the text edit box or the player's current target's location if he/she has one.\par
+\cf2\ul\b API\par
+\cf0\ulnone\b0 I have added quite a few small helper API for use with the 'If/While Condition's and Custom Actions. They are there to serve as shortcuts. You can also use HB's api if needed.\par
+The following tradeskills are currently supported and have wrappers for them \par
+Alchemy,Blacksmithing,Cooking,Enchanting,Engineering,FirstAid,Fishing,Herbalism,Inscription,Jewelcrafting,Leatherworking,Mining and Tailoring.\par
+Each of the listed tradeskills have the following Properties available. Example usage is \b\par
+\cf2\ul If/While\b0  \b Condition\cf0\ulnone\b0\par
+The '\ul If/While Condition' \ulnone runs the actions that they contain if an expression is true.\par
+Execution starts from the top action and goes down the list of actions that the\ul  If/While Condition \ulnone contains. If at anytime the Condition becomes false then execution stops right away unless the property 'Ignore Execution Until done' is set to true then excution will ignore Condition until it finishes executing the last action at the bottom of the list\par
+The "\ul While Condition\ulnone " will reset all of it's actions "IsDone" state to false once all of the actions that it contains have their "IsDone" state set to true so they will be executed repeatedly as long as the expression is true. The "While Condition" will also recursively reset any nested "If/While Condtion"s and all that actions they contain.\par
+A \ul While condition\ulnone  can repeatedly execute actions within while the \ul If Condition \ulnone can not (unless it's embeded within a \ul While Condition\ulnone )\par
+\cf2\ul\b\i\fs28 SubRoutines\cf0\ulnone\b0\i0\fs24\par
+Subroutines can contain a group of actions that you can execute by using 'Call Subroutine' action. This allows you to have more compact and organized profiles\par
+\cf2\ul\b\i\fs28 Packages\cf0\fs24\par
+\ulnone\b0\i0\fs22 A PB profile and any HB/GB2 profile that it uses can be saved and compressed into one file if you save the profile with a .package extension. There is one rule though, all HB/GB2 profiles must be in same directory or in a subdirectory of the PB profile since PB will use the same directory struction in the package file and the directory that the PB  profile is in will be used as the top level directory. The reason for this rule is because the 'LoadProfile' action requires a relative instead of an absolute path to a profile so there are no issues with sharing profiles publicly\par
+\par
+\cf2\ul\b\fs28 Useful stuff to use in If/While Conditions, Wait and Custom Actions\ulnone\b0\fs22\par
+\cf0\b\i\f1\fs24 Generic Tradeskill API \ul\f0  \ulnone\b0\i0     \lang1033\f2\par
+\b Mining.\lang9\f3 Level\lang1033\f2  - \b0\f0 returns current level for mining. Mining can be used for any profession\f2\par
+\b Mining.MaxLevel \b0 - \f0 returns the current max level Mining.Depending on the skill rank it's either 75,150,225,300,375,450 or 525. Mining can be used for any profession\f2 .\par
+\lang9\b\f0 CanRepeatNum (RecipeID)\b0   - returns the number of times the recipe can be repeated with current mats, RecipeID is the wowhead ID\par
+\b CanCraft (RecipeID) - \b0 checks if the player has the recipe, has the tools and mats to make it. returns a bool\par
+\b HasMats (RecipeID) \b0 - checks if the player has material for the recipe\par
+\b HasRecipe (RecipeID) \b0 - checks if the player has the specific recipe\par
+\b HasTools (RecipeID) \b0 - checks if the player has the tools need to craft the recipe.\par
+\b\i\f1\par
+Non TradeSkill related API\i0  \b0\f0  \par
+\b HasNewMail  \b0 - This is a property that returns true if player has new mail.\par
+\b DataStore\b0  - This is a Dictionary<uint,int> that gets populated when PB starts up or when RefreshDataStore() is called. The Key is an item ID and Value is number of items total that are on that server/faction.\par
+\b MailCount  \b0 - This property returns the number of mail in the inbox, requires mailbox to be open.\par
+\b InbagCount (ItemID\b0 ) - Returns the number of items the player has in the bags that match ItemID\par
+\b Log(string,params object[] args)\b0  - prints a message to Honorbudde's Log\par
+\b Log(Color,string,params object[] args)\b0  - prints a message to Honorbudde's Log using the specific color\par
+\b DistanceTo (x,y,z\b0 ) - returns distance to location\par
+\b MoveTo (x,y,z)\b0  - moves to location\par
+\b CTM (x,y,z)\b0  - uses Click-To-Move to go to location\par
+\b RefreshDataStore() \b0 - Imports a fresh copy of the DataStore database.\par
+\b SwitchToBot(string botName) \b0 - Switches to a the specified Bot\par
+\b Me\b0  - The localplayer object. e.g. ObjectManager.Me\par
+\b var1,var2...var9 \b0 - I added 9 static 'object' type variables to store info to use later in code. \par
+\tab var1 = true;\par
+  \tab while (bool)var1 == true\par
+             \tab var1 = HasNewMail || MailCount > 0\par
+\b Settings["Name"] \b0 - This is used in conjuction of the Settings Action from the action list. It returns the current value assigned to a setting that can be edited by the end user from a gui.You use a Settings Action to give it a type and default value. Since the type returned is an object type you must cast to the real type when reading the value from it. Example \i (bool)Settings["Level Mining"]\par
+\b\f1\par
+Other Misc Stuff  from HB's API \b0\f4\fs18 - thanks to Inrego for the compilation.\i0\f0\fs22\par
+\b\fs24 Me.MapId == X       \b0\fs22 Check what continent I'm on.\par
+                                            0   = Eastern Kingdoms\par
+                                            1   = Kalimdor\par
+                                            530 = Outlands\par
+                                            571 = Northrend\par
+                             \par
+\pard\ri-900\sa200\sl240\slmult1\tx9720\b\fs24 Me.ZoneId == X \b0\fs22\tab\tab Check what zone I'm in. ZoneIDs can be found on Wowhead.com\par
+\pard\sa200\sl240\slmult1\b\fs24 Me.IsHorde / Me.IsAlliance  \tab\b0\fs22 Returns true/false.\par
+\b\fs24 TreeRoot.Current.Name \b0\fs22  \tab  Name of the current Botbase, \par
+\tab\tab\tab\tab e.g TreeRoot.Current.Name != "Gatherbuddy2"\par
+\b\fs24 Me.FreeNormalBagSlots\b0\fs22        \tab The number of free bag slots.\par
+\b\fs24 Lua.DoString(string.Format("RunMacroText(\\"\{0\}\\")", "/s hello"), 0);\fs22\par
+\b0 Input to the chat box. Chat strings can be inserted, or stuff like /use Hearthstone\par
+\b\fs24 Lua.DoString("RunMacro('Test')");\b0\fs22  \tab  Run the ingame macro named "test"\par
+\b Lua.DoString("UseItemByName(ItemID)");\b0  Use the item with given ItemID. ItemID can be found on Wowhead.com\par
+\b\fs24 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == #objectID ) != null && ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == #objectID ).Location.Distance(new WoWPoint(x,y,z)) < #distance\par
+\b0\fs22 This line checks if the given #objectID is within #distance yards of the (x,y,z) coord.\par
+Example:\par
+\i Wait(\par
+ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 190536 ) != null && ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 190536 ).Location.Distance(new WoWPoint(-8288.816, 1424.703, -0.01198259)) < 3\par
+)\i0\par
+Will wait until the the boat with objectID 190536 is within 3 yards of (-8288.816, 1424.703, -0.01198259).\par
+This can be used for all boats and zeppelins. You can find the objectIDs and their coords in HB Developer Tools.\par
+\fs16\par
+}
+ 

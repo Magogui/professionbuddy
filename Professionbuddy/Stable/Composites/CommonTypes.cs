@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.ComponentModel;
+using System.Globalization;
+using Styx;
+using TreeSharp;
+using Styx.Helpers;
+using Styx.WoWInternals;
+using System.Diagnostics;
+using Styx.Logic.Pathing;
+using Styx.WoWInternals.WoWObjects;
+using System.Xml;
+using System.Drawing.Design;
+// Types shared between Composites
+namespace HighVoltz.Composites
+{
+    public enum SubCategoryType { None }; // use as a placeholder for item categories with no sub categories defined in HB
+    public enum BankType { Personal, Guild }
+    static class Callbacks
+    {
+        /// <summary>
+        /// Returns the SubCategories enum that goes with the Category enum 'ItemClass'. 
+        /// </summary>
+        /// <param name="itemClass"></param>
+        /// <param name="propBag"></param>
+        /// <returns></returns>
+        static public object GetSubCategory(WoWItemClass itemClass)
+        {
+            switch (itemClass)
+            {
+                case WoWItemClass.Armor:
+                    return WoWItemArmorClass.None;
+                case WoWItemClass.Container:
+                case WoWItemClass.Money:
+                case WoWItemClass.Projectile:
+                case WoWItemClass.Quest:
+                case WoWItemClass.Quiver:
+                case WoWItemClass.Reagent:
+                    return SubCategoryType.None;
+                case WoWItemClass.Consumable:
+                    return WoWItemContainerClass.None;
+                case WoWItemClass.Gem:
+                    return WoWItemGemClass.None;
+                case WoWItemClass.Glyph:
+                    return WoWItemGlyphClass.None;
+                case WoWItemClass.Key:
+                    return WoWItemKeyClass.None;
+                case WoWItemClass.Miscellaneous:
+                    return WoWItemMiscClass.None;
+                case WoWItemClass.Recipe:
+                    return WoWItemRecipeClass.None;
+                case WoWItemClass.TradeGoods:
+                    return WoWItemTradeGoodsClass.None;
+                case WoWItemClass.Weapon:
+                    return WoWItemWeaponClass.None;
+            }
+            return SubCategoryType.None;
+        }
+    }
+}
