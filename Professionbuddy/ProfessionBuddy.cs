@@ -517,8 +517,14 @@ namespace HighVoltz
                 PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.CurrentProfile.Branch, dict);
                 if (dict.Count > 0)
                 {
-                    ProfileManager.LoadNew(dict.Keys.FirstOrDefault());
-                    return;
+                    foreach (var kv in dict)
+                    {
+                        if (!string.IsNullOrEmpty(kv.Key))
+                        {
+                            ProfileManager.LoadNew(kv.Key);
+                            return;
+                        }
+                    }
                 }
             }
             if (ProfileManager.CurrentProfile == null)

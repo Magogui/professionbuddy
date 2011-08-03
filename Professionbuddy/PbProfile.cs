@@ -38,11 +38,13 @@ namespace HighVoltz
     public class PbProfile
     {
         Professionbuddy _pb = Professionbuddy.Instance;
-        public PbProfile() {
+        public PbProfile()
+        {
             ProfilePath = XmlPath = "";
             Branch = new PrioritySelector();
         }
-        public PbProfile(string path) {
+        public PbProfile(string path)
+        {
             ProfilePath = path;
             LoadFromFile(ProfilePath);
         }
@@ -59,14 +61,15 @@ namespace HighVoltz
         /// </summary>
         public PrioritySelector Branch { get; protected set; }
 
-        public PBIdentityComposite LoadFromFile(string path) {
+        public PBIdentityComposite LoadFromFile(string path)
+        {
             try
             {
                 if (File.Exists(path))
                 {
                     Professionbuddy.Log("Loading profile {0}", path);
                     ProfilePath = path;
-                    
+
                     if (Path.GetExtension(path).Equals(".package", StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (Package zipFile = Package.Open(path, FileMode.Open, FileAccess.Read))
@@ -112,7 +115,8 @@ namespace HighVoltz
         }
 
 
-        public void SaveXml(string file) {
+        public void SaveXml(string file)
+        {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             using (XmlWriter writer = XmlWriter.Create(file, settings))
@@ -124,7 +128,8 @@ namespace HighVoltz
 
         private const string PackageRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/document";
         private const string ResourceRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/required-resource";
-        public void CreatePackage(string path, string profilePath) {
+        public void CreatePackage(string path, string profilePath)
+        {
             try
             {
                 Uri partUriProfile = PackUriHelper.CreatePartUri(
@@ -160,8 +165,10 @@ namespace HighVoltz
             { Professionbuddy.Err(ex.ToString()); }
         }
 
-        static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict) {
-            if (comp is LoadProfileAction)
+        static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
+        {
+            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path) &&
+                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
             {
                 Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction)comp).Path, UriKind.Relative));
                 string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);
@@ -178,7 +185,8 @@ namespace HighVoltz
             }
         }
 
-        void CopyStream(Stream source, Stream target) {
+        void CopyStream(Stream source, Stream target)
+        {
             const int bufSize = 0x1000;
             byte[] buf = new byte[bufSize];
             int bytesRead = 0;
@@ -186,7 +194,8 @@ namespace HighVoltz
                 target.Write(buf, 0, bytesRead);
         }
 
-        private string ExtractPart(PackagePart packagePart, string targetDirectory) {
+        private string ExtractPart(PackagePart packagePart, string targetDirectory)
+        {
             string packageRelative = Uri.UnescapeDataString(packagePart.Uri.ToString().TrimStart('/'));
             string fullPath = Path.Combine(targetDirectory, packageRelative);
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));

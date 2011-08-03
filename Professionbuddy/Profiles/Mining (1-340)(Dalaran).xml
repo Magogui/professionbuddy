@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Professionbuddy ChildrenCount="12">
+<Professionbuddy ChildrenCount="13">
+  <LoadProfileAction Path="" ProfileType="Honorbuddy" />
   <While Condition="!TreeRoot.Current.Name.Contains(&quot;Combat&quot;)" IgnoreCanRun="True" ChildrenCount="1">
     <ChangeBotAction BotName="Combat" />
   </While>
@@ -9,7 +10,7 @@
   <While Condition="Mining.MaxLevel == 0" IgnoreCanRun="False" ChildrenCount="1">
     <TrainSkillAction NpcEntry="28698" X="0" Y="0" Z="0" />
   </While>
-  <While Condition="Mining.Level &lt; 65" IgnoreCanRun="False" ChildrenCount="3">
+  <While Condition="Mining.Level &lt; 50" IgnoreCanRun="False" ChildrenCount="3">
     <If Condition="CanCraft(2657)" IgnoreCanRun="True" ChildrenCount="2">
       <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5923.522" Y="722.3371" Z="642.1357" />
       <CastSpellAction Entry="2657" Repeat="50" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
@@ -18,10 +19,10 @@
       <BuyItemFromAhAction ItemID="2770" MaxBuyout="4g0s0c" Amount="50" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
   </While>
-  <While Condition="Mining.Level &gt;= 65 &amp;&amp; Mining.Level &lt; 115" IgnoreCanRun="False" ChildrenCount="4">
+  <While Condition="Mining.Level &gt;= 50 &amp;&amp; Mining.Level &lt; 115" IgnoreCanRun="False" ChildrenCount="4">
     <If Condition="!HasRecipe(2659) || !HasRecipe(3304)" IgnoreCanRun="True" ChildrenCount="1">
       <TrainSkillAction NpcEntry="28698" X="0" Y="0" Z="0" />
     </If>
@@ -32,7 +33,7 @@
       <CastSpellAction Entry="2659" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
     <If Condition="!HasNewMail &amp;&amp; !CanCraft(2657) &amp;&amp; !CanCraft(2659) &amp;&amp; !CanCraft(3304) &amp;&amp; !HasNewMail" IgnoreCanRun="False" ChildrenCount="2">
       <If Condition="Mining.Level &lt; 75 || InbagCount(3576) &lt;=5" IgnoreCanRun="True" ChildrenCount="1">
@@ -55,7 +56,7 @@
       <BuyItemFromAhAction ItemID="2775" MaxBuyout="10g0s0c" Amount="20" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
   </While>
   <While Condition="Mining.Level &gt;= 125 &amp;&amp; Mining.Level &lt; 155" IgnoreCanRun="False" ChildrenCount="4">
@@ -70,7 +71,7 @@
       <BuyItemFromAhAction ItemID="2772" MaxBuyout="10g0s0c" Amount="40" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
   </While>
   <While Condition="Mining.Level &gt;= 155 &amp;&amp; Mining.Level &lt; 175" IgnoreCanRun="False" ChildrenCount="4">
@@ -82,7 +83,7 @@
       <CastSpellAction Entry="3308" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
     <If Condition="!HasNewMail &amp;&amp; !CanCraft(3308)" IgnoreCanRun="False" ChildrenCount="1">
       <BuyItemFromAhAction ItemID="2776" MaxBuyout="10g0s0c" Amount="10" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
@@ -103,7 +104,7 @@
       <BuyItemFromAhAction ItemID="3858" MaxBuyout="10g0s0c" Amount="20" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
   </While>
   <While Condition="Mining.Level &gt;= 230 &amp;&amp; Mining.Level &lt; 275" IgnoreCanRun="False" ChildrenCount="4">
@@ -115,7 +116,7 @@
       <CastSpellAction Entry="16153" Repeat="5" RepeatType="Craftable" CastOnItem="False" ItemId="0" ItemType="Chest" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
     <If Condition="!HasNewMail &amp;&amp; !CanCraft(16153)" IgnoreCanRun="False" ChildrenCount="1">
       <BuyItemFromAhAction ItemID="10620" MaxBuyout="10g0s0c" Amount="20" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
@@ -133,7 +134,7 @@
       <BuyItemFromAhAction ItemID="23424" MaxBuyout="10g0s0c" Amount="20" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
   </While>
   <While Condition="Mining.Level &gt;= 325 &amp;&amp; Mining.Level &lt; 340" IgnoreCanRun="False" ChildrenCount="4">
@@ -144,7 +145,7 @@
       <BuyItemFromAhAction ItemID="23425" MaxBuyout="10g0s0c" Amount="20" ItemListType="Item" AutoFindAh="True" X="0" Y="0" Z="0" BidOnItem="False" />
     </If>
     <If Condition="HasNewMail || MailCount &gt; 0" IgnoreCanRun="True" ChildrenCount="1">
-      <GetMailAction ItemID="0" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+      <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     </If>
     <If Condition="CanCraft(29358)" IgnoreCanRun="True" ChildrenCount="2">
       <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5923.522" Y="722.3371" Z="642.1357" />
