@@ -20,6 +20,7 @@ namespace HighVoltz.Composites
             SubRoutineName = "";
         }
 
+        bool ranonce = false;
         protected override RunStatus Run(object context) {
             if (!IsDone)
             {
@@ -30,11 +31,12 @@ namespace HighVoltz.Composites
                         Professionbuddy.Err("Unable to find Subroutine with name: {0}.", SubRoutineName);
                         IsDone = true;
                     }
-                    else
-                    {
-                        // make sure all actions within the subroutine are reset before we start.
-                        _sub.Reset();
-                    }
+                }
+                if (!ranonce)
+                {
+                    // make sure all actions within the subroutine are reset before we start.
+                    _sub.Reset();
+                    ranonce = true;
                 }
                 if (_sub != null)
                 {
@@ -47,9 +49,7 @@ namespace HighVoltz.Composites
                     catch { IsDone = true; _sub.Reset(); return RunStatus.Failure; }
                     IsDone = _sub.IsDone;
                     // we need to reset so calls to the sub from other places can
-                    if (IsDone)
-                        _sub.Reset();
-                    else
+                    if (!IsDone)
                         return RunStatus.Running;
                 }
             }
@@ -58,7 +58,7 @@ namespace HighVoltz.Composites
 
         public override void Reset() {
             base.Reset();
-            _sub = null;
+            ranonce = false;
         }
         bool GetSubRoutine() {
             _sub = FindSubRoutineByName(SubRoutineName, Pb.CurrentProfile.Branch);
