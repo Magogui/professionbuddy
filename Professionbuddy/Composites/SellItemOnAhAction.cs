@@ -518,7 +518,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will sell a specific item that matches Name/ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs";
+                return "This action will sell a specific item that matches ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs";
             }
         }
         public override object Clone()
