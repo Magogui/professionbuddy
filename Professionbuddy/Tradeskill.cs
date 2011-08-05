@@ -513,7 +513,7 @@ namespace HighVoltz
             }
         }
         /// <summary>
-        /// The Number of times recipe can be crafted with current mats in bags
+        /// The Number of times recipe can be crafted with current mats in bags using internal Ingredient list.
         /// </summary>
         public uint CanRepeatNum {
             get {
@@ -521,6 +521,26 @@ namespace HighVoltz
                 foreach (Ingredient ingred in Ingredients)
                 {
                     uint cnt = (uint)System.Math.Floor((double)(ingred.InBagItemCount / ingred.Required));
+                    if (repeat > cnt)
+                    {
+                        repeat = cnt;
+                    }
+                }
+                return repeat;
+            }
+        }
+        /// <summary>
+        /// The Number of times recipe can be crafted with current mats in bags. Checks directly with ObjectManager
+        /// </summary>
+        public uint CanRepeatNum2
+        {
+            get
+            {
+                uint repeat = uint.MaxValue;
+                foreach (Ingredient ingred in Ingredients)
+                {
+                    uint cnt = (uint)System.Math.Floor((double)
+                        (Ingredient.GetInBagItemCount(ingred.ID) / ingred.Required));
                     if (repeat > cnt)
                     {
                         repeat = cnt;

@@ -152,7 +152,7 @@ namespace HighVoltz.Composites
                 case RepeatCalculationType.Specific:
                     return Repeat;
                 case RepeatCalculationType.Craftable:
-                    return IsRecipe ? (int)Recipe.CanRepeatNum : Repeat;
+                    return IsRecipe ? (int)Recipe.CanRepeatNum2 : Repeat;
                 case RepeatCalculationType.Banker:
                     if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
                         return (int)Repeat - Pb.DataStore[Recipe.CraftedItemID];
@@ -180,9 +180,10 @@ namespace HighVoltz.Composites
                     IsDone = true;
                     return RunStatus.Failure;
                 }
-                // can't make recipe then make as done.
-                if (IsRecipe && Recipe.CanRepeatNum <= 0)
+                // can't make recipe so stop trying.
+                if (IsRecipe && Recipe.CanRepeatNum2 <= 0)
                 {
+                    Professionbuddy.Debug("{0} doesn't have enough material to craft.", SpellName);
                     IsDone = true;
                     return RunStatus.Failure;
                 }

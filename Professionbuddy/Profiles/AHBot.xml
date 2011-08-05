@@ -119,12 +119,9 @@
       </If>
       <CustomAction Code="var1 = false;" />
     </If>
-    <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var2).TotalSeconds &gt;= (int)var3" IgnoreCanRun="True" ChildrenCount="8">
+    <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var2).TotalSeconds &gt;= (int)var3" IgnoreCanRun="True" ChildrenCount="5">
       <CustomAction Code="Log (&quot;Checking for undercut auctions&quot;);" />
-      <MoveToAction MoveType="NearestAH" Pathing="Navigator" Entry="0" X="-8811.736" Y="656.2274" Z="99.49487" />
-      <InteractionAction Entry="0" InteractDelay="0" InteractType="NPC" GameObjectType="Mailbox" SpellFocus="Anvil" />
-      <WaitAction Condition="false" Timeout="2000" />
-      <CustomAction Code="Lua.DoString(&quot;for index = 1, GetNumAuctionItems(\&quot;owner\&quot;) do local _,_,_,_,_,_,_,_,_,bidAmmount = GetAuctionItemInfo(\&quot;owner\&quot;, index) if (bidAmmount == 0) then CancelAuction(index) end end&quot;);" />
+      <CancelAuctionAction ItemID="0" AutoFindAh="True" UseCategory="False" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" MinBuyout="0g0s0c" X="0" Y="0" Z="0" />
       <CustomAction Code="var2 = DateTime.Now;" />
       <CustomAction Code="var3 = new Random().Next(30, 300);" />
       <CustomAction Code="Log (&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />

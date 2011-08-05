@@ -59,4 +59,37 @@ namespace HighVoltz.Composites
             return SubCategoryType.None;
         }
     }
+
+    struct AuctionEntry
+    {
+        public AuctionEntry(string name, uint id, uint buyout, uint bid)
+        {
+            Name = name;
+            Id = id;
+            Buyout = buyout;
+            Bid = bid;
+            LowestBo = uint.MaxValue;
+            myAuctions = 0;
+        }
+
+        public string Name;
+        public uint Id;
+        public uint Buyout;
+        public uint Bid;
+        public uint LowestBo;
+        public uint myAuctions;
+        public override string ToString()
+        {
+            return string.Format("Name:{0} Buyout:{1} Competitor:{2}",
+                Name, GoldString(Buyout), GoldString(LowestBo));
+        }
+        public static string GoldString(uint copper)
+        {
+            uint gold = copper / 10000;
+            copper %= 10000;
+            uint silver = copper / 100;
+            copper %= 100;
+            return string.Format("{0}g{1}s{2}c", gold, silver, copper);
+        }
+    }
 }

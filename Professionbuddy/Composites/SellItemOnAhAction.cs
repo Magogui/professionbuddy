@@ -18,39 +18,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    struct AuctionEntry
-    {
-        public AuctionEntry(string name, uint id, uint buyout, uint bid)
-        {
-            Name = name;
-            Id = id;
-            Buyout = buyout;
-            Bid = bid;
-            LowestBo = uint.MaxValue;
-            myAuctions = 0;
-        }
-
-        public string Name;
-        public uint Id;
-        public uint Buyout;
-        public uint Bid;
-        public uint LowestBo;
-        public uint myAuctions;
-        public override string ToString()
-        {
-            return string.Format("Name:{0} Buyout:{1} Competitor:{2}",
-                Name, GoldString(Buyout), GoldString(LowestBo));
-        }
-        public static string GoldString(uint copper)
-        {
-            uint gold = copper / 10000;
-            copper %= 10000;
-            uint silver = copper / 100;
-            copper %= 100;
-            return string.Format("{0}g{1}s{2}c", gold, silver, copper);
-        }
-    }
-
+    
     #region SellItemOnAhAction
     class SellItemOnAhAction : PBAction
     {
@@ -245,7 +213,7 @@ namespace HighVoltz.Composites
             {
                 if (Lua.GetReturnVal<int>("if AuctionFrame and AuctionFrame:IsVisible() then return 1 else return 0 end ", 0) == 0)
                 {
-                    moveToAh();
+                    MoveToAh();
                 }
                 else
                 {
@@ -437,7 +405,7 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        void moveToAh()
+        void MoveToAh()
         {
             WoWPoint movetoPoint = loc;
             WoWUnit auctioneer;
@@ -488,33 +456,24 @@ namespace HighVoltz.Composites
             }
             else
             {
-                List<uint> idList = new List<uint>();
                 string[] entries = ItemID.Split(',');
                 if (entries != null && entries.Length > 0)
                 {
                     foreach (var entry in entries)
                     {
-                        uint temp = 0;
-                        uint.TryParse(entry.Trim(), out temp);
-                        idList.Add(temp);
+                        uint id = 0;
+                        uint.TryParse(entry.Trim(), out id);
+                        itemList = ObjectManager.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == id).ToList();
+                        if (itemList != null && itemList.Count > 0)
+                        {
+                            tmpItemlist.Add(new AuctionEntry(itemList[0].Name, itemList[0].Entry, 0, 0));
+                        }
                     }
                 }
                 else
                 {
                     Professionbuddy.Err("No ItemIDs are specified");
                     IsDone = true;
-                }
-                //List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).Take((int)Count).ToList();
-                //if (itemList != null) {
-                //    using (new FrameLock()) {
-                //        foreach (WoWItem item in itemList)
-                //            item.UseContainerItem();
-                //    }
-                //}
-                itemList = ObjectManager.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && idList.Contains(i.Entry)).ToList();
-                if (itemList != null && itemList.Count > 0)
-                {
-                    tmpItemlist.Add(new AuctionEntry(itemList[0].Name, itemList[0].Entry, 0, 0));
                 }
             }
             return tmpItemlist;

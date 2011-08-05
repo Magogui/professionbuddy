@@ -1,7 +1,12 @@
-rofessionbuddy 1.0.0.59
-Mining/herb 1-525 profile changes
-Fixed a bug with copying actions 
-Added a 'Check for new mail' property to 'Get Mail' action, which will keep trying to get mail as long as the 'new mail' indicator is active.
+Professionbuddy 1.71
+* Added a Cancel Auction action. 
+* Fixed a bug with 'Buy Item' action where it failed to work if buying 20 items.
+* Minor tweeks. 
+
+Professionbuddy 1.0.0.59
+* Mining/herb 1-525 profile changes
+* Fixed a bug with copying actions 
+* Added a 'Check for new mail' property to 'Get Mail' action, which will keep trying to get mail as long as the 'new mail' indicator is active.
 
 Professionbuddy 1.0.0.44
 * Any If/While Condition,Wait or Custom action compile errors will cause the effected action's font turn red in color and the compiler error is shown in a CompileError property within the action.

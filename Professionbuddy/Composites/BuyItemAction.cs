@@ -179,7 +179,7 @@ namespace HighVoltz.Composites
                     // since BuyItem can only by up to 20 items we need to run it multiple times when buying over 20 items
                     int stacks = (int)(count / 20);
                     int leftovers = (int)(count % 20);
-                    if (count > 20)
+                    if (count >= 20)
                     {
                         //using (new FrameLock()) // framelock was causing DCs
                         //{
