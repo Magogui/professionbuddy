@@ -10,7 +10,7 @@ using Styx.Plugins.PluginClass;
 
 namespace HighVoltz
 {
-    public partial class Professionbuddy
+    public partial class Svn
     {
         protected override string RevString
         {
