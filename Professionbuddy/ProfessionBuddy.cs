@@ -40,7 +40,7 @@ using System.Globalization;
 
 namespace HighVoltz
 {
-    public partial class Professionbuddy : PBPlugin
+    public partial class Professionbuddy : HBPlugin
     {
         #region Declarations
         public ProfessionBuddySettings MySettings;
@@ -63,6 +63,7 @@ namespace HighVoltz
 
         public event EventHandler OnTradeSkillsLoaded;
         public readonly LocalPlayer Me = ObjectManager.Me;
+        Svn _svn = new Svn();
         static public uint Ping { get { return StyxWoW.WoWClient.Latency; } }
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
         public bool HasDataStoreAddon { get; private set; }
@@ -88,7 +89,7 @@ namespace HighVoltz
 
         public override string Author { get { return "HighVoltz"; } }
 
-        public override Version Version { get { return new Version(1, Revision); } }
+        public override Version Version { get { return new Version(1, _svn.Revision); } }
 
         public override bool WantButton { get { return true; } }
 

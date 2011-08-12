@@ -1,5 +1,5 @@
 ﻿// This file is auto genorated from using SubRCRev.exe and template SVN.template
-// Build Date: 2011/08/05 13:16:05
+// Build Date: 2011/08/05 18:26:56
 // SVN url: https://professionbuddy.googlecode.com/svn/trunk/Professionbuddy
 
 using System;
@@ -10,13 +10,13 @@ using Styx.Plugins.PluginClass;
 
 namespace HighVoltz
 {
-    public partial class Professionbuddy
+    public partial class Svn
     {
         protected override string RevString
         {
             get
             {
-                return "71";
+                return "73";
             }
         }
     }

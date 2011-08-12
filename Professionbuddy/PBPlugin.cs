@@ -39,8 +39,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz
 {
-    // this class is mainly used to use virual methods to import svn revision using keyword substitution
-    public class PBPlugin : HBPlugin
+    public class SvnBase
     {
         int _rev = -1;
 
@@ -51,30 +50,14 @@ namespace HighVoltz
             {
                 if (_rev == -1)
                     int.TryParse(RevString, out _rev);
-                return _rev +1;
+                return _rev + 1;
             }
         }
-
-        public PBPlugin()
-        {
-        }
-
-        public override string Name { get { return ""; } }
-
-        public override string Author { get { return "HighVoltz"; } }
-
-        public override Version Version { get { return new Version(1, Revision); } }
-
-        public override bool WantButton { get { return true; } }
-
-        public override string ButtonText { get { return Name; } }
-
-        public override void Pulse()
-        {
-        }
-
-        public override void Initialize()
-        {
-        }
     }
+
+    public partial class Svn : SvnBase
+    {
+
+    }
+   
 }
