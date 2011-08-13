@@ -70,7 +70,7 @@ namespace HighVoltz.Composites
         public GetItemfromBankAction()
         {
             Properties["Amount"] = new MetaProp("Amount", typeof(int));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(uint));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
 
             Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint), new DisplayNameAttribute("Min Free Bagslots"));
             Properties["GetItemfromBankType"] = new MetaProp("GetItemfromBankType", typeof(BankWithdrawlItemType), new DisplayNameAttribute("Items to Withdraw"));
@@ -87,10 +87,7 @@ namespace HighVoltz.Composites
             AutoFindBank = true;
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
-
             NpcEntry = 0u;
-            Properties["Amount"].Show = false;
-            Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
             Properties["AutoFindBank"].PropertyChanged += new EventHandler(AutoFindBankChanged);
@@ -129,11 +126,11 @@ namespace HighVoltz.Composites
             {
                 case BankWithdrawlItemType.SpecificItem:
                     Properties["Amount"].Show = true;
-                    Properties["Entry"].Show = true;
+                    Properties["ItemID"].Show = true;
                     break;
                 case BankWithdrawlItemType.Materials:
                     Properties["Amount"].Show = false;
-                    Properties["Entry"].Show = false;
+                    Properties["ItemID"].Show = false;
                     break;
             }
             RefreshPropertyGrid();
@@ -171,13 +168,13 @@ namespace HighVoltz.Composites
                         if (done)
                             ItemList.Remove(kv.Key);
                     }
-                    if (IsDone)
-                    {
-                        Professionbuddy.Log("Removed Item with ID: {0} from {1} Bank", ItemID, Bank);
-                    }
-                    else
-                        return RunStatus.Running;
                 }
+                if (IsDone)
+                {
+                    Professionbuddy.Log("Removed Item:[{0}] from {1} Bank", ItemID, Bank);
+                }
+                else
+                    return RunStatus.Running;
             }
             return RunStatus.Failure;
         }

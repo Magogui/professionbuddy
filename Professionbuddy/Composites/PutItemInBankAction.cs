@@ -152,13 +152,13 @@ namespace HighVoltz.Composites
         {
             if (UseCategory)
             {
-                Properties["Entry"].Show = false;
+                Properties["ItemID"].Show = false;
                 Properties["Category"].Show = true;
                 Properties["SubCategory"].Show = true;
             }
             else
             {
-                Properties["Entry"].Show = true;
+                Properties["ItemID"].Show = true;
                 Properties["Category"].Show = false;
                 Properties["SubCategory"].Show = false;
             }
@@ -175,71 +175,39 @@ namespace HighVoltz.Composites
         }
 
         #endregion
-
-        List<uint> ItemBlackList = new List<uint>();
+        
+        Dictionary<uint, int> ItemList = null;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                WoWPoint movetoPoint = loc;
-                WoWObject bank = GetLocalBanker();
-                if (bank != null)
-                    movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
-                // search the database
-                else if (movetoPoint == WoWPoint.Zero)
+                if ((Bank == BankType.Guild && !IsGbankFrameVisible) ||
+                                 (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
-                    if (Bank == BankType.Personal)
-                        movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestBanker, NpcEntry);
-                    else
-                        movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestGB, NpcEntry);
-                }
-                if (movetoPoint == WoWPoint.Zero)
-                    return RunStatus.Failure;
-                if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
-                {
-                    Util.MoveTo(movetoPoint);
-                    return RunStatus.Running;
-                }
-                else if (bank == null)
-                {
-                    Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
-                    return RunStatus.Failure;
+                    MoveToBanker();
                 }
                 else
                 {
-                    // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
-                    if ((Bank == BankType.Guild && !IsGbankFrameVisible) || (Bank == BankType.Personal && !Util.IsBankFrameOpen))
-                    {
-                        bank.Interact();
-                        return RunStatus.Running;
-                    }
-                    List<WoWItem> itemList = BuildItemList();
-                    if (itemList == null || itemList.Count == 0)
-                    {
+                    if (ItemList == null)
+                        ItemList = BuildItemList();
+                    // no bag space... 
+                    if (ItemList.Count == 0)
                         IsDone = true;
-                    }
                     else
                     {
-                        foreach (WoWItem item in itemList)
-                        {
-                            if (!ItemBlackList.Contains(item.Entry))
-                            {
-                                bool status;
-                                if (Bank == BankType.Personal)
-                                    status = PutItemInBank(item.Entry, Amount);
-                                else
-                                    status = PutItemInGBank(item.Entry, Amount, GuildTab);
-                                if (status)
-                                    ItemBlackList.Add(item.Entry);
-                                else
-                                    return RunStatus.Running;
-                            }
-                        }
+                        KeyValuePair<uint, int> kv = ItemList.FirstOrDefault();
+                        bool done = false;
+                        if (Bank == BankType.Personal)
+                            done = PutItemInBank(kv.Key, kv.Value);
+                        else
+                            done = PutItemInGBank(kv.Key, kv.Value,GuildTab);
+                        if (done)
+                            ItemList.Remove(kv.Key);
                     }
                 }
                 if (IsDone)
                 {
-                    Professionbuddy.Log("Deposited Item with ID: {0} into {1} Bank", ItemID, Bank);
+                    Professionbuddy.Log("Deposited Items:[{0}] to {1} Bank", ItemID, Bank);
                 }
                 else
                     return RunStatus.Running;
@@ -247,17 +215,58 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        List<WoWItem> BuildItemList()
+        void MoveToBanker()
         {
-            IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
-                                               where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
-                                               select item;
-            if (UseCategory)
-                return tmpItemlist.Where(i => !Pb.ProtectedItems.Contains(i.Entry) &&
-                    i.ItemInfo.ItemClass == Category && subCategoryCheck(i)).Take(12).ToList();
+            WoWPoint movetoPoint = loc;
+            WoWObject bank = GetLocalBanker();
+            if (bank != null)
+                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
+            // search the database
+            else if (movetoPoint == WoWPoint.Zero)
+            {
+                if (Bank == BankType.Personal)
+                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestBanker, NpcEntry);
+                else
+                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestGB, NpcEntry);
+            }
+            if (movetoPoint == WoWPoint.Zero)
+            {
+                IsDone = true;
+                Professionbuddy.Err("Unable to find bank");
+            }
+            if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
+            {
+                Util.MoveTo(movetoPoint);
+            }
+            // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
+            else if (bank != null)
+            {
+                bank.Interact();
+            }
             else
             {
-                List<uint> idList = new List<uint>();
+                IsDone = true;
+                Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
+            }
+        }
+
+        Dictionary<uint, int> BuildItemList()
+        {
+             Dictionary<uint, int> itemList = new Dictionary<uint, int>();
+            IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
+                                               where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled 
+                                               select item;
+            if (UseCategory)
+                foreach (WoWItem item in tmpItemlist)
+                {
+                    if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
+                        subCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
+                    {
+                        itemList.Add(item.Entry, Amount);
+                    }
+                }
+            else
+            {
                 string[] entries = ItemID.Split(',');
                 if (entries != null && entries.Length > 0)
                 {
@@ -265,7 +274,7 @@ namespace HighVoltz.Composites
                     {
                         uint temp = 0;
                         uint.TryParse(entry.Trim(), out temp);
-                        idList.Add(temp);
+                        itemList.Add(temp,Amount);
                     }
                 }
                 else
@@ -273,9 +282,8 @@ namespace HighVoltz.Composites
                     Professionbuddy.Err("No ItemIDs are specified");
                     IsDone = true;
                 }
-                return tmpItemlist.Where(i => idList.Contains(i.Entry)).Take(12).ToList();
             }
-
+            return itemList;
         }
 
         bool subCategoryCheck(WoWItem item)
@@ -311,7 +319,7 @@ namespace HighVoltz.Composites
             {
                 if (!AutoFindBank && NpcEntry != 0)
                     bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
-                else if (AutoFindBank || loc == WoWPoint.Zero) 
+                else if (AutoFindBank || loc == WoWPoint.Zero)
                     bank = bankers.OrderBy(o => o.Distance).FirstOrDefault();
                 else if (ObjectManager.Me.Location.Distance(loc) <= 90)
                 {
@@ -464,7 +472,7 @@ namespace HighVoltz.Composites
         {
             base.Reset();
             queueServerSW = null;
-            ItemBlackList = new List<uint>();
+            ItemList = null;
             _currentBag = -1;
             _currentSlot = 1;
         }
