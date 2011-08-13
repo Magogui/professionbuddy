@@ -12,6 +12,7 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Reflection;
 
 
 namespace HighVoltz.Composites
@@ -40,10 +41,10 @@ namespace HighVoltz.Composites
             get { return (BankWithdrawlItemType)Properties["GetItemfromBankType"].Value; }
             set { Properties["GetItemfromBankType"].Value = value; }
         }
-        public uint Entry
+        public string ItemID
         {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
         public uint NpcEntry
         {
@@ -69,7 +70,8 @@ namespace HighVoltz.Composites
         public GetItemfromBankAction()
         {
             Properties["Amount"] = new MetaProp("Amount", typeof(int));
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(uint));
+
             Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint), new DisplayNameAttribute("Min Free Bagslots"));
             Properties["GetItemfromBankType"] = new MetaProp("GetItemfromBankType", typeof(BankWithdrawlItemType), new DisplayNameAttribute("Items to Withdraw"));
             Properties["Bank"] = new MetaProp("Bank", typeof(BankType));
@@ -78,19 +80,19 @@ namespace HighVoltz.Composites
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
 
             Amount = 1;
-            Entry = 0u;
+            ItemID = "";
             MinFreeBagSlots = 2u;
-            GetItemfromBankType = BankWithdrawlItemType.Materials;
+            GetItemfromBankType = BankWithdrawlItemType.SpecificItem;
             Bank = BankType.Personal;
             AutoFindBank = true;
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
+
             NpcEntry = 0u;
             Properties["Amount"].Show = false;
-            Properties["Entry"].Show = false;
+            Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
-
             Properties["AutoFindBank"].PropertyChanged += new EventHandler(AutoFindBankChanged);
             Properties["GetItemfromBankType"].PropertyChanged += new EventHandler(GetItemfromBankAction_PropertyChanged);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
@@ -137,100 +139,45 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-         #endregion
+        #endregion
 
-        List<KeyValuePair<uint, int>> matList = null;
-        WoWObject bank;
-
+        // key= itemID; value amount to withdrawl
+        Dictionary<uint, int> ItemList = null;
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                WoWPoint movetoPoint = loc;
-                bank = GetLocalBanker();
-                if (bank != null)
-                    movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
-                // search the database
-                else if (movetoPoint == WoWPoint.Zero)
+                if ((Bank == BankType.Guild && !IsGbankFrameVisible) ||
+                    (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
-                    if (Bank == BankType.Personal)
-                        movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestBanker, NpcEntry);
+                    MoveToBanker();
+                }
+                else
+                {
+                    if (ItemList == null)
+                        ItemList = BuildItemList();
+                    // no bag space... 
+                    if (me.FreeNormalBagSlots <= MinFreeBagSlots || ItemList.Count == 0)
+                        IsDone = true;
                     else
-                        movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestGB, NpcEntry);
-                }
-                if (movetoPoint == WoWPoint.Zero)
-                    return RunStatus.Failure;
-                if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
-                {
-                    Util.MoveTo(movetoPoint);
-                    return RunStatus.Running;
-                }
-                else if (bank == null)
-                {
-                    Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
-                    return RunStatus.Failure;
-                }
-                // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
-                else if ((Bank == BankType.Guild && !IsGbankFrameVisible) || Bank == BankType.Personal && !Util.IsBankFrameOpen)
-                {
-                    bank.Interact();
-                    return RunStatus.Running;
-                }
-
-                // no bag space... 
-                if (me.FreeNormalBagSlots <= MinFreeBagSlots)
-                {
-                    IsDone = true;
-                }
-                else
-                {
-                    if (GetItemfromBankType == BankWithdrawlItemType.SpecificItem)
                     {
+                        KeyValuePair<uint, int> kv = ItemList.FirstOrDefault();
+                        bool done = false;
                         if (Bank == BankType.Personal)
-                            IsDone = GetItemFromBank(Entry, Amount);
+                            done = GetItemFromBank(kv.Key, kv.Value);
                         else
-                            IsDone = GetItemFromGBank(Entry, Amount);
+                            done = GetItemFromGBank(kv.Key, kv.Value);
+                        if (done)
+                            ItemList.Remove(kv.Key);
                     }
-                    else if (GetItemfromBankType == BankWithdrawlItemType.Materials)
+                    if (IsDone)
                     {
-                        if (matList == null)
-                        {
-                            matList = new List<KeyValuePair<uint, int>>();
-                            foreach (var kv in Pb.MaterialList)
-                            {
-                                matList.Add(kv);
-                            }
-                        }
-                        if (matList.Count == 0)
-                        {
-                            matList = null;
-                            IsDone = true;
-                        }
-                        else
-                        {
-                            if (Bank == BankType.Personal)
-                            {
-                                bool done = GetItemFromBank(matList[0].Key, matList[0].Value);
-                                if (done)
-                                    matList.RemoveAt(0);
-                            }
-                            else
-                            {
-                                bool done = GetItemFromGBank(matList[0].Key, matList[0].Value);
-                                if (done)
-                                    matList.RemoveAt(0);
-                            }
-                        }
-
+                        Professionbuddy.Log("Removed Item with ID: {0} from {1} Bank", ItemID, Bank);
                     }
+                    else
+                        return RunStatus.Running;
                 }
-                if (IsDone)
-                {
-                    Professionbuddy.Log("Removed Item with ID: {0} from {1} Bank", Entry, Bank);
-                }
-                else
-                    return RunStatus.Running;
             }
             return RunStatus.Failure;
         }
@@ -265,6 +212,72 @@ namespace HighVoltz.Composites
                 }
             }
             return bank;
+        }
+
+        void MoveToBanker()
+        {
+            WoWPoint movetoPoint = loc;
+            WoWObject bank = GetLocalBanker();
+            if (bank != null)
+                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
+            // search the database
+            else if (movetoPoint == WoWPoint.Zero)
+            {
+                if (Bank == BankType.Personal)
+                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestBanker, NpcEntry);
+                else
+                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestGB, NpcEntry);
+            }
+            if (movetoPoint == WoWPoint.Zero)
+            {
+                IsDone = true;
+                Professionbuddy.Err("Unable to find bank");
+            }
+            if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
+            {
+                Util.MoveTo(movetoPoint);
+            }
+            // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
+            else if (bank != null)
+            {
+                bank.Interact();
+            }
+            else
+            {
+                IsDone = true;
+                Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
+            }
+        }
+
+        Dictionary<uint, int> BuildItemList()
+        {
+            Dictionary<uint, int> items = new Dictionary<uint, int>();
+            switch (GetItemfromBankType)
+            {
+                case BankWithdrawlItemType.SpecificItem:
+                    //List<uint> idList = new List<uint>();
+                    string[] entries = ItemID.Split(',');
+                    if (entries != null && entries.Length > 0)
+                    {
+                        foreach (var entry in entries)
+                        {
+                            uint temp = 0;
+                            uint.TryParse(entry.Trim(), out temp);
+                            items.Add(temp, Amount);
+                        }
+                    }
+                    else
+                    {
+                        Professionbuddy.Err("No ItemIDs are specified");
+                        IsDone = true;
+                    }
+                    break;
+                case BankWithdrawlItemType.Materials:
+                    foreach (var kv in Pb.MaterialList)
+                        items.Add(kv.Key, kv.Value);
+                    break;
+            }
+            return items;
         }
 
         // returns true when done. supports pulsing.
@@ -349,7 +362,7 @@ namespace HighVoltz.Composites
                       "bag1 = -1 " +
                    "end " +
                    "for slot1 = 1, GetContainerNumSlots(bag1) do " +
-                      "local _,c,l=GetContainerItemInfo(bag1, slot1) " + 
+                      "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
                       "local id = GetContainerItemID(bag1,slot1) " +
                       "if l ~= 1 and  id == {0} then " +
                          "if c + bagged <= amount  then " +
@@ -373,7 +386,7 @@ namespace HighVoltz.Composites
                    "end " +
                    "bag1 = bag1 -1 " +
                 "end "
-            , id,amount);
+            , id, amount);
             Lua.DoString(lua);
             return true;
         }
@@ -382,6 +395,7 @@ namespace HighVoltz.Composites
         {
             base.Reset();
             queueServerSW = null;
+            ItemList = null;
         }
 
         public override string Name { get { return "Withdraw Item From Bank"; } }
@@ -390,7 +404,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: " + (GetItemfromBankType == BankWithdrawlItemType.SpecificItem ?
-                    " {1} {2}" : ""), Name, Entry, Amount);
+                    " {1} {2}" : ""), Name, ItemID, Amount);
             }
         }
         public override string Help
@@ -404,7 +418,7 @@ namespace HighVoltz.Composites
         {
             return new GetItemfromBankAction()
             {
-                Entry = this.Entry,
+                ItemID = this.ItemID,
                 Amount = this.Amount,
                 Bank = this.Bank,
                 GetItemfromBankType = this.GetItemfromBankType,
@@ -415,12 +429,16 @@ namespace HighVoltz.Composites
                 MinFreeBagSlots = this.MinFreeBagSlots,
             };
         }
+
         #region XmlSerializer
         public override void ReadXml(XmlReader reader)
         {
             uint id;
-            uint.TryParse(reader["Entry"], out id);
-            Entry = id;
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("Entry"))
+                ItemID = reader["Entry"];
+
             uint.TryParse(reader["Amount"], out id);
             Amount = (int)id;
             Bank = (BankType)Enum.Parse(typeof(BankType), reader["Bank"]);
@@ -445,7 +463,7 @@ namespace HighVoltz.Composites
         }
         public override void WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("Entry", Entry.ToString());
+            writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("Amount", Amount.ToString());
             writer.WriteAttributeString("Bank", Bank.ToString());
             writer.WriteAttributeString("GetItemfromBankType", GetItemfromBankType.ToString());

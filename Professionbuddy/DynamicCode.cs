@@ -171,7 +171,7 @@ namespace HighVoltz
             public static Helpers.TradeskillHelper Leatherworking { get { return Helpers.Leatherworking;} }
             public static Helpers.TradeskillHelper Mining { get { return Helpers.Mining;} }
             public static Helpers.TradeskillHelper Tailoring { get { return Helpers.Tailoring;} }
-            public static Dictionary<uint,int> DataStore {get{return Professionbuddy.Instance.DataStore;}}
+            public static DataStore DataStore {get{return Professionbuddy.Instance.DataStore;}}
             uint CanRepeatNum (uint id){  return Helpers.TradeskillHelper.CanRepeatNum(id);}
             bool CanCraft (uint id){  return Helpers.TradeskillHelper.CanCraft(id);}
             bool HasMats (uint id){  return Helpers.TradeskillHelper.HasMats(id);}
@@ -189,7 +189,7 @@ namespace HighVoltz
             void MoveTo(WoWPoint p) {Helpers.MoveTo(p.X,p.Y,p.Z); }
             void CTM(double x,double y,double z) {Helpers.CTM(x,y,z); }
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
-            void RefreshDataStore() {Professionbuddy.Instance.ImportDataStore(); }
+            void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
             void SwitchToBot(string botName) {Log(@""Switching to {0} BotBase"",botName);new Thread(()=>{ TreeRoot.Stop(); BotManager.Instance.SetCurrent(BotManager.Instance.Bots[botName]); TreeRoot.Start();}).Start();}
         }";
         #endregion

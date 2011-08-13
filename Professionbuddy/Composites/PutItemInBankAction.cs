@@ -42,10 +42,10 @@ namespace HighVoltz.Composites
             set { Properties["Bank"].Value = value; }
         }
 
-        public uint Entry
+        public string ItemID
         {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
+            get { return (string)Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
         }
         public uint GuildTab
         {
@@ -76,7 +76,7 @@ namespace HighVoltz.Composites
         public PutItemInBankAction()
         {
             Properties["Amount"] = new MetaProp("Amount", typeof(int));
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["Bank"] = new MetaProp("Bank", typeof(BankType));
             Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool), new DisplayNameAttribute("Auto find Bank"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
@@ -87,7 +87,7 @@ namespace HighVoltz.Composites
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
 
             Amount = 0;
-            Entry = 0u;
+            ItemID = "";
             Bank = BankType.Personal;
             AutoFindBank = true;
             loc = WoWPoint.Zero;
@@ -98,7 +98,7 @@ namespace HighVoltz.Composites
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
 
-            Properties["Entry"].Show = false;
+            Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
             Properties["GuildTab"].Show = false;
@@ -239,7 +239,7 @@ namespace HighVoltz.Composites
                 }
                 if (IsDone)
                 {
-                    Professionbuddy.Log("Deposited Item with ID: {0} into {1} Bank", Entry, Bank);
+                    Professionbuddy.Log("Deposited Item with ID: {0} into {1} Bank", ItemID, Bank);
                 }
                 else
                     return RunStatus.Running;
@@ -251,12 +251,31 @@ namespace HighVoltz.Composites
         {
             IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
                                                where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
-                                               && !ItemBlackList.Contains(item.Entry) && !Pb.ProtectedItems.Contains(item.Entry)
                                                select item;
             if (UseCategory)
-                return tmpItemlist.Where(i => i.ItemInfo.ItemClass == Category && subCategoryCheck(i)).ToList();
+                return tmpItemlist.Where(i => !Pb.ProtectedItems.Contains(i.Entry) &&
+                    i.ItemInfo.ItemClass == Category && subCategoryCheck(i)).Take(12).ToList();
             else
-                return tmpItemlist.Where(i => i.Entry == Entry).ToList();
+            {
+                List<uint> idList = new List<uint>();
+                string[] entries = ItemID.Split(',');
+                if (entries != null && entries.Length > 0)
+                {
+                    foreach (var entry in entries)
+                    {
+                        uint temp = 0;
+                        uint.TryParse(entry.Trim(), out temp);
+                        idList.Add(temp);
+                    }
+                }
+                else
+                {
+                    Professionbuddy.Err("No ItemIDs are specified");
+                    IsDone = true;
+                }
+                return tmpItemlist.Where(i => idList.Contains(i.Entry)).Take(12).ToList();
+            }
+
         }
 
         bool subCategoryCheck(WoWItem item)
@@ -430,7 +449,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: {1} {2}", Name,
-                    UseCategory ? string.Format("{0} {1}", Category, SubCategory) : Entry.ToString(),
+                    UseCategory ? string.Format("{0} {1}", Category, SubCategory) : ItemID.ToString(),
                     Amount > 0 ? Amount.ToString() : "");
             }
         }
@@ -453,7 +472,7 @@ namespace HighVoltz.Composites
         {
             return new PutItemInBankAction()
             {
-                Entry = this.Entry,
+                ItemID = this.ItemID,
                 Amount = this.Amount,
                 Bank = this.Bank,
                 NpcEntry = this.NpcEntry,
@@ -473,8 +492,10 @@ namespace HighVoltz.Composites
             uint id;
             uint.TryParse(reader["Amount"], out id);
             Amount = (int)id;
-            uint.TryParse(reader["Entry"], out id);
-            Entry = id;
+            if (reader.MoveToAttribute("ItemID"))
+                ItemID = reader["ItemID"];
+            else if (reader.MoveToAttribute("Entry"))
+                ItemID = reader["Entry"];
             uint.TryParse(reader["NpcEntry"], out id);
             NpcEntry = id;
             uint.TryParse(reader["GuildTab"], out id);
@@ -524,7 +545,7 @@ namespace HighVoltz.Composites
         public override void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("Amount", Amount.ToString());
-            writer.WriteAttributeString("Entry", Entry.ToString());
+            writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
             writer.WriteAttributeString("GuildTab", GuildTab.ToString());
             writer.WriteAttributeString("AutoFindBank", AutoFindBank.ToString());
