@@ -386,7 +386,7 @@
     </While>
   </If>
   <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 ==450)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 450)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="4">
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 400)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 400)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 400)|| !(bool)Settings[&quot;Mining&quot;]) || (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 400)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
       <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
     </If>
     <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;= 400)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 400)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
@@ -546,7 +546,7 @@
         <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
       </If>
     </While>
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 475)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
+    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 475)|| !(bool)Settings[&quot;Mining&quot;]) || (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
       <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
     </If>
     <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;= 475)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True" ChildrenCount="1">
