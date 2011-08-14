@@ -175,7 +175,7 @@ namespace HighVoltz.Composites
         }
 
         #endregion
-        
+
         Dictionary<uint, int> ItemList = null;
         protected override RunStatus Run(object context)
         {
@@ -188,6 +188,10 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
+                    if (!itemsSW.IsRunning)
+                        itemsSW.Start();
+                    else if (itemsSW.ElapsedMilliseconds < 2000)
+                        return RunStatus.Running;
                     if (ItemList == null)
                         ItemList = BuildItemList();
                     // no bag space... 
@@ -200,9 +204,10 @@ namespace HighVoltz.Composites
                         if (Bank == BankType.Personal)
                             done = PutItemInBank(kv.Key, kv.Value);
                         else
-                            done = PutItemInGBank(kv.Key, kv.Value,GuildTab);
+                            done = PutItemInGBank(kv.Key, kv.Value, GuildTab);
                         if (done)
                             ItemList.Remove(kv.Key);
+                        itemsSW.Reset();
                     }
                 }
                 if (IsDone)
@@ -220,7 +225,7 @@ namespace HighVoltz.Composites
             WoWPoint movetoPoint = loc;
             WoWObject bank = GetLocalBanker();
             if (bank != null)
-                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
+                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 4);
             // search the database
             else if (movetoPoint == WoWPoint.Zero)
             {
@@ -252,9 +257,9 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, int> BuildItemList()
         {
-             Dictionary<uint, int> itemList = new Dictionary<uint, int>();
+            Dictionary<uint, int> itemList = new Dictionary<uint, int>();
             IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
-                                               where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled 
+                                               where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
                                                select item;
             if (UseCategory)
                 foreach (WoWItem item in tmpItemlist)
@@ -274,7 +279,7 @@ namespace HighVoltz.Composites
                     {
                         uint temp = 0;
                         uint.TryParse(entry.Trim(), out temp);
-                        itemList.Add(temp,Amount);
+                        itemList.Add(temp, Amount);
                     }
                 }
                 else
@@ -332,6 +337,7 @@ namespace HighVoltz.Composites
 
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch queueServerSW;
+        Stopwatch itemsSW = new Stopwatch();
         int _currentBag = -1;
         int _currentSlot = 1;
         public bool PutItemInGBank(uint id, int amount, uint tab)
@@ -344,111 +350,127 @@ namespace HighVoltz.Composites
                 Professionbuddy.Log("Queuing server for gbank info");
                 return false;
             }
-            if (queueServerSW.ElapsedMilliseconds < 2000)
-            {
+            else if (queueServerSW.ElapsedMilliseconds < 2000 )
                 return false;
-            }
             string lua = string.Format(
                 "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
-                "local tabInfo = {{{3},{4}}} " +
-                "local storeInGbank= function () " +
-                   "if {2} > 0 then tabInfo[1] = {2} end " +
-                   "while tabInfo[1] <= tabnum do " +
-                      "_,_,v,d =GetGuildBankTabInfo(tabInfo[1]) " +
-                      "if v == 1 and d == 1 then " +
-                         "SetCurrentGuildBankTab(tabInfo[1]) " +
-                         "for i=tabInfo[2], 98 do " +
-                            "local _,c,l=GetGuildBankItemInfo(tabInfo[1], i) " +
-                            "if c == 0 then " +
-                               "PickupGuildBankItem(tabInfo[1] ,i) " +
-                               "tabInfo[2] = i +1 " +
-                               "return " +
+                "local tabInfo = {{0}} " +
+                "local tab = 0 " +
+                "local i = 1 " +
+                "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
+                "while tab <= tabnum do " +
+                   "local_,_,v,d =GetGuildBankTabInfo(tab) " +
+                   "if v == 1 and d == 1 then " +
+                      "SetCurrentGuildBankTab(tab) " +
+                      "for slot=1, 98 do " +
+                         "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
+                         "if c > 0 and l == nil then " +
+                            "local id = tonumber(string.match(GetGuildBankItemLink(tab,slot), 'Hitem:(%d+)')) " +
+                            "if id == {0} and c < maxStack then " +
+                               "tabInfo[i] = {{tab,slot,maxStack-c}} " +
+                               "i = i +1 " +
                             "end " +
+                         "elseif c == 0 then " + 
+                            "tabInfo[i] = {{tab,slot,maxStack}} " +
+                            "i = i +1 " +
                          "end " +
                       "end " +
-                      "tabInfo[2] = 1 " +
-                      "tabInfo[1] = tabInfo[1] + 1 " +
+                   "end " +
+                   "tab = tab + 1 " +
+                "end " +
+                "i = 1 " +
+                "for bag = 0,4 do " +
+                   "for slot=1,GetContainerNumSlots(bag) do " +
+                      "if i > #tabInfo then return end " +
+                      "local id = GetContainerItemID(bag,slot) " +
+                      "local _,c,l = GetContainerItemInfo(bag, slot) " +
+                      "if id == {0} and l == nil then  " +
+                         "if c + bagged <= {1} and c <= tabInfo[i][3]then " +
+                            "PickupContainerItem(bag,slot) " +
+                            "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
+                            "bagged = bagged + c " +
+                            "i=i+1 " +
+                         "else " +
+                            "local cnt = {1}-bagged " +
+                            "if cnt > tabInfo[i][3] then cnt = tabInfo[i][3] end " +
+                            "SplitContainerItem(bag,slot, cnt) " +
+                            "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
+                            "bagged = bagged + cnt " +
+                            "i=i+1 " +
+                         "end " +
+                      "end " +
+                      "if bagged >= {1} then return end " +
                    "end " +
                 "end " +
-                   "for bag = 0,4 do " +
-                      "for slot=GetContainerNumSlots(bag),1,-1 do " +
-                         "local id = GetContainerItemID(bag,slot) " +
-                         "local _,c,l = GetContainerItemInfo(bag, slot) " +
-                         "if id == {0} and l == nil then  " +
-                            "if c + bagged <= {1} then " +
-                               "PickupContainerItem(bag,slot) " +
-                               "storeInGbank() " +
-                               "bagged = bagged + c " +
-                            "else " +
-                               "SplitContainerItem(bag,slot, {1}-bagged) " +
-                               "storeInGbank() " +
-                               "return unpack(tabInfo) " +
-                            "end " +
-                         "end " +
-                         "if bagged == {1} then return unpack(tabInfo) end " +
-                      "end " +
-                   "end " +
-                "return unpack(tabInfo) ",
-                id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
+                "return " 
+                ,id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
             List<string> retVals = Lua.GetReturnValues(lua);
-            if (retVals != null)
-            {
-                int.TryParse(retVals[0], out _currentBag);
-                int.TryParse(retVals[1], out _currentSlot);
+            //if (retVals != null)
+            //{
+            //    int.TryParse(retVals[0], out _currentBag);
+            //    int.TryParse(retVals[1], out _currentSlot);
+            //    _currentBag = -1;
+            //    _currentSlot = 1; 
                 return true;
-            }
-            return false;
+            //}
+            //return false;
         }
 
         public bool PutItemInBank(uint id, int amount)
         {
             string lua = string.Format(
                 "local bagged = 0 " +
-                "local bagInfo = {{{2},{3}}} " +
-                "local storeInBank= function () " +
-                   "while bagInfo[1] <= 11 do " +
-                      "local itemf  = GetItemFamily({0}) " +
-                      "local fs,bfamily = GetContainerNumFreeSlots(bagInfo[1]) " +
-                      "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-                         "for i=bagInfo[2], GetContainerNumSlots(bagInfo[1]) do " +
-                            "local _,c,l = GetContainerItemInfo(bagInfo[1], i) " +
-                            "if c == nil then " +
-                               "PickupContainerItem(bagInfo[1],i) " +
-                               "bagInfo[2] = i +1 " +
-                               "return " +
-                            "end " +
+                "local bagInfo = {{0}} " +
+                "local bag = -1 " +
+                "local i=1; " +
+                "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
+                "while bag <= 11 do " +
+                   "local itemf  = GetItemFamily({0}) " +
+                   "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
+                   "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
+                      "for slot=1, GetContainerNumSlots(bag) do " +
+                         "local _,c,l = GetContainerItemInfo(bag, slot) " +
+                         "local id = GetContainerItemID(bag, slot) or 0 " +
+                         "if c == nil then " + 
+                            "bagInfo[i]={{bag,slot,maxStack}} " +
+                            "i=i+1 " +
+                         "elseif l == nil and id == {0} and c < maxStack then " +
+                            "bagInfo[i]={{bag,slot,maxStack-c}} " +
+                            "i=i+1 " +
                          "end " +
                       "end " +
-                       "bagInfo[2] = 1 " +
-                      "bagInfo[1] = bagInfo[1] + 1 " +
-                      "if bagInfo[1] == 0 then bagInfo[1] = 5 end " +
                    "end " +
+                   "bag = bag + 1 " +
+                   "if bag == 0 then bag = 5 end " +
                 "end " +
+                "i=1 " +
                 "for bag = 0,4 do " +
-                   "for slot=GetContainerNumSlots(bag),1,-1 do " +
-                      "local id = GetContainerItemID(bag,slot) " +
+                   "for slot=1,GetContainerNumSlots(bag) do " +
+                      "if i > #bagInfo then return end " +
+                      "local id = GetContainerItemID(bag,slot) or 0 " +
                       "local _,c,l = GetContainerItemInfo(bag, slot) " +
-                      "local _,_,_,_,_,_,_, maxStack = GetItemInfo(id or 0) " +
+                      "local _,_,_,_,_,_,_, maxStack = GetItemInfo(id) " +
                       "if id == {0} and l == nil then " +
-                         "if c + bagged <= {1} then " +
+                         "if c + bagged <= {1} and c <= bagInfo[i][3] then " +
                             "PickupContainerItem(bag, slot) " +
-                            "storeInBank() " +
+                            "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
                             "bagged = bagged + c " +
+                            "if c== bagInfo[i][3] then i=i+1 end " +
                          "else " +
-                            "SplitContainerItem(bag,slot, {1}-bagged) " +
-                            "storeInBank() " +
-                            "return unpack(bagInfo) " +
+                            "local cnt = {1}-bagged " +
+                            "if cnt > bagInfo[i][3] then cnt = bagInfo[i][3] end " +
+                            "SplitContainerItem(bag,slot, cnt) " +
+                            "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
+                            "bagged = bagged + cnt " +
+                            "if cnt == bagInfo[i][3] then i=i+1 end " +
                          "end " +
                       "end " +
-                      "if bagged == {1} then return unpack(bagInfo) end " +
+                      "if bagged == {1} then return end " +
                    "end " +
-                "end " +
-                "return unpack(bagInfo) "
-                , id, amount <= 0 ? int.MaxValue : amount, _currentBag, _currentSlot);
-            List<string> retVals = Lua.GetReturnValues(lua);
-            int.TryParse(retVals[0], out _currentBag);
-            int.TryParse(retVals[1], out _currentSlot);
+                "end return "
+                , id, amount <= 0 ? int.MaxValue : amount);
+            Lua.DoString(lua);
             return true;
         }
         public override string Name { get { return "Deposit Item in Bank"; } }
@@ -473,6 +495,7 @@ namespace HighVoltz.Composites
             base.Reset();
             queueServerSW = null;
             ItemList = null;
+            itemsSW = new Stopwatch();
             _currentBag = -1;
             _currentSlot = 1;
         }
