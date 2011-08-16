@@ -141,6 +141,7 @@ namespace HighVoltz.Composites
         // key= itemID; value amount to withdrawl
         Dictionary<uint, int> ItemList = null;
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
+        Stopwatch _itemsSW ;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -152,6 +153,13 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
+                    if (_itemsSW == null)
+                    {
+                        _itemsSW = new Stopwatch();
+                        _itemsSW.Start();
+                    }
+                    else if (_itemsSW.ElapsedMilliseconds < 2000)
+                        return RunStatus.Running;
                     if (ItemList == null)
                         ItemList = BuildItemList();
                     // no bag space... 
@@ -168,6 +176,8 @@ namespace HighVoltz.Composites
                         if (done)
                             ItemList.Remove(kv.Key);
                     }
+                    _itemsSW.Reset();
+                    _itemsSW.Start();
                 }
                 if (IsDone)
                 {
@@ -393,6 +403,7 @@ namespace HighVoltz.Composites
             base.Reset();
             queueServerSW = null;
             ItemList = null;
+            _itemsSW = null;
         }
 
         public override string Name { get { return "Withdraw Item From Bank"; } }

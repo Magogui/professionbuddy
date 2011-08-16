@@ -188,9 +188,12 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    if (!itemsSW.IsRunning)
-                        itemsSW.Start();
-                    else if (itemsSW.ElapsedMilliseconds < 2000)
+                    if (_itemsSW == null)
+                    {
+                        _itemsSW = new Stopwatch();
+                        _itemsSW.Start();
+                    }
+                    else if (_itemsSW.ElapsedMilliseconds < 2000)
                         return RunStatus.Running;
                     if (ItemList == null)
                         ItemList = BuildItemList();
@@ -206,8 +209,12 @@ namespace HighVoltz.Composites
                         else
                             done = PutItemInGBank(kv.Key, kv.Value, GuildTab);
                         if (done)
+                        {
+                            Professionbuddy.Debug("Done Depositing Item:{0} to bank",kv.Key);
                             ItemList.Remove(kv.Key);
-                        itemsSW.Reset();
+                        }
+                        _itemsSW.Reset();
+                        _itemsSW.Start();
                     }
                 }
                 if (IsDone)
@@ -288,6 +295,12 @@ namespace HighVoltz.Composites
                     IsDone = true;
                 }
             }
+            Professionbuddy.Debug("List of items to deposit to bank");
+            foreach (var item in itemList)
+            {
+                Professionbuddy.Debug("Item:{0} Amount:{1}",item.Key,item.Value);
+            }
+            Professionbuddy.Debug("End of list");
             return itemList;
         }
 
@@ -337,7 +350,7 @@ namespace HighVoltz.Composites
 
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch queueServerSW;
-        Stopwatch itemsSW = new Stopwatch();
+        Stopwatch _itemsSW ;
         int _currentBag = -1;
         int _currentSlot = 1;
         public bool PutItemInGBank(uint id, int amount, uint tab)
@@ -456,14 +469,14 @@ namespace HighVoltz.Composites
                             "PickupContainerItem(bag, slot) " +
                             "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
                             "bagged = bagged + c " +
-                            "if c== bagInfo[i][3] then i=i+1 end " +
+                            "i=i+1 " +
                          "else " +
                             "local cnt = {1}-bagged " +
                             "if cnt > bagInfo[i][3] then cnt = bagInfo[i][3] end " +
                             "SplitContainerItem(bag,slot, cnt) " +
                             "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
                             "bagged = bagged + cnt " +
-                            "if cnt == bagInfo[i][3] then i=i+1 end " +
+                            "i=i+1 " +
                          "end " +
                       "end " +
                       "if bagged == {1} then return end " +
@@ -495,7 +508,7 @@ namespace HighVoltz.Composites
             base.Reset();
             queueServerSW = null;
             ItemList = null;
-            itemsSW = new Stopwatch();
+            _itemsSW = null;
             _currentBag = -1;
             _currentSlot = 1;
         }
