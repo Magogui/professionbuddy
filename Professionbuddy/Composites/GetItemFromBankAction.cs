@@ -158,7 +158,7 @@ namespace HighVoltz.Composites
                         _itemsSW = new Stopwatch();
                         _itemsSW.Start();
                     }
-                    else if (_itemsSW.ElapsedMilliseconds < 2000)
+                    else if (_itemsSW.ElapsedMilliseconds < Professionbuddy.Ping * 3)
                         return RunStatus.Running;
                     if (ItemList == null)
                         ItemList = BuildItemList();
