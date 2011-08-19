@@ -248,7 +248,7 @@ namespace HighVoltz.Composites {
             switch (ItemListType) {
                 case ItemType.Item:
                     foreach (uint id in idList)
-                        list.Add(new BuyItemEntry() { Id = id, BuyAmount = Amount });
+                        list.Add(new BuyItemEntry() { Id = id, BuyAmount = Amount -Util.GetCarriedItemCount(id)});
                     break;
                 case ItemType.MaterialList:
                     foreach (var kv in Pb.MaterialList) {

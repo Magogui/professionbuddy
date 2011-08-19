@@ -270,7 +270,7 @@ namespace HighVoltz.Composites
                         {
                             uint temp = 0;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, Amount);
+                            items.Add(temp, Amount-(int)Util.GetCarriedItemCount(temp));
                         }
                     }
                     else

@@ -207,7 +207,6 @@ namespace HighVoltz.Composites
                 {
                     if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) == 1)
                     {
-                        queueTimer.Stop();
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
@@ -229,7 +228,6 @@ namespace HighVoltz.Composites
             if (scanned)
             {
                 Professionbuddy.Debug("lowest buyout {0}", ae.LowestBo);
-                queueTimer.Stop();
                 queueTimer.Reset();
                 totalAuctions = 0;
                 page = 0;
