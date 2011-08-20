@@ -15,8 +15,6 @@
 	<MinLevel>1</MinLevel>
 	<MaxLevel>86</MaxLevel>
 
-	<ContinentID>1</ContinentID>
-
 	<Mailboxes>
 		<!-- Durotar -->
 		<Mailbox X="321.8162" Y="-4707.742" Z="14.555" />

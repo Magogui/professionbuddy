@@ -15,8 +15,6 @@
 	<MinLevel>1</MinLevel>
 	<MaxLevel>86</MaxLevel>
 
-	<ContinentID>0</ContinentID>
-
 	<Mailboxes>
 		<!-- Ewynn Forest -->
 		<Mailbox X="-9455.054" Y="46.70951" Z="56.60733" />

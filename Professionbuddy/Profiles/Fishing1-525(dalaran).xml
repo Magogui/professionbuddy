@@ -16,7 +16,7 @@
     <If Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Me.BagsFull" IgnoreCanRun="True" ChildrenCount="1">
       <CallSubRoutine SubRoutineName="VenderAndTrain" />
     </If>
-    <If Condition="DistanceTo(5701.468, 621.2751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
+    <If Condition="DistanceTo(5700.02, 618.8751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
       <CallSubRoutine SubRoutineName="MoveToFishingSpot" />
     </If>
     <If Condition="Me.Rotation &lt;4.0 || Me.Rotation &gt; 5.5" IgnoreCanRun="True" ChildrenCount="5">
@@ -46,9 +46,9 @@
   </If>
   <SubRoutine SubRoutineName="MoveToFishingSpot" ChildrenCount="3">
     <CustomAction Code="Log(&quot;Moving to fishing spot&quot;);" />
-    <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5701.468" Y="621.2751" Z="646.241" />
-    <While Condition="DistanceTo(5701.468, 621.2751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
-      <CustomAction Code="CTM(5701.468, 621.2751, 646.241);" />
+    <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5700.02" Y="618.8751" Z="646.241" />
+    <While Condition="DistanceTo(5700.00, 618.8751, 646.241) &gt;1.5" IgnoreCanRun="True" ChildrenCount="1">
+      <CustomAction Code="CTM(5700.00, 618.8751, 646.241);" />
     </While>
   </SubRoutine>
   <SubRoutine SubRoutineName="VenderAndTrain" ChildrenCount="7">
