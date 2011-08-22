@@ -280,7 +280,7 @@ namespace HighVoltz.Composites
                         {
                             uint temp = 0;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, WithdrawAdditively?  Amount-(int)Util.GetCarriedItemCount(temp):Amount);
+                            items.Add(temp, !WithdrawAdditively?  Amount-(int)Util.GetCarriedItemCount(temp):Amount);
                         }
                     }
                     else
@@ -429,7 +429,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will withdraw the specified item from your personal or guild bank, it can also withdraw items needed for your recipes in the action tree.";
+                return "This action will withdraw the specified item from your personal or guild bank, it can also withdraw items needed for your recipes in the action tree.WithdrawAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
             }
         }
         public override object Clone()
