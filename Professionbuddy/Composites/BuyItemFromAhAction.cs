@@ -46,6 +46,12 @@ namespace HighVoltz.Composites {
             get { return (uint)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        public bool BuyAdditively
+        {
+            get { return (bool)Properties["BuyAdditively"].Value; }
+            set { Properties["BuyAdditively"].Value = value; }
+        }
+
         public bool AutoFindAh {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
@@ -67,6 +73,8 @@ namespace HighVoltz.Composites {
             Properties["Amount"] = new MetaProp("Amount", typeof(uint));
             Properties["ItemListType"] = new MetaProp("ItemListType", typeof(ItemType), new DisplayNameAttribute("Buy ..."));
             Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
+
             Properties["BidOnItem"] = new MetaProp("BidOnItem", typeof(bool), new DisplayNameAttribute("Bid on Item"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
@@ -78,6 +86,7 @@ namespace HighVoltz.Composites {
             Location = loc.ToInvariantString();
             MaxBuyout = new PropertyBag.GoldEditor("100g0s0c");
             BidOnItem = false;
+            BuyAdditively = true;
 
             Properties["AutoFindAh"].PropertyChanged += new EventHandler(AutoFindAHChanged);
             Properties["ItemListType"].PropertyChanged += new EventHandler(BuyItemFromAhAction_PropertyChanged);
@@ -107,10 +116,12 @@ namespace HighVoltz.Composites {
             if (ItemListType == ItemType.MaterialList) {
                 Properties["ItemID"].Show = false;
                 Properties["Amount"].Show = false;
+                Properties["BuyAdditively"].Show = false;
             }
             else {
                 Properties["ItemID"].Show = true;
                 Properties["Amount"].Show = true;
+                Properties["BuyAdditively"].Show = true;
             }
             RefreshPropertyGrid();
         }
@@ -248,7 +259,8 @@ namespace HighVoltz.Composites {
             switch (ItemListType) {
                 case ItemType.Item:
                     foreach (uint id in idList)
-                        list.Add(new BuyItemEntry() { Id = id, BuyAmount = Amount -Util.GetCarriedItemCount(id)});
+                        list.Add(new BuyItemEntry() { Id = id,
+                            BuyAmount = BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount });
                     break;
                 case ItemType.MaterialList:
                     foreach (var kv in Pb.MaterialList) {
@@ -290,7 +302,7 @@ namespace HighVoltz.Composites {
         }
         public override string Help {
             get {
-                return "This action will buy a either a specified item, ingredients that a recipe requires or whatevers in the material list from the Auction house if item is below specified maximum price. The ItemID is the id of the item or the recipe Id if buying materials for a recipe.'Bid On Item', if set to true will bid on an item if buyout price > maxBuyout and minBid <= maxBuyout. ItemID accepts a comma separated list of Item IDs";
+                return "This action will buy a either a specified item, ingredients that a recipe requires or whatevers in the material list from the Auction house if item is below specified maximum price. The ItemID is the id of the item or the recipe Id if buying materials for a recipe.'Bid On Item', if set to true will bid on an item if buyout price > maxBuyout and minBid <= maxBuyout. ItemID accepts a comma separated list of Item IDs. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
             }
         }
 
@@ -302,7 +314,8 @@ namespace HighVoltz.Composites {
                 ItemListType = this.ItemListType,
                 AutoFindAh = this.AutoFindAh,
                 Location = this.Location,
-                BidOnItem = this.BidOnItem
+                BidOnItem = this.BidOnItem,
+                BuyAdditively = this.BuyAdditively,
             };
         }
         #region XmlSerializer
@@ -320,6 +333,13 @@ namespace HighVoltz.Composites {
             bool boolVal;
             bool.TryParse(reader["AutoFindAh"], out boolVal);
             AutoFindAh = boolVal;
+
+            if (reader.MoveToAttribute("BuyAdditively"))
+            {
+                bool.TryParse(reader["BuyAdditively"], out boolVal);
+                BuyAdditively = boolVal;
+            }
+
             float x, y, z;
             x = reader["X"].ToSingle();
             y = reader["Y"].ToSingle();
@@ -342,6 +362,7 @@ namespace HighVoltz.Composites {
             writer.WriteAttributeString("Y", loc.Y.ToString());
             writer.WriteAttributeString("Z", loc.Z.ToString());
             writer.WriteAttributeString("BidOnItem", BidOnItem.ToString());
+            writer.WriteAttributeString("BuyAdditively", BuyAdditively.ToString());
         }
         #endregion
     }

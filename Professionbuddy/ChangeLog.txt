@@ -1,5 +1,6 @@
-Professionbuddy 1.97
-* 'Buy Item','Buy Item from AH' and 'WithDraw Item From Bank' if set to buy/withdraw a specific item will subtract the amount player has bags from the amount to buy/withdraw
+Professionbuddy 1.101
+* 'Buy Item','Buy Item from AH' and 'WithDraw Item From Bank' if set to buy/withdraw a specific item will subtract the amount player has bags from the amount to buy/withdraw if 'BuyAdditively' is set to false.
+
 Professionbuddy 1.71
 * Added a Cancel Auction action. 
 * Fixed a bug with 'Buy Item' action where it failed to work if buying 20 items.

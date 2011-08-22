@@ -74,7 +74,7 @@
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <Comment Text="if we are not canceling undercut auctions than post if competition is below minBuyout" />
-      <If Condition="!(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True" ChildrenCount="15">
+      <If Condition="!(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True" ChildrenCount="16">
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Cloth" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Armor" SubCategoryType="WoWItemArmorClass" SubCategory="Misc" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -94,9 +94,10 @@
         <If Condition="!(bool)Settings[&quot;Prospect&quot;]" IgnoreCanRun="True" ChildrenCount="1">
           <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
+        <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="20g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       </If>
       <Comment Text="if we are canceling undercut auctions than don't post if competition is below minBuyout" />
-      <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True" ChildrenCount="15">
+      <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True" ChildrenCount="16">
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Cloth" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
         <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Armor" SubCategoryType="WoWItemArmorClass" SubCategory="Misc" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
@@ -116,6 +117,7 @@
         <If Condition="!(bool)Settings[&quot;Prospect&quot;]" IgnoreCanRun="False" ChildrenCount="1">
           <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
         </If>
+        <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="20g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
       </If>
       <CustomAction Code="var1 = false;" />
     </If>

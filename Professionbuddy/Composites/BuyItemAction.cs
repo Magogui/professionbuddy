@@ -46,12 +46,18 @@ namespace HighVoltz.Composites
             get { return (uint)Properties["Count"].Value; }
             set { Properties["Count"].Value = value; }
         }
+        public bool BuyAdditively
+        {
+            get { return (bool)Properties["BuyAdditively"].Value; }
+            set { Properties["BuyAdditively"].Value = value; }
+        }
         public BuyItemAction() {
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["Count"] = new MetaProp("Count", typeof(uint));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType), new DisplayNameAttribute("Buy"));
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
 
             ItemID = "";
             Count = 0u;
@@ -59,9 +65,11 @@ namespace HighVoltz.Composites
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
             NpcEntry = 0u;
+            BuyAdditively = true;
 
             Properties["ItemID"].Show = false;
             Properties["Count"].Show = false;
+            Properties["BuyAdditively"].Show = false;
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             Properties["BuyItemType"].PropertyChanged += new EventHandler(BuyItemAction_PropertyChanged);
         }
@@ -79,10 +87,12 @@ namespace HighVoltz.Composites
                 case BuyItemActionType.Material:
                     Properties["ItemID"].Show = false;
                     Properties["Count"].Show = false;
+                    Properties["BuyAdditively"].Show = false;
                     break;
                 case BuyItemActionType.SpecificItem:
                     Properties["ItemID"].Show = true;
                     Properties["Count"].Show = true;
+                    Properties["BuyAdditively"].Show = true;
                     break;
             }
             RefreshPropertyGrid();
@@ -144,7 +154,7 @@ namespace HighVoltz.Composites
                                 return RunStatus.Failure;
                             }
                             foreach (uint id in idList)
-                                buyItem(id, Count-Util.GetCarriedItemCount(id));
+                                buyItem(id, BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count);
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {
@@ -211,7 +221,7 @@ namespace HighVoltz.Composites
 
         public override string Help {
             get {
-                return "This action will buy items from a merchant frame, either a specific item or any materials the NPC has that are needed for recipes in the action tree";
+                return "This action will buy items from a merchant frame, either a specific item or any materials the NPC has that are needed for recipes in the action tree. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
             }
         }
 
@@ -222,7 +232,8 @@ namespace HighVoltz.Composites
                 ItemID = this.ItemID,
                 BuyItemType = this.BuyItemType,
                 Location = this.Location,
-                NpcEntry = this.NpcEntry
+                NpcEntry = this.NpcEntry,
+                BuyAdditively = this.BuyAdditively
             };
         }
         #region XmlSerializer
@@ -239,6 +250,12 @@ namespace HighVoltz.Composites
             {
                 uint.TryParse(reader["NpcEntry"], out val);
                 NpcEntry = val;
+            }
+            if (reader.MoveToAttribute("BuyAdditively"))
+            {
+                bool boolVal = false;
+                bool.TryParse(reader["BuyAdditively"], out boolVal);
+                BuyAdditively = boolVal;
             }
             if (reader.MoveToAttribute("X"))
             {
@@ -259,6 +276,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("ItemID", ItemID);
             writer.WriteAttributeString("Count", Count.ToString());
             writer.WriteAttributeString("BuyItemType", BuyItemType.ToString());
+            writer.WriteAttributeString("BuyAdditively", BuyAdditively.ToString());
         }
         #endregion
     }

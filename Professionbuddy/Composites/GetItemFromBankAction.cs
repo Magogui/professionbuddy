@@ -61,6 +61,11 @@ namespace HighVoltz.Composites
             get { return (bool)Properties["AutoFindBank"].Value; }
             set { Properties["AutoFindBank"].Value = value; }
         }
+        public bool WithdrawAdditively
+        {
+            get { return (bool)Properties["WithdrawAdditively"].Value; }
+            set { Properties["WithdrawAdditively"].Value = value; }
+        }
         WoWPoint loc;
         public string Location
         {
@@ -78,6 +83,7 @@ namespace HighVoltz.Composites
             Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool), new DisplayNameAttribute("Auto find Bank"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
+            Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool), new DisplayNameAttribute("Withdraw Additively"));
 
             Amount = 1;
             ItemID = "";
@@ -88,6 +94,8 @@ namespace HighVoltz.Composites
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
             NpcEntry = 0u;
+            WithdrawAdditively = true; 
+
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
             Properties["AutoFindBank"].PropertyChanged += new EventHandler(AutoFindBankChanged);
@@ -127,10 +135,12 @@ namespace HighVoltz.Composites
                 case BankWithdrawlItemType.SpecificItem:
                     Properties["Amount"].Show = true;
                     Properties["ItemID"].Show = true;
+                    Properties["WithdrawAdditively"].Show = true;
                     break;
                 case BankWithdrawlItemType.Materials:
                     Properties["Amount"].Show = false;
                     Properties["ItemID"].Show = false;
+                    Properties["WithdrawAdditively"].Show = false;
                     break;
             }
             RefreshPropertyGrid();
@@ -270,7 +280,7 @@ namespace HighVoltz.Composites
                         {
                             uint temp = 0;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, Amount-(int)Util.GetCarriedItemCount(temp));
+                            items.Add(temp, WithdrawAdditively?  Amount-(int)Util.GetCarriedItemCount(temp):Amount);
                         }
                     }
                     else
@@ -435,6 +445,7 @@ namespace HighVoltz.Composites
                 NpcEntry = this.NpcEntry,
                 Location = this.Location,
                 MinFreeBagSlots = this.MinFreeBagSlots,
+                WithdrawAdditively = this.WithdrawAdditively
             };
         }
 
@@ -453,9 +464,9 @@ namespace HighVoltz.Composites
             GetItemfromBankType = (BankWithdrawlItemType)Enum.Parse(typeof(BankWithdrawlItemType), reader["GetItemfromBankType"]);
             uint.TryParse(reader["NpcEntry"], out id);
             NpcEntry = id;
-            bool autofind;
-            bool.TryParse(reader["AutoFindBank"], out autofind);
-            AutoFindBank = autofind;
+            bool boolVal;
+            bool.TryParse(reader["AutoFindBank"], out boolVal);
+            AutoFindBank = boolVal;
             float x, y, z;
             x = reader["X"].ToSingle();
             y = reader["Y"].ToSingle();
@@ -466,6 +477,11 @@ namespace HighVoltz.Composites
             {
                 uint.TryParse(reader["MinFreeBagSlots"], out id);
                 MinFreeBagSlots = id;
+            }
+            if (reader.MoveToAttribute("WithdrawAdditively"))
+            {
+                bool.TryParse(reader["WithdrawAdditively"], out boolVal);
+                WithdrawAdditively = boolVal;
             }
             reader.ReadStartElement();
         }
@@ -481,6 +497,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("Y", loc.Y.ToString());
             writer.WriteAttributeString("Z", loc.Z.ToString());
             writer.WriteAttributeString("MinFreeBagSlots", MinFreeBagSlots.ToString());
+            writer.WriteAttributeString("WithdrawAdditively", WithdrawAdditively.ToString());
         }
         #endregion
     }
