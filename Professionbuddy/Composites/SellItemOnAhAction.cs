@@ -353,7 +353,7 @@ namespace HighVoltz.Composites
                     "local sold = 0 " +
                     "local leftovers = 0 " +
                     "local numItems = GetItemCount(itemID) " +
-                    "if numItems == 0 then return 1 end " +
+                    "if numItems == 0 then return -1 end " +
                     "if AuctionProgressFrame:IsVisible() == nil then " +
                         "AuctionFrameTab3:Click() " +
                         "local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID) " +
