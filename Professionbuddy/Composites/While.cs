@@ -16,44 +16,44 @@ namespace HighVoltz.Composites
     {
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            //lock (_lockObject)
-            //{
-            if (IsDone)
+            lock (_lockObject)
             {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            foreach (Composite node in Children)
-            {
-                node.Start(context);
-                // Keep stepping through the enumeration while it's returing RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
-                    node.Tick(context) == RunStatus.Running)
+                if (IsDone)
                 {
-                    Selection = node;
-                    yield return RunStatus.Running;
-                }
-                Selection = null;
-                //node.Stop(context); tick will call stop, so why do it twice?
-                if (node.LastStatus == RunStatus.Success)
-                {
-                    yield return RunStatus.Success;
+                    yield return RunStatus.Failure;
                     yield break;
                 }
+                foreach (Composite node in Children)
+                {
+                    node.Start(context);
+                    // Keep stepping through the enumeration while it's returing RunStatus.Running
+                    // or until CanRun() returns false if IgnoreCanRun is false..
+                    while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
+                        node.Tick(context) == RunStatus.Running)
+                    {
+                        Selection = node;
+                        yield return RunStatus.Running;
+                    }
+                    Selection = null;
+                    //node.Stop(context); tick will call stop, so why do it twice?
+                    if (node.LastStatus == RunStatus.Success)
+                    {
+                        yield return RunStatus.Success;
+                        yield break;
+                    }
+                }
+                Reset();
+                if (!CanRun(context))
+                {
+                    yield return RunStatus.Failure;
+                    yield break;
+                }
+                else
+                {
+                    yield return RunStatus.Success;
+                    //yield break;
+                }
             }
-            Reset();
-            if (!CanRun(context))
-            {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            else
-            {
-                yield return RunStatus.Success;
-                //yield break;
-            }
-            //}
         }
 
         override public string Name { get { return "While Condition"; } }

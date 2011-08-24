@@ -871,7 +871,11 @@ namespace HighVoltz
         public uint InBagItemCount { get { return subclass.InBagsCount; } }
         
         public static uint GetInBagItemCount(uint id) {
-            return (uint)ObjectManager.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            try
+            {
+                return (uint)ObjectManager.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            }
+            catch (Exception ex) { Logging.WriteException(ex); return 0; }
         }
     }
     #endregion

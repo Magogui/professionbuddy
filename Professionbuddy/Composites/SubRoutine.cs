@@ -33,35 +33,35 @@ namespace HighVoltz.Composites
         // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            //lock (Locker) 
-            //{  
-            if (context == null || !(context is string) || (string)context != SubRoutineName)
+            lock (Locker)
             {
+                if (context == null || !(context is string) || (string)context != SubRoutineName)
+                {
+                    yield return RunStatus.Failure;
+                    yield break;
+                }
+                foreach (Composite node in Children)
+                {
+                    node.Start(context);
+                    // Keep stepping through the enumeration while it's returing RunStatus.Running
+                    // or until CanRun() returns false if IgnoreCanRun is false..
+                    while (node.Tick(context) == RunStatus.Running)
+                    {
+                        Selection = node;
+                        yield return RunStatus.Running;
+                    }
+
+                    Selection = null;
+                    node.Stop(context);
+                    if (node.LastStatus == RunStatus.Success)
+                    {
+                        yield return RunStatus.Success;
+                        yield break;
+                    }
+                }
                 yield return RunStatus.Failure;
                 yield break;
             }
-            foreach (Composite node in Children)
-            {
-                node.Start(context);
-                // Keep stepping through the enumeration while it's returing RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                while (node.Tick(context) == RunStatus.Running)
-                {
-                    Selection = node;
-                    yield return RunStatus.Running;
-                }
-
-                Selection = null;
-                node.Stop(context);
-                if (node.LastStatus == RunStatus.Success)
-                {
-                    yield return RunStatus.Success;
-                    yield break;
-                }
-            }
-            yield return RunStatus.Failure;
-            yield break;
-            //}
         }
 
         virtual public void Reset()
