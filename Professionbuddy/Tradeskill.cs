@@ -23,7 +23,7 @@ namespace HighVoltz
         // needs to be moved to offsets enum
 
         //private static uint TradeskillOffset = 0xA92550; // wow 4.1
-        private static uint TradeskillOffset = 0xB0AAE8; // wow 4.2
+        private static uint TradeskillOffset = 0xB0D5E8; // wow 4.2
         internal struct SkillOffset
         {
             public const uint Guid = 0; // guid of player who's tradeskill is shown, could be someone besides localplayer.
