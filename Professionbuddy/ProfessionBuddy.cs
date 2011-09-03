@@ -78,10 +78,10 @@ namespace HighVoltz
         public Professionbuddy()
         {
             Instance = this;
-                new Thread((ThreadStart)delegate
+            new Thread((ThreadStart)delegate
+                {
+                    try
                     {
-                                    try
-            {
                         var mod = Process.GetCurrentProcess().MainModule;
                         using (HashAlgorithm hashAlg = new SHA1Managed())
                         {
@@ -93,9 +93,9 @@ namespace HighVoltz
                         }
                         var vInfo = mod.FileVersionInfo;
                         Logging.WriteDebug("V: {0}", vInfo.FileVersion);
+                    }
                     catch { }
-                                    }).Start() ;
-                    
+                }).Start();
         }
         #endregion
 
