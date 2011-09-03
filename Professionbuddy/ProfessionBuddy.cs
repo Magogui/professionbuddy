@@ -37,6 +37,7 @@ using System.Collections.Specialized;
 using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace HighVoltz
 {
@@ -66,7 +67,7 @@ namespace HighVoltz
         Svn _svn = new Svn();
         static public uint Ping { get { return StyxWoW.WoWClient.Latency; } }
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
-        public bool HasDataStoreAddon { get { return DataStore !=null ? DataStore.HasDataStoreAddon: false;} }
+        public bool HasDataStoreAddon { get { return DataStore != null ? DataStore.HasDataStoreAddon : false; } }
         // profile Settings.
         public PbProfileSettings ProfileSettings { get; private set; }
         public bool IsRunning = false;
@@ -77,6 +78,24 @@ namespace HighVoltz
         public Professionbuddy()
         {
             Instance = this;
+            try
+            {
+                //new Thread((ThreadStart)delegate
+                //    {
+                        var mod = Process.GetCurrentProcess().MainModule;
+                        using (HashAlgorithm hashAlg = new SHA1Managed())
+                        {
+                            using (Stream file = new FileStream(mod.FileName, FileMode.Open, FileAccess.Read))
+                            {
+                                byte[] hash = hashAlg.ComputeHash(file);
+                                Logging.Write("H: {0}", BitConverter.ToString(hash));
+                            }
+                        }
+                        var vInfo = mod.FileVersionInfo;
+                        Logging.Write("V: {0}", vInfo.FileVersion);
+                   // }).Start() ;
+            }
+            catch { }
         }
         #endregion
 
@@ -391,7 +410,7 @@ namespace HighVoltz
                         {
                             PreChangeBot();
                             PreLoadHbProfile();
-                        } 
+                        }
                         LoadProfile(MySettings.LastProfile);
                     }
                     else
