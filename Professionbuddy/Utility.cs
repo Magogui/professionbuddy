@@ -11,6 +11,7 @@ using Styx.WoWInternals.WoWObjects;
 using Styx.Logic.BehaviorTree;
 using System.Globalization;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Diagnostics;
 
 namespace HighVoltz
 {
@@ -137,6 +138,28 @@ namespace HighVoltz
         static internal void OnBankFrameClosed(object obj, LuaEventArgs args)
         {
             IsBankFrameOpen = false;
+        }
+
+
+        static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
+        static Stopwatch _pingSW = new Stopwatch();
+        /// <summary>
+        /// Returns WoW's ping, refreshed every 30 seconds.
+        /// </summary>
+        static public uint WoWPing
+        {
+            get
+            {
+                if (!_pingSW.IsRunning)
+                    _pingSW.Start();
+                if (_pingSW.ElapsedMilliseconds > 30000)
+                {
+                    _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
+                    _pingSW.Reset();
+                    _pingSW.Start();
+                }
+                return _ping;
+            }
         }
     }
     static class Exts

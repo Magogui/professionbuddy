@@ -65,7 +65,6 @@ namespace HighVoltz
         public event EventHandler OnTradeSkillsLoaded;
         public readonly LocalPlayer Me = ObjectManager.Me;
         Svn _svn = new Svn();
-        static public uint Ping { get { return StyxWoW.WoWClient.Latency; } }
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
         public bool HasDataStoreAddon { get { return DataStore != null ? DataStore.HasDataStoreAddon : false; } }
         // profile Settings.
