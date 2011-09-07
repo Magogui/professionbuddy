@@ -12,7 +12,7 @@ using Styx.Helpers;
 
 namespace HighVoltz.Composites
 {
-    class ChangeBotAction : PBAction
+    public class ChangeBotAction : PBAction
     {
         public string BotName
         {
@@ -30,38 +30,51 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                ChangeBot();
-                IsDone = true;
+                try
+                {
+                    ChangeBot();
+                }
+                finally
+                {
+                    IsDone = true;
+                }
             }
             return RunStatus.Failure;
         }
 
-        public bool ChangeBot()
+        public void ChangeBot()
         {
-            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(BotName)).Value;
-            if (bot == null)
+            ChangeBot(BotName);
+        }
+
+        static public void ChangeBot(string name)
+        {
+            try
             {
-                Professionbuddy.Err("ChangeBotAction was unable to find the following bot {0}",BotName);
-                return false;
-            }
-            Professionbuddy.Log("ChangeBotAction: Switching to {0}",BotName);
-            new Thread(() => {
-                try
+                BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(name)).Value;
+                if (bot != null)
                 {
-                    TreeRoot.Stop();
-                }
-                catch (Exception ex)
-                {
-                    Logging.Write("ChangeBot: " + ex.ToString());
-                }
-                finally
-                {
+                    Professionbuddy.Log("Changing bot to {0}", name);
                     BotManager.Instance.SetCurrent(bot);
-                    Thread.Sleep(3000);
-                    TreeRoot.Start();
                 }
-            }).Start();
-            return true;
+                else
+                {
+                    Professionbuddy.Err("Bot {0} does not exist", name);
+                }
+            }
+            finally
+            {
+                new Thread(() => {
+                    try
+                    {
+                    }
+                    finally
+                    {
+                        Thread.Sleep(3000);
+                        TreeRoot.Start();
+                    }
+                }).Start();
+            }
         }
 
         public override string Name { get { return "Change Bot"; } }
@@ -69,7 +82,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return string.Format("{0} to :{1}",Name,BotName);
+                return string.Format("{0} to :{1}", Name, BotName);
             }
         }
         public override string Help

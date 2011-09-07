@@ -213,7 +213,7 @@ namespace HighVoltz.Composites {
         }
         public override string Help {
             get {
-                return "This action will mail either all items that match the specific ID or a specific amount.Setting Count to 0 will mail all items that match Entry. Note: Count = axact number, not stacks";
+                return "This action will mail either all items that match Item ID or by item category.Setting Count to 0 will mail all items that match Entry. Note: Count = axact number, not stacks. This mails items to the 'Mail Recipient' from Honorbuddy settings. ";
             }
         }
         public override object Clone() {

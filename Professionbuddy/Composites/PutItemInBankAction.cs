@@ -403,15 +403,14 @@ namespace HighVoltz.Composites
                             "PickupContainerItem(bag,slot) " +
                             "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
                             "bagged = bagged + c " +
-                            "i=i+1 " +
                          "else " +
                             "local cnt = {1}-bagged " +
                             "if cnt > tabInfo[i][3] then cnt = tabInfo[i][3] end " +
                             "SplitContainerItem(bag,slot, cnt) " +
                             "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
                             "bagged = bagged + cnt " +
-                            "i=i+1 " +
                          "end " +
+                         "i=i+1 " +
                       "end " +
                       "if bagged >= {1} then return end " +
                    "end " +
@@ -445,7 +444,7 @@ namespace HighVoltz.Composites
                       "for slot=1, GetContainerNumSlots(bag) do " +
                          "local _,c,l = GetContainerItemInfo(bag, slot) " +
                          "local id = GetContainerItemID(bag, slot) or 0 " +
-                         "if c == nil then " + 
+                         "if c == nil then " +
                             "bagInfo[i]={{bag,slot,maxStack}} " +
                             "i=i+1 " +
                          "elseif l == nil and id == {0} and c < maxStack then " +
@@ -469,15 +468,14 @@ namespace HighVoltz.Composites
                             "PickupContainerItem(bag, slot) " +
                             "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
                             "bagged = bagged + c " +
-                            "i=i+1 " +
                          "else " +
                             "local cnt = {1}-bagged " +
                             "if cnt > bagInfo[i][3] then cnt = bagInfo[i][3] end " +
                             "SplitContainerItem(bag,slot, cnt) " +
                             "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
                             "bagged = bagged + cnt " +
-                            "i=i+1 " +
                          "end " +
+                         "i=i+1 " +
                       "end " +
                       "if bagged == {1} then return end " +
                    "end " +

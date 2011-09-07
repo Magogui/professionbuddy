@@ -60,7 +60,7 @@ namespace HighVoltz.Composites
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
 
             ItemID = "";
-            Count = 0u;
+            Count = 1u;
             BuyItemType = BuyItemActionType.Material;
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();

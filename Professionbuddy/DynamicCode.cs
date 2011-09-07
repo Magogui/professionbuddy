@@ -39,16 +39,8 @@ namespace HighVoltz
     {
 
         Dictionary<string, ICSharpCode> CsharpCodeDict;
-        //Dictionary<string, If> DecoratorMethods;
-        //Dictionary<string, CustomAction> ActionMethods;
-        //Dictionary<string, WaitAction> WaitMethods;
 
         public bool CodeWasModified = true;
-
-        static string GB2Path = Path.Combine(Logging.ApplicationPath, "Bots\\Gatherbuddy2\\GatherBuddy2.dll");
-        static string AbPath = Path.Combine(Logging.ApplicationPath, "Bots\\ArchaeologyBuddy\\ArchaeologyBuddy.dll");
-        static bool hasGB2 = File.Exists(GB2Path);
-        static bool hasAB = File.Exists(AbPath);
 
         void WipeTempFolder()
         {
@@ -118,8 +110,6 @@ namespace HighVoltz
         #region Strings
 
         static string prefix =
-        (hasGB2 ? "using Bots.Gatherbuddy;" : "") +
-        (hasAB ? "using Bots.ArchaeologyBuddy;" : "") +
         @"using HighVoltz;
         using System;
         using System.Reflection;
@@ -151,6 +141,7 @@ namespace HighVoltz
         using Styx.Plugins.PluginClass;
         using Styx.WoWInternals.World;
         using Styx.Combat.CombatRoutine;
+        using HighVoltz.Composites;
         public class CodeDriver
         {";
         static string postfix =
@@ -190,7 +181,7 @@ namespace HighVoltz
             void CTM(double x,double y,double z) {Helpers.CTM(x,y,z); }
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
-            void SwitchToBot(string botName) {Log(@""Switching to {0} BotBase"",botName);new Thread(()=>{ TreeRoot.Stop(); BotManager.Instance.SetCurrent(BotManager.Instance.Bots[botName]); TreeRoot.Start();}).Start();}
+            void SwitchToBot(string botName) {ChangeBotAction.ChangeBot(botName);}
         }";
         #endregion
         public StringBuilder CsharpStringBuilder { get; private set; }
