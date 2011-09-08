@@ -135,6 +135,12 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
+                    // check if we have merchant frame open at correct NPC
+                    if (me.GotTarget && me.CurrentTarget.Entry != NpcEntry)
+                    {
+                        MerchantFrame.Instance.Close();
+                        return RunStatus.Running;
+                    }
                     if (!_concludingSw.IsRunning)
                     {
                         if (BuyItemType == BuyItemActionType.SpecificItem)

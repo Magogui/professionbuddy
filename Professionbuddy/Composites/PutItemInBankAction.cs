@@ -375,7 +375,7 @@ namespace HighVoltz.Composites
                 "while tab <= tabnum do " +
                    "local_,_,v,d =GetGuildBankTabInfo(tab) " +
                    "if v == 1 and d == 1 then " +
-                      "SetCurrentGuildBankTab(tab) " +
+                      //"SetCurrentGuildBankTab(tab) " +
                       "for slot=1, 98 do " +
                          "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
                          "if c > 0 and l == nil then " +
@@ -399,6 +399,7 @@ namespace HighVoltz.Composites
                       "local id = GetContainerItemID(bag,slot) " +
                       "local _,c,l = GetContainerItemInfo(bag, slot) " +
                       "if id == {0} and l == nil then  " +
+                         "SetCurrentGuildBankTab(tabInfo[i][1]) " +
                          "if c + bagged <= {1} and c <= tabInfo[i][3]then " +
                             "PickupContainerItem(bag,slot) " +
                             "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
