@@ -181,7 +181,7 @@ namespace HighVoltz
             void CTM(double x,double y,double z) {Helpers.CTM(x,y,z); }
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
-            void SwitchToBot(string botName) {ChangeBotAction.ChangeBot(botName);}
+            void SwitchToBot(string botName) {try{ChangeBotAction.ChangeBot(botName);}catch{}}
         }";
         #endregion
         public StringBuilder CsharpStringBuilder { get; private set; }

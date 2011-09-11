@@ -9,6 +9,7 @@ using Styx.Logic.BehaviorTree;
 using Styx;
 using System.Xml;
 using Styx.Helpers;
+using System.Windows;
 
 namespace HighVoltz.Composites
 {
@@ -49,31 +50,21 @@ namespace HighVoltz.Composites
 
         static public void ChangeBot(string name)
         {
-            try
+            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(name)).Value;
+            if (bot != null)
             {
-                BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(name)).Value;
-                if (bot != null)
-                {
-                    Professionbuddy.Log("Changing bot to {0}", name);
-                    BotManager.Instance.SetCurrent(bot);
-                }
-                else
-                {
-                    Professionbuddy.Err("Bot {0} does not exist", name);
-                }
-            }
-            finally
-            {
-                new Thread(() => {
-                    try
-                    {
-                    }
-                    finally
-                    {
-                        Thread.Sleep(3000);
+                // execute from GUI thread since this thread will get aborted when switching bot
+                Application.Current.Dispatcher.BeginInvoke(
+                    new System.Action(() => {
+                        BotManager.Instance.SetCurrent(bot);
                         TreeRoot.Start();
                     }
-                }).Start();
+                ));
+                Professionbuddy.Log("Changing bot to {0}", name);
+            }
+            else
+            {
+                Professionbuddy.Err("Bot {0} does not exist", name);
             }
         }
 
