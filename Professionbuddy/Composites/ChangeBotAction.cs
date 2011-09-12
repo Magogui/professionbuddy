@@ -10,6 +10,7 @@ using Styx;
 using System.Xml;
 using Styx.Helpers;
 using System.Windows;
+using System.Diagnostics;
 
 namespace HighVoltz.Composites
 {
@@ -29,7 +30,7 @@ namespace HighVoltz.Composites
 
         protected override RunStatus Run(object context)
         {
-            if (!IsDone)
+            if (!IsDone && !_botIsChanging)
             {
                 try
                 {
@@ -47,17 +48,38 @@ namespace HighVoltz.Composites
         {
             ChangeBot(BotName);
         }
-
+        
+        static Timer _timer;
+        //static Stopwatch _throttleSW = new Stopwatch();
+        static bool _botIsChanging = false;
         static public void ChangeBot(string name)
         {
+            if (_botIsChanging)
+            {
+                Professionbuddy.Log("Must wait for previous ChangeBot to finish before calling ChangeBot again.");
+                return;
+            }
             BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(name)).Value;
+            if (BotManager.Current == bot)
+                return;
             if (bot != null)
             {
                 // execute from GUI thread since this thread will get aborted when switching bot
+                _botIsChanging = true;
                 Application.Current.Dispatcher.BeginInvoke(
                     new System.Action(() => {
+                        bool isRunning = TreeRoot.IsRunning;
                         BotManager.Instance.SetCurrent(bot);
-                        TreeRoot.Start();
+                        if (isRunning)
+                        {
+                            Professionbuddy.Log("Restarting HB in 3 seconds");
+                            _timer = new Timer(new TimerCallback((o) => {
+                                TreeRoot.Start();
+                                Professionbuddy.Log("Restarting HB");
+                                _botIsChanging = false;
+                            }),null,3000,Timeout.Infinite);
+                            
+                        }
                     }
                 ));
                 Professionbuddy.Log("Changing bot to {0}", name);
