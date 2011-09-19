@@ -16,8 +16,8 @@ namespace HighVoltz.Composites
     {
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            lock (_lockObject)
-            {
+            //lock (_lockObject)
+            //{
                 if (IsDone)
                 {
                     yield return RunStatus.Failure;
@@ -53,7 +53,7 @@ namespace HighVoltz.Composites
                     yield return RunStatus.Success;
                     //yield break;
                 }
-            }
+           // }
         }
 
         override public string Name { get { return "While Condition"; } }

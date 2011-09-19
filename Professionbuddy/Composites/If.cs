@@ -93,8 +93,8 @@ namespace HighVoltz.Composites
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             // genorates some exeption.... besides I'm only accessing this from one thread
-            lock (Locker)
-            {
+            //lock (Locker)
+            //{
                 if (IsDone)
                 {
                     yield return RunStatus.Failure;
@@ -122,7 +122,7 @@ namespace HighVoltz.Composites
                 }
                 yield return RunStatus.Failure;
                 yield break;
-            }
+            //}
         }
 
         //private IEnumerator<RunStatus> _current;

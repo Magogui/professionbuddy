@@ -33,8 +33,8 @@ namespace HighVoltz.Composites
         // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            lock (Locker)
-            {
+            //lock (Locker)
+            //{
                 if (context == null || !(context is string) || (string)context != SubRoutineName)
                 {
                     yield return RunStatus.Failure;
@@ -61,7 +61,7 @@ namespace HighVoltz.Composites
                 }
                 yield return RunStatus.Failure;
                 yield break;
-            }
+            //}
         }
 
         virtual public void Reset()
