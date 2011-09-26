@@ -142,7 +142,8 @@ namespace HighVoltz.Composites {
                             IsDone = true;
                             return RunStatus.Failure;
                         }
-                        List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).Take((int)Count).ToList();
+                        List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).
+                            Take((int)Count <= 0? int.MaxValue:(int)Count).ToList();
                         if (itemList != null) {
                             using (new FrameLock()) {
                                 foreach (WoWItem item in itemList)
