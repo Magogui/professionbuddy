@@ -69,6 +69,13 @@ namespace HighVoltz.Composites
             get { return (uint)Properties["StackSize"].Value; }
             set { Properties["StackSize"].Value = value; }
         }
+
+        public uint IgnoreStackSizeBelow
+        {
+            get { return (uint)Properties["IgnoreStackSizeBelow"].Value; }
+            set { Properties["IgnoreStackSizeBelow"].Value = value; }
+        }
+
         public uint Amount
         {
             get { return (uint)Properties["Amount"].Value; }
@@ -111,6 +118,7 @@ namespace HighVoltz.Composites
                 new DisplayNameAttribute("Max Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
             Properties["Amount"] = new MetaProp("Amount", typeof(uint));
             Properties["StackSize"] = new MetaProp("StackSize", typeof(uint));
+            Properties["IgnoreStackSizeBelow"] = new MetaProp("IgnoreStackSizeBelow", typeof(uint), new DisplayNameAttribute("Ignore StackSize Below"));
             Properties["AmountType"] = new MetaProp("AmountType", typeof(AmountBasedType), new DisplayNameAttribute("Sell"));
             Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
@@ -127,6 +135,7 @@ namespace HighVoltz.Composites
             RunTime = RunTimeType._24_Hours;
             Amount = 10u;
             StackSize = 20u;
+            IgnoreStackSizeBelow = 1u;
             AmountType = AmountBasedType.Everything;
             AutoFindAh = true;
             BidPrecent = 95f;
@@ -304,8 +313,8 @@ namespace HighVoltz.Composites
                         queueTimer.Stop();
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8());
+                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and count >= {3} and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
+                            ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8(),IgnoreStackSizeBelow);
                         //Logging.Write("****Copy Below this line****");
                         //Logging.Write(lua);
                         //Logging.Write("****End of copy/paste****");
@@ -518,7 +527,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will sell a specific item that matches ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs";
+                return "This action will sell a specific item that matches ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs. All stacks of items below the IgnoreStackSizeBelow are ignored when undercutting auctions";
             }
         }
         public override object Clone()
@@ -530,6 +539,7 @@ namespace HighVoltz.Composites
                 MaxBuyout = new PropertyBag.GoldEditor(this.MaxBuyout.ToString()),
                 Amount = this.Amount,
                 StackSize = this.StackSize,
+                IgnoreStackSizeBelow = this.IgnoreStackSizeBelow,
                 AmountType = this.AmountType,
                 AutoFindAh = this.AutoFindAh,
                 Location = this.Location,
@@ -558,6 +568,12 @@ namespace HighVoltz.Composites
             Amount = val;
             uint.TryParse(reader["StackSize"], out val);
             StackSize = val;
+            if (reader.MoveToAttribute("IgnoreStackSizeBelow"))
+            {
+                uint.TryParse(reader["IgnoreStackSizeBelow"], out val);
+                IgnoreStackSizeBelow = val;
+            }
+
             AmountType = (AmountBasedType)Enum.Parse(typeof(AmountBasedType), reader["AmountType"]);
             bool boolVal;
             bool.TryParse(reader["AutoFindAh"], out boolVal);
@@ -614,6 +630,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("RunTime", RunTime.ToString());
             writer.WriteAttributeString("Amount", Amount.ToString());
             writer.WriteAttributeString("StackSize", StackSize.ToString());
+            writer.WriteAttributeString("IgnoreStackSizeBelow", IgnoreStackSizeBelow.ToString());
             writer.WriteAttributeString("AmountType", AmountType.ToString());
             writer.WriteAttributeString("AutoFindAh", AutoFindAh.ToString());
             writer.WriteAttributeString("BidPrecent", BidPrecent.ToString(CultureInfo.InvariantCulture));

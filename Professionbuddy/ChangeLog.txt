@@ -1,3 +1,8 @@
+Professionbuddy 1.134
+* Added an 'Ignore Stacksize Below' property to 'Sell Item On AH' Action. It will ignore all items stacks below the value when undercutting.
+* Mining-Herb(1-525) now automatically disables gathering of mines if maximum level of mining is higher than herbs maximum level and vice versa
+
+
 Professionbuddy 1.101
 * 'Buy Item','Buy Item from AH' and 'WithDraw Item From Bank' if set to buy/withdraw a specific item will subtract the amount player has bags from the amount to buy/withdraw if 'BuyAdditively' is set to false.
 
