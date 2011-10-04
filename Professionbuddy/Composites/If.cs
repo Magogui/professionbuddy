@@ -241,7 +241,7 @@ namespace HighVoltz.Composites
                 if (reader.NodeType == XmlNodeType.Comment)
                 {
                     AddChild(new Comment(reader.Value));
-                    reader.ReadStartElement();
+                    reader.Skip();
                 }
                 else
                 {
