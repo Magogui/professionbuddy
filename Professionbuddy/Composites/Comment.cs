@@ -15,7 +15,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    class Comment : PBAction
+    public class Comment : PBAction
     {
         public string Text
         {
@@ -25,6 +25,10 @@ namespace HighVoltz.Composites
         public Comment()
         {
             Properties["Text"] = new MetaProp("Text", typeof(string), new DisplayNameAttribute("Comment"));
+        }
+        public Comment(string comment) : this()
+        {
+            Text = comment;
         }
         public override System.Drawing.Color Color { get { return System.Drawing.Color.DarkGreen; } }
         public override object Clone()

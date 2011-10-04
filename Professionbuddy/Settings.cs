@@ -56,7 +56,8 @@ namespace HighVoltz
         string SettingsPath {
             get {
                 return Path.Combine(Logging.ApplicationPath,
-                    string.Format("Settings\\ProfessionBuddy\\{0}-{1}.xml", ProfileName, ObjectManager.Me.Name));
+                    string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
+                    ObjectManager.Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)));
             }
         }
         public void Save() {

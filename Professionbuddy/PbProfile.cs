@@ -95,7 +95,7 @@ namespace HighVoltz
                     XmlReaderSettings settings = new XmlReaderSettings();
                     settings.IgnoreWhitespace = true;
                     settings.IgnoreProcessingInstructions = true;
-                    settings.IgnoreComments = true;
+                    settings.IgnoreComments = false;
 
                     using (XmlReader reader = XmlReader.Create(path, settings))
                     {

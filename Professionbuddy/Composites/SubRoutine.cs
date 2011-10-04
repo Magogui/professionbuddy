@@ -35,32 +35,32 @@ namespace HighVoltz.Composites
         {
             //lock (Locker)
             //{
-                if (context == null || !(context is string) || (string)context != SubRoutineName)
-                {
-                    yield return RunStatus.Failure;
-                    yield break;
-                }
-                foreach (Composite node in Children)
-                {
-                    node.Start(context);
-                    // Keep stepping through the enumeration while it's returing RunStatus.Running
-                    // or until CanRun() returns false if IgnoreCanRun is false..
-                    while (node.Tick(context) == RunStatus.Running)
-                    {
-                        Selection = node;
-                        yield return RunStatus.Running;
-                    }
-
-                    Selection = null;
-                    node.Stop(context);
-                    if (node.LastStatus == RunStatus.Success)
-                    {
-                        yield return RunStatus.Success;
-                        yield break;
-                    }
-                }
+            if (context == null || !(context is string) || (string)context != SubRoutineName)
+            {
                 yield return RunStatus.Failure;
                 yield break;
+            }
+            foreach (Composite node in Children)
+            {
+                node.Start(context);
+                // Keep stepping through the enumeration while it's returing RunStatus.Running
+                // or until CanRun() returns false if IgnoreCanRun is false..
+                while (node.Tick(context) == RunStatus.Running)
+                {
+                    Selection = node;
+                    yield return RunStatus.Running;
+                }
+
+                Selection = null;
+                node.Stop(context);
+                if (node.LastStatus == RunStatus.Success)
+                {
+                    yield return RunStatus.Success;
+                    yield break;
+                }
+            }
+            yield return RunStatus.Failure;
+            yield break;
             //}
         }
 
@@ -100,12 +100,16 @@ namespace HighVoltz.Composites
         virtual public void ReadXml(XmlReader reader)
         {
             SubRoutineName = reader["SubRoutineName"];
-            reader.MoveToAttribute("ChildrenCount");
-            int count = reader.ReadContentAsInt();
             reader.ReadStartElement();
-            if (count > 0)
+
+            while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
             {
-                for (int i = 0; i < count; i++)
+                if (reader.NodeType == XmlNodeType.Comment)
+                {
+                    AddChild(new Comment(reader.Value));
+                    reader.ReadStartElement();
+                }
+                else
                 {
                     Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
                     if (type != null)
@@ -122,21 +126,27 @@ namespace HighVoltz.Composites
                         Logging.Write(System.Drawing.Color.Red, "Failed to load type {0}", type.Name);
                     }
                 }
-                if (reader.NodeType == XmlNodeType.EndElement)
-                    reader.ReadEndElement();
             }
+            if (reader.NodeType == XmlNodeType.EndElement)
+                reader.ReadEndElement();
         }
 
         virtual public void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("SubRoutineName", SubRoutineName);
-            writer.WriteAttributeString("ChildrenCount", Children.Count.ToString());
 
             foreach (IPBComposite comp in Children)
             {
-                writer.WriteStartElement(comp.GetType().Name);
-                ((IXmlSerializable)comp).WriteXml(writer);
-                writer.WriteEndElement();
+                if (comp is Comment)
+                {
+                    writer.WriteComment(((Comment)comp).Text);
+                }
+                else
+                {
+                    writer.WriteStartElement(comp.GetType().Name);
+                    ((IXmlSerializable)comp).WriteXml(writer);
+                    writer.WriteEndElement();
+                }
             }
         }
         virtual public System.Xml.Schema.XmlSchema GetSchema() { return null; }

@@ -11,7 +11,6 @@ using System.Diagnostics;
 using PrioritySelector = TreeSharp.PrioritySelector;
 namespace HighVoltz.Composites
 {
-
     class While : If
     {
         protected override IEnumerable<RunStatus> Execute(object context)
@@ -26,7 +25,7 @@ namespace HighVoltz.Composites
                 foreach (Composite node in Children)
                 {
                     node.Start(context);
-                    // Keep stepping through the enumeration while it's returing RunStatus.Running
+                    // Keep stepping through the enumeration while it's returning RunStatus.Running
                     // or until CanRun() returns false if IgnoreCanRun is false..
                     while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
                         node.Tick(context) == RunStatus.Running)

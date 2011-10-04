@@ -50,29 +50,35 @@ namespace HighVoltz.Composites
 
         public void ReadXml(XmlReader reader)
         {
-            int count;
             reader.MoveToContent();
-            int.TryParse(reader["ChildrenCount"], out count);
             reader.ReadStartElement("Professionbuddy");
             PrioritySelector ps = (PrioritySelector)DecoratedChild;
-            for (int i = 0; i < count; i++)
+            while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
             {
-                Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
-                if (type != null)
+                if (reader.NodeType == XmlNodeType.Comment)
                 {
-                    IPBComposite comp = (IPBComposite)Activator.CreateInstance(type);
-                    if (comp != null)
-                    {
-                        comp.ReadXml(reader);
-                        ps.AddChild((Composite)comp);
-                    }
+                    ps.AddChild(new Comment(reader.Value));
+                    reader.ReadStartElement();
                 }
                 else
                 {
-                    Professionbuddy.Err("PB:Failed to load type {0}", type);
+                    Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
+                    if (type != null)
+                    {
+                        IPBComposite comp = (IPBComposite)Activator.CreateInstance(type);
+                        if (comp != null)
+                        {
+                            comp.ReadXml(reader);
+                            ps.AddChild((Composite)comp);
+                        }
+                    }
+                    else
+                    {
+                        Professionbuddy.Err("PB:Failed to load type {0}", type);
+                    }
                 }
             }
-            if (reader.NodeType == XmlNodeType.EndElement)
+            if (reader.NodeType == XmlNodeType.Element)
                 reader.ReadEndElement();
         }
 
@@ -80,14 +86,18 @@ namespace HighVoltz.Composites
         {
             writer.WriteStartElement("Professionbuddy");
             PrioritySelector ps = (PrioritySelector)DecoratedChild;
-            writer.WriteStartAttribute("ChildrenCount");
-            writer.WriteValue(ps.Children.Count);
-            writer.WriteEndAttribute();
             foreach (IPBComposite comp in ps.Children)
             {
-                writer.WriteStartElement(comp.GetType().Name);
-                ((IXmlSerializable)comp).WriteXml(writer);
-                writer.WriteEndElement();
+                if (comp is Comment)
+                {
+                    writer.WriteComment(((Comment)comp).Text);
+                }
+                else
+                {
+                    writer.WriteStartElement(comp.GetType().Name);
+                    ((IXmlSerializable)comp).WriteXml(writer);
+                    writer.WriteEndElement();
+                }
             }
             writer.WriteEndElement();
         }

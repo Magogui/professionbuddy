@@ -95,33 +95,33 @@ namespace HighVoltz.Composites
             // genorates some exeption.... besides I'm only accessing this from one thread
             //lock (Locker)
             //{
-                if (IsDone)
-                {
-                    yield return RunStatus.Failure;
-                    yield break;
-                }
-                foreach (Composite node in Children)
-                {
-                    // Keep stepping through the enumeration while it's returing RunStatus.Running
-                    // or until CanRun() returns false if IgnoreCanRun is false..
-                    node.Start(context);
-                    while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
-                        node.Tick(context) == RunStatus.Running)
-                    {
-                        Selection = node;
-                        yield return RunStatus.Running;
-                    }
-
-                    Selection = null;
-                    //node.Stop(context);
-                    if (node.LastStatus == RunStatus.Success)
-                    {
-                        yield return RunStatus.Success;
-                        //yield break; don't break iteration.. While Condition return sucess if at end of loop
-                    }
-                }
+            if (IsDone)
+            {
                 yield return RunStatus.Failure;
                 yield break;
+            }
+            foreach (Composite node in Children)
+            {
+                // Keep stepping through the enumeration while it's returing RunStatus.Running
+                // or until CanRun() returns false if IgnoreCanRun is false..
+                node.Start(context);
+                while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
+                    node.Tick(context) == RunStatus.Running)
+                {
+                    Selection = node;
+                    yield return RunStatus.Running;
+                }
+
+                Selection = null;
+                //node.Stop(context);
+                if (node.LastStatus == RunStatus.Success)
+                {
+                    yield return RunStatus.Success;
+                    //yield break; don't break iteration.. While Condition return sucess if at end of loop
+                }
+            }
+            yield return RunStatus.Failure;
+            yield break;
             //}
         }
 
@@ -235,12 +235,15 @@ namespace HighVoltz.Composites
             bool boolVal;
             bool.TryParse(reader["IgnoreCanRun"], out boolVal);
             IgnoreCanRun = boolVal;
-            reader.MoveToAttribute("ChildrenCount");
-            int count = reader.ReadContentAsInt();
             reader.ReadStartElement();
-            if (count > 0)
+            while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
             {
-                for (int i = 0; i < count; i++)
+                if (reader.NodeType == XmlNodeType.Comment)
+                {
+                    AddChild(new Comment(reader.Value));
+                    reader.ReadStartElement();
+                }
+                else
                 {
                     Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
                     if (type != null)
@@ -257,23 +260,27 @@ namespace HighVoltz.Composites
                         Logging.Write(System.Drawing.Color.Red, "Failed to load type {0}", type.Name);
                     }
                 }
-                if (reader.NodeType == XmlNodeType.EndElement)
-                    reader.ReadEndElement();
             }
+            if (reader.NodeType == XmlNodeType.EndElement)
+                reader.ReadEndElement();
         }
 
         virtual public void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("Condition", Condition);
             writer.WriteAttributeString("IgnoreCanRun", IgnoreCanRun.ToString());
-            writer.WriteStartAttribute("ChildrenCount");
-            writer.WriteValue(Children.Count);
-            writer.WriteEndAttribute();
             foreach (IPBComposite comp in Children)
             {
-                writer.WriteStartElement(comp.GetType().Name);
-                ((IXmlSerializable)comp).WriteXml(writer);
-                writer.WriteEndElement();
+                if (comp is Comment)
+                {
+                    writer.WriteComment(((Comment)comp).Text);
+                }
+                else
+                {
+                    writer.WriteStartElement(comp.GetType().Name);
+                    ((IXmlSerializable)comp).WriteXml(writer);
+                    writer.WriteEndElement();
+                }
             }
         }
 
