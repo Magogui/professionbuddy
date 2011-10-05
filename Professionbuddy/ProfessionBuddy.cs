@@ -385,8 +385,12 @@ namespace HighVoltz
                     WipeTempFolder();
                     // force Tripper.Tools.dll to load........
                     new Tripper.Tools.Math.Vector3(0, 0, 0);
-                    MySettings = new ProfessionBuddySettings
-                        (Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}-{1}.xml", Name, Me.Name)));
+
+                    MySettings = new ProfessionBuddySettings (
+                        Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
+                        Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)))
+                    );
+
                     IsTradeSkillsLoaded = false;
                     IsRunning = MySettings.IsRunning;
                     MaterialList = new Dictionary<uint, int>();
