@@ -9,7 +9,7 @@
   <CustomAction Code="var2 = DateTime.Now;" />
   <!--check for undercut items every 30 to 300 seconds-->
   <CustomAction Code="var3 = new Random().Next(30, 300);" />
-  <If Condition="!(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True">
+  <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True">
     <CustomAction Code="Log (&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />
   </If>
   <While Condition="true" IgnoreCanRun="True">

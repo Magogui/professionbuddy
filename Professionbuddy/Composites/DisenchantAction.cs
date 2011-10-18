@@ -137,7 +137,7 @@ namespace HighVoltz.Composites
                             if (spell != null)
                             {
                                 TreeRoot.GoalText = string.Format("{0}ing {1}", ActionType, ItemList[index].Name);
-
+                                Professionbuddy.Log(TreeRoot.GoalText);
                                 //Lua.DoString("CastSpellByID({0}) UseContainerItem({1}, {2})",
                                 //    spellId, ItemList[index].BagIndex + 1, ItemList[index].BagSlot + 1);
                                 spell.CastOnItem(ItemList[index]);
@@ -179,14 +179,17 @@ namespace HighVoltz.Composites
                                              ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
                                              ItemTarget == ItemTargetType.All)
                                              select item;
-            switch (ActionType)
+            using (new FrameLock())
             {
-                case DeActionType.Disenchant:
-                    return itemQueue.Where(i => i.CanDisenchant() && checkItemQuality(i)).ToList();
-                case DeActionType.Mill:
-                    return itemQueue.Where(i => i.CanMill() && i.StackCount >= 5).ToList();
-                case DeActionType.Prospect:
-                    return itemQueue.Where(i => i.CanProspect() && i.StackCount >= 5).ToList();
+                switch (ActionType)
+                {
+                    case DeActionType.Disenchant:
+                        return itemQueue.Where(i => i.CanDisenchant() && checkItemQuality(i)).ToList();
+                    case DeActionType.Mill:
+                        return itemQueue.Where(i => i.CanMill() && i.StackCount >= 5).ToList();
+                    case DeActionType.Prospect:
+                        return itemQueue.Where(i => i.CanProspect() && i.StackCount >= 5).ToList();
+                }
             }
             return null;
         }
@@ -397,9 +400,14 @@ namespace HighVoltz.Composites
 
         public static bool CanDisenchant(this WoWItem item)
         {
+
             int enchantingLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
             if (item.ItemInfo.StatsCount == 0)
+            {
+                Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
+                    item.Name, item.BagIndex + 1, item.BagSlot + 1);
                 return false;
+            }
             int[,] deList = null;
             if (item.Quality == WoWItemQuality.Uncommon)
                 deList = UncommonItemDeList;
@@ -417,10 +425,14 @@ namespace HighVoltz.Composites
                     int a = deList[x, 1];
                     if (iLevel <= deList[x, 1])
                     {
+                        Professionbuddy.Log("We can disenchant {0} found in bag {1} at slot {2}",
+                            item.Name,item.BagIndex + 1,item.BagSlot+1);
                         return enchantingLevel >= deList[x, 0];
                     }
                 }
             }
+            Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2}",
+                item.Name, item.BagIndex + 1, item.BagSlot + 1);
             return false;
         }
     }
