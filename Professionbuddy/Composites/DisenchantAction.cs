@@ -95,7 +95,7 @@ namespace HighVoltz.Composites
             if (!IsDone)
             {
                 if (me.IsFlying)
-                    return RunStatus.Failure ;
+                    return RunStatus.Failure;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
                     LootFrame.Instance.LootAll();
@@ -179,17 +179,15 @@ namespace HighVoltz.Composites
                                              ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
                                              ItemTarget == ItemTargetType.All)
                                              select item;
-            using (new FrameLock())
+
+            switch (ActionType)
             {
-                switch (ActionType)
-                {
-                    case DeActionType.Disenchant:
-                        return itemQueue.Where(i => i.CanDisenchant() && checkItemQuality(i)).ToList();
-                    case DeActionType.Mill:
-                        return itemQueue.Where(i => i.CanMill() && i.StackCount >= 5).ToList();
-                    case DeActionType.Prospect:
-                        return itemQueue.Where(i => i.CanProspect() && i.StackCount >= 5).ToList();
-                }
+                case DeActionType.Disenchant:
+                    return itemQueue.Where(i => i.CanDisenchant() && checkItemQuality(i)).ToList();
+                case DeActionType.Mill:
+                    return itemQueue.Where(i => i.CanMill() && i.StackCount >= 5).ToList();
+                case DeActionType.Prospect:
+                    return itemQueue.Where(i => i.CanProspect() && i.StackCount >= 5).ToList();
             }
             return null;
         }
@@ -402,7 +400,7 @@ namespace HighVoltz.Composites
         {
 
             int enchantingLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
-            if (item.ItemInfo.StatsCount == 0)
+            if (item.ItemInfo.StatsCount == 0 && item.ItemInfo.RandomPropertiesId == 0)
             {
                 Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
                     item.Name, item.BagIndex + 1, item.BagSlot + 1);
@@ -426,7 +424,7 @@ namespace HighVoltz.Composites
                     if (iLevel <= deList[x, 1])
                     {
                         Professionbuddy.Log("We can disenchant {0} found in bag {1} at slot {2}",
-                            item.Name,item.BagIndex + 1,item.BagSlot+1);
+                            item.Name, item.BagIndex + 1, item.BagSlot + 1);
                         return enchantingLevel >= deList[x, 0];
                     }
                 }
