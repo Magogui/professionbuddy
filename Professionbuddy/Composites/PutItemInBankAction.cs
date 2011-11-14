@@ -178,6 +178,9 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, int> ItemList = null;
         //bool _switchingTabs = false;
+        Stopwatch _gbankItemThrottleSW = new Stopwatch();
+        const long _gbankItemThrottle = 167; // 6 times per sec.. round up to nearest 1.
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -208,7 +211,19 @@ namespace HighVoltz.Composites
                         if (Bank == BankType.Personal)
                             done = PutItemInBank(kv.Key, kv.Value);
                         else
+                        {
+                            // throttle the amount of items being withdrawn from gbank per sec
+                            if (!_gbankItemThrottleSW.IsRunning)
+                                _gbankItemThrottleSW.Start();
+                            if (_gbankItemThrottleSW.ElapsedMilliseconds < _gbankItemThrottle)
+                                return RunStatus.Success;
+                            else
+                            {
+                                _gbankItemThrottleSW.Reset();
+                                _gbankItemThrottleSW.Start();
+                            }
                             done = PutItemInGBank(kv.Key, kv.Value, GuildTab);
+                        }
                         if (done)
                         {
                             Professionbuddy.Debug("Done Depositing Item:{0} to bank", kv.Key);

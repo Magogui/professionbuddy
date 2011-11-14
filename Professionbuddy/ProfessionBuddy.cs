@@ -1,5 +1,6 @@
 ﻿//!CompilerOption:Optimize:On
 //!CompilerOption:AddRef:WindowsBase.dll
+
 // Professionbuddy plugin by HighVoltz
 
 using System;
@@ -104,7 +105,6 @@ namespace HighVoltz
         {
             get { return _name; }
         }
-
         public override string Author { get { return "HighVoltz"; } }
 
         public override Version Version { get { return new Version(1, _svn.Revision); } }

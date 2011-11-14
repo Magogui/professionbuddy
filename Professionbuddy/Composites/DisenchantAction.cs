@@ -399,13 +399,13 @@ namespace HighVoltz.Composites
         public static bool CanDisenchant(this WoWItem item)
         {
 
-            int enchantingLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
             if (item.ItemInfo.StatsCount == 0 && item.ItemInfo.RandomPropertiesId == 0)
             {
-                Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
-                    item.Name, item.BagIndex + 1, item.BagSlot + 1);
+                //Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
+                //    item.Name, item.BagIndex + 1, item.BagSlot + 1);
                 return false;
             }
+            int enchantingLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
             int[,] deList = null;
             if (item.Quality == WoWItemQuality.Uncommon)
                 deList = UncommonItemDeList;

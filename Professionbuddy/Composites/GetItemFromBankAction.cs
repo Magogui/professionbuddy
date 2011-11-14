@@ -94,7 +94,7 @@ namespace HighVoltz.Composites
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
             NpcEntry = 0u;
-            WithdrawAdditively = true; 
+            WithdrawAdditively = true;
 
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
@@ -151,7 +151,9 @@ namespace HighVoltz.Composites
         // key= itemID; value amount to withdrawl
         Dictionary<uint, int> ItemList = null;
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
-        Stopwatch _itemsSW ;
+        Stopwatch _itemsSW;
+        Stopwatch _gbankItemThrottleSW = new Stopwatch();
+        const long _gbankItemThrottle = 167; // 6 times per sec.. round up to nearest 1.
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -182,7 +184,19 @@ namespace HighVoltz.Composites
                         if (Bank == BankType.Personal)
                             done = GetItemFromBank(kv.Key, kv.Value);
                         else
+                        {
+                            // throttle the amount of items being withdrawn from gbank per sec
+                            if (!_gbankItemThrottleSW.IsRunning)
+                                _gbankItemThrottleSW.Start();
+                            if (_gbankItemThrottleSW.ElapsedMilliseconds < _gbankItemThrottle)
+                                return RunStatus.Success;
+                            else
+                            {
+                                _gbankItemThrottleSW.Reset();
+                                _gbankItemThrottleSW.Start();
+                            }
                             done = GetItemFromGBank(kv.Key, kv.Value);
+                        }
                         if (done)
                             ItemList.Remove(kv.Key);
                     }
@@ -280,7 +294,7 @@ namespace HighVoltz.Composites
                         {
                             uint temp = 0;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, !WithdrawAdditively?  Amount-(int)Util.GetCarriedItemCount(temp):Amount);
+                            items.Add(temp, !WithdrawAdditively ? Amount - (int)Util.GetCarriedItemCount(temp) : Amount);
                         }
                     }
                     else
