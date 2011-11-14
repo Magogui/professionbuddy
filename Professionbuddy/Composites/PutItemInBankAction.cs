@@ -179,7 +179,7 @@ namespace HighVoltz.Composites
         //bool _switchingTabs = false;
         Stopwatch _gbankItemThrottleSW = new Stopwatch();
         const long _gbankItemThrottle = 167; // 6 times per sec.. round up to nearest 1.
-
+        int _numOfItemsDepositedInGB = 0;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -196,7 +196,7 @@ namespace HighVoltz.Composites
                         _itemsSW = new Stopwatch();
                         _itemsSW.Start();
                     }
-                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3) 
+                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
                         return RunStatus.Running;
                     if (ItemList == null)
                         ItemList = BuildItemList();
@@ -221,7 +221,14 @@ namespace HighVoltz.Composites
                                 _gbankItemThrottleSW.Reset();
                                 _gbankItemThrottleSW.Start();
                             }
-                            done = PutItemInGBank(kv.Key, kv.Value, GuildTab);
+                            int ret = PutItemInGBank(kv.Key, kv.Value, GuildTab);
+                            if (ret == -1 || _numOfItemsDepositedInGB + ret >= Amount)
+                                done = true;
+                            else
+                            {
+                                _numOfItemsDepositedInGB += ret;
+                                done = false;
+                            }
                         }
                         if (done)
                         {
@@ -368,7 +375,8 @@ namespace HighVoltz.Composites
         Stopwatch _itemsSW;
         int _currentBag = -1;
         int _currentSlot = 1;
-        public bool PutItemInGBank(uint id, int amount, uint tab)
+        // returns number of items deposited.. -1 if done...
+        public int PutItemInGBank(uint id, int amount, uint tab)
         {
             if (queueServerSW == null)
             {
@@ -376,10 +384,10 @@ namespace HighVoltz.Composites
                 queueServerSW.Start();
                 Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
                 Professionbuddy.Log("Queuing server for gbank info");
-                return false;
+                return 0;
             }
             else if (queueServerSW.ElapsedMilliseconds < 2000)
-                return false;
+                return 0;
             string lua = string.Format(
                 "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
@@ -432,14 +440,15 @@ namespace HighVoltz.Composites
                             "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
                             "bagged = bagged + cnt " +
                          "end " +
+                         "return c " +
                          "i=i+1 " +
                       "end " +
                       "if bagged >= {1} then return 1 end " +
                    "end " +
                 "end " +
-                "return 1"
+                "return -1"
                 , id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
-            return  Lua.GetReturnVal<int>(lua,0) == 1;
+           return Lua.GetReturnVal<int>(lua,0) ;
         }
 
         public bool PutItemInBank(uint id, int amount)
@@ -522,6 +531,7 @@ namespace HighVoltz.Composites
             _itemsSW = null;
             _currentBag = -1;
             _currentSlot = 1;
+            _numOfItemsDepositedInGB = 0;
         }
         public override object Clone()
         {
