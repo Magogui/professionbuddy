@@ -175,7 +175,6 @@ namespace HighVoltz.Composites
         }
 
         #endregion
-
         Dictionary<uint, int> ItemList = null;
         //bool _switchingTabs = false;
         Stopwatch _gbankItemThrottleSW = new Stopwatch();
