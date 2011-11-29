@@ -17,6 +17,7 @@
       <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="-8860.81" Y="637.1594" Z="96.19888" MinFreeBagSlots="2" />
       <WaitAction Condition="false" Timeout="2000" />
       <SellItemOnAhAction ItemID="0" MinBuyout="6g0s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="3" StackSize="1" IgnoreStackSizeBelow="1" AmountType="Amount" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Glyph" SubCategoryType="WoWItemGlyphClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
+      <SellItemOnAhAction ItemID="0" MinBuyout="3g0s0c" MaxBuyout="1000g0s0c" RunTime="_24_Hours" Amount="3" StackSize="1" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Miscellaneous" SubCategoryType="WoWItemMiscClass" SubCategory="Pet" X="0" Y="0" Z="0" PostIfBelowMinBuyout="False" />
       <If Condition="(bool)Settings[&quot;MillHerbs&quot;]" IgnoreCanRun="True">
         <StackItemsAction />
         <!--WhipTail-->

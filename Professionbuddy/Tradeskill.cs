@@ -14,6 +14,8 @@ using Styx.WoWInternals.WoWObjects;
 using System.Collections.ObjectModel;
 using Styx.Logic.Combat;
 using Styx.Helpers;
+using System.Diagnostics;
+using System.IO;
 
 namespace HighVoltz
 {
@@ -23,7 +25,7 @@ namespace HighVoltz
         // needs to be moved to offsets enum
 
         //private static uint TradeskillOffset = 0xA92550; // wow 4.1
-        private static uint TradeskillOffset = 0xB0D5E8; // wow 4.2
+        //static uint TradeskillOffset = 0xB0D5E8; // wow 4.2
         internal struct SkillOffset
         {
             public const uint Guid = 0; // guid of player who's tradeskill is shown, could be someone besides localplayer.
@@ -119,13 +121,41 @@ namespace HighVoltz
         /// Singleton Instance
         /// </summary>
         public static readonly TradeSkillFrame Instance = new TradeSkillFrame();
-        private static readonly uint baseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + TradeskillOffset;
+        private static readonly uint _baseAddress;
 
-        public TradeSkillFrame()
-            : base("TradeSkillFrame") {
+        static TradeSkillFrame()
+        {
+            ProcessModule mod = ObjectManager.WoWProcess.MainModule;
+            if (ProfessionBuddySettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
+                ProfessionBuddySettings.Instance.TradeskillFrameOffset == 0)
+            {
+                Professionbuddy.Log("A new wow version has been detected\nScanning for new TradeskillFrame offset");
+                try
+                {
+                    uint pointer = Util.FindPattern("89 0D 00 00 00 00 8B 50 04 8B 45 0C 53 33 DB 89 15 00 00 00 00 89 1D 00 00 00 00 8B 08 89 0D 00 00 00 00 8B 50 04 89 15",
+                        "xx????xxxxxxxxxxx????xx????xxxx????xxxxx") + 2;
+                    ProfessionBuddySettings.Instance.TradeskillFrameOffset = ObjectManager.Wow.Read<uint>(pointer);
+                    ProfessionBuddySettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
+                    Professionbuddy.Log("Found TradeskillFrame offset for WoW Version {0} at offset {1}",
+                        mod.FileVersionInfo.FileVersion, ProfessionBuddySettings.Instance.TradeskillFrameOffset);
+                    ProfessionBuddySettings.Instance.Save();
+                }
+                catch (InvalidDataException)
+                {
+                    Professionbuddy.Log("Unable to find TradeskillFrame offset for WoW Version {0}\nPlease notify the developer of this issue",
+                        mod.FileVersionInfo.FileVersion);
+                }
+            }
+            _baseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + ProfessionBuddySettings.Instance.TradeskillFrameOffset;
         }
 
-        public static string GetItemCacheName(uint id) {
+        public TradeSkillFrame()
+            : base("TradeSkillFrame")
+        {
+        }
+
+        public static string GetItemCacheName(uint id)
+        {
             var cache = Styx.StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
                 return ObjectManager.Wow.Read<string>(cache.ItemSparse.Name);
@@ -136,11 +166,13 @@ namespace HighVoltz
         /// <summary>
         /// Returns a list of currently loaded Recipes
         /// </summary>
-        public TradeSkill GetTradeSkill() {
+        public TradeSkill GetTradeSkill()
+        {
             return GetTradeSkill(Skill, false);
         }
 
-        public TradeSkill GetTradeSkill(SkillLine skillLine) {
+        public TradeSkill GetTradeSkill(SkillLine skillLine)
+        {
             return GetTradeSkill(skillLine, false);
         }
 
@@ -150,7 +182,8 @@ namespace HighVoltz
         /// <param name="skillLine"></param>
         /// <param name="blockFrame">prevents tradeskill frame from showing</param>
         /// <returns></returns>
-        public TradeSkill GetTradeSkill(SkillLine skillLine, bool blockFrame) {
+        public TradeSkill GetTradeSkill(SkillLine skillLine, bool blockFrame)
+        {
             if (!ObjectManager.IsInGame)
                 throw new InvalidOperationException("Must Be in game to call GetTradeSkill()");
             if (skillLine == 0 || !SupportedSkills.Contains(skillLine))
@@ -206,76 +239,91 @@ namespace HighVoltz
         /// <summary>
         /// Returns Guid of the player who's tradeskill is shown
         /// </summary>
-        ulong Guid {
-            get { return ObjectManager.Wow.Read<ulong>(baseAddress + SkillOffset.Guid); }
+        ulong Guid
+        {
+            get { return ObjectManager.Wow.Read<ulong>(_baseAddress + SkillOffset.Guid); }
         }
         /// <summary>
         /// Returns true if the currently loaded tradeskill is from a tradeskill link
         /// </summary>
-        public bool IsLinked {
-            get { return ObjectManager.Wow.Read<bool>(baseAddress + SkillOffset.IsLinked); }
+        public bool IsLinked
+        {
+            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.IsLinked); }
         }
 
-        new public bool IsVisible {
-            get { return ObjectManager.Wow.Read<bool>(baseAddress + SkillOffset.ShownSkill); }
+        new public bool IsVisible
+        {
+            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.ShownSkill); }
         }
-        public bool IsLoading {
-            get { return ObjectManager.Wow.Read<bool>(baseAddress + SkillOffset.IsLoading); }
+        public bool IsLoading
+        {
+            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.IsLoading); }
         }
         /// <summary>
         /// Name of currently loaded tradeskill
         /// </summary>
-        public string Name {
-            get {
+        public string Name
+        {
+            get
+            {
                 return ObjectManager.Me.GetSkill(Skill).Name;
             }
         }
         /// <summary>
         /// ID of the recipe that's currently being crafted
         /// </summary>
-        public int QueuedRecipeID {
-            get {
-                int recipe1 = ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.QueuedRecipeID1);
-                int recipe2 = ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.QueuedRecipeID2);
+        public int QueuedRecipeID
+        {
+            get
+            {
+                int recipe1 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeID1);
+                int recipe2 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeID2);
                 return recipe1 != 0 ? recipe1 : recipe2;
             }
         }
         /// <summary>
         /// Number of recipes, this includes headers
         /// </summary>
-        public int RecipeCount {
-            get { return ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.TotalRecipeCount); }
+        public int RecipeCount
+        {
+            get { return ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.TotalRecipeCount); }
         }
         // offset to the recipe array of pointers.
-        uint RecipeOffset {
-            get { return ObjectManager.Wow.Read<uint>(baseAddress + SkillOffset.RecipeArray); }
+        uint RecipeOffset
+        {
+            get { return ObjectManager.Wow.Read<uint>(_baseAddress + SkillOffset.RecipeArray); }
         }
         /// <summary>
         /// Number of times a recipe is set to repeat itself
         /// </summary>
-        public int RepeatQueueCount {
-            get {
-                int repeat1 = ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.QueuedRecipeRepeat1);
-                int repeat2 = ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.QueuedRecipeRepeat2);
+        public int RepeatQueueCount
+        {
+            get
+            {
+                int repeat1 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeRepeat1);
+                int repeat2 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeRepeat2);
                 return repeat1 != 0 ? repeat1 : repeat2;
             }
         }
         /// <summary>
         /// Number of recipes currently shown (filtered), this includes headers
         /// </summary>
-        int ShownRecipeCount {
-            get { return ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.ShownRecipeNum); }
+        int ShownRecipeCount
+        {
+            get { return ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.ShownRecipeNum); }
         }
         /// <summary>
         /// Opens TradeSkill Frame
         /// </summary>
-        override public void Show() {
+        override public void Show()
+        {
             Show(Skill);
         }
         /// Opens TradeSkill Frame for the specific skill
         /// </summary>
         /// <param name="skillLine"></param>
-        public void Show(SkillLine skillLine) {
+        public void Show(SkillLine skillLine)
+        {
             if (skillLine != 0 && ObjectManager.IsInGame && !IsVisible)
             {
                 WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
@@ -290,14 +338,16 @@ namespace HighVoltz
         /// <summary>
         /// Returns the skill of currently loaded tradeskill
         /// </summary>
-        public SkillLine Skill {
-            get { return (SkillLine)ObjectManager.Wow.Read<int>(baseAddress + SkillOffset.LoadedSkill); }
+        public SkillLine Skill
+        {
+            get { return (SkillLine)ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.LoadedSkill); }
         }
         /// <summary>
         /// Updates the skill level, recipe difficulty and adds new recipes.
         /// </summary>
         /// <param name="tradeSkill"></param>
-        public void UpdateTradeSkill(TradeSkill tradeSkill, bool blockFrame) {
+        public void UpdateTradeSkill(TradeSkill tradeSkill, bool blockFrame)
+        {
             if (!ObjectManager.IsInGame || tradeSkill == null)
             {
                 return;
@@ -357,12 +407,14 @@ namespace HighVoltz
     #region TradeSkill
     public class TradeSkill
     {
-        public TradeSkill(WoWSkill skill) {
+        public TradeSkill(WoWSkill skill)
+        {
             this.WoWSkill = skill;
             Recipes = new Dictionary<uint, Recipe>();
         }
         public WoWSkill WoWSkill { get; internal set; }
-        public void AddRecipe(Recipe recipe) {
+        public void AddRecipe(Recipe recipe)
+        {
             if (Recipes.ContainsKey(recipe.ID))
                 return;
             Recipes.Add(recipe.ID, recipe);
@@ -389,8 +441,10 @@ namespace HighVoltz
         /// <summary>
         /// List of ingredients 
         /// </summary>
-        public Dictionary<uint, IngredientSubClass> Ingredients {
-            get {
+        public Dictionary<uint, IngredientSubClass> Ingredients
+        {
+            get
+            {
                 if (ingredients == null)
                 {
                     InitIngredientList();
@@ -399,7 +453,8 @@ namespace HighVoltz
             }
         }
 
-        internal void InitIngredientList() {
+        internal void InitIngredientList()
+        {
             ingredients = new Dictionary<uint, IngredientSubClass>();
             foreach (var recipePair in Recipes)
             {
@@ -412,8 +467,10 @@ namespace HighVoltz
         /// <summary>
         /// List of Tools
         /// </summary>
-        public List<Tool> Tools {
-            get {
+        public List<Tool> Tools
+        {
+            get
+            {
                 if (tools == null)
                 {
                     InitToolList();
@@ -422,7 +479,8 @@ namespace HighVoltz
             }
         }
         List<Tool> tools;
-        internal void InitToolList() {
+        internal void InitToolList()
+        {
             tools = new List<Tool>();
             foreach (var recipePair in Recipes)
             {
@@ -437,7 +495,8 @@ namespace HighVoltz
         /// <summary>
         /// Syncs Ingredient and Tool list with Bags
         /// </summary>
-        public void PulseBags() {
+        public void PulseBags()
+        {
             if (!TreeRoot.IsRunning)
                 ObjectManager.Update();
             foreach (var ingredPair in Ingredients)
@@ -450,13 +509,15 @@ namespace HighVoltz
             }
         }
         // syncs the TradeSkill, updating Skill level,recipe dificulty and adding new recipes that arent in list
-        public void PulseSkill() {
+        public void PulseSkill()
+        {
             TradeSkillFrame.Instance.UpdateTradeSkill(this, true);
         }
         /// <summary>
         /// number of Recipes
         /// </summary>
-        public int RecipeCount {
+        public int RecipeCount
+        {
             get { return Recipes.Count; }
         }
 
@@ -478,8 +539,8 @@ namespace HighVoltz
             public const uint Skillups = 8;
         }
         enum SpellDB
-        { 
-            NamePtr = 21, 
+        {
+            NamePtr = 21,
             SpellCastingReqIndex = 34,
             SpellReagentsIndex = 43,
             SpellTotemsIndex = 46,
@@ -489,7 +550,8 @@ namespace HighVoltz
             optimal, medium, easy, trivial
         }
         uint[] recipeData;
-        internal Recipe(uint[] data, TradeSkill parent, SkillLine skill) {
+        internal Recipe(uint[] data, TradeSkill parent, SkillLine skill)
+        {
             this.recipeData = data;
             this.Skill = skill;
             this.parent = parent;
@@ -497,8 +559,10 @@ namespace HighVoltz
         /// <summary>
         /// Returns the color that represents the recipes difficulty
         /// </summary>
-        public System.Drawing.Color Color {
-            get {
+        public System.Drawing.Color Color
+        {
+            get
+            {
                 switch (Difficulty)
                 {
                     case RecipeDifficulty.optimal:
@@ -515,8 +579,10 @@ namespace HighVoltz
         /// <summary>
         /// The Number of times recipe can be crafted with current mats in bags using internal Ingredient list.
         /// </summary>
-        public uint CanRepeatNum {
-            get {
+        public uint CanRepeatNum
+        {
+            get
+            {
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
@@ -555,7 +621,8 @@ namespace HighVoltz
         public uint CraftedItemID { get { return (uint)(craftedItemID ?? (craftedItemID = GetCraftedItemID())); } }
         uint? craftedItemID;
 
-        uint? GetCraftedItemID() {
+        uint? GetCraftedItemID()
+        {
             if (Spell != null)
             {
                 return Spell.SpellEffect1.ItemType;
@@ -567,10 +634,12 @@ namespace HighVoltz
         /// <summary>
         /// Returns the difficulty of the Recipe
         /// </summary>
-        public RecipeDifficulty Difficulty {
+        public RecipeDifficulty Difficulty
+        {
             get { return (RecipeDifficulty)recipeData[(int)RecipeIndex.RecipeDifficulty]; }
         }
-        internal void InitIngredients() {  // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
+        internal void InitIngredients()
+        {  // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
             if (ingredients != null)
                 return;
             uint recipeID = ID;
@@ -602,7 +671,8 @@ namespace HighVoltz
             }
         }
 
-        string GetHeader() {
+        string GetHeader()
+        {
             WoWDb.DbTable dbTable;
             WoWDb.Row dbRow;
             string header = "";
@@ -641,7 +711,8 @@ namespace HighVoltz
             return header;
         }
         // grab name from dbc
-        string GetName() {
+        string GetName()
+        {
             string name = null;
             WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.Spell];
             WoWDb.Row r = t.GetRow((uint)ID);
@@ -653,7 +724,8 @@ namespace HighVoltz
             return name;
         }
         // grab name from dbc
-        internal void InitTools() { // instantizing tools in here and doing a null check to prevent recursion from Trade.Tools() 
+        internal void InitTools()
+        { // instantizing tools in here and doing a null check to prevent recursion from Trade.Tools() 
             if (tools != null)
                 return;
             tools = new List<Tool>();
@@ -713,7 +785,8 @@ namespace HighVoltz
         // this basically checks if the master tool list already contains this tool and 
         // returns that tool if it does, otherwise it adds the tool to the master Tool list
         // and returns it.
-        Tool GetTool(uint index, Tool.ToolType toolType) {
+        Tool GetTool(uint index, Tool.ToolType toolType)
+        {
             Tool newTool = new Tool(index, toolType);
             Tool tool = parent.Tools.Find(a => a.Equals(newTool));
             if (tool == null)
@@ -726,15 +799,18 @@ namespace HighVoltz
         /// <summary>
         /// Name of header this recipe belongs to
         /// </summary>
-        public string Header {
+        public string Header
+        {
             get { return header ?? (header = GetHeader()); }
         }
         string header;
         /// <summary>
         /// List of ingredients required for the recipe
         /// </summary>
-        public ReadOnlyCollection<Ingredient> Ingredients {
-            get {
+        public ReadOnlyCollection<Ingredient> Ingredients
+        {
+            get
+            {
                 if (ingredients == null)
                     InitIngredients();
                 return ingredients.AsReadOnly();
@@ -744,7 +820,8 @@ namespace HighVoltz
         /// <summary>
         /// Name of the Recipe
         /// </summary>
-        public string Name {
+        public string Name
+        {
             get { return name ?? (name = GetName()); }
         }
         string name;
@@ -761,13 +838,17 @@ namespace HighVoltz
         /// <summary>
         /// returns the spell that's attached to the recipe
         /// </summary>
-        public WoWSpell Spell {
-            get {
+        public WoWSpell Spell
+        {
+            get
+            {
                 return WoWSpell.FromId((int)ID);
             }
         }
-        public ReadOnlyCollection<Tool> Tools {
-            get {
+        public ReadOnlyCollection<Tool> Tools
+        {
+            get
+            {
                 if (tools == null)
                     InitTools();
                 return tools.AsReadOnly();
@@ -775,7 +856,8 @@ namespace HighVoltz
         }
         List<Tool> tools;
 
-        internal void Update(uint[] data) {
+        internal void Update(uint[] data)
+        {
             this.recipeData = data;
         }
     }
@@ -791,16 +873,19 @@ namespace HighVoltz
     public class IngredientSubClass
     {
         internal Ingredient parent;
-        internal IngredientSubClass(Ingredient parent, uint inBagCount) {
+        internal IngredientSubClass(Ingredient parent, uint inBagCount)
+        {
             this.parent = parent;
             this.InBagsCount = inBagCount;
         }
         static object _nameLockObject = new object();
-        public string Name {
+        public string Name
+        {
             get { lock (_nameLockObject) { return name ?? (name = GetName()); } }
         }
 
-        string GetName() {
+        string GetName()
+        {
             string _name = TradeSkillFrame.GetItemCacheName(parent.ID);
             if (_name == null)
             {
@@ -826,7 +911,8 @@ namespace HighVoltz
         /// <summary>
         /// updates the InBagsCount
         /// </summary>
-        internal void UpdateInBagsCount() {
+        internal void UpdateInBagsCount()
+        {
             InBagsCount = Ingredient.GetInBagItemCount(parent.ID);
         }
     }
@@ -840,7 +926,8 @@ namespace HighVoltz
         // list where every ingredient is stored, used to save memory usage,
         // this points to the one initilized in a TradeSkill instance
         internal Dictionary<uint, IngredientSubClass> masterList;
-        internal Ingredient(uint id, uint requiredNum, Dictionary<uint, IngredientSubClass> masterList) {
+        internal Ingredient(uint id, uint requiredNum, Dictionary<uint, IngredientSubClass> masterList)
+        {
             this.ID = id;
             this.Required = requiredNum;
             this.masterList = masterList;
@@ -857,7 +944,8 @@ namespace HighVoltz
         /// <summary>
         /// Name of the Reagent
         /// </summary>
-        public string Name {
+        public string Name
+        {
             get { return subclass.Name; }
         }
         /// <summary>
@@ -869,8 +957,9 @@ namespace HighVoltz
         /// Number of this Reagent in players possession
         /// </summary>
         public uint InBagItemCount { get { return subclass.InBagsCount; } }
-        
-        public static uint GetInBagItemCount(uint id) {
+
+        public static uint GetInBagItemCount(uint id)
+        {
             try
             {
                 return (uint)ObjectManager.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
@@ -887,7 +976,8 @@ namespace HighVoltz
 
         uint index; // index to some DBC, depends on type
         ToolType toolType;
-        internal Tool(uint index, ToolType toolType) {
+        internal Tool(uint index, ToolType toolType)
+        {
             this.index = index;
             this.toolType = toolType;
             UpdateToolStatus();
@@ -897,7 +987,8 @@ namespace HighVoltz
                 this.ID = 0;
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             if (obj == null)
                 return false;
             if (obj is Tool)
@@ -907,11 +998,13 @@ namespace HighVoltz
             }
             return false;
         }
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return (int)index + (int)toolType * 100000;
         }
 
-        string GetName() {
+        string GetName()
+        {
             string _name = null;
             uint stringPtr = 0;
             switch (toolType)
@@ -942,7 +1035,8 @@ namespace HighVoltz
             return _name;
         }
 
-        internal void UpdateToolStatus() {
+        internal void UpdateToolStatus()
+        {
             switch (toolType)
             {
                 case ToolType.SpellFocus:
@@ -981,7 +1075,8 @@ namespace HighVoltz
         /// <summary>
         /// Name of the tool
         /// </summary>
-        public string Name {
+        public string Name
+        {
             get { return name ?? (name = GetName()); }
         }
         string name;

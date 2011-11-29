@@ -14,8 +14,10 @@ namespace HighVoltz
 {
     public class ProfessionBuddySettings : Styx.Helpers.Settings
     {
+        public static ProfessionBuddySettings Instance{get;private set;}
         public ProfessionBuddySettings(string settingsPath)
             : base(settingsPath) {
+                Instance = this;
             Load();
         }
         [Setting, DefaultValue("")]
@@ -26,6 +28,12 @@ namespace HighVoltz
 
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }
+        
+        [Setting, DefaultValue("")]
+        public string WowVersion { get; set; }
+
+        [Setting, DefaultValue(0)]
+        public uint TradeskillFrameOffset { get; set; }       
     }
 
     public class PbProfileSettings

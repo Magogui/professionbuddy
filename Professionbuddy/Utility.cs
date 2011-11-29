@@ -12,6 +12,8 @@ using Styx.Logic.BehaviorTree;
 using System.Globalization;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.IO;
 
 namespace HighVoltz
 {
@@ -77,7 +79,7 @@ namespace HighVoltz
         static public WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
-            Regex pattern = new Regex(@"-?\d+\.?(\d+)?",RegexOptions.CultureInvariant);
+            Regex pattern = new Regex(@"-?\d+\.?(\d+)?", RegexOptions.CultureInvariant);
             MatchCollection matches = pattern.Matches(location);
             if (matches != null)
             {
@@ -161,6 +163,50 @@ namespace HighVoltz
                 return _ping;
             }
         }
+        const int _cacheSize = 0x500;
+        /// <summary>
+        /// Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
+        /// </summary>
+        /// <param name="pattern">the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
+        /// <param name="mask">the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored</param>
+        /// <returns>The offset the first match of the pattern was found at.</returns>
+        static public uint FindPattern(string pattern, string mask)
+        {
+            byte[] patternArray = HexStringToByteArray(pattern);
+            bool[] maskArray = MaskStringToBoolArray(mask);
+            ProcessModule wowModule = ObjectManager.WoWProcess.MainModule;
+            uint start = (uint)wowModule.BaseAddress.ToInt32();
+            int size = wowModule.ModuleMemorySize;
+            var patternLength = mask.Length;
+
+            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(_cacheSize - patternLength))
+            {
+                byte[] cache = ObjectManager.Wow.ReadBytes((uint)start + cacheOffset, _cacheSize > size - cacheOffset ? size - (int)cacheOffset : _cacheSize);
+                for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
+                {
+                    if (DataCompare(cache, cacheIndex, patternArray, maskArray))
+                        return start + cacheOffset + cacheIndex;
+                }
+            }
+            throw new InvalidDataException("Pattern not found");
+        }
+
+        static byte[] HexStringToByteArray(string hexString)
+        {
+            return hexString.Split(' ')
+                .Aggregate(new List<byte>(), (a, b) => { a.Add(byte.Parse(b, NumberStyles.HexNumber)); return a; })
+                .ToArray();
+        }
+
+        static bool[] MaskStringToBoolArray(string mask)
+        {
+            return mask.Aggregate(new List<bool>(), (a, b) => { a.Add(b == '?' ? false : true); return a; }).ToArray();
+        }
+
+        static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, bool[] mask)
+        {
+            return !mask.Where((t, i) => t && pattern[i] != data[dataOffset + i]).Any();
+        }
     }
     static class Exts
     {
@@ -208,7 +254,7 @@ namespace HighVoltz
         /// <returns></returns>
         public static string ToInvariantString(this WoWPoint text)
         {
-            return string.Format(CultureInfo.InvariantCulture,"{0},{1},{2}", text.X, text.Y, text.Z);
+            return string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", text.X, text.Y, text.Z);
         }
     }
 }
