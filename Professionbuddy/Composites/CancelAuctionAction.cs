@@ -209,7 +209,7 @@ namespace HighVoltz.Composites
                     {
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
+                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
                             ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8());
 
                         List<string> retVals = Lua.GetReturnValues(lua);
@@ -237,7 +237,7 @@ namespace HighVoltz.Composites
 
         bool CancelAuction(AuctionEntry ae)
         {
-            int numCanceled = Lua.GetReturnVal<int>(String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
+            int numCanceled = Lua.GetReturnVal<int>(String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
                 ae.Id,MinBuyout.TotalCopper,ae.LowestBo),0);
             if (numCanceled > 0)
             {
@@ -248,7 +248,7 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, string> GetMyAuctions()
         {
-            string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
+            string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
                 0);
             Dictionary<uint, string> ret = new Dictionary<uint, string>();
             if (rawString != null)
