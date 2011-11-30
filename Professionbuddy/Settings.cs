@@ -32,7 +32,7 @@ namespace HighVoltz
         [Setting, DefaultValue("")]
         public string WowVersion { get; set; }
 
-        [Setting, DefaultValue(0)]
+        [Setting, DefaultValue(0u)]
         public uint TradeskillFrameOffset { get; set; }       
     }
 

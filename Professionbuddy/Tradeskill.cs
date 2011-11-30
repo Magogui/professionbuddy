@@ -126,6 +126,7 @@ namespace HighVoltz
         static TradeSkillFrame()
         {
             ProcessModule mod = ObjectManager.WoWProcess.MainModule;
+            uint baseAddress = (uint)mod.BaseAddress;
             if (ProfessionBuddySettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
                 ProfessionBuddySettings.Instance.TradeskillFrameOffset == 0)
             {
@@ -134,9 +135,9 @@ namespace HighVoltz
                 {
                     uint pointer = Util.FindPattern("89 0D 00 00 00 00 8B 50 04 8B 45 0C 53 33 DB 89 15 00 00 00 00 89 1D 00 00 00 00 8B 08 89 0D 00 00 00 00 8B 50 04 89 15",
                         "xx????xxxxxxxxxxx????xx????xxxx????xxxxx") + 2;
-                    ProfessionBuddySettings.Instance.TradeskillFrameOffset = ObjectManager.Wow.Read<uint>(pointer);
+                    ProfessionBuddySettings.Instance.TradeskillFrameOffset = ObjectManager.Wow.Read<uint>(baseAddress + pointer) - baseAddress;
                     ProfessionBuddySettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
-                    Professionbuddy.Log("Found TradeskillFrame offset for WoW Version {0} at offset {1}",
+                    Professionbuddy.Log("Found TradeskillFrame offset for WoW Version {0} at offset 0x{1:X}",
                         mod.FileVersionInfo.FileVersion, ProfessionBuddySettings.Instance.TradeskillFrameOffset);
                     ProfessionBuddySettings.Instance.Save();
                 }

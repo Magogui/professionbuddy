@@ -185,7 +185,7 @@ namespace HighVoltz
                 for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
                 {
                     if (DataCompare(cache, cacheIndex, patternArray, maskArray))
-                        return start + cacheOffset + cacheIndex;
+                        return cacheOffset + cacheIndex;
                 }
             }
             throw new InvalidDataException("Pattern not found");
