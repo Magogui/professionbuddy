@@ -429,7 +429,7 @@ namespace HighVoltz.Composites
                          "if GetCurrentGuildBankTab() ~= tabInfo[i][1] then " +
                             "return 0 " +
                          "end " +
-                         "if c + bagged <= {1} and c <= tabInfo[i][3]then " +
+                         "if c + bagged <= {1} and c <= tabInfo[i][3] then " +
                             "PickupContainerItem(bag,slot) " +
                             "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
                             "bagged = bagged + c " +
@@ -441,8 +441,8 @@ namespace HighVoltz.Composites
                             "bagged = bagged + cnt " +
                          "end " +
                          "return c " +
-                         "i=i+1 " +
                       "end " +
+                      "i=i+1 " +
                       "if bagged >= {1} then return 1 end " +
                    "end " +
                 "end " +
