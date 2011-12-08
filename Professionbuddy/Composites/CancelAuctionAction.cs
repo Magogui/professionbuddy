@@ -237,8 +237,9 @@ namespace HighVoltz.Composites
 
         bool CancelAuction(AuctionEntry ae)
         {
-            int numCanceled = Lua.GetReturnVal<int>(String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
-                ae.Id,MinBuyout.TotalCopper,ae.LowestBo),0);
+            string lua = String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
+                ae.Id,MinBuyout.TotalCopper,ae.LowestBo);
+            int numCanceled = Lua.GetReturnVal<int>(lua,0);
             if (numCanceled > 0)
             {
                 Professionbuddy.Log("Canceled {0} x{1}", ae.Name, numCanceled);

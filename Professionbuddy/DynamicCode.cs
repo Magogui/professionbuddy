@@ -33,6 +33,7 @@ using HighVoltz.Composites;
 using Action = TreeSharp.Action;
 using PrioritySelector = TreeSharp.PrioritySelector;
 using System.Reflection.Emit;
+using System.Threading;
 namespace HighVoltz
 {
     public partial class Professionbuddy
@@ -69,9 +70,6 @@ namespace HighVoltz
         public void GenorateDynamicCode()
         {
             CsharpCodeDict = new Dictionary<string, ICSharpCode>();
-            //DecoratorMethods = new Dictionary<string, If>();
-            //ActionMethods = new Dictionary<string, CustomAction>();
-            //WaitMethods = new Dictionary<string, WaitAction>();
             StoreMethodName(CurrentProfile.Branch);
             // check if theres anything to compile
             if (CsharpCodeDict.Count == 0 )
@@ -182,6 +180,7 @@ namespace HighVoltz
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
             void SwitchToBot(string botName) {try{ChangeBotAction.ChangeBot(botName);}catch{}}
+            void SwitchCharacter(string character,string server){Helpers.SwitchCharacter(character,server);}
         }";
         #endregion
         public StringBuilder CsharpStringBuilder { get; private set; }
@@ -296,6 +295,58 @@ namespace HighVoltz
         public static void CTM(double x, double y, double z)
         {
             WoWMovement.ClickToMove(new WoWPoint(x, y, z));
+        }
+
+        static bool _isSwitchingToons = false;
+        public static void SwitchCharacter(string character, string server)
+        {
+            if (_isSwitchingToons)
+            {
+                Professionbuddy.Log("Already switching characters");
+                return;
+            } 
+            // credit to mvbc of mmowned
+            string _loginLua = 
+            "if (RealmList and RealmList:IsVisible()) then " +
+                "for i = 1, select('#',GetRealmCategories()) do " +
+                    "for j = 1, GetNumRealms(i) do " +
+                        "if GetRealmInfo(i, j) == '" + server + "' then " +
+                            "RealmList:Hide() " +
+                            "ChangeRealm(i, j) " +
+                        "end " +
+                    "end " +
+                "end " +
+            "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
+                "if GetServerName() ~= '" + server + "' and (not RealmList or not RealmList:IsVisible()) then " +
+                    "RequestRealmList(1) " +
+                "else " +
+                    "for i = 1,GetNumCharacters() do " +
+                        "if (GetCharacterInfo(i) == '" + character + "') then " +
+                            "CharacterSelect_SelectCharacter(i) " +
+                            "EnterWorld() " +
+                        "end " +
+                    "end " +
+                "end " +
+            "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
+                "CharacterCreate_Back() " +
+            "end ";
+            _isSwitchingToons = true;
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(
+            new System.Action(() => {
+                TreeRoot.Stop();
+                Lua.DoString("Logout()");
+                new Thread(() => {
+                    while (ObjectManager.IsInGame)
+                        Thread.Sleep(2000);
+                    while (!ObjectManager.IsInGame)
+                    {
+                        Lua.DoString(_loginLua);
+                        Thread.Sleep(2000);
+                    }
+                    TreeRoot.Start();
+                    _isSwitchingToons = false;
+                }).Start();
+            }));
         }
         public class TradeskillHelper
         {
