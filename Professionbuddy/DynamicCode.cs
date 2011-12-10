@@ -72,7 +72,7 @@ namespace HighVoltz
             CsharpCodeDict = new Dictionary<string, ICSharpCode>();
             StoreMethodName(CurrentProfile.Branch);
             // check if theres anything to compile
-            if (CsharpCodeDict.Count == 0 )
+            if (CsharpCodeDict.Count == 0)
                 return;
             Type dynamicType = CompileAndLoad();
             if (dynamicType != null)
@@ -89,7 +89,7 @@ namespace HighVoltz
                 }
             }
         }
-    
+
         void StoreMethodName(Composite comp)
         {
 
@@ -104,7 +104,7 @@ namespace HighVoltz
                     StoreMethodName(child);
             }
         }
-        
+
         #region Strings
 
         static string prefix =
@@ -180,7 +180,7 @@ namespace HighVoltz
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
             void SwitchToBot(string botName) {try{ChangeBotAction.ChangeBot(botName);}catch{}}
-            void SwitchCharacter(string character,string server){Helpers.SwitchCharacter(character,server);}
+            void SwitchCharacter(string character,string server,string botName){Helpers.SwitchCharacter(character,server,botName);}
         }";
         #endregion
         public StringBuilder CsharpStringBuilder { get; private set; }
@@ -191,7 +191,7 @@ namespace HighVoltz
                 {"CompilerVersion", "v3.5"},
             }))
             {
-                
+
                 CompilerParameters options = new CompilerParameters();
                 foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
@@ -199,7 +199,7 @@ namespace HighVoltz
                         options.ReferencedAssemblies.Add(asm.Location);
                 }
                 options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
-           
+
                 // disabled due to a bug in 2.0.0.3956;
                 //options.GenerateInMemory = true; 
                 options.GenerateExecutable = false;
@@ -298,15 +298,21 @@ namespace HighVoltz
         }
 
         static bool _isSwitchingToons = false;
-        public static void SwitchCharacter(string character, string server)
+        /// <summary>
+        /// Switches to a different character on same account
+        /// </summary>
+        /// <param name="character"></param>
+        /// <param name="server"></param>
+        /// <param name="botName">Name of bot to use on that character</param>
+        public static void SwitchCharacter(string character, string server, string botName)
         {
             if (_isSwitchingToons)
             {
                 Professionbuddy.Log("Already switching characters");
                 return;
-            } 
+            }
             // credit to mvbc of mmowned
-            string _loginLua = 
+            string _loginLua =
             "if (RealmList and RealmList:IsVisible()) then " +
                 "for i = 1, select('#',GetRealmCategories()) do " +
                     "for j = 1, GetNumRealms(i) do " +
@@ -331,11 +337,28 @@ namespace HighVoltz
                 "CharacterCreate_Back() " +
             "end ";
             _isSwitchingToons = true;
+            // reset all actions 
+            Professionbuddy.Instance.IsRunning = false;
+            foreach (IPBComposite comp in Professionbuddy.Instance.CurrentProfile.Branch.Children)
+            {
+                comp.Reset();
+            }
             System.Windows.Application.Current.Dispatcher.BeginInvoke(
-            new System.Action(() => {
+            new System.Action(() =>
+            {
                 TreeRoot.Stop();
+                BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(botName, StringComparison.OrdinalIgnoreCase) >= 0).Value;
+                if (bot != null)
+                {
+                    if (BotManager.Current != bot)
+                        BotManager.Instance.SetCurrent(bot);
+                }
+                else
+                    Professionbuddy.Err("Could not find bot with name {0}", botName);
                 Lua.DoString("Logout()");
-                new Thread(() => {
+
+                new Thread(() =>
+                {
                     while (ObjectManager.IsInGame)
                         Thread.Sleep(2000);
                     while (!ObjectManager.IsInGame)
@@ -345,7 +368,8 @@ namespace HighVoltz
                     }
                     TreeRoot.Start();
                     _isSwitchingToons = false;
-                }).Start();
+                    Professionbuddy.Instance.IsRunning = true;
+                }) { IsBackground = true}.Start();
             }));
         }
         public class TradeskillHelper

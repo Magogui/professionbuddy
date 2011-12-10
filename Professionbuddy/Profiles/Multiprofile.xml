@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Professionbuddy>
+  <!--ATTENTION: READ BELOW BEFORE YOU START-->
+  <!--Set Hearth to Dwarf area in Stormwind if Alliance or Org if horde-->
+  <!--Adjust the profile settings especially your banker name -->
+  <!--if changes are made to settings after profile was running you need to reload the profile!-->
+  <!--You must start HB while logged in your farmer-->
+  <!--If you customize this profile (change profiles, AH buyout etc) remember to rename so it doesn't get overwritten when you update from svn-->
+  <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" />
+  <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" />
+  <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" />
+  <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " />
+  <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" />
+  <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" />
+  <Settings Type="Boolean" DefaultValue="false" Name="EmptyBags" Summary="Set to true to empty bags now." />
+  <CallSubRoutine SubRoutineName="Init" />
+  <CallSubRoutine SubRoutineName="LoadProfile" />
+  <If Condition="Me.Name.Equals((string)Settings[&quot;BankerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
+    <CustomAction Code="MessageBox.Show(&quot;Switch to your farmer before starting this multiprofile. Must restart HB&quot;);TreeRoot.Stop();" />
+  </If>
+  <If Condition="((string)var2).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase)  &amp;&amp; TreeRoot.Current.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+    <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
+    <WaitAction Condition="TreeRoot.Current.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+  </If>
+  <While Condition="true" IgnoreCanRun="True">
+    <!--Check if bags are full and not in city. If true then hearth-->
+    <If Condition="Me.Name.Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase) &amp;&amp; ( Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBags&quot;]) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
+      <CallSubRoutine SubRoutineName="Hearth" />
+    </If>
+    <!--Check if we're in factions capital city. Stormwind = 1519. Org = 1637-->
+    <If Condition="Me.ZoneId == (int)var3" IgnoreCanRun="True">
+      <!--Me.Name is cached and stay the same regardless of switching characters.-->
+      <CustomAction Code="var2=Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0);" />
+      <!--On Farmer-->
+      <If Condition="((string)var2).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
+        <If Condition="Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBags&quot;]" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="MailItems" />
+          <CustomAction Code="Log (&quot;Switching to banker&quot;);" />
+          <!--Log on Banker-->
+          <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
+          <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+        </If>
+        <!--Update the Character name variable-->
+        <CustomAction Code="var2=Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0);" />
+        <If Condition="((string)var2).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
+          <!--Change FarmedZone to the next zone-->
+          <CustomAction Code="uint a = ((List&lt;uint&gt;)var4).FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]); Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: ((List&lt;uint&gt;)var4).Min();" />
+          <CallSubRoutine SubRoutineName="LoadProfile" />
+          <CallSubRoutine SubRoutineName="Use Portal" />
+        </If>
+      </If>
+      <!--On Banker-->
+      <If Condition="((string)var2).Equals((string)Settings[&quot;BankerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="False">
+        <If Condition="(bool)Settings[&quot;EmptyBags&quot;]" IgnoreCanRun="True">
+          <CustomAction Code="Settings[&quot;EmptyBags&quot;] = false;" />
+        </If>
+        <!--Get all mail and put it on AH-->
+        <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
+          <GetMailAction ItemID="" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+          <CallSubRoutine SubRoutineName="SellOnAH" />
+        </While>
+        <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
+        <!--Log on Farmer-->
+        <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />
+        <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+      </If>
+    </If>
+  </While>
+  <SubRoutine SubRoutineName="MailItems">
+    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
+    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="SellOnAH">
+    <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="5g50s0c" MaxBuyout="20g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Elemental" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Herb" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Cloth" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Armor" SubCategoryType="WoWItemArmorClass" SubCategory="Misc" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+    <SellItemOnAhAction ItemID="0" MinBuyout="5g50s0c" MaxBuyout="20g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Elemental" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="Hearth">
+    <CustomAction Code="Log(&quot;Hearthing&quot;);" />
+    <While Condition="Me.ZoneId != (int)var3;" IgnoreCanRun="True">
+      <!--Dismount and use hearthstone-->
+      <CustomAction Code="Mount.Dismount();Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
+    </While>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="Init">
+    <CustomAction Code="Log(&quot;Multi-profile initializing&quot;);" />
+    <!--store current server name, needed when switching characters.-->
+    <CustomAction Code="var1 = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
+    <CustomAction Code="var2=Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0);" />
+    <!--ZoneID of bots capital city-->
+    <CustomAction Code="var3 = Me.IsAlliance? 1519:1637;" />
+    <!--List of zones IDs that we will farm in accending numerical order-->
+    <CustomAction Code="var4 = new List&lt;uint&gt;();" />
+    <!--current ZoneID-->
+    <CustomAction Code="var5 = 0u;" />
+    <!--Hyjal-->
+    <CustomAction Code="if ((bool)Settings[&quot;Hyjal&quot;]) ((List&lt;uint&gt;)var4).Add(616);" />
+    <!--Twilight Highlands-->
+    <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) ((List&lt;uint&gt;)var4).Add(4922);" />
+    <!--Uldum-->
+    <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) ((List&lt;uint&gt;)var4).Add(5034);" />
+    <If Condition="Me.ZoneId != (int) var3 &amp;&amp; !((List&lt;uint&gt;)var4).Contains(Me.ZoneId)" IgnoreCanRun="True">
+      <CustomAction Code="Log(&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
+      <CallSubRoutine SubRoutineName="Hearth" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="Use Portal">
+    <CustomAction Code="var5 = Me.ZoneId;" />
+    <!--Hyjal-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
+      <CustomAction Code="Log(&quot;Using Portal to Hyjal&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="-8212.33" Y="399.0208" Z="117.273" />
+        <InteractionAction Entry="207692" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="2042.752" Y="-4395.662" Z="97.93639" />
+        <InteractionAction Entry="207688" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+    </If>
+    <!--Twilight Highlands-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
+      <CustomAction Code="Log(&quot;Using Portal to Twilight Highlands&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="-8186.149" Y="413.7292" Z="116.7497" />
+        <InteractionAction Entry="207694" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True" />
+    </If>
+    <!--Uldum-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
+      <CustomAction Code="Log(&quot;Using Portal to Uldum&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="-8233.281" Y="415.5955" Z="117.4477" />
+        <InteractionAction Entry="207695" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="2039.67" Y="-4356.288" Z="98.00434" />
+        <InteractionAction Entry="207687" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+    </If>
+    <!--Wait until zone changes.-->
+    <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="LoadProfile">
+    <!--Hyjal-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
+      <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+        <CustomAction Code="Log(&quot;Loading Herb&amp;Mining profile for Hyjal&quot;);" />
+        <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Hyjal.Nuetral)Mines&amp;Herbs.xml" ProfileType="Honorbuddy" />
+      </If>
+      <!--if herb gathering is off in GB2 load a mine only profile.-->
+      <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+        <CustomAction Code="Log(&quot;Loading Mining profile for Hyjal&quot;);" />
+        <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Hyjal.Nuetral)Mines.xml" ProfileType="Honorbuddy" />
+      </If>
+    </If>
+    <!--Twilight Highlands-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Loading Alliance Herb&amp;Mining profile for Twilight Highlands&quot;);" />
+          <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Alliance)Herb&amp;Mines.xml" ProfileType="Honorbuddy" />
+        </If>
+        <!--if herb gathering is off in GB2 load a mine only profile.-->
+        <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Loading Alliance Mining profile for Twilight Highlands&quot;);" />
+          <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Alliance)Mines.xml" ProfileType="Honorbuddy" />
+        </If>
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Loading Horde Herb&amp;Mining profile for Twilight Highlands&quot;);" />
+          <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Horde)Herb&amp;mines.xml" ProfileType="Honorbuddy" />
+        </If>
+        <!--if herb gathering is off in GB2 load a mine only profile.-->
+        <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Loading Horde Mining profile for Twilight Highlands&quot;);" />
+          <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Horde)Mines.xml" ProfileType="Honorbuddy" />
+        </If>
+      </If>
+    </If>
+    <!--Uldum-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
+      <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+        <CustomAction Code="Log(&quot;Loading Herb&amp;Mining profile for Uldum&quot;);" />
+        <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Uldum.Nuetral)Mines&amp;Herbs.xml" ProfileType="Honorbuddy" />
+      </If>
+      <!--if herb gathering is off in GB2 load a mine only profile.-->
+      <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
+        <CustomAction Code="Log(&quot;Loading Mining profile for Uldum&quot;);" />
+        <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Uldum.Nuetral)Mines.xml" ProfileType="Honorbuddy" />
+      </If>
+    </If>
+  </SubRoutine>
+</Professionbuddy>

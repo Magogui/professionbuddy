@@ -2,6 +2,8 @@
 using System.Xml;
 using System;
 using TreeSharp;
+using System.Threading;
+using System.ComponentModel;
 
 namespace HighVoltz.Composites
 {
@@ -19,10 +21,11 @@ namespace HighVoltz.Composites
             get { return (int)Properties["Timeout"].Value; }
             set { Properties["Timeout"].Value = value; }
         }
-        public WaitAction():base(CsharpCodeType.BoolExpression)
+        public WaitAction()
+            : base(CsharpCodeType.BoolExpression)
         {
             Properties["Timeout"] = new MetaProp("Timeout", typeof(int));
-            Properties["Condition"] = new MetaProp("Condition", typeof(string));
+            Properties["Condition"] = new MetaProp("Condition", typeof(string), new DisplayNameAttribute("Until Condition"));
 
             Timeout = 2000;
             Condition = "false";
@@ -41,7 +44,7 @@ namespace HighVoltz.Composites
                     {
                         timeout.Stop();
                         timeout.Reset();
-                        Professionbuddy.Log("Wait Action Completed");
+                        Professionbuddy.Debug("Wait Until {0} Completed",Condition);
                         IsDone = true;
                     }
                     else
@@ -49,7 +52,8 @@ namespace HighVoltz.Composites
                 }
                 catch (Exception ex)
                 {
-                    Professionbuddy.Err("Wait:({0})\n{1}", Condition, ex);
+                    if (ex.GetType() != typeof(ThreadAbortException))
+                        Professionbuddy.Err("Wait:({0})\n{1}", Condition, ex);
                 }
             }
             return RunStatus.Failure;

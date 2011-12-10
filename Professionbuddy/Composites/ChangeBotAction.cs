@@ -48,7 +48,7 @@ namespace HighVoltz.Composites
         {
             ChangeBot(BotName);
         }
-        
+
         static Timer _timer;
         //static Stopwatch _throttleSW = new Stopwatch();
         static bool _botIsChanging = false;
@@ -59,7 +59,7 @@ namespace HighVoltz.Composites
                 Professionbuddy.Log("Must wait for previous ChangeBot to finish before calling ChangeBot again.");
                 return;
             }
-            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.Contains(name)).Value;
+            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(name, StringComparison.InvariantCultureIgnoreCase) >= 0).Value;
             if (BotManager.Current == bot)
                 return;
             if (bot != null)
@@ -67,19 +67,17 @@ namespace HighVoltz.Composites
                 // execute from GUI thread since this thread will get aborted when switching bot
                 _botIsChanging = true;
                 Application.Current.Dispatcher.BeginInvoke(
-                    new System.Action(() => {
-                        bool isRunning = TreeRoot.IsRunning;
+                    new System.Action(() =>
+                    {
                         BotManager.Instance.SetCurrent(bot);
-                        if (isRunning)
+                        Professionbuddy.Log("Restarting HB in 3 seconds");
+                        _timer = new Timer(new TimerCallback((o) =>
                         {
-                            Professionbuddy.Log("Restarting HB in 3 seconds");
-                            _timer = new Timer(new TimerCallback((o) => {
-                                TreeRoot.Start();
-                                Professionbuddy.Log("Restarting HB");
-                                _botIsChanging = false;
-                            }),null,3000,Timeout.Infinite);
-                            
-                        }
+                            TreeRoot.Start();
+                            Professionbuddy.Log("Restarting HB");
+                        }), null, 3000, Timeout.Infinite);
+                        _botIsChanging = false;
+
                     }
                 ));
                 Professionbuddy.Log("Changing bot to {0}", name);

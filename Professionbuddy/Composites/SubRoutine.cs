@@ -100,8 +100,13 @@ namespace HighVoltz.Composites
         virtual public void ReadXml(XmlReader reader)
         {
             SubRoutineName = reader["SubRoutineName"];
+            // stop reading since there are no child elements
+            if (reader.IsEmptyElement)
+            {
+                reader.ReadStartElement();
+                return;
+            }
             reader.ReadStartElement();
-
             while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
             {
                 if (reader.NodeType == XmlNodeType.Comment)

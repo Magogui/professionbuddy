@@ -2,6 +2,7 @@
 using System.Xml;
 using Styx.Helpers;
 using TreeSharp;
+using System.Threading;
 
 
 namespace HighVoltz.Composites
@@ -16,7 +17,8 @@ namespace HighVoltz.Composites
             set { Properties["Code"].Value = value; }
         }
 
-        public CustomAction():base(CsharpCodeType.Statements)
+        public CustomAction()
+            : base(CsharpCodeType.Statements)
         {
             this.Action = c => { ;};
             Properties["Code"] = new MetaProp("Code", typeof(string));
@@ -41,13 +43,18 @@ namespace HighVoltz.Composites
                     }
                     catch (Exception ex)
                     {
-                        Professionbuddy.Err("Custom:({0})\n{1}", Code, ex);
+                        if (ex.GetType() != typeof(ThreadAbortException))
+                            Professionbuddy.Err("Custom:({0})\n{1}", Code, ex);
                     }
                     IsDone = true;
                 }
                 return RunStatus.Failure;
             }
-            catch (Exception ex) { Logging.Write(System.Drawing.Color.Red, "There was an exception while executing a CustomAction\n{0}", ex); }
+            catch (Exception ex)
+            {
+                if (ex.GetType() != typeof(ThreadAbortException))
+                    Logging.Write(System.Drawing.Color.Red, "There was an exception while executing a CustomAction\n{0}", ex);
+            }
             return RunStatus.Failure;
         }
         public override string Name { get { return "Custom Action"; } }

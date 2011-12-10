@@ -17,7 +17,7 @@ namespace HighVoltz.Composites
         {
             //lock (_lockObject)
             //{
-                if (IsDone)
+                if (!CanRun(null))
                 {
                     yield return RunStatus.Failure;
                     yield break;

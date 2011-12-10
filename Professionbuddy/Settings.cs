@@ -106,16 +106,12 @@ namespace HighVoltz
         }
 
         public void LoadDefaultValues() {
-            List<Composites.Settings> settingsList = new List<Composites.Settings>();
-            GetDefaultSettings(Professionbuddy.Instance.CurrentProfile.Branch, settingsList);
+            List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.CurrentProfile.Branch);
             foreach (var setting in settingsList)
             {
                 if (!Settings.ContainsKey(setting.SettingName))
-                {
-                    object o = GetValue(setting.Type, setting.DefaultValue);
-                    Settings[setting.SettingName] = o;
-                    Summaries[setting.SettingName] = setting.Summary;
-                }
+                    Settings[setting.SettingName] = GetValue(setting.Type, setting.DefaultValue);
+                Summaries[setting.SettingName] = setting.Summary;
             }
         }
 
@@ -161,13 +157,21 @@ namespace HighVoltz
             catch (Exception ex) { Logging.WriteException(ex);return null; }
         }
 
-        public void GetDefaultSettings(Composite comp, List<Composites.Settings> list) {
+        public List<Composites.Settings> GetDefaultSettings(Composite comp)
+        {
+            List<Composites.Settings> list = new List<Composites.Settings>();
+            GetProfileSettings(comp, ref list);
+            return list;
+        }
+        // recursively get all profile settings
+        void GetProfileSettings(Composite comp, ref List<Composites.Settings> list)
+        {
             if (comp is Composites.Settings)
                 list.Add(comp as Composites.Settings);
             if (comp is GroupComposite)
             {
                 foreach (var child in ((GroupComposite)comp).Children)
-                    GetDefaultSettings(child, list);
+                    GetProfileSettings(child, ref list);
             }
         }
     }

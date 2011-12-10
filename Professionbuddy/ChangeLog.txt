@@ -1,3 +1,10 @@
+Professionbuddy 1.151
+* Reduced CPU usage on If/While Conditions.. should fix 'stop and go' behavior caused by PB when running huge profiles
+* Fixed sending of empty mail.
+* ChangeBotAction bug fixes.
+* Added a multiprofile that hearths when bags are full,mails items to banker, logs on banker and post items on ah, switches back to farmer and changes zone.
+* small bug fixes and tweaks. GetDefaultSettings
+
 Professionbuddy 1.134
 * Added an 'Ignore Stacksize Below' property to 'Sell Item On AH' Action. It will ignore all items stacks below the value when undercutting.
 * Mining-Herb(1-525) now automatically disables gathering of mines if maximum level of mining is higher than herbs maximum level and vice versa

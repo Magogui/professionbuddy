@@ -9,6 +9,7 @@ using System.Diagnostics;
 using PrioritySelector = TreeSharp.PrioritySelector;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Threading;
 
 
 namespace HighVoltz.Composites
@@ -85,7 +86,8 @@ namespace HighVoltz.Composites
             }
             catch (Exception ex)
             {
-                Professionbuddy.Err("If Condition: {0} ,Err:{1}", Condition, ex);
+                if (ex.GetType() != typeof(ThreadAbortException))
+                    Professionbuddy.Err("If Condition: {0} ,Err:{1}", Condition, ex);
                 return false;
             }
         }
@@ -120,6 +122,7 @@ namespace HighVoltz.Composites
                     //yield break; don't break iteration.. While Condition return sucess if at end of loop
                 }
             }
+            _executed = true;
             yield return RunStatus.Failure;
             yield break;
             //}
@@ -180,6 +183,7 @@ namespace HighVoltz.Composites
 
         virtual public void Reset()
         {
+            _executed = false;
             recursiveReset(this);
         }
         void recursiveReset(If gc)
@@ -191,14 +195,25 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as If);
             }
         }
+        //virtual public bool IsDone
+        //{
+        //    get
+        //    {
+        //        return Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count || !CanRun(null);
+        //    }
+        //}
+
+        bool _executed = false;
+        /// <summary>
+        /// Returns true if the If Condition is finished executing its children or condition isn't met.
+        /// </summary>
         virtual public bool IsDone
         {
             get
             {
-                return Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count || !CanRun(null);
+                return _executed || !CanRun(null);
             }
         }
-
         virtual public System.Drawing.Color Color
         {
             get { return string.IsNullOrEmpty(CompileError) ? System.Drawing.Color.Blue : System.Drawing.Color.Red; }
@@ -235,6 +250,12 @@ namespace HighVoltz.Composites
             bool boolVal;
             bool.TryParse(reader["IgnoreCanRun"], out boolVal);
             IgnoreCanRun = boolVal;
+            // stop reading since there are no child elements
+            if (reader.IsEmptyElement)
+            {
+                reader.ReadStartElement();
+                return;
+            }
             reader.ReadStartElement();
             while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
             {
