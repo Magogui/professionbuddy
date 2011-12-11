@@ -6,6 +6,8 @@
   <!--if changes are made to settings after profile was running you need to reload the profile!-->
   <!--You must start HB while logged in your farmer-->
   <!--If you customize this profile (change profiles, AH buyout etc) remember to rename so it doesn't get overwritten when you update from svn-->
+  <!--********** Credits **********-->
+  <!--Extacy - For most of the Org portal IDs and locations.-->
   <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" />
   <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" />
   <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" />
@@ -13,6 +15,7 @@
   <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" />
   <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" />
   <Settings Type="Boolean" DefaultValue="false" Name="EmptyBags" Summary="Set to true to empty bags now." />
+  <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." />
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
   <If Condition="Me.Name.Equals((string)Settings[&quot;BankerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
@@ -37,8 +40,10 @@
           <CallSubRoutine SubRoutineName="MailItems" />
           <CustomAction Code="Log (&quot;Switching to banker&quot;);" />
           <!--Log on Banker-->
-          <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
-          <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+          <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
+            <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
+            <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+          </If>
         </If>
         <!--Update the Character name variable-->
         <CustomAction Code="var2=Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0);" />
