@@ -8,6 +8,7 @@
   <!--If you customize this profile (change profiles, AH buyout etc) remember to rename so it doesn't get overwritten when you update from svn-->
   <!--********** Credits **********-->
   <!--Extacy - For most of the Org portal IDs and locations.-->
+  <!--no1knowsy - For Org Twilight Highlands portal info.-->
   <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" />
   <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" />
   <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" />
@@ -134,7 +135,10 @@
         <FlyToAction Dismount="True" X="-8186.149" Y="413.7292" Z="116.7497" />
         <InteractionAction Entry="207694" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
-      <If Condition="Me.IsHorde" IgnoreCanRun="True" />
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="2055.473" Y="-4378.082" Z="98.84528" />
+        <InteractionAction Entry="207686" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
     </If>
     <!--Uldum-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
