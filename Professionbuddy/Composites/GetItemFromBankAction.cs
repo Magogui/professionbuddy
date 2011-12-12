@@ -148,7 +148,7 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        // key= itemID; value amount to withdrawl
+        // key = itemID; value amount to withdrawl
         Dictionary<uint, int> ItemList = null;
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch _itemsSW;
@@ -331,7 +331,6 @@ namespace HighVoltz.Composites
                 "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
                 "local amount = {1} " +
-                "if GuildBankFrame and GuildBankFrame:IsVisible() then " +
                    "for tab = 1,tabnum do " +
                       "local _,_,iv,_,_, rw = GetGuildBankTabInfo(tab) " +
                       "if iv then " +
@@ -361,9 +360,7 @@ namespace HighVoltz.Composites
                          "end " +
                       "end " +
                    "end " +
-                   "if sawItem == 0 then return -1 else return bagged end " +
-                "end " +
-                "return -2 "
+                   "if sawItem == 0 then return -1 else return bagged end " 
             , id, amount);
             Professionbuddy.Log("Attempting to withdraw items");
             int retVal = Lua.GetReturnVal<int>(lua, 0);

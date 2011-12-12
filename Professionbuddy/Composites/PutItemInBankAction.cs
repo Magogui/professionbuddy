@@ -20,6 +20,65 @@ namespace HighVoltz.Composites
     #region PutItemInBankAction
     public class PutItemInBankAction : PBAction
     {
+        #region Strings
+        static string _gbankSlotInfo =
+             "local _,c,l=GetGuildBankItemInfo({0}, {1}) " +
+             "if c > 0 and l == nil then " +
+                 "local id = tonumber(string.match(GetGuildBankItemLink({0},{1}), 'Hitem:(%d+)')) " +
+                 "local maxStack = select(8,GetItemInfo(id)) " +
+                 "return id,c,maxStack " +
+             "elseif c == 0 then " +
+                "return 0,0,0 " +
+             "end ";
+        #endregion
+
+        class BankSlotInfo : IEquatable<BankSlotInfo>
+        {
+            public BankSlotInfo(int bag, int bagType, int slot, uint itemID, uint stackSize, int maxStackSize)
+            {
+                this.Bag = bag;
+                this.BagType = bagType;
+                this.Slot = slot;
+                this.ItemID = itemID;
+                this.StackSize = stackSize;
+                this.MaxStackSize = maxStackSize;
+            }
+            public int Bag { get; private set; } // this is also the tab for GBank
+            public int BagType { get; private set; }
+            public int Slot { get; private set; }
+            public uint ItemID { get; set; } //  0 if slot is has no items.
+            public uint StackSize { get; set; } // amount of items in slot..
+            public int MaxStackSize { get; set; }
+            // public static BankSlotInfo Zero { get { return new BankSlotInfo(0, 0, 0, 0, 0, 0); } }
+
+            public bool Equals(BankSlotInfo other)
+            {
+                return other != null && this.Bag == other.Bag && this.Slot == other.Slot;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as BankSlotInfo);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Bag * 1000 + Slot).GetHashCode();
+            }
+
+            public static bool operator ==(BankSlotInfo a, BankSlotInfo b)
+            {
+                if ((object)a == null || (object)b == null)
+                    return Object.Equals(a, b);
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(BankSlotInfo a, BankSlotInfo b)
+            {
+                return !(a == b);
+            }
+        }
+
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
@@ -179,7 +238,6 @@ namespace HighVoltz.Composites
         //bool _switchingTabs = false;
         Stopwatch _gbankItemThrottleSW = new Stopwatch();
         const long _gbankItemThrottle = 167; // 6 times per sec.. round up to nearest 1.
-        int _numOfItemsDepositedInGB = 0;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -205,10 +263,10 @@ namespace HighVoltz.Composites
                         IsDone = true;
                     else
                     {
-                        KeyValuePair<uint, int> kv = ItemList.FirstOrDefault();
+                        uint itemID = ItemList.Keys.FirstOrDefault();
                         bool done = false;
                         if (Bank == BankType.Personal)
-                            done = PutItemInBank(kv.Key, kv.Value);
+                            done = PutItemInBank(itemID, ItemList[itemID]);
                         else
                         {
                             // throttle the amount of items being withdrawn from gbank per sec
@@ -221,19 +279,17 @@ namespace HighVoltz.Composites
                                 _gbankItemThrottleSW.Reset();
                                 _gbankItemThrottleSW.Start();
                             }
-                            int ret = PutItemInGBank(kv.Key, kv.Value, GuildTab);
-                            if (ret == -1 || _numOfItemsDepositedInGB + ret >= Amount)
+                            int ret = PutItemInGBank(itemID, ItemList[itemID], GuildTab);
+                            ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
+                            if (ItemList[itemID] <= 0)
                                 done = true;
                             else
-                            {
-                                _numOfItemsDepositedInGB += ret;
                                 done = false;
-                            }
                         }
                         if (done)
                         {
-                            Professionbuddy.Debug("Done Depositing Item:{0} to bank", kv.Key);
-                            ItemList.Remove(kv.Key);
+                            Professionbuddy.Debug("Done Depositing Item:{0} to bank", itemID);
+                            ItemList.Remove(itemID);
                         }
                         _itemsSW.Reset();
                         _itemsSW.Start();
@@ -296,7 +352,7 @@ namespace HighVoltz.Composites
                     if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
                         subCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
                     {
-                        itemList.Add(item.Entry, Amount);
+                        itemList.Add(item.Entry, Amount > 0 ? Amount : (int)Util.GetCarriedItemCount(item.Entry));
                     }
                 }
             else
@@ -306,9 +362,9 @@ namespace HighVoltz.Composites
                 {
                     foreach (var entry in entries)
                     {
-                        uint temp = 0;
-                        uint.TryParse(entry.Trim(), out temp);
-                        itemList.Add(temp, Amount);
+                        uint itemID = 0;
+                        uint.TryParse(entry.Trim(), out itemID);
+                        itemList.Add(itemID, Amount > 0 ? Amount : (int)Util.GetCarriedItemCount(itemID));
                     }
                 }
                 else
@@ -317,12 +373,6 @@ namespace HighVoltz.Composites
                     IsDone = true;
                 }
             }
-            Professionbuddy.Debug("List of items to deposit to bank");
-            foreach (var item in itemList)
-            {
-                Professionbuddy.Debug("Item:{0} Amount:{1}", item.Key, item.Value);
-            }
-            Professionbuddy.Debug("End of list");
             return itemList;
         }
 
@@ -370,86 +420,173 @@ namespace HighVoltz.Composites
             return bank;
         }
 
+        #region GuildBank
         bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch queueServerSW;
         Stopwatch _itemsSW;
-        int _currentBag = -1;
-        int _currentSlot = 1;
-        // returns number of items deposited.. -1 if done...
+        List<BankSlotInfo> _bankSlots;
+
         public int PutItemInGBank(uint id, int amount, uint tab)
         {
-            if (queueServerSW == null)
+            using (new FrameLock())
             {
-                queueServerSW = new Stopwatch();
-                queueServerSW.Start();
-                Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
-                Professionbuddy.Log("Queuing server for gbank info");
-                return 0;
+                if (queueServerSW == null)
+                {
+                    queueServerSW = new Stopwatch();
+                    queueServerSW.Start();
+                    Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end SetCurrentGuildBankTab({0}) ", tab == 0 ? 1 : tab);
+                    Professionbuddy.Log("Queuing server for gbank info");
+                    return 0;
+                }
+                else if (queueServerSW.ElapsedMilliseconds < 2000)
+                    return 0;
+                if (_bankSlots == null)
+                    _bankSlots = GetBankSlotInfo();
+                int tabCnt = Lua.GetReturnVal<int>("return GetNumGuildBankTabs()", 0);
+                int currentTab = Lua.GetReturnVal<int>("return GetCurrentGuildBankTab()", 0);
+
+                IEnumerable<BankSlotInfo> slotsInCurrentTab = _bankSlots.Where(slotI => slotI.Bag == currentTab);
+                WoWItem itemToDeposit = me.CarriedItems.OrderBy(item => item.StackCount)
+                    .FirstOrDefault(item => item.Entry == id && !item.IsDisabled);
+                if (itemToDeposit != null)
+                {
+                    int depositAmount = amount > 0 && amount < (int)itemToDeposit.StackCount ?
+                       amount : (int)itemToDeposit.StackCount;
+
+                    BankSlotInfo emptySlot = slotsInCurrentTab.FirstOrDefault(slotI => slotI.StackSize == 0);
+                    BankSlotInfo partialStack = slotsInCurrentTab
+                        .FirstOrDefault(slotI => slotI.ItemID == id && slotI.MaxStackSize - slotI.StackSize >= depositAmount);
+                    if (partialStack != null || emptySlot != null)
+                    {
+                        bool slotIsEmpty = partialStack == null;
+                        int bSlotIndex = slotIsEmpty ? _bankSlots.IndexOf(emptySlot) : _bankSlots.IndexOf(partialStack);
+                        _bankSlots[bSlotIndex].StackSize += itemToDeposit.StackCount;
+                        if (slotIsEmpty)
+                        {
+                            _bankSlots[bSlotIndex].ItemID = itemToDeposit.Entry;
+                            _bankSlots[bSlotIndex].MaxStackSize = itemToDeposit.ItemInfo.MaxStackSize;
+                        }
+                        if (depositAmount == itemToDeposit.StackCount)
+                            itemToDeposit.UseContainerItem();
+                        else
+                        {
+                            Lua.DoString("SplitContainerItem({0},{1},{2}) PickupGuildBankItem({3},{4})",
+                                itemToDeposit.BagIndex + 1, itemToDeposit.BagSlot + 1,depositAmount, _bankSlots[bSlotIndex].Bag, _bankSlots[bSlotIndex].Slot);
+                        }
+                        return depositAmount;
+                    }
+                    if (tab == 0 && currentTab < tabCnt)
+                    {
+                        Lua.DoString("SetCurrentGuildBankTab({0})", currentTab + 1);
+                        return 0;
+                    }
+                }
+                return -1;
             }
-            else if (queueServerSW.ElapsedMilliseconds < 2000)
-                return 0;
-            string lua = string.Format(
-                "local tabnum = GetNumGuildBankTabs() " +
-                "local bagged = 0 " +
-                "local tabInfo = {{0}} " +
-                "local tab = 0 " +
-                "local i = 1 " +
-                "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
-                "while tab <= tabnum do " +
-                   "local_,_,v,d =GetGuildBankTabInfo(tab) " +
-                   "if v == 1 and d == 1 then " +
-                   //"SetCurrentGuildBankTab(tab) " +
-                      "for slot=1, 98 do " +
-                         "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
-                         "if c > 0 and l == nil then " +
-                            "local id = tonumber(string.match(GetGuildBankItemLink(tab,slot), 'Hitem:(%d+)')) " +
-                            "if id == {0} and c < maxStack then " +
-                               "tabInfo[i] = {{tab,slot,maxStack-c}} " +
-                               "i = i +1 " +
-                            "end " +
-                         "elseif c == 0 then " +
-                            "tabInfo[i] = {{tab,slot,maxStack}} " +
-                            "i = i +1 " +
-                         "end " +
-                      "end " +
-                   "end " +
-                   "tab = tab + 1 " +
-                "end " +
-                "i = 1 " +
-                "if GetCurrentGuildBankTab() ~= tabInfo[1][1] then " +
-                    "SetCurrentGuildBankTab(tabInfo[1][1]) " +
-                    "return 0 " +
-                "end " +
-                "for bag = 0,4 do " +
-                   "for slot=1,GetContainerNumSlots(bag) do " +
-                      "if i > #tabInfo then return end " +
-                      "local id = GetContainerItemID(bag,slot) " +
-                      "local _,c,l = GetContainerItemInfo(bag, slot) " +
-                      "if id == {0} and l == nil then  " +
-                         "if GetCurrentGuildBankTab() ~= tabInfo[i][1] then " +
-                            "return 0 " +
-                         "end " +
-                         "if c + bagged <= {1} and c <= tabInfo[i][3] then " +
-                            "PickupContainerItem(bag,slot) " +
-                            "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
-                            "bagged = bagged + c " +
-                         "else " +
-                            "local cnt = {1}-bagged " +
-                            "if cnt > tabInfo[i][3] then cnt = tabInfo[i][3] end " +
-                            "SplitContainerItem(bag,slot, cnt) " +
-                            "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
-                            "bagged = bagged + cnt " +
-                         "end " +
-                         "return c " +
-                      "end " +
-                      "i=i+1 " +
-                      "if bagged >= {1} then return 1 end " +
-                   "end " +
-                "end " +
-                "return -1"
-                , id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
-           return Lua.GetReturnVal<int>(lua,0) ;
+
+            //    string lua = string.Format(
+            //        "local tabnum = GetNumGuildBankTabs() " +
+            //        "local bagged = 0 " +
+            //        "local tabInfo = {{0}} " +
+            //        "local tab = {2} " +
+            //        "local i = 1 " +
+            //        "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
+            //        "while tab <= tabnum do " +
+            //           "local_,_,v,d =GetGuildBankTabInfo(tab) " +
+            //           "if v == 1 and d == 1 then " +
+            //        //"SetCurrentGuildBankTab(tab) " +
+            //              "for slot=1, 98 do " +
+            //                 "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
+            //                 "if c > 0 and l == nil then " +
+            //                    "local id = tonumber(string.match(GetGuildBankItemLink(tab,slot), 'Hitem:(%d+)')) " +
+            //                    "if id == {0} and c < maxStack then " +
+            //                       "tabInfo[i] = {{tab,slot,maxStack-c}} " +
+            //                       "i = i +1 " +
+            //                    "end " +
+            //                 "elseif c == 0 then " +
+            //                    "tabInfo[i] = {{tab,slot,maxStack}} " +
+            //                    "i = i +1 " +
+            //                 "end " +
+            //              "end " +
+            //           "end " +
+            //           "tab = tab + 1 " +
+            //        "end " +
+            //        "i = 1 " +
+            //        "if GetCurrentGuildBankTab() ~= tabInfo[1][1] then " +
+            //            "SetCurrentGuildBankTab(tabInfo[1][1]) " +
+            //            "return 0 " +
+            //        "end " +
+            //        "for bag = 0,4 do " +
+            //           "for slot=1,GetContainerNumSlots(bag) do " +
+            //              "if i > #tabInfo then return -1 end " +
+            //              "local id = GetContainerItemID(bag,slot) " +
+            //              "local _,c,l = GetContainerItemInfo(bag, slot) " +
+            //              "if id == {0} and l == nil then  " +
+            //                 "if GetCurrentGuildBankTab() ~= tabInfo[i][1] then " +
+            //                    "return 0 " +
+            //                 "end " +
+            //                 "if c + bagged <= {1} and c <= tabInfo[i][3] then " +
+            //                    "PickupContainerItem(bag,slot) " +
+            //                    "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
+            //                    "bagged = bagged + c " +
+            //                 "else " +
+            //                    "local cnt = {1}-bagged " +
+            //                    "if cnt > tabInfo[i][3] then cnt = tabInfo[i][3] end " +
+            //                    "SplitContainerItem(bag,slot, cnt) " +
+            //                    "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
+            //                    "bagged = bagged + cnt " +
+            //                 "end " +
+            //                 "return c " +
+            //              "end " +
+            //              "i=i+1 " +
+            //           "end " +
+            //        "end " +
+            //        "return -1"
+            //        , id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
+            //    return Lua.GetReturnVal<int>(lua, 0);
         }
+
+        const int GuildTabSlotNum = 98;
+        /// <summary>
+        /// Returns a list of bag/gbank tab slots with empty/partial full slots.
+        /// </summary>
+        /// <returns></returns>
+        List<BankSlotInfo> GetBankSlotInfo()
+        {
+            List<BankSlotInfo> bankSlotInfo = new List<BankSlotInfo>();
+            using (new FrameLock())
+            {
+                if (Bank == BankType.Guild)
+                {
+                    int tabCnt = Lua.GetReturnVal<int>("return GetNumGuildBankTabs()", 0);
+                    int minTab = GuildTab > 0 ? (int)GuildTab : 1;
+                    int maxTab = GuildTab > 0 ? (int)GuildTab : tabCnt;
+                    for (int tab = minTab; tab <= maxTab; tab++)
+                    {
+                        // check permissions for tab
+                        bool canDespositInTab =
+                            Lua.GetReturnVal<int>(string.Format("local _,_,v,d =GetGuildBankTabInfo({0}) if v==1 and d==1 then return 1 else return 0 end", tab), 0) == 1;
+                        if (canDespositInTab)
+                        {
+                            for (int slot = 1; slot <= GuildTabSlotNum; slot++)
+                            {
+                                // 3 return values in following order, ItemID,StackSize,MaxStackSize
+                                string lua = string.Format(_gbankSlotInfo, tab, slot);
+                                List<string> retVals = Lua.GetReturnValues(lua);
+                                bankSlotInfo.Add(new BankSlotInfo(tab, 0, slot, uint.Parse(retVals[0]), uint.Parse(retVals[1]), int.Parse(retVals[2])));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            return bankSlotInfo;
+        }
+
+        #endregion
 
         public bool PutItemInBank(uint id, int amount)
         {
@@ -527,11 +664,9 @@ namespace HighVoltz.Composites
         {
             base.Reset();
             queueServerSW = null;
+            _bankSlots = null;
             ItemList = null;
             _itemsSW = null;
-            _currentBag = -1;
-            _currentSlot = 1;
-            _numOfItemsDepositedInGB = 0;
         }
         public override object Clone()
         {

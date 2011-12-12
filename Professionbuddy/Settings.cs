@@ -14,10 +14,11 @@ namespace HighVoltz
 {
     public class ProfessionBuddySettings : Styx.Helpers.Settings
     {
-        public static ProfessionBuddySettings Instance{get;private set;}
+        public static ProfessionBuddySettings Instance { get; private set; }
         public ProfessionBuddySettings(string settingsPath)
-            : base(settingsPath) {
-                Instance = this;
+            : base(settingsPath)
+        {
+            Instance = this;
             Load();
         }
         [Setting, DefaultValue("")]
@@ -28,12 +29,12 @@ namespace HighVoltz
 
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }
-        
+
         [Setting, DefaultValue("")]
         public string WowVersion { get; set; }
 
         [Setting, DefaultValue(0u)]
-        public uint TradeskillFrameOffset { get; set; }       
+        public uint TradeskillFrameOffset { get; set; }
     }
 
     public class PbProfileSettings
@@ -41,34 +42,43 @@ namespace HighVoltz
         public Dictionary<string, object> Settings { get; private set; }
         public Dictionary<string, string> Summaries { get; private set; }
 
-        public PbProfileSettings() {
+        public PbProfileSettings()
+        {
             Settings = new Dictionary<string, object>();
             Summaries = new Dictionary<string, string>();
         }
-        public object this[string name] {
-            get {
+        public object this[string name]
+        {
+            get
+            {
                 return Settings.ContainsKey(name) ? Settings[name] : null;
             }
-            set {
+            set
+            {
                 Settings[name] = value;
                 if (Professionbuddy.Instance.CurrentProfile != null)
                     Save();
             }
         }
-        string ProfileName {
-            get {
+        string ProfileName
+        {
+            get
+            {
                 return Professionbuddy.Instance.CurrentProfile != null ?
                     Path.GetFileNameWithoutExtension(Professionbuddy.Instance.CurrentProfile.XmlPath) : "";
             }
         }
-        string SettingsPath {
-            get {
+        string SettingsPath
+        {
+            get
+            {
                 return Path.Combine(Logging.ApplicationPath,
                     string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
                     ObjectManager.Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)));
             }
         }
-        public void Save() {
+        public void Save()
+        {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
                 XmlWriterSettings settings = new XmlWriterSettings();
@@ -80,8 +90,9 @@ namespace HighVoltz
                 }
             }
         }
-        public void Load() {
 
+        public void Load()
+        {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
                 if (File.Exists(SettingsPath))
@@ -105,7 +116,8 @@ namespace HighVoltz
             }
         }
 
-        public void LoadDefaultValues() {
+        public void LoadDefaultValues()
+        {
             List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.CurrentProfile.Branch);
             foreach (var setting in settingsList)
             {
@@ -115,7 +127,8 @@ namespace HighVoltz
             }
         }
 
-        object GetValue(TypeCode code, string value) {
+        object GetValue(TypeCode code, string value)
+        {
             try
             {
                 switch (code)
@@ -154,7 +167,7 @@ namespace HighVoltz
                         return new object();
                 }
             }
-            catch (Exception ex) { Logging.WriteException(ex);return null; }
+            catch (Exception ex) { Logging.WriteException(ex); return null; }
         }
 
         public List<Composites.Settings> GetDefaultSettings(Composite comp)

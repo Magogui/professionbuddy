@@ -311,7 +311,7 @@ namespace HighVoltz
                 Professionbuddy.Log("Already switching characters");
                 return;
             }
-            // credit to mvbc of mmowned
+            // credit to mvbc of mmocore.com
             string _loginLua =
             "if (RealmList and RealmList:IsVisible()) then " +
                 "for i = 1, select('#',GetRealmCategories()) do " +
@@ -372,6 +372,7 @@ namespace HighVoltz
                 }) { IsBackground = true}.Start();
             }));
         }
+
         public class TradeskillHelper
         {
             SkillLine skillLine;
