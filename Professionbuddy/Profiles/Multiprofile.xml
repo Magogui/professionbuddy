@@ -61,9 +61,6 @@
         <CustomAction Code="uint a = ((List&lt;uint&gt;)var4).FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]); Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: ((List&lt;uint&gt;)var4).Min();" />
         <CallSubRoutine SubRoutineName="LoadProfile" />
         <CallSubRoutine SubRoutineName="Use Portal" />
-        <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
-          <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
-        </If>
         <If Condition="(bool)Settings[&quot;EnableZoneTimer&quot;]" IgnoreCanRun="True">
           <CustomAction Code="var6 = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
           <CustomAction Code="Log( &quot;I will spend {0} minutes in this zone&quot;,var6);" />
@@ -76,6 +73,9 @@
           <GetMailAction ItemID="" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
           <CallSubRoutine SubRoutineName="SellOnAH" />
         </While>
+        <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+          <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
+        </If>
         <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
         <!--Log on Farmer-->
         <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />

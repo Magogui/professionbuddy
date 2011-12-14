@@ -95,6 +95,8 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
+                Summaries = new Dictionary<string, string>();
+                Settings = new Dictionary<string, object>();
                 if (File.Exists(SettingsPath))
                 {
                     using (XmlReader reader = XmlReader.Create(SettingsPath))
@@ -103,8 +105,7 @@ namespace HighVoltz
                         var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
                         if (temp != null)
                         {
-                            Settings = new Dictionary<string, object>();
-                            Summaries = new Dictionary<string, string>();
+
                             foreach (var kv in temp)
                             {
                                 Settings[kv.Key] = kv.Value;
@@ -125,6 +126,8 @@ namespace HighVoltz
                     Settings[setting.SettingName] = GetValue(setting.Type, setting.DefaultValue);
                 Summaries[setting.SettingName] = setting.Summary;
             }
+            // remove unused settings..
+            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,kv => kv.Value);
         }
 
         object GetValue(TypeCode code, string value)
