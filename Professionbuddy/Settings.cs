@@ -109,14 +109,21 @@ namespace HighVoltz
                 {
                     using (XmlReader reader = XmlReader.Create(SettingsPath))
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                        var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
-                        if (temp != null)
+                        try
                         {
-                            foreach (var kv in temp)
+                            DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                            var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
+                            if (temp != null)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value };
+                                foreach (var kv in temp)
+                                {
+                                    Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value };
+                                }
                             }
+                        }
+                        catch (Exception ex)
+                        {
+                            Professionbuddy.Err(ex.ToString());
                         }
                     }
                 }
