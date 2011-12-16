@@ -62,7 +62,7 @@ namespace HighVoltz.Composites
 
         void Condition_PropertyChanged(object sender, EventArgs e)
         {
-            Professionbuddy.Instance.CodeWasModified = true;
+            DynamicCode.CodeWasModified = true;
         }
 
         string lastError = "";

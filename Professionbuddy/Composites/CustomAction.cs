@@ -28,7 +28,7 @@ namespace HighVoltz.Composites
 
         void CustomAction_PropertyChanged(object sender, EventArgs e)
         {
-            Pb.CodeWasModified = true;
+            DynamicCode.CodeWasModified = true;
         }
 
         protected override RunStatus Run(object context)

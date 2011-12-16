@@ -292,7 +292,6 @@
       </If>
     </While>
     <While Condition="Alchemy.Level &gt;=285 &amp;&amp; Alchemy.Level &lt; 300" IgnoreCanRun="False">
-      <CustomAction Code="Log(&quot;here&quot;);" />
       <If Condition="!HasRecipe(17556)" IgnoreCanRun="True">
         <TrainSkillAction NpcEntry="28703" X="5889.271" Y="698.5286" Z="643.2379" />
       </If>

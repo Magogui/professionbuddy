@@ -37,7 +37,6 @@ namespace HighVoltz
 {
     public class PbProfile
     {
-        Professionbuddy _pb = Professionbuddy.Instance;
         public PbProfile()
         {
             ProfilePath = XmlPath = "";
@@ -61,7 +60,7 @@ namespace HighVoltz
         /// </summary>
         public PrioritySelector Branch { get; protected set; }
 
-        public PBIdentityComposite LoadFromFile(string path)
+        public PbDecorator LoadFromFile(string path)
         {
             try
             {
@@ -81,17 +80,17 @@ namespace HighVoltz
                                 return null;
                             }
                             PackagePart pbProfilePart = zipFile.GetPart(packageRelation.TargetUri);
-                            path = ExtractPart(pbProfilePart, _pb.TempFolder);
+                            path = ExtractPart(pbProfilePart, DynamicCode.TempFolder);
                             var pbProfileRelations = pbProfilePart.GetRelationships();
                             foreach (var rel in pbProfileRelations)
                             {
                                 var hbProfilePart = zipFile.GetPart(rel.TargetUri);
-                                ExtractPart(hbProfilePart, _pb.TempFolder);
+                                ExtractPart(hbProfilePart, DynamicCode.TempFolder);
                             }
                         }
                     }
                     Branch.Children.Clear();
-                    PBIdentityComposite idComp;
+                    PbDecorator idComp;
                     XmlReaderSettings settings = new XmlReaderSettings();
                     settings.IgnoreWhitespace = true;
                     settings.IgnoreProcessingInstructions = true;
@@ -99,7 +98,7 @@ namespace HighVoltz
 
                     using (XmlReader reader = XmlReader.Create(path, settings))
                     {
-                        idComp = new PBIdentityComposite(Branch);
+                        idComp = new PbDecorator(Branch);
                         idComp.ReadXml(reader);
                     }
                     XmlPath = path;
@@ -121,7 +120,7 @@ namespace HighVoltz
             settings.Indent = true;
             using (XmlWriter writer = XmlWriter.Create(file, settings))
             {
-                ((PBIdentityComposite)_pb.Root).WriteXml(writer);
+                ((PbRootComposite)Professionbuddy.Instance.Root).PbBotBase.WriteXml(writer);
             }
             XmlPath = file;
         }
@@ -135,7 +134,7 @@ namespace HighVoltz
                 Uri partUriProfile = PackUriHelper.CreatePartUri(
                     new Uri(Path.GetFileName(profilePath), UriKind.Relative));
                 Dictionary<string, Uri> HbProfileUrls = new Dictionary<string, Uri>();
-                GetHbprofiles(profilePath, _pb.CurrentProfile.Branch, HbProfileUrls);
+                GetHbprofiles(profilePath, Professionbuddy.Instance.CurrentProfile.Branch, HbProfileUrls);
                 using (Package package = Package.Open(path, FileMode.Create))
                 {
                     // Add the PB profile

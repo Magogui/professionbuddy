@@ -36,14 +36,16 @@ using System.Reflection.Emit;
 using System.Threading;
 namespace HighVoltz
 {
-    public partial class Professionbuddy
+    public class DynamicCode
     {
+        static Dictionary<string, ICSharpCode> CsharpCodeDict;
 
-        Dictionary<string, ICSharpCode> CsharpCodeDict;
+        public static bool CodeWasModified = true;
 
-        public bool CodeWasModified = true;
+        static string _tempFolder ;
+        static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.Instance.BotPath, "Temp")); } }
 
-        void WipeTempFolder()
+        public static void WipeTempFolder()
         {
             if (!Directory.Exists(TempFolder))
             {
@@ -67,10 +69,10 @@ namespace HighVoltz
             }
         }
 
-        public void GenorateDynamicCode()
+        static public void GenorateDynamicCode()
         {
             CsharpCodeDict = new Dictionary<string, ICSharpCode>();
-            StoreMethodName(CurrentProfile.Branch);
+            StoreMethodName(Professionbuddy.Instance.CurrentProfile.Branch);
             // check if theres anything to compile
             if (CsharpCodeDict.Count == 0)
                 return;
@@ -90,9 +92,8 @@ namespace HighVoltz
             }
         }
 
-        void StoreMethodName(Composite comp)
+        static void StoreMethodName(Composite comp)
         {
-
             if (comp is ICSharpCode)
             {
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString()] = (ICSharpCode)comp;
@@ -179,12 +180,13 @@ namespace HighVoltz
             void CTM(double x,double y,double z) {Helpers.CTM(x,y,z); }
             void CTM(WoWPoint p) {Helpers.CTM(p.X,p.Y,p.Z); }
             void RefreshDataStore() {Professionbuddy.Instance.DataStore.ImportDataStore(); }
-            void SwitchToBot(string botName) {try{ChangeBotAction.ChangeBot(botName);}catch{}}
+            void SwitchToBot(string botName) {try{Professionbuddy.ChangeSecondaryBot(botName);}catch{}}
             void SwitchCharacter(string character,string server,string botName){Helpers.SwitchCharacter(character,server,botName);}
+            BotBase SecondaryBot {get{return Professionbuddy.Instance.SecondaryBot;}}
         }";
         #endregion
-        public StringBuilder CsharpStringBuilder { get; private set; }
-        public Type CompileAndLoad()
+        static public StringBuilder CsharpStringBuilder { get; private set; }
+        static public Type CompileAndLoad()
         {
             CompilerResults results = null;
             using (CSharpCodeProvider provider = new CSharpCodeProvider(new Dictionary<string, string>() { 
@@ -195,7 +197,7 @@ namespace HighVoltz
                 CompilerParameters options = new CompilerParameters();
                 foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (!asm.GetName().Name.Contains(Name))
+                    if (!asm.GetName().Name.Contains(Professionbuddy.Instance.Name))
                         options.ReferencedAssemblies.Add(asm.Location);
                 }
                 options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
@@ -350,11 +352,19 @@ namespace HighVoltz
                 BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(botName, StringComparison.OrdinalIgnoreCase) >= 0).Value;
                 if (bot != null)
                 {
-                    if (BotManager.Current != bot)
-                        BotManager.Instance.SetCurrent(bot);
+                    if (Professionbuddy.Instance.SecondaryBot != bot)
+                        Professionbuddy.Instance.SecondaryBot = bot;
+                    if (!bot.Initialized)
+                        bot.Initialize();
+                    if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+                    {
+                        ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+                        ProfessionBuddySettings.Instance.Save();
+                    }
                 }
                 else
                     Professionbuddy.Err("Could not find bot with name {0}", botName);
+
                 Lua.DoString("Logout()");
 
                 new Thread(() =>
@@ -369,7 +379,7 @@ namespace HighVoltz
                     TreeRoot.Start();
                     _isSwitchingToons = false;
                     Professionbuddy.Instance.IsRunning = true;
-                }) { IsBackground = true}.Start();
+                }) { IsBackground = true }.Start();
             }));
         }
 

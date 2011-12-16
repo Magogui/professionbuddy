@@ -30,11 +30,11 @@ namespace HighVoltz.Composites
 
         protected override RunStatus Run(object context)
         {
-            if (!IsDone && !_botIsChanging)
+            if (!IsDone)
             {
                 try
                 {
-                    ChangeBot();
+                    Professionbuddy.ChangeSecondaryBot(BotName) ;
                 }
                 finally
                 {
@@ -44,49 +44,45 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public void ChangeBot()
-        {
-            ChangeBot(BotName);
-        }
 
-        static Timer _timer;
+        //static Timer _timer;
         //static Stopwatch _throttleSW = new Stopwatch();
-        static bool _botIsChanging = false;
-        static public void ChangeBot(string name)
-        {
-            if (_botIsChanging)
-            {
-                Professionbuddy.Log("Must wait for previous ChangeBot to finish before calling ChangeBot again.");
-                return;
-            }
-            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(name, StringComparison.InvariantCultureIgnoreCase) >= 0).Value;
-            if (BotManager.Current == bot)
-                return;
-            if (bot != null)
-            {
-                // execute from GUI thread since this thread will get aborted when switching bot
-                _botIsChanging = true;
-                Application.Current.Dispatcher.BeginInvoke(
-                    new System.Action(() =>
-                    {
-                        BotManager.Instance.SetCurrent(bot);
-                        Professionbuddy.Log("Restarting HB in 3 seconds");
-                        _timer = new Timer(new TimerCallback((o) =>
-                        {
-                            TreeRoot.Start();
-                            Professionbuddy.Log("Restarting HB");
-                        }), null, 3000, Timeout.Infinite);
-                        _botIsChanging = false;
+        //static bool _botIsChanging = false;
+        //static public void ChangeBot(string name)
+        //{
+        //    if (_botIsChanging)
+        //    {
+        //        Professionbuddy.Log("Must wait for previous ChangeBot to finish before calling ChangeBot again.");
+        //        return;
+        //    }
+        //    BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(name, StringComparison.InvariantCultureIgnoreCase) >= 0).Value;
+        //    if (BotManager.Current == bot)
+        //        return;
+        //    if (bot != null)
+        //    {
+        //        // execute from GUI thread since this thread will get aborted when switching bot
+        //        _botIsChanging = true;
+        //        Application.Current.Dispatcher.BeginInvoke(
+        //            new System.Action(() =>
+        //            {
+        //                BotManager.Instance.SetCurrent(bot);
+        //                Professionbuddy.Log("Restarting HB in 3 seconds");
+        //                _timer = new Timer(new TimerCallback((o) =>
+        //                {
+        //                    TreeRoot.Start();
+        //                    Professionbuddy.Log("Restarting HB");
+        //                }), null, 3000, Timeout.Infinite);
+        //                _botIsChanging = false;
 
-                    }
-                ));
-                Professionbuddy.Log("Changing bot to {0}", name);
-            }
-            else
-            {
-                Professionbuddy.Err("Bot {0} does not exist", name);
-            }
-        }
+        //            }
+        //        ));
+        //        Professionbuddy.Log("Changing bot to {0}", name);
+        //    }
+        //    else
+        //    {
+        //        Professionbuddy.Err("Bot {0} does not exist", name);
+        //    }
+        //}
 
         public override string Name { get { return "Change Bot"; } }
         public override string Title

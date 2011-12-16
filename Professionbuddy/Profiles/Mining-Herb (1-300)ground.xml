@@ -12,7 +12,7 @@
     <CustomAction Code="TreeRoot.Stop();" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
-    <If Condition="TreeRoot.Current.Name != &quot;Questing&quot;" IgnoreCanRun="True">
+    <If Condition="SecondaryBot.Name != &quot;Questing&quot;" IgnoreCanRun="True">
       <ChangeBotAction BotName="Questing" />
     </If>
     <If Condition="Mining.Level != Mining.MaxLevel &amp;&amp; Mining.MaxLevel == Herbalism.MaxLevel" IgnoreCanRun="True">

@@ -11,28 +11,30 @@
   <!--no1knowsy -  For help with the Org portals-->
   <!--no1knowsy -  For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
-  <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" />
-  <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" />
-  <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" />
-  <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " />
-  <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" />
-  <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" />
-  <Settings Type="Boolean" DefaultValue="false" Name="EmptyBagsNow" Summary="Set to true to empty bags now." />
-  <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." />
-  <Settings Type="Int32" DefaultValue="200" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." />
-  <Settings Type="Boolean" DefaultValue="false" Name="DepositGoldInGbank" Summary="Set to true if you want to banker to depost gold in gbank" />
-  <Settings Type="Boolean" DefaultValue="true" Name="EnableZoneTimer" Summary="Set to true to leave zone after random amount of time spent there." />
-  <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" />
-  <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" />
+  <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
+    <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Zones" />
+    <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" Category="Banker" />
+    <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" Category="Farmer" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" Category="Zones" />
+    <Settings Type="Boolean" DefaultValue="false" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" />
+    <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" />
+    <Settings Type="Int32" DefaultValue="200" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" />
+    <Settings Type="Boolean" DefaultValue="false" Name="DepositGoldInGbank" Summary="Set to true if you want to banker to depost gold in gbank" Category="Banker" />
+    <Settings Type="Boolean" DefaultValue="true" Name="EnableZoneTimer" Summary="Set to true to leave zone after random amount of time spent there." Category="Farmer" />
+    <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" />
+    <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" Category="Farmer" />
+  </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
   <If Condition="Me.Name.Equals((string)Settings[&quot;BankerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
     <CustomAction Code="MessageBox.Show(&quot;Switch to your farmer before starting this multiprofile. Must restart HB&quot;);TreeRoot.Stop();" />
   </If>
   <!--Check if GB is current bot and only when farmer is logged on.-->
-  <If Condition="(bool)var2 &amp;&amp; TreeRoot.Current.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+  <If Condition="(bool)var2 &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
     <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
-    <WaitAction Condition="TreeRoot.Current.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+    <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
     <!--Check if bags are full and not in city. If true then hearth-->
@@ -45,7 +47,7 @@
     </If>
     <!--Check if bags are full and not in city. If true then hearth-->
     <!--Check if we're in factions capital city. Stormwind = 1519. Org = 1637-->
-    <If Condition="Me.ZoneId == (int)var3" IgnoreCanRun="True">
+    <If Condition="Me.ZoneId == (int)var3 &amp;&amp; (bool)var2" IgnoreCanRun="True">
       <!--On Farmer-->
       <If Condition="(bool)var2" IgnoreCanRun="True">
         <If Condition="Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
@@ -66,21 +68,24 @@
           <CustomAction Code="Log( &quot;I will spend {0} minutes in this zone&quot;,var6);" />
         </If>
       </If>
-      <!--On Banker-->
-      <If Condition="!(bool)var2" IgnoreCanRun="False">
-        <!--Get all mail and put it on AH-->
-        <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
-          <GetMailAction ItemID="" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
-          <CallSubRoutine SubRoutineName="SellOnAH" />
-        </While>
-        <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
-          <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
-        </If>
-        <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
-        <!--Log on Farmer-->
-        <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />
-        <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+    </If>
+    <!--On Banker-->
+    <If Condition="!(bool)var2" IgnoreCanRun="False">
+      <!--Get all mail and put it on AH-->
+      <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
+        <GetMailAction ItemID="" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+        <CallSubRoutine SubRoutineName="SellOnAH" />
+      </While>
+      <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+        <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
       </If>
+      <If Condition="(bool)Settings[&quot;DepositGoldInGbank&quot;]" IgnoreCanRun="True">
+        <CallSubRoutine SubRoutineName="DepositGoldInGbank" />
+      </If>
+      <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
+      <!--Log on Farmer-->
+      <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />
+      <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
     </If>
   </While>
   <SubRoutine SubRoutineName="MailItems">
@@ -174,7 +179,28 @@
     <!--Wait until zone changes.-->
     <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
   </SubRoutine>
-  <SubRoutine SubRoutineName="SetRandomZoneTime" />
+  <SubRoutine SubRoutineName="DepositGoldInGbank">
+    <CustomAction Code="Log(&quot;Depositing all but {0} gold into GBank&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
+    <!--Eastern Kingdoms-->
+    <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <!--Stormwind 'Human' GuildBank-->
+        <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &lt; DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
+          <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8920.106" Y="621.256" Z="100.226" />
+        </If>
+        <!--Stormwind 'Dwarf' GuildBank-->
+        <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &gt;= DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
+          <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8315.161" Y="582.8967" Z="100.3132" />
+        </If>
+      </If>
+    </If>
+    <!--loop until Gbank frame is opened-->
+    <While Condition="Lua.GetReturnVal&lt;int&gt;(&quot;if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end &quot;, 0) != 1" IgnoreCanRun="True">
+      <InteractionAction Entry="0" InteractDelay="2000" InteractType="GameObject" GameObjectType="GuildBank" SpellFocus="Anvil" />
+    </While>
+    <!--Deposit gold in Gbank-->
+    <CustomAction Code="Lua.DoString(&quot;local goldToKeep={0}*10000 local depositAmount=(GetMoney()-goldToKeep) if depositAmount &gt; 0 then DepositGuildBankMoney(depositAmount) end&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
+  </SubRoutine>
   <SubRoutine SubRoutineName="LoadProfile">
     <!--Hyjal-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">

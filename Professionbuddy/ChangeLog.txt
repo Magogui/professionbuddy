@@ -1,3 +1,14 @@
+Professionbuddy 1.159
+* Changed Professionbuddy to a botbase and this change might break some profiles.Read below for fix.
+* Because Professionbuddy is now a bot all profiles that check name of current bot with 'TreeRoot.Current.Name' will have to use 'SecondaryBot.Name' instead
+* 'ChangeBot' still works fine but it now changes the 'SecondaryBot' in Professionbuddy (which is the bot that chosen from the dropdown list in Professionbuddy's UI)
+* Double-clicking a profile from the profile list will now load it.
+* When saving a profile the file name of the current profile will now be used in the save dialog.
+* Profile Settings will nolonger show obolete/unused settings.
+* Profile Settings are now displayed in a tab if the currently loaded profile has any settings attached to it.
+* Added a 'Category' property to Profile Settings. This is used by the property grid that shows the profile settings.
+* Profession buddy profiles can now be loaded from HB's 'Load Profile' button
+
 Professionbuddy 1.151
 * Reduced CPU usage on If/While Conditions.. should fix 'stop and go' behavior caused by PB when running huge profiles
 * Fixed sending of empty mail.

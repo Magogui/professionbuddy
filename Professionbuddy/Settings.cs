@@ -24,9 +24,6 @@ namespace HighVoltz
         [Setting, DefaultValue("")]
         public string LastProfile { get; set; }
 
-        [Setting, DefaultValue(false)]
-        public bool IsRunning { get; set; }
-
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }
 
@@ -35,27 +32,39 @@ namespace HighVoltz
 
         [Setting, DefaultValue(0u)]
         public uint TradeskillFrameOffset { get; set; }
+        
+        [Setting, DefaultValue("")]
+        public string LastBotBase { get; set; }
+    }
+
+    public class PbProfileSettingEntry
+    {
+        public object Value { get; set; }
+        public string Summary { get; set; }
+        public string Category { get; set; }
     }
 
     public class PbProfileSettings
     {
-        public Dictionary<string, object> Settings { get; private set; }
-        public Dictionary<string, string> Summaries { get; private set; }
+        //public Dictionary<string, object> Settings { get; private set; }
+        //public Dictionary<string, string> Summaries { get; private set; }
+        //public Dictionary<string, string> Categories { get; private set; }
+        public Dictionary<string, PbProfileSettingEntry> Settings { get; private set; }
 
         public PbProfileSettings()
         {
-            Settings = new Dictionary<string, object>();
-            Summaries = new Dictionary<string, string>();
+            Settings = new Dictionary<string, PbProfileSettingEntry>();
+            //Summaries = new Dictionary<string, string>();
         }
         public object this[string name]
         {
             get
             {
-                return Settings.ContainsKey(name) ? Settings[name] : null;
+                return Settings.ContainsKey(name) ? Settings[name].Value : null;
             }
             set
             {
-                Settings[name] = value;
+                Settings[name].Value = value;
                 if (Professionbuddy.Instance.CurrentProfile != null)
                     Save();
             }
@@ -95,8 +104,7 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                Summaries = new Dictionary<string, string>();
-                Settings = new Dictionary<string, object>();
+                Settings = new Dictionary<string, PbProfileSettingEntry>();
                 if (File.Exists(SettingsPath))
                 {
                     using (XmlReader reader = XmlReader.Create(SettingsPath))
@@ -105,10 +113,9 @@ namespace HighVoltz
                         var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
                         if (temp != null)
                         {
-
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = kv.Value;
+                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value };
                             }
                         }
                     }
@@ -123,9 +130,10 @@ namespace HighVoltz
             foreach (var setting in settingsList)
             {
                 if (!Settings.ContainsKey(setting.SettingName))
-                    Settings[setting.SettingName] = GetValue(setting.Type, setting.DefaultValue);
-                Summaries[setting.SettingName] = setting.Summary;
-            }
+                    Settings[setting.SettingName] = new PbProfileSettingEntry() { Value = GetValue(setting.Type, setting.DefaultValue) };
+                Settings[setting.SettingName].Summary = setting.Summary;
+                Settings[setting.SettingName].Category = setting.Category;
+             }
             // remove unused settings..
             Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,kv => kv.Value);
         }

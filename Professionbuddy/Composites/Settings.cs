@@ -33,27 +33,43 @@ namespace HighVoltz.Composites
             get { return (string)Properties["Name"].Value; }
             set { Properties["Name"].Value = value; }
         }
+
         public string Summary
         {
             get { return (string)Properties["Summary"].Value; }
             set { Properties["Summary"].Value = value; }
         }
+
+        public string Category
+        {
+            get { return (string)Properties["Category"].Value; }
+            set { Properties["Category"].Value = value; }
+        }
+
         public Settings()
         {
             Properties["DefaultValue"] = new MetaProp("DefaultValue", typeof(string), new DisplayNameAttribute("Default Value"));
             Properties["Type"] = new MetaProp("Type", typeof(TypeCode));
             Properties["Name"] = new MetaProp("Name", typeof(string));
             Properties["Summary"] = new MetaProp("Summary", typeof(string));
+            Properties["Category"] = new MetaProp("Category", typeof(string));
+
             DefaultValue = "true";
             Type = TypeCode.Boolean;
             SettingName = "SettingName";
             Summary = "This is a summary of what this setting does";
+            Category = "Misc";
         }
 
         public override object Clone()
         {
-            return new Settings() { DefaultValue = this.DefaultValue,
-                SettingName = this.SettingName,Type = this.Type,Summary = this.Summary};
+            return new Settings() 
+            { DefaultValue = this.DefaultValue,
+                SettingName = this.SettingName,
+                Type = this.Type,
+                Summary = this.Summary,
+                Category = this.Category,
+            };
         }
         public override string Help
         {
@@ -89,6 +105,8 @@ namespace HighVoltz.Composites
             Type = (TypeCode)Enum.Parse(typeof(TypeCode), reader["Type"]);
             DefaultValue = reader["DefaultValue"];
             SettingName = reader["Name"];
+            if (reader.MoveToAttribute("Category"))
+                Category = reader["Category"];
             Summary = reader["Summary"];
             reader.ReadStartElement();
         }
@@ -98,6 +116,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("DefaultValue", DefaultValue);
             writer.WriteAttributeString("Name", SettingName);
             writer.WriteAttributeString("Summary", Summary);
+            writer.WriteAttributeString("Category", Category);
         }
         #endregion
     }

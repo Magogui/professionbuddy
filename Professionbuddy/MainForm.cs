@@ -19,6 +19,7 @@ using System.Xml;
 using HighVoltz.Composites;
 using Styx.Logic.Profiles;
 using System.Threading;
+using Styx;
 
 namespace HighVoltz
 {
@@ -43,23 +44,30 @@ namespace HighVoltz
         #region Initalize/update methods
         public MainForm()
         {
-            Instance = this;
-            PB = Professionbuddy.Instance;
-            InitializeComponent();
-            saveFileDialog.InitialDirectory = PB.ProfilePath;
-
-            profileWatcher = new FileSystemWatcher(PB.ProfilePath);
-            profileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
-            profileWatcher.Changed += profileWatcher_Changed;
-            profileWatcher.Created += profileWatcher_Changed;
-            profileWatcher.Deleted += profileWatcher_Changed;
-            profileWatcher.Renamed += profileWatcher_Changed;
-            profileWatcher.EnableRaisingEvents = true;
-
-            // used by the dev to display the 'Secret button', a button that dumps some debug info of the Task list.
-            if (Environment.UserName == "highvoltz")
+            try
             {
-                toolStripSecretButton.Visible = true;
+                Instance = this;
+                PB = Professionbuddy.Instance;
+                InitializeComponent();
+                saveFileDialog.InitialDirectory = PB.ProfilePath;
+
+                profileWatcher = new FileSystemWatcher(PB.ProfilePath);
+                profileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+                profileWatcher.Changed += profileWatcher_Changed;
+                profileWatcher.Created += profileWatcher_Changed;
+                profileWatcher.Deleted += profileWatcher_Changed;
+                profileWatcher.Renamed += profileWatcher_Changed;
+                profileWatcher.EnableRaisingEvents = true;
+
+                // used by the dev to display the 'Secret button', a button that dumps some debug info of the Task list.
+                if (Environment.UserName == "highvoltz")
+                {
+                    toolStripSecretButton.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Professionbuddy.Err(ex.ToString());
             }
         }
 
@@ -67,6 +75,7 @@ namespace HighVoltz
         private delegate void InitDelegate();
         public void Initialize()
         {
+            MainSplitContainer.Panel2MinSize = 390;
             RefreshProfileList();
             InitTradeSkillTab();
             InitActionTree();
@@ -74,19 +83,14 @@ namespace HighVoltz
             if (PB.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
                 toolStripAddCombo.Items.Add("Banker");
             toolStripAddCombo.SelectedIndex = 0;
-#if DLL
-            toolStripOpen.Image = HighVoltz.Properties.Resources.OpenPL;
-            toolStripSave.Image = HighVoltz.Properties.Resources.SaveHL;
-            toolStripCopy.Image = HighVoltz.Properties.Resources.copy;
-            toolStripCut.Image = HighVoltz.Properties.Resources.cut;
-            toolStripPaste.Image = HighVoltz.Properties.Resources.paste_32x32;
-            toolStripDelete.Image = HighVoltz.Properties.Resources.delete;
-            toolStripAddBtn.Image = HighVoltz.Properties.Resources._112_RightArrowLong_Orange_32x32_72;
-            toolStripMaterials.Image = HighVoltz.Properties.Resources.Notepad_32x32;
-            toolStripHelp.Image = HighVoltz.Properties.Resources._109_AllAnnotations_Help_32x32_72;
-            toolStripSettings.Image = HighVoltz.Properties.Resources.settings_48);
-#else
-            string imagePath = Path.Combine(PB.PluginPath, "Icons//");
+            toolStripBotCombo.Items.AddRange(BotManager.Instance.Bots.Where(kv => kv.Key != PB.Name).Select(kv => kv.Key).ToArray());
+            int i = toolStripBotCombo.Items.IndexOf(ProfessionBuddySettings.Instance.LastBotBase);
+            if (i >= 0)
+                toolStripBotCombo.SelectedIndex = i;
+            else
+                toolStripBotCombo.SelectedIndex = 1;
+
+            string imagePath = Path.Combine(PB.BotPath, "Icons\\");
             toolStripOpen.Image = Image.FromFile(imagePath + "OpenPL.bmp");
             toolStripSave.Image = Image.FromFile(imagePath + "SaveHL.bmp");
             toolStripCopy.Image = Image.FromFile(imagePath + "copy.png");
@@ -96,11 +100,12 @@ namespace HighVoltz
             toolStripAddBtn.Image = Image.FromFile(imagePath + "112_RightArrowLong_Orange_32x32_72.png");
             toolStripMaterials.Image = Image.FromFile(imagePath + "Notepad_32x32.png");
             toolStripHelp.Image = Image.FromFile(imagePath + "109_AllAnnotations_Help_32x32_72.png");
-            toolStripSettings.Image = Image.FromFile(imagePath + "settings_48.png");
-#endif
 
-            if (PB.ProfileSettings.Settings.Count == 0)
-                toolStripSettings.Enabled = false;
+            if (PB.ProfileSettings.Settings.Count > 0)
+                AddProfileSettingsTab();
+            else
+                RemoveProfileSettingsTab();
+
             if (PB.TradeSkillList.Count > 0)
                 TradeSkillTabControl.Visible = true;
             UpdateControls();
@@ -293,16 +298,12 @@ namespace HighVoltz
                 DisableControls();
                 this.Text = string.Format("Profession Buddy - Running {0}",
                     !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
-                toolStripStart.BackColor = Color.Green;
-                toolStripStart.Text = "Running";
             }
             else
             {
                 EnableControls();
                 this.Text = string.Format("Profession Buddy - Stopped {0}",
                     !string.IsNullOrEmpty(PB.MySettings.LastProfile) ? "(" + Path.GetFileName(PB.MySettings.LastProfile) + ")" : "");
-                toolStripStart.BackColor = Color.Red;
-                toolStripStart.Text = "Stopped";
             }
         }
         #endregion
@@ -317,38 +318,6 @@ namespace HighVoltz
                 return IsChildNode(parent, child.Parent);
         }
 
-        void ToggleStart()
-        {
-            try
-            {
-                if (PB.IsRunning)
-                {
-                    PB.MySettings.IsRunning = PB.IsRunning = false;
-                    PB.MySettings.Save();
-                }
-                else
-                {
-                    // reset all actions 
-                    foreach (IPBComposite comp in PB.CurrentProfile.Branch.Children)
-                    {
-                        comp.Reset();
-                    }
-                    if (PB.CodeWasModified)
-                    {
-                        PB.GenorateDynamicCode();
-                    }
-                    PB.ProfileSettings.LoadDefaultValues();
-                    PB.MySettings.IsRunning = PB.IsRunning = true;
-                    PB.MySettings.Save();
-                    Professionbuddy.PreLoadHbProfile();
-                    Professionbuddy.PreChangeBot();
-                    if (!TreeRoot.IsRunning)
-                        TreeRoot.Start();
-                }
-                UpdateControls();
-            }
-            catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
-        }
 
         void AddToActionTree(object action, TreeNode dest)
         {
@@ -459,6 +428,8 @@ namespace HighVoltz
             toolStripPaste.Enabled = false;
             ActionGrid.Enabled = false;
             LoadProfileButton.Enabled = false;
+            ProfileListView.Enabled = false;
+            toolStripBotCombo.Enabled = false;
         }
 
         void EnableControls()
@@ -472,6 +443,68 @@ namespace HighVoltz
             toolStripPaste.Enabled = true;
             ActionGrid.Enabled = true;
             LoadProfileButton.Enabled = true;
+            ProfileListView.Enabled = true;
+            toolStripBotCombo.Enabled = true;
+        }
+
+        public void AddProfileSettingsTab()
+        {
+            if (!IsValid)
+                return;
+            if (ProfileTab.InvokeRequired)
+                ProfileTab.BeginInvoke(new guiInvokeCB(AddProfileSettingsTabCallback));
+            else
+                AddProfileSettingsTabCallback();
+        }
+
+        void AddProfileSettingsTabCallback()
+        {
+            RightSideTab.SuspendLayout();
+            if (RightSideTab.TabPages.ContainsKey("ProfileSettings"))
+            {
+                RightSideTab.TabPages.RemoveByKey("ProfileSettings");
+            }
+            RightSideTab.TabPages.Add("ProfileSettings", "Profile Settings");
+
+            PropertyGrid pg = new PropertyGrid();
+            pg.Dock = DockStyle.Fill;
+            RightSideTab.TabPages["ProfileSettings"].Controls.Add(pg);
+
+            ProfilePropertyBag = new PropertyBag();
+            foreach (var kv in PB.ProfileSettings.Settings)
+            {
+                ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
+                    new DescriptionAttribute(kv.Value.Summary), new CategoryAttribute(kv.Value.Category));
+                ProfilePropertyBag[kv.Key].Value = kv.Value.Value;
+                ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(ProfileSettings_PropertyChanged);
+            }
+            pg.SelectedObject = ProfilePropertyBag;
+            RightSideTab.SelectTab(1);
+            RightSideTab.ResumeLayout();
+        }
+
+        void ProfileSettings_PropertyChanged(object sender, EventArgs e)
+        {
+            PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
+        }
+
+        public void RemoveProfileSettingsTab()
+        {
+            if (!IsValid)
+                return;
+            if (ProfileTab.InvokeRequired)
+                ProfileTab.BeginInvoke(new guiInvokeCB(RemoveProfileSettingsTabCallback));
+            else
+                RemoveProfileSettingsTabCallback();      
+        }
+
+        void RemoveProfileSettingsTabCallback()
+        {
+            if (RightSideTab.TabPages.ContainsKey("ProfileSettings"))
+            {
+                ProfilePropertyBag = null;
+                RightSideTab.TabPages.RemoveByKey("ProfileSettings");
+            }
         }
 
         void UdateTreeNode(TreeNode node, IPBComposite pbComp, Type type, bool recursive)
@@ -638,8 +671,8 @@ namespace HighVoltz
             }
             else
                 Initialize();
-            if (PB.CodeWasModified)
-                PB.GenorateDynamicCode();
+            if (DynamicCode.CodeWasModified)
+                DynamicCode.GenorateDynamicCode();
         }
 
         private void MainForm_ResizeBegin(object sender, EventArgs e)
@@ -651,13 +684,6 @@ namespace HighVoltz
         {
             this.ResumeLayout();
         }
-
-
-        private void StartButton_Click(object sender, EventArgs e)
-        {
-            ToggleStart();
-        }
-
 
         private void ActionGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
@@ -675,8 +701,8 @@ namespace HighVoltz
                 ActionTree.ResumeLayout();
             }
 
-            if (PB.CodeWasModified)
-                PB.GenorateDynamicCode();
+            if (DynamicCode.CodeWasModified)
+                DynamicCode.GenorateDynamicCode();
         }
 
         private void RemoveButton_Click(object sender, EventArgs e)
@@ -721,9 +747,10 @@ namespace HighVoltz
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Professionbuddy.LoadProfile(openFileDialog.FileName);
-                // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
                 if (PB.ProfileSettings.Settings.Count > 0)
-                    toolStripSettings.Enabled = true;
+                    AddProfileSettingsTab();
+                else
+                    RemoveProfileSettingsTab();
             }
         }
 
@@ -731,6 +758,7 @@ namespace HighVoltz
         {
             saveFileDialog.DefaultExt = "xml";
             saveFileDialog.FilterIndex = 1;
+            saveFileDialog.FileName = PB.CurrentProfile != null && PB.CurrentProfile.XmlPath != null ? PB.CurrentProfile.XmlPath : "";
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 bool zip = Path.GetExtension(saveFileDialog.FileName).Equals(".package", StringComparison.InvariantCultureIgnoreCase);
@@ -809,16 +837,6 @@ namespace HighVoltz
             RemoveSelectedNodes();
         }
 
-        private void toolStripStart_Click(object sender, EventArgs e)
-        {
-            ToggleStart();
-        }
-
-        private void Materials_Click(object sender, EventArgs e)
-        {
-            new MaterialListForm().ShowDialog();
-        }
-
         private void toolStripHelp_Click(object sender, EventArgs e)
         {
             Form helpWindow = new Form();
@@ -831,7 +849,7 @@ namespace HighVoltz
 #if DLL
             helpView.Rtf = HighVoltz.Properties.Resources.Guide;
 #else
-            helpView.LoadFile(Path.Combine(PB.PluginPath, "Guide.rtf"));
+            helpView.LoadFile(Path.Combine(PB.BotPath, "Guide.rtf"));
 #endif
             helpWindow.Controls.Add(helpView);
             helpWindow.Show();
@@ -907,53 +925,31 @@ namespace HighVoltz
             }
         }
 
-        private void toolStripSettings_Click(object sender, EventArgs e)
-        {
-            Form settingWindow = new Form();
-            settingWindow.Height = 300;
-            settingWindow.Width = 300;
-            settingWindow.Text = "Profile Settings";
-            PropertyGrid pg = new PropertyGrid();
-            pg.Dock = DockStyle.Fill;
-            settingWindow.Controls.Add(pg);
+        //private void toolStripSettings_Click(object sender, EventArgs e)
+        //{
+        //    Form settingWindow = new Form();
+        //    settingWindow.Height = 300;
+        //    settingWindow.Width = 300;
+        //    settingWindow.Text = "Profile Settings";
+        //    PropertyGrid pg = new PropertyGrid();
+        //    pg.Dock = DockStyle.Fill;
+        //    settingWindow.Controls.Add(pg);
 
-            ProfilePropertyBag = new PropertyBag();
-            foreach (var kv in PB.ProfileSettings.Settings)
-            {
-                string sum = PB.ProfileSettings.Summaries.ContainsKey(kv.Key) ?
-                    PB.ProfileSettings.Summaries[kv.Key] : "";
-                ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.GetType(),
-                    new DescriptionAttribute(sum));
-                ProfilePropertyBag[kv.Key].Value = kv.Value;
-                ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(MainForm_PropertyChanged);
-            }
-            pg.SelectedObject = ProfilePropertyBag;
-            toolStripSettings.Enabled = false;
-            settingWindow.Show();
-            settingWindow.Disposed += new EventHandler(settingWindow_Disposed);
-        }
-
-        void settingWindow_Disposed(object sender, EventArgs e)
-        {
-            // cleanup 
-            foreach (var kv in PB.ProfileSettings.Settings)
-            {
-                ProfilePropertyBag[kv.Key].PropertyChanged -= MainForm_PropertyChanged;
-            }
-            ((Form)sender).Disposed -= settingWindow_Disposed;
-            toolStripSettings.Enabled = true;
-        }
-
-        void MainForm_PropertyChanged(object sender, EventArgs e)
-        {
-            PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
-        }
-
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            PB.LoadTradeSkills();
-            MainForm.Instance.InitTradeSkillTab();
-        }
+        //    ProfilePropertyBag = new PropertyBag();
+        //    foreach (var kv in PB.ProfileSettings.Settings)
+        //    {
+        //        string sum = PB.ProfileSettings.Summaries.ContainsKey(kv.Key) ?
+        //            PB.ProfileSettings.Summaries[kv.Key] : "";
+        //        ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.GetType(),
+        //            new DescriptionAttribute(sum));
+        //        ProfilePropertyBag[kv.Key].Value = kv.Value;
+        //        ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(MainForm_PropertyChanged);
+        //    }
+        //    pg.SelectedObject = ProfilePropertyBag;
+        //    toolStripSettings.Enabled = false;
+        //    settingWindow.Show();
+        //    settingWindow.Disposed += new EventHandler(settingWindow_Disposed);
+        //}
 
         void profileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
@@ -967,8 +963,44 @@ namespace HighVoltz
                 Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
                 if (PB.ProfileSettings.Settings.Count > 0)
-                    toolStripSettings.Enabled = true;
+                    AddProfileSettingsTab();
+                else
+                    RemoveProfileSettingsTab();
             }
+        }
+
+        private void toolStripReloadBtn_Click(object sender, EventArgs e)
+        {
+            PB.LoadTradeSkills();
+            MainForm.Instance.InitTradeSkillTab();
+        }
+
+        private void toolStripMaterials_Click(object sender, EventArgs e)
+        {
+            new MaterialListForm().ShowDialog();
+        }
+
+        private void toolStripBotCombo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Professionbuddy.ChangeSecondaryBot((string)toolStripBotCombo.SelectedItem);
+            }
+            catch (Exception ex)
+            {
+                Professionbuddy.Err(ex.ToString());
+            }
+        }
+
+        private void toolStripBotConfigButton_Click(object sender, EventArgs e)
+        {
+            if (PB.SecondaryBot != null)
+                PB.SecondaryBot.ConfigurationForm.ShowDialog();
+        }
+
+        private void ProfileListView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            LoadProfileButton_Click(null, null);
         }
 
     }

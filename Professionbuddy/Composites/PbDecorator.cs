@@ -14,9 +14,9 @@ namespace HighVoltz.Composites
 {
 
     #region PBIdentityComposite
-    public class PBIdentityComposite : Decorator, IXmlSerializable
+    public class PbDecorator : Decorator, IXmlSerializable
     {
-        public PBIdentityComposite(PrioritySelector ps)
+        public PbDecorator(PrioritySelector ps)
             : base(c => StyxWoW.IsInWorld && !ExitBehavior() && Professionbuddy.Instance.IsRunning, ps) { }
 
         static LocalPlayer Me = ObjectManager.Me;
@@ -28,7 +28,12 @@ namespace HighVoltz.Composites
                 {
                     if (!base.IsRunning)
                         base.Start(null);
+                    int prevTime = Environment.TickCount;
                     LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
+                    //if (LastStatus == RunStatus.Failure)
+                    //    Professionbuddy.Log("Tick Goes to SecondaryBot. Tick time: {0} ms",Environment.TickCount - prevTime);
+                    //else
+                    //    Professionbuddy.Log("Tick was used by PB. Tick time: {0} ms", Environment.TickCount - prevTime);
                 }
                 catch 
                 {
@@ -42,8 +47,7 @@ namespace HighVoltz.Composites
         // returns true if in combat or dead or low hp %
         public static bool ExitBehavior()
         {
-            return !Professionbuddy.Instance.IsEnabled ||
-                ((Me.IsActuallyInCombat && !Me.Mounted) ||
+            return ((Me.IsActuallyInCombat && !Me.Mounted) ||
                 (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying && Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
                 !Me.IsAlive || Me.HealthPercent <= 40;
         }
