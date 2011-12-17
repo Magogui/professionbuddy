@@ -140,47 +140,54 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (Lua.GetReturnVal<int>("if AuctionFrame and AuctionFrame:IsVisible() == 1 then return 1 else return 0 end ", 0) == 0)
+                try
                 {
-                    MoveToAh();
+                    if (Lua.GetReturnVal<int>("if AuctionFrame and AuctionFrame:IsVisible() == 1 then return 1 else return 0 end ", 0) == 0)
+                    {
+                        MoveToAh();
+                    }
+                    else if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('owner') == 1 then return 1 else return 0 end ", 0) == 1)
+                    {
+                        if (ToScanItemList == null)
+                        {
+                            ToScanItemList = BuildScanItemList();
+                            ToCancelItemList = new List<AuctionEntry>();
+                        }
+
+                        if (ToScanItemList.Count > 0)
+                        {
+                            AuctionEntry ae = ToScanItemList[0];
+                            bool scanDone = ScanAh(ref ae);
+                            ToScanItemList[0] = ae; // update
+                            if (scanDone)
+                            {
+                                ToCancelItemList.Add(ae);
+                                ToScanItemList.RemoveAt(0);
+                            }
+                            if (ToScanItemList.Count == 0)
+                                Professionbuddy.Debug("Finished scanning for items");
+                        }
+                        else
+                        {
+                            if (ToCancelItemList.Count == 0)
+                            {
+                                ToScanItemList = null;
+                                IsDone = true;
+                                return RunStatus.Failure;
+                            }
+                            else if (CancelAuction(ToCancelItemList[0]))
+                            {
+                                ToCancelItemList.RemoveAt(0);
+                            }
+                        }
+
+                    }
+                    return RunStatus.Running;
                 }
-                else if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('owner') == 1 then return 1 else return 0 end ", 0) == 1)
+                catch (Exception ex)
                 {
-                    if (ToScanItemList == null)
-                    {
-                        ToScanItemList = BuildScanItemList();
-                        ToCancelItemList = new List<AuctionEntry>();
-                    }
-
-                    if (ToScanItemList.Count > 0)
-                    {
-                        AuctionEntry ae = ToScanItemList[0];
-                        bool scanDone = ScanAh(ref ae);
-                        ToScanItemList[0] = ae; // update
-                        if (scanDone)
-                        {
-                            ToCancelItemList.Add(ae);
-                            ToScanItemList.RemoveAt(0);
-                        }
-                        if (ToScanItemList.Count == 0)
-                            Professionbuddy.Debug("Finished scanning for items");
-                    }
-                    else
-                    {
-                        if (ToCancelItemList.Count == 0)
-                        {
-                            ToScanItemList = null;
-                            IsDone = true;
-                            return RunStatus.Failure;
-                        }
-                        else if (CancelAuction(ToCancelItemList[0]))
-                        {
-                            ToCancelItemList.RemoveAt(0);
-                        }
-                    }
-
+                    Professionbuddy.Err(ex.ToString());
                 }
-                return RunStatus.Running;
             }
             return RunStatus.Failure;
         }
@@ -238,8 +245,8 @@ namespace HighVoltz.Composites
         bool CancelAuction(AuctionEntry ae)
         {
             string lua = String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
-                ae.Id,MinBuyout.TotalCopper,ae.LowestBo);
-            int numCanceled = Lua.GetReturnVal<int>(lua,0);
+                ae.Id, MinBuyout.TotalCopper, ae.LowestBo);
+            int numCanceled = Lua.GetReturnVal<int>(lua, 0);
             if (numCanceled > 0)
             {
                 Professionbuddy.Log("Canceled {0} x{1}", ae.Name, numCanceled);
@@ -249,18 +256,22 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, string> GetMyAuctions()
         {
-            string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
-                0);
+            //string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
+            //    0);
+
             Dictionary<uint, string> ret = new Dictionary<uint, string>();
-            if (rawString != null)
+            using (new FrameLock())
             {
-                string[] myAucs = rawString.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string rawEntry in myAucs)
+                int numOfMyItemsOnAH = Lua.GetReturnVal<int>("return GetNumAuctionItems('owner')", 0);
+                for (int i = 1; i <= numOfMyItemsOnAH; i++)
                 {
-                    uint itemId;
-                    string[] entry = rawEntry.Split(',');
-                    uint.TryParse(entry[0], out itemId);
-                    ret.Add(itemId, entry[1]);
+                    List<string> luaRet = Lua.GetReturnValues(string.Format("local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', {0}) return id,name,sold", i));
+                    if (luaRet != null && luaRet[2] != "1")
+                    {
+                        uint id = uint.Parse(luaRet[0]);
+                        if (!ret.ContainsKey(id))
+                            ret.Add(id, luaRet[1]);
+                    }
                 }
             }
             return ret;
