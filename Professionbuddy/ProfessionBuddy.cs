@@ -551,6 +551,7 @@ namespace HighVoltz
                     Instance.ProfileSettings.Load();
                     DynamicCode.GenorateDynamicCode();
                     Instance.UpdateMaterials();
+                    PreLoadHbProfile();
                 }
                 else
                     return false;
@@ -590,6 +591,8 @@ namespace HighVoltz
                                ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
                                ProfessionBuddySettings.Instance.Save();
                            }
+                           if (MainForm.IsValid)
+                               MainForm.Instance.UpdateBotCombo();
                            if (isRunning)
                                TreeRoot.Start();
                        }
@@ -599,6 +602,29 @@ namespace HighVoltz
             }
             else
                 Err("Bot with name: {0} was not found", botName);
+        }
+
+        public static void PreLoadHbProfile()
+        {
+            if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.CurrentProfile.Branch != null)
+            {
+                Dictionary<string, Uri> dict = new Dictionary<string, Uri>();
+                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.CurrentProfile.Branch, dict);
+                if (dict.Count > 0)
+                {
+                    foreach (var kv in dict)
+                    {
+                        if (!string.IsNullOrEmpty(kv.Key))
+                        {
+                            Log("Preloading profile {0}", kv.Key);
+                            ProfileManager.LoadNew(kv.Key);
+                            return;
+                        }
+                    }
+                }
+            }
+            if (ProfileManager.CurrentProfile == null)
+                ProfileManager.LoadEmpty();
         }
 
         static internal List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite

@@ -80,15 +80,11 @@ namespace HighVoltz
             InitTradeSkillTab();
             InitActionTree();
             PopulateActionGridView();
+            toolStripBotCombo.Items.AddRange(BotManager.Instance.Bots.Where(kv => kv.Key != PB.Name).Select(kv => kv.Key).ToArray());
+            UpdateBotCombo();
             if (PB.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
                 toolStripAddCombo.Items.Add("Banker");
             toolStripAddCombo.SelectedIndex = 0;
-            toolStripBotCombo.Items.AddRange(BotManager.Instance.Bots.Where(kv => kv.Key != PB.Name).Select(kv => kv.Key).ToArray());
-            int i = toolStripBotCombo.Items.IndexOf(ProfessionBuddySettings.Instance.LastBotBase);
-            if (i >= 0)
-                toolStripBotCombo.SelectedIndex = i;
-            else
-                toolStripBotCombo.SelectedIndex = 1;
 
             string imagePath = Path.Combine(PB.BotPath, "Icons\\");
             toolStripOpen.Image = Image.FromFile(imagePath + "OpenPL.bmp");
@@ -168,6 +164,27 @@ namespace HighVoltz
                 TradeSkillTabControl.TabPages.Add(new TradeSkillListView(i));
             }
             TradeSkillTabControl.ResumeLayout();
+        }
+        #endregion
+
+        #region UpdateBotCombo
+        public void UpdateBotCombo()
+        {
+            if (!IsValid)
+                return;
+            if (TradeSkillTabControl.InvokeRequired)
+                TradeSkillTabControl.BeginInvoke(new guiInvokeCB(InitTradeSkillTabCallback));
+            else
+                InitTradeSkillTabCallback();
+        }
+
+        void UpdateBotComboCallback()
+        {
+            int i = toolStripBotCombo.Items.IndexOf(ProfessionBuddySettings.Instance.LastBotBase);
+            if (i >= 0)
+                toolStripBotCombo.SelectedIndex = i;
+            else
+                toolStripBotCombo.SelectedIndex = 1;
         }
         #endregion
 
@@ -495,7 +512,7 @@ namespace HighVoltz
             if (ProfileTab.InvokeRequired)
                 ProfileTab.BeginInvoke(new guiInvokeCB(RemoveProfileSettingsTabCallback));
             else
-                RemoveProfileSettingsTabCallback();      
+                RemoveProfileSettingsTabCallback();
         }
 
         void RemoveProfileSettingsTabCallback()

@@ -95,7 +95,8 @@ namespace HighVoltz
                 using (XmlWriter writer = XmlWriter.Create(SettingsPath, settings))
                 {
                     DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                    serializer.WriteObject(writer, Settings);
+                    Dictionary<string, object> temp = Settings.ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                    serializer.WriteObject(writer, temp);
                 }
             }
         }

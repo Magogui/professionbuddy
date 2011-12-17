@@ -87,7 +87,7 @@
         <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=250 &amp;&amp; (int)var5 &lt; 300) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=260 &amp;&amp; (int)var7 &lt; 300)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=250 &amp;&amp; (int)var5 &lt; 300) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=260 &amp;&amp; (int)var7 &lt; 300))" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="True">
+        <If Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="False">
           <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
           <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0" IgnoreCanRun="False">
             <TrainSkillAction NpcEntry="5566" X="-8969.993" Y="779.6597" Z="96.25022" />
@@ -134,12 +134,12 @@
         <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 300) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=280 &amp;&amp; (int)var7 &lt; 300)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 300) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=280 &amp;&amp; (int)var7 &lt; 300))" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <If Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="True">
+        <If Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0) || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0) || (InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0) " IgnoreCanRun="False">
           <If Condition="(bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0" IgnoreCanRun="True">
             <!--In front of Mining trainer building-->
             <FlyToAction Dismount="True" X="2069.483" Y="-4766.704" Z="27.47169" />
             <TrainSkillAction NpcEntry="3357" X="2081.978" Y="-4764.085" Z="27.92557" />
-            <WaitAction Condition="(int)var6 != 0" Timeout="3000" />
+            <WaitAction Condition="Mining.MaxLevel != 0" Timeout="3000" />
           </If>
           <If Condition="InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0" IgnoreCanRun="True">
             <!--In front of Mining trainer building-->
@@ -150,7 +150,7 @@
             <!--Close to Herb trainer building-->
             <FlyToAction Dismount="True" X="1910.606" Y="-4391.944" Z="43.89495" />
             <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
-            <WaitAction Condition="(int)var8 != 0" Timeout="3000" />
+            <WaitAction Condition="Herbalism.MaxLevel != 0" Timeout="3000" />
           </If>
         </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">

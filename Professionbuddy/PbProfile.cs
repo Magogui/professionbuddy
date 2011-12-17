@@ -66,7 +66,6 @@ namespace HighVoltz
             {
                 if (File.Exists(path))
                 {
-                    Professionbuddy.Log("Loading profile {0}", path);
                     ProfilePath = path;
 
                     if (Path.GetExtension(path).Equals(".package", StringComparison.InvariantCultureIgnoreCase))
