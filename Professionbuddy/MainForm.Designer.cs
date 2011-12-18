@@ -607,6 +607,7 @@
             this.toolStripCopy.Size = new System.Drawing.Size(39, 22);
             this.toolStripCopy.Text = "&Copy";
             this.toolStripCopy.ToolTipText = "Copy";
+            this.toolStripCopy.Click += new System.EventHandler(this.toolStripCopy_Click);
             // 
             // toolStripCut
             // 

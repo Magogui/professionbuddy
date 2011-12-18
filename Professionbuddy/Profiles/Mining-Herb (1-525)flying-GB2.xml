@@ -91,9 +91,11 @@
           <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
           <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 0" IgnoreCanRun="False">
             <TrainSkillAction NpcEntry="5566" X="-8969.993" Y="779.6597" Z="96.25022" />
+            <WaitAction Condition="Herbalism.MaxLevel != 0" Timeout="3000" />
           </If>
           <If Condition="(bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 == 0" IgnoreCanRun="False">
             <TrainSkillAction NpcEntry="5513" X="-8433.48" Y="688.922" Z="96.31891" />
+            <WaitAction Condition="Mining.MaxLevel != 0" Timeout="3000" />
           </If>
           <If Condition="InbagCount (2901) == 0 &amp;&amp; InbagCount (40772) == 0" IgnoreCanRun="False">
             <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8430.177" Y="695.1375" Z="96.31892" />
@@ -111,7 +113,7 @@
           <CustomAction Code="TreeRoot.Stop();" />
         </If>
         <!--Mining 1-50 and Herb 1-50-->
-        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;50) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &lt; 50)" IgnoreCanRun="True">
+        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;50) || ((bool)var3 &amp;&amp; (int)var7 &lt; 50)" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <!--Mining 50-65 and Herb 50-75-->
@@ -167,18 +169,10 @@
         <CustomAction Code="CTM(-247.3961, 890.3077, 96.21683);" />
         <WaitAction Condition="Me.MapId == 0" Timeout="25000" />
         <If Condition="Me.IsAlliance &amp;&amp; Me.MapId == 0" IgnoreCanRun="True">
-          <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
+          <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
         </If>
         <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 0" IgnoreCanRun="True">
-          <FlyToAction Dismount="True" X="1684.71" Y="731.1318" Z="76.04871" />
-        </If>
-        <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-          <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-        </If>
-        <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-          <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
-          <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
+          <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
         </If>
       </While>
       <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 1" IgnoreCanRun="True">
@@ -206,21 +200,7 @@
         </If>
         <If Condition="Me.MapId ==0" IgnoreCanRun="True">
           <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-            <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
-            <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
-              <TrainSkillAction NpcEntry="5566" X="-8969.993" Y="779.6597" Z="96.25022" />
-            </If>
-            <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-              <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-              <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
-            </If>
-            <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-              <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
-              <MailItemAction Entry="0" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
-            </If>
-            <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
-              <TrainSkillAction NpcEntry="5513" X="-8433.48" Y="688.922" Z="96.31891" />
-            </If>
+            <CallSubRoutine SubRoutineName="TrainInStormwind" />
           </If>
           <If Condition="Me.IsHorde" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="TrainInUndercity" />
@@ -508,6 +488,7 @@
   <SubRoutine SubRoutineName="EmptyBagsInStormwind">
     <!--Front of AH area-->
     <FlyToAction Dismount="True" X="-8423.598" Y="628.4059" Z="95.74567" />
+    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -518,19 +499,22 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInStormwind">
-    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
       <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
       <TrainSkillAction NpcEntry="5513" X="-8433.48" Y="688.922" Z="96.31891" />
+      <WaitAction Condition="Mining.MaxLevel-Mining.Level &gt; 25" Timeout="3000" />
     </If>
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
       <FlyToAction Dismount="True" X="-8969.993" Y="779.6597" Z="96.25022" />
       <TrainSkillAction NpcEntry="5566" X="-8969.993" Y="779.6597" Z="96.25022" />
+      <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInUndercity">
+    <CustomAction Code="Log(&quot;Empting my bags in UnderCity&quot;);" />
     <FlyToAction Dismount="True" X="1688.531" Y="730.3077" Z="73.82889" />
+    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -542,18 +526,21 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInUndercity">
-    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
       <TrainSkillAction NpcEntry="4614" X="1560.8" Y="355.098" Z="-62.16309" />
+      <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
     </If>
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
       <TrainSkillAction NpcEntry="4598" X="1638.21" Y="335.638" Z="-62.18319" />
+      <WaitAction Condition="Mining.MaxLevel-Mining.Level &gt; 25" Timeout="3000" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInOrg">
+    <CustomAction Code="Log(&quot;Empting my bags in Org&quot;);" />
     <!--In front of AH area-->
     <FlyToAction Dismount="True" X="2012.031" Y="-4690.59" Z="28.64125" />
+    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -564,19 +551,19 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInOrg">
-    <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
+    <CustomAction Code="Log(&quot;Training in Org&quot;);" />
     <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
       <!--In front of Mining trainer building-->
       <FlyToAction Dismount="True" X="2069.483" Y="-4766.704" Z="27.47169" />
       <TrainSkillAction NpcEntry="3357" X="2081.978" Y="-4764.085" Z="27.92557" />
-      <WaitAction Condition="(int)var6-(int)var5 &gt; 25" Timeout="3000" />
+      <WaitAction Condition="Mining.MaxLevel-Mining.Level &gt; 25" Timeout="3000" />
     </If>
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
       <!--Close to Herb trainer building-->
       <FlyToAction Dismount="True" X="1910.606" Y="-4391.944" Z="43.89495" />
       <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
-      <WaitAction Condition="(int)var8-(int)var7 &gt; 25" Timeout="3000" />
+      <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
     </If>
   </SubRoutine>
 </Professionbuddy>

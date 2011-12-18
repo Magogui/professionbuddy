@@ -173,9 +173,9 @@ namespace HighVoltz
             if (!IsValid)
                 return;
             if (TradeSkillTabControl.InvokeRequired)
-                TradeSkillTabControl.BeginInvoke(new guiInvokeCB(InitTradeSkillTabCallback));
+                TradeSkillTabControl.BeginInvoke(new guiInvokeCB(UpdateBotComboCallback));
             else
-                InitTradeSkillTabCallback();
+                UpdateBotComboCallback();
         }
 
         void UpdateBotComboCallback()

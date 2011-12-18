@@ -57,7 +57,6 @@ namespace HighVoltz
                 BotPoi.Clear();
             if (!ObjectManager.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
                 Mount.MountUp();
-            TreeRoot.StatusText = string.Format("PB: Moving to {0}", point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
             Navigator.MoveTo(point);

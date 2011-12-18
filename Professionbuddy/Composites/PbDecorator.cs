@@ -9,6 +9,8 @@ using Styx.WoWInternals.WoWObjects;
 using Styx.WoWInternals;
 using Styx;
 using Styx.Logic;
+using System.Diagnostics;
+using Styx.Helpers;
 
 namespace HighVoltz.Composites
 {
@@ -20,6 +22,7 @@ namespace HighVoltz.Composites
             : base(c => StyxWoW.IsInWorld && !ExitBehavior() && Professionbuddy.Instance.IsRunning, ps) { }
 
         static LocalPlayer Me = ObjectManager.Me;
+        //Stopwatch _profilerSW = new Stopwatch();
         public override RunStatus Tick(object context)
         {
             if (CanRun(null))
@@ -28,12 +31,12 @@ namespace HighVoltz.Composites
                 {
                     if (!base.IsRunning)
                         base.Start(null);
-                    int prevTime = Environment.TickCount;
+                   // _profilerSW.Reset(); _profilerSW.Start();
                     LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
-                    //if (LastStatus == RunStatus.Failure)
-                    //    Professionbuddy.Log("Tick Goes to SecondaryBot. Tick time: {0} ms",Environment.TickCount - prevTime);
+                    //if (LastStatus == RunStatus.Running)
+                    //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
                     //else
-                    //    Professionbuddy.Log("Tick was used by PB. Tick time: {0} ms", Environment.TickCount - prevTime);
+                    //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
                 }
                 catch 
                 {
