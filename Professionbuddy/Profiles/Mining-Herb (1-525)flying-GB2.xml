@@ -61,11 +61,11 @@
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <!--Mining 65-65 and Herb 75-120-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=65  &amp;&amp; (int)var5 &lt; 125) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 125) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120))" IgnoreCanRun="True">
+        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=65  &amp;&amp; (int)var5 &lt; 80) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 80) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120))" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <!--Mining 65-125 and Herb 120-160-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 125) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 125) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160))" IgnoreCanRun="True">
+        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=80 &amp;&amp; (int)var5 &lt; 125) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=80 &amp;&amp; (int)var5 &lt; 125) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160))" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <!--Mining 125-175 and Herb 160-200-->
