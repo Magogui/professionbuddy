@@ -22,30 +22,27 @@
   <CustomAction Code="var7 = 0;" />
   <!--var8 = Herbalism.MaxLevel-->
   <CustomAction Code="var8 = 0;" />
+  <!--var9 = lowestMaxLevel-->
+  <CustomAction Code="var9 = 0;" />
+  <If Condition="SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+    <ChangeBotAction BotName="Gatherbuddy2" />
+  </If>
   <While Condition="true" IgnoreCanRun="True">
     <CustomAction Code="var5 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining Level&quot;] :(int) Mining.Level;" />
     <CustomAction Code="var6 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining MaxLevel&quot;] :(int) Mining.MaxLevel;" />
     <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
-    <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int)Herbalism.MaxLevel;" />
-    <If Condition="SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
-      <ChangeBotAction BotName="Gatherbuddy2" />
-    </If>
-    <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; ((int)var5 == (int)var6 || (int)var6 &gt; (int)var8 )) || !(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
-      <CustomAction Code="var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;" />
-    </If>
-    <If Condition="(bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 != (int)var6 &amp;&amp; (int)var6 &lt;= (int)var8" IgnoreCanRun="True">
-      <CustomAction Code="var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;" />
-    </If>
-    <!--disable herb if herb maxlevel is higher than mining-->
-    <If Condition="((bool)Settings[&quot;Herb&quot;] &amp;&amp; ((int)var7 == (int)var8 || (int)var8 &gt; (int)var6)) || !(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
-      <CustomAction Code="var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = false;" />
-    </If>
+    <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int) Herbalism.MaxLevel;" />
+    <CustomAction Code="var9 = (bool)var2 &amp;&amp; (bool)var3 ? (int)var6 &lt; (int)var8 ? var6 : var8:(bool)var2 ? var6 :var8;" />
+    <!--disable gathering of mines-->
+    <CustomAction Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp; ((int)var5 == (int)var6 || (int)var6 &gt; (int)var8 )) || !(bool)Settings[&quot;Mining&quot;]) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;" />
+    <!--enable gathering of mines-->
+    <CustomAction Code="if ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 != (int)var6 &amp;&amp; (int)var6 &lt;= (int)var8) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;" />
+    <!--disable gathering of herbs-->
+    <CustomAction Code="if (((bool)Settings[&quot;Herb&quot;] &amp;&amp; ((int)var7 == (int)var8 || (int)var8 &gt; (int)var6)) || !(bool)Settings[&quot;Herb&quot;]) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = false;" />
     <!--enable Herb in GB2 if enabled in profile Settings and Herb MaxLevel <= Mining.MaxLevel-->
-    <If Condition="(bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 != (int)var8 &amp;&amp;  (int)var8 &lt;= (int)var6" IgnoreCanRun="True">
-      <CustomAction Code="var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;" />
-    </If>
+    <CustomAction Code="if ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 != (int)var8 &amp;&amp;  (int)var8 &lt;= (int)var6) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;" />
     <!--Herb/Mining 1-300-->
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 &lt;=300)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 &lt;= 300)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+    <If Condition="(int) var9 &lt;=300" IgnoreCanRun="True">
       <If Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
@@ -60,7 +57,7 @@
           <CustomAction Code="TreeRoot.Stop();" />
         </If>
         <!--Mining 1-65 and Herb 1-75-->
-        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;65) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &lt; 75)" IgnoreCanRun="True">
+        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;65) || ((bool)var3 &amp;&amp; (int)var7 &lt; 75)" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
         <!--Mining 65-65 and Herb 75-120-->
@@ -126,7 +123,7 @@
       </If>
     </If>
     <!--Herb/Mining 300-350-->
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 ==375)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 375)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+    <If Condition="(int) var9 ==375" IgnoreCanRun="True">
       <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
@@ -182,11 +179,11 @@
       </If>
     </If>
     <!--Herb/Mining 350-450-->
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 ==450)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 450)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
-      <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 400)|| !(bool)Settings[&quot;Mining&quot;]) || (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 400)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+    <If Condition="(int) var9 == 450" IgnoreCanRun="True">
+      <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 400) || ((bool)var3 &amp;&amp; (int)var7 &lt; 400)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
-      <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;= 400)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 400)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+      <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;= 475) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;= 475)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
@@ -228,7 +225,7 @@
       </If>
     </If>
     <!--Herb/Mining 450-525-->
-    <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6 ==525)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 == 525)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+    <If Condition="(int) var9 == 525" IgnoreCanRun="True">
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -242,7 +239,7 @@
           <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
         </If>
       </While>
-      <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 475)|| !(bool)Settings[&quot;Mining&quot;]) || (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+      <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 475) || ((bool)var3 &amp;&amp; (int)var7 &lt; 475)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
       </If>
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;= 475)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
