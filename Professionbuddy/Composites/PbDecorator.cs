@@ -31,14 +31,14 @@ namespace HighVoltz.Composites
                 {
                     if (!base.IsRunning)
                         base.Start(null);
-                   // _profilerSW.Reset(); _profilerSW.Start();
-                    LastStatus = base.Tick(context) != RunStatus.Running ? RunStatus.Failure : RunStatus.Running;
+                    // _profilerSW.Reset(); _profilerSW.Start();
+                    LastStatus = base.Tick(context) == RunStatus.Running && !While.EndOfLoopReturn ? RunStatus.Running : RunStatus.Failure;
                     //if (LastStatus == RunStatus.Running)
                     //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
                     //else
                     //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
                 }
-                catch 
+                catch
                 {
                     LastStatus = RunStatus.Failure;
                 }
@@ -47,6 +47,59 @@ namespace HighVoltz.Composites
                 LastStatus = RunStatus.Failure;
             return (RunStatus)LastStatus;
         }
+
+        //public override RunStatus Tick(object context)
+        //{
+        //    lock (Locker)
+        //    {
+        //        try
+        //        {
+        //            // _profilerSW.Reset(); _profilerSW.Start();
+        //            LastStatus = base.Tick(context) == RunStatus.Running && !While.EndOfLoopReturn ? RunStatus.Running : RunStatus.Failure;
+        //            //if (LastStatus == RunStatus.Running)
+        //            //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
+        //            //else
+        //            //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
+        //        }
+        //        catch
+        //        {
+        //            LastStatus = RunStatus.Failure;
+        //        }
+        //        return LastStatus.Value;
+        //    }
+        //}
+
+        //protected override IEnumerable<RunStatus> Execute(object context)
+        //{
+        //    if (!CanRun(context))
+        //    {
+        //        yield return RunStatus.Failure;
+        //        yield break;
+        //    }
+        //    if (!DecoratedChild.IsRunning)
+        //        DecoratedChild.Start(null);
+        //    while (DecoratedChild.Tick(context) == RunStatus.Running)
+        //    {
+        //        if (While.EndOfLoopReturn)
+        //            yield return RunStatus.Failure;
+        //        yield return RunStatus.Running;
+        //    }
+
+        //    DecoratedChild.Stop(context);
+        //    if (DecoratedChild.LastStatus == RunStatus.Failure)
+        //    {
+        //        yield return RunStatus.Failure;
+        //        yield break;
+        //    }
+
+        //    yield return RunStatus.Success;
+        //    yield break;
+        //}
+        //public override void Stop(object context)
+        //{
+        //    if (!While.EndOfLoopReturn)
+        //        base.Stop(context);
+        //}
         // returns true if in combat or dead or low hp %
         public static bool ExitBehavior()
         {

@@ -237,7 +237,7 @@ namespace HighVoltz.Composites
         Dictionary<uint, int> ItemList = null;
         //bool _switchingTabs = false;
         Stopwatch _gbankItemThrottleSW = new Stopwatch();
-        const long _gbankItemThrottle = 167; // 6 times per sec.. round up to nearest 1.
+        const long _gbankItemThrottle = 200; // 5 times per sec.
         protected override RunStatus Run(object context)
         {
             if (!IsDone)

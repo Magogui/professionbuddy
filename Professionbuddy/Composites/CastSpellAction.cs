@@ -106,7 +106,7 @@ namespace HighVoltz.Composites
             //Properties["Recipe"].Show = false;
             Properties["ItemType"].Show = false;
             Properties["ItemId"].Show = false;
-           // Properties["Casted"].PropertyChanged += OnCounterChanged;
+            Properties["Casted"].PropertyChanged += OnCounterChanged;
             CheckTradeskillList();
             Properties["RepeatType"].PropertyChanged += new EventHandler(CastSpellAction_PropertyChanged);
             Properties["Entry"].PropertyChanged += new EventHandler(OnEntryChanged);
@@ -161,9 +161,10 @@ namespace HighVoltz.Composites
             return Repeat;
         }
 
-        //void OnCounterChanged(object sender, EventArgs e) {
-        //    RefreshPropertyGrid();
-        //}
+        void OnCounterChanged(object sender, EventArgs e)
+        {
+            RefreshPropertyGrid();
+        }
 
         protected override RunStatus Run(object context) {
             if (!IsDone)

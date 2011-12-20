@@ -13,15 +13,17 @@ namespace HighVoltz.Composites
 {
     class While : If
     {
+        static public bool EndOfLoopReturn { get; private set; }
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            //lock (_lockObject)
+            //lock (Locker)
             //{
                 if (!CanRun(null))
                 {
                     yield return RunStatus.Failure;
                     yield break;
                 }
+                EndOfLoopReturn = false;
                 foreach (Composite node in Children)
                 {
                     node.Start(context);
@@ -34,7 +36,6 @@ namespace HighVoltz.Composites
                         yield return RunStatus.Running;
                     }
                     Selection = null;
-                    //node.Stop(context); tick will call stop, so why do it twice?
                     if (node.LastStatus == RunStatus.Success)
                     {
                         yield return RunStatus.Success;
@@ -49,10 +50,11 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    yield return RunStatus.Success;
-                    //yield break;
+                    // we want to give SecondaryBot a slice of the execution pie but want to restart execution at the top of the while condition on next pulse.
+                    EndOfLoopReturn = true;
+                    yield return RunStatus.Running;
                 }
-           // }
+            //}
         }
 
         override public string Name { get { return "While Condition"; } }

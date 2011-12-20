@@ -97,34 +97,34 @@ namespace HighVoltz.Composites
             // genorates some exeption.... besides I'm only accessing this from one thread
             //lock (Locker)
             //{
-            if (IsDone)
-            {
+                if (IsDone)
+                {
+                    yield return RunStatus.Failure;
+                    yield break;
+                }
+                foreach (Composite node in Children)
+                {
+                    // Keep stepping through the enumeration while it's returing RunStatus.Running
+                    // or until CanRun() returns false if IgnoreCanRun is false..
+                    node.Start(context);
+                    while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
+                        node.Tick(context) == RunStatus.Running)
+                    {
+                        Selection = node;
+                        yield return RunStatus.Running;
+                    }
+
+                    Selection = null;
+                    //node.Stop(context);
+                    if (node.LastStatus == RunStatus.Success)
+                    {
+                        yield return RunStatus.Success;
+                        //yield break; don't break iteration.. While Condition return sucess if at end of loop
+                    }
+                }
+                _executed = true;
                 yield return RunStatus.Failure;
                 yield break;
-            }
-            foreach (Composite node in Children)
-            {
-                // Keep stepping through the enumeration while it's returing RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                node.Start(context);
-                while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
-                    node.Tick(context) == RunStatus.Running)
-                {
-                    Selection = node;
-                    yield return RunStatus.Running;
-                }
-
-                Selection = null;
-                //node.Stop(context);
-                if (node.LastStatus == RunStatus.Success)
-                {
-                    yield return RunStatus.Success;
-                    //yield break; don't break iteration.. While Condition return sucess if at end of loop
-                }
-            }
-            _executed = true;
-            yield return RunStatus.Failure;
-            yield break;
             //}
         }
 
