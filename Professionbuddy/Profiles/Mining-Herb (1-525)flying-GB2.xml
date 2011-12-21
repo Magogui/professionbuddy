@@ -56,33 +56,37 @@
           <CustomAction Code="MessageBox.Show(&quot;Please switch to Kalimdor continent&quot;);" />
           <CustomAction Code="TreeRoot.Stop();" />
         </If>
-        <!--Mining 1-65 and Herb 1-75-->
-        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;65) || ((bool)var3 &amp;&amp; (int)var7 &lt; 75)" IgnoreCanRun="True">
+        <If Condition="(int) var9 ==75" IgnoreCanRun="True">
+          <!--Mining 1-50 and Herb 1-50-->
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <!--Mining 65-65 and Herb 75-120-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=65  &amp;&amp; (int)var5 &lt; 80) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 80) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 120))" IgnoreCanRun="True">
+        <If Condition="(int) var9 ==150" IgnoreCanRun="True">
+          <!--Mining 50-125 and Herb 50-125-->
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <!--Mining 65-125 and Herb 120-160-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=80 &amp;&amp; (int)var5 &lt; 125) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=80 &amp;&amp; (int)var5 &lt; 125) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=120 &amp;&amp; (int)var7 &lt; 160))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <If Condition="(int) var9 ==225" IgnoreCanRun="True">
+          <If Condition="((bool)var3 &amp;&amp; (int)var7 &lt; 160)" IgnoreCanRun="True">
+            <!--Mining 65-125 and Herb 120-160-->
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <If Condition="(((bool)var2 &amp;&amp; (int)var5 &lt; 175) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;= 160 &amp;&amp; (int)var7 &lt; 200)) || (!(bool)var2 &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;= 160 &amp;&amp; (int)var7 &lt; 200)" IgnoreCanRun="True">
+            <!--Mining 125-175 and Herb 160-200-->
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=175  &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=200 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=175 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=200 ))" IgnoreCanRun="True">
+            <!--Mining 175-235 and Herb 200-260-->
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
         </If>
-        <!--Mining 125-175 and Herb 160-200-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=125 &amp;&amp; (int)var5 &lt; 175) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=160 &amp;&amp; (int)var7 &lt; 200)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=125 &amp;&amp; (int)var5 &lt; 175) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=160 &amp;&amp; (int)var7 &lt; 200))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
-        </If>
-        <!--Mining 175-235 and Herb 200-260-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=175 &amp;&amp; (int)var5 &lt; 235) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=200 &amp;&amp; (int)var7 &lt; 260)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=175 &amp;&amp; (int)var5 &lt; 235) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=200 &amp;&amp; (int)var7 &lt; 260))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
-        </If>
-        <!--Mining 235-250 and Herb 260-260-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 250)) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=260) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 250) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=260))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 235-255)(BlasstedLands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
-        </If>
-        <!--Mining 250-300 and Herb 260-300-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=250 &amp;&amp; (int)var5 &lt; 300) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=260 &amp;&amp; (int)var7 &lt; 300)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=250 &amp;&amp; (int)var5 &lt; 300) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=260 &amp;&amp; (int)var7 &lt; 300))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <If Condition="(int) var9 ==300" IgnoreCanRun="True">
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 235) || ((bool)var3 &amp;&amp; (int)var7 &lt; 260)" IgnoreCanRun="True">
+            <!--Mining 175-235 and Herb 200-260-->
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=235  &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=260 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=235 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=260 ))" IgnoreCanRun="True">
+            <!--Mining 250-300 and Herb 260-300-->
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
         </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="TrainInStormwind" />
@@ -94,28 +98,38 @@
           <CustomAction Code="TreeRoot.Stop();" />
         </If>
         <!--Mining 1-50 and Herb 1-50-->
-        <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;50) || ((bool)var3 &amp;&amp; (int)var7 &lt; 50)" IgnoreCanRun="True">
+        <If Condition="(int) var9 ==75" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
         </If>
-        <!--Mining 50-65 and Herb 50-75-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=50 &amp;&amp; (int)var5 &lt; 65) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=50 &amp;&amp; (int)var7 &lt; 75)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=50 &amp;&amp; (int)var5 &lt; 65) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=50 &amp;&amp; (int)var7 &lt; 75))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <If Condition="(int) var9 == 150" IgnoreCanRun="True">
+          <!--Mining 50-65 and Herb 50-75-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 65) || ((bool)var3 &amp;&amp; (int)var7 &lt; 75)" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <!--Mining 65-125 and Herb 75-150-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=65  &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=75 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=75 ))" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
         </If>
-        <!--Mining 65-125 and Herb 75-150-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 125) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 150)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=65 &amp;&amp; (int)var5 &lt; 125) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=75 &amp;&amp; (int)var7 &lt; 150))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <If Condition="(int) var9 == 225" IgnoreCanRun="True">
+          <!--Mining 125-175 and Herb 150-225-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 175) || ((bool)var3 &amp;&amp; (int)var7 &lt;225)" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <!--Mining 175-235 and Herb 225-280-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=175  &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=225 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=175 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=225 ))" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
         </If>
-        <!--Mining 125-175 and Herb 150-225-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=125 &amp;&amp; (int)var5 &lt; 175) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=150 &amp;&amp; (int)var7 &lt; 225)) || (((bool)var2 &amp;&amp;  !(bool)var3 &amp;&amp; (int)var5 &gt;=125 &amp;&amp; (int)var5 &lt; 175) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=150 &amp;&amp; (int)var7 &lt; 225))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
-        </If>
-        <!--Mining 175-235 and Herb 225-280-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=175 &amp;&amp; (int)var5 &lt; 235) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=225 &amp;&amp; (int)var7 &lt; 280)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=175 &amp;&amp; (int)var5 &lt; 235) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=225 &amp;&amp; (int)var7 &lt; 280))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
-        </If>
-        <!--Mining 235-300 and Herb 280-300-->
-        <If Condition="(((bool)var2 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 300) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;=280 &amp;&amp; (int)var7 &lt; 300)) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (int)var5 &lt; 300) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=280 &amp;&amp; (int)var7 &lt; 300))" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <If Condition="(int) var9 == 300" IgnoreCanRun="True">
+          <!--Mining 175-235 and Herb 225-280-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 235) || ((bool)var3 &amp;&amp; (int)var7 &lt;280)" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
+          <!--Mining 235-300 and Herb 280-300-->
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=235 &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=280 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=235 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=280 ))" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
         </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="TrainInOrg" />
@@ -183,7 +197,7 @@
       <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 400) || ((bool)var3 &amp;&amp; (int)var7 &lt; 400)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
-      <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;= 475) &amp;&amp; ((bool)var3 &amp;&amp; (int)var7 &gt;= 475)" IgnoreCanRun="True">
+      <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=400 &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=400 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=400 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=400 ))" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
@@ -242,7 +256,7 @@
       <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 475) || ((bool)var3 &amp;&amp; (int)var7 &lt; 475)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
       </If>
-      <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;= 475)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 475)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+      <If Condition="((bool)var2 &amp;&amp; (int)var5 &gt;=475 &amp;&amp; (bool)var3 &amp;&amp; (int)var7 &gt;=475 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &gt;=475 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=475 ))" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 475-525)(Uldum.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
       </If>
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 == 525)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;= 525)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
