@@ -13,8 +13,7 @@ namespace HighVoltz.Composites
 {
     class While : If
     {
-        static public bool EndOfLoopReturn { get; private set; }
-        protected override IEnumerable<RunStatus> Execute(object context)
+          protected override IEnumerable<RunStatus> Execute(object context)
         {
             //lock (Locker)
             //{
@@ -23,7 +22,6 @@ namespace HighVoltz.Composites
                     yield return RunStatus.Failure;
                     yield break;
                 }
-                EndOfLoopReturn = false;
                 foreach (Composite node in Children)
                 {
                     node.Start(context);
@@ -50,9 +48,7 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    // we want to give SecondaryBot a slice of the execution pie but want to restart execution at the top of the while condition on next pulse.
-                    EndOfLoopReturn = true;
-                    yield return RunStatus.Running;
+                     yield return RunStatus.Running;
                 }
             //}
         }

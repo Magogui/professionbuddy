@@ -32,7 +32,7 @@ namespace HighVoltz.Composites
                     if (!base.IsRunning)
                         base.Start(null);
                     // _profilerSW.Reset(); _profilerSW.Start();
-                    LastStatus = base.Tick(context) == RunStatus.Running && !While.EndOfLoopReturn ? RunStatus.Running : RunStatus.Failure;
+                    LastStatus = base.Tick(context) == RunStatus.Running ? RunStatus.Running : RunStatus.Failure;
                     //if (LastStatus == RunStatus.Running)
                     //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
                     //else
