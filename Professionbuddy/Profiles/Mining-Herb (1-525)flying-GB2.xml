@@ -141,9 +141,11 @@
       <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
-        <FlyToAction Dismount="False" X="-252.0331" Y="965.9687" Z="90.23502" />
-        <CustomAction Code="CTM(-247.3961, 890.3077, 96.21683);" />
-        <WaitAction Condition="Me.MapId == 0" Timeout="25000" />
+        <If Condition="Me.MapId == 530" IgnoreCanRun="True">
+          <FlyToAction Dismount="False" X="-252.0331" Y="965.9687" Z="90.23502" />
+          <CustomAction Code="CTM(-247.3961, 890.3077, 96.21683);" />
+          <WaitAction Condition="Me.MapId == 0" Timeout="25000" />
+        </If>
         <If Condition="Me.IsAlliance &amp;&amp; Me.MapId == 0" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
         </If>
@@ -151,9 +153,10 @@
           <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
         </If>
       </While>
-      <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 1" IgnoreCanRun="True">
+      <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde " IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="1662.198" Y="-4132.378" Z="56.96952" />
         <InteractionAction Entry="195142" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+        <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
       </If>
       <If Condition="Me.MapId == 0 &amp;&amp; (((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 350 || !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 350)|| !(bool)Settings[&quot;Herb&quot;]))" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -194,6 +197,22 @@
     </If>
     <!--Herb/Mining 350-450-->
     <If Condition="(int) var9 == 450" IgnoreCanRun="True">
+      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+        <If Condition="Me.MapId == 571" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
+        </If>
+        <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
+        </If>
+        <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+          <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
+          </If>
+          <If Condition="Me.IsHorde" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
+          </If>
+        </If>
+      </While>
       <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 400) || ((bool)var3 &amp;&amp; (int)var7 &lt; 400)" IgnoreCanRun="True">
         <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
       </If>
@@ -203,7 +222,9 @@
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 450)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 450)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
           <If Condition="Me.IsHorde" IgnoreCanRun="True">
-            <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="1696.929" Y="731.7497" Z="68.85725" />
+            <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt;1000" IgnoreCanRun="True">
+              <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="1696.929" Y="731.7497" Z="68.85725" />
+            </If>
             <FlyToAction Dismount="False" X="2062.034" Y="358.3257" Z="82.47099" />
             <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ).Location.Distance(new WoWPoint(2056.493, 381.6347, 100.362)) &lt; 1" Timeout="600000" />
             <CustomAction Code="CTM(2058.573, 372.6453, 82.5169);" />
@@ -217,10 +238,13 @@
           </If>
         </If>
       </If>
+      <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 1" IgnoreCanRun="True" />
+      <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="1662.198" Y="-4132.378" Z="56.96952" />
+        <InteractionAction Entry="195142" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+        <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
+      </If>
       <If Condition="Me.MapId == 571" IgnoreCanRun="True">
-        <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
-          <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
-        </While>
         <If Condition="!Me.IsFlying &amp;&amp; InbagCount(37701) &gt;= 10" IgnoreCanRun="True">
           <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 37701 then UseContainerItem(bag,slot) end end end&quot;);" />
         </If>
@@ -302,11 +326,13 @@
       <If Condition="Me.MapId == 571" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <FlyToAction Dismount="True" X="5768.25" Y="707.2867" Z="641.5833" />
-          <InteractionAction Entry="190960" InteractDelay="0" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+          <InteractionAction Entry="190960" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+          <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
         </If>
         <If Condition="Me.IsHorde" IgnoreCanRun="True">
           <FlyToAction Dismount="True" X="5897.042" Y="562.7647" Z="639.48" />
           <InteractionAction Entry="191009" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+          <WaitAction Condition="Me.MapId == 1" Timeout="20000" />
         </If>
       </If>
     </If>
@@ -416,11 +442,12 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInDalaran">
     <CustomAction Code="Log(&quot;Empting my bags in Dalaran&quot;);" />
-    <!--In front of AH area-->
-    <FlyToAction Dismount="False" X="5504.699" Y="609.505" Z="276.2625" />
-    <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
-    <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5888.19" Y="714.7673" Z="712.1321" />
-    <FlyToAction Dismount="True" X="5896.106" Y="719.2957" Z="640.5133" />
+    <If Condition="DistanceTo(5896.106, 719.2957, 640.5133) &gt; 100" IgnoreCanRun="True">
+      <FlyToAction Dismount="False" X="5363.158" Y="561.5566" Z="876.3179" />
+      <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
+      <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5888.19" Y="714.7673" Z="712.1321" />
+      <FlyToAction Dismount="True" X="5896.106" Y="719.2957" Z="640.5133" />
+    </If>
     <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.001" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -442,15 +469,11 @@
       <FlyToAction Dismount="True" X="5896.106" Y="719.2957" Z="640.5133" />
     </If>
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
-      <!--In front of Mining trainer building-->
-      <FlyToAction Dismount="True" X="2069.483" Y="-4766.704" Z="27.47169" />
-      <TrainSkillAction NpcEntry="3357" X="2081.978" Y="-4764.085" Z="27.92557" />
+      <TrainSkillAction NpcEntry="28698" X="5924.542" Y="708.256" Z="642.5153" />
       <WaitAction Condition="Mining.MaxLevel-Mining.Level &gt; 25" Timeout="3000" />
     </If>
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
-      <!--Close to Herb trainer building-->
-      <FlyToAction Dismount="True" X="1910.606" Y="-4391.944" Z="43.89495" />
-      <TrainSkillAction NpcEntry="46741" X="1902.69" Y="-4450.71" Z="53.4155" />
+      <TrainSkillAction NpcEntry="28704" X="5878.112" Y="696.3543" Z="644.9129" />
       <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
     </If>
   </SubRoutine>
