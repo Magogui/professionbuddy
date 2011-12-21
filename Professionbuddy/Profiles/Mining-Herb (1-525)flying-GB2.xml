@@ -301,6 +301,9 @@
         <CustomAction Code="Log(&quot;Stopping HB since We are 525 herb/mining&quot;);" />
         <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
       </If>
+      <If Condition="Me.MapId == 1 &amp;&amp; DistanceTo(1804.349, -4346.937, -10.66582) &lt; 70" IgnoreCanRun="True">
+        <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="1894.106" Y="-4495.328" Z="23.87761" />
+      </If>
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 525)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 525)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
           <If Condition="Me.IsHorde" IgnoreCanRun="True">
