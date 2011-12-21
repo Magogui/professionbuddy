@@ -443,7 +443,7 @@
   <SubRoutine SubRoutineName="EmptyBagsInDalaran">
     <CustomAction Code="Log(&quot;Empting my bags in Dalaran&quot;);" />
     <If Condition="DistanceTo(5896.106, 719.2957, 640.5133) &gt; 100" IgnoreCanRun="True">
-      <FlyToAction Dismount="False" X="5363.158" Y="561.5566" Z="876.3179" />
+      <FlyToAction Dismount="False" X="5341.598" Y="522.6038" Z="440.8728" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5888.19" Y="714.7673" Z="712.1321" />
       <FlyToAction Dismount="True" X="5896.106" Y="719.2957" Z="640.5133" />
@@ -463,7 +463,7 @@
     <CustomAction Code="Log(&quot;Training in Dalaran&quot;);" />
     <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
     <If Condition="DistanceTo(5896.106, 719.2957, 640.5133) &gt; 100" IgnoreCanRun="True">
-      <FlyToAction Dismount="False" X="5363.158" Y="561.5566" Z="876.3179" />
+      <FlyToAction Dismount="False" X="5341.598" Y="522.6038" Z="440.8728" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5888.19" Y="714.7673" Z="712.1321" />
       <FlyToAction Dismount="True" X="5896.106" Y="719.2957" Z="640.5133" />
