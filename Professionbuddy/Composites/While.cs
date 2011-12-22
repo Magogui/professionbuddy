@@ -14,68 +14,68 @@ namespace HighVoltz.Composites
 
     class While : If
     {
-        protected override IEnumerable<RunStatus> Execute(object context)
-        {
-            while (CanRun(context))
-            {
-                foreach (Composite node in Children)
-                {
-                    node.Start(context);
-                    while (node.Tick(context) == RunStatus.Running &&
-                        (IgnoreCanRun || (!IgnoreCanRun && CanRun(context))))
-                    {
-                        Selection = node;
-                        yield return RunStatus.Running;
-                    }
-                    Selection = null;
-                }
-                Reset();
-                while (Professionbuddy.Instance.SecondaryBot.Root.Tick(null) == RunStatus.Running)
-                    yield return RunStatus.Running;
-            }
-            yield return RunStatus.Failure;
-            yield break;
-        }
-
         //protected override IEnumerable<RunStatus> Execute(object context)
         //{
-        //    //lock (Locker)
-        //    //{
-        //    if (!CanRun(null))
+        //    while (CanRun(context))
         //    {
-        //        yield return RunStatus.Failure;
-        //        yield break;
-        //    }
-        //    foreach (Composite node in Children)
-        //    {
-        //        node.Start(context);
-        //        // Keep stepping through the enumeration while it's returning RunStatus.Running
-        //        // or until CanRun() returns false if IgnoreCanRun is false..
-        //        while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
-        //            node.Tick(context) == RunStatus.Running)
+        //        foreach (Composite node in Children)
         //        {
-        //            Selection = node;
+        //            node.Start(context);
+        //            while (node.Tick(context) == RunStatus.Running &&
+        //                (IgnoreCanRun || (!IgnoreCanRun && CanRun(context))))
+        //            {
+        //                Selection = node;
+        //                yield return RunStatus.Running;
+        //            }
+        //            Selection = null;
+        //        }
+        //        Reset();
+        //        while (Professionbuddy.Instance.SecondaryBot.Root.Tick(null) == RunStatus.Running)
         //            yield return RunStatus.Running;
-        //        }
-        //        Selection = null;
-        //        if (node.LastStatus == RunStatus.Success)
-        //        {
-        //            yield return RunStatus.Success;
-        //            yield break;
-        //        }
         //    }
-        //    Reset();
-        //    if (!CanRun(context))
-        //    {
-        //        yield return RunStatus.Failure;
-        //        yield break;
-        //    }
-        //    else
-        //    {
-        //        yield return RunStatus.Running;
-        //    }
-        //    //}
+        //    yield return RunStatus.Failure;
+        //    yield break;
         //}
+        protected override IEnumerable<RunStatus> Execute(object context)
+        {
+            //lock (Locker)
+            //{
+            if (!CanRun(null))
+            {
+                yield return RunStatus.Failure;
+                yield break;
+            }
+            foreach (Composite node in Children)
+            {
+                node.Start(context);
+                // Keep stepping through the enumeration while it's returning RunStatus.Running
+                // or until CanRun() returns false if IgnoreCanRun is false..
+                while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
+                    node.Tick(context) == RunStatus.Running)
+                {
+                    Selection = node;
+                    yield return RunStatus.Running;
+                }
+                Selection = null;
+                if (node.LastStatus == RunStatus.Success)
+                {
+                    yield return RunStatus.Success;
+                    yield break;
+                }
+            }
+            Reset();
+            if (!CanRun(context))
+            {
+                yield return RunStatus.Failure;
+                yield break;
+            }
+            else
+            {
+                yield return RunStatus.Running;
+            }
+            //}
+        }
+
         override public string Name { get { return "While Condition"; } }
         override public string Title
         {
