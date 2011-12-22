@@ -107,8 +107,8 @@ namespace HighVoltz.Composites
                     // Keep stepping through the enumeration while it's returing RunStatus.Running
                     // or until CanRun() returns false if IgnoreCanRun is false..
                     node.Start(context);
-                    while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
-                        node.Tick(context) == RunStatus.Running)
+                    while (node.Tick(context) == RunStatus.Running &&
+                      (IgnoreCanRun || (!IgnoreCanRun && CanRun(context))))
                     {
                         Selection = node;
                         yield return RunStatus.Running;
@@ -116,11 +116,11 @@ namespace HighVoltz.Composites
 
                     Selection = null;
                     //node.Stop(context);
-                    if (node.LastStatus == RunStatus.Success)
-                    {
-                        yield return RunStatus.Success;
-                        //yield break; don't break iteration.. While Condition return sucess if at end of loop
-                    }
+                    //if (node.LastStatus == RunStatus.Success)
+                    //{
+                    //    yield return RunStatus.Success;
+                    //    //yield break; don't break iteration.. While Condition return sucess if at end of loop
+                    //}
                 }
                 _executed = true;
                 yield return RunStatus.Failure;

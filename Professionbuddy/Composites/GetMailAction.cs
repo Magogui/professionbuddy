@@ -178,7 +178,7 @@ namespace HighVoltz.Composites
                                 {
                                     string lua = string.Format("local freeslots = 0 for bag=0,NUM_BAG_SLOTS do local fs, bagType = GetContainerNumFreeSlots(bag) if bagType == 0 then freeslots = freeslots + fs end end if freeslots <= {2} then return 1 end local numItems,totalItems = GetInboxNumItems() local foundMail=0 for index=numItems,1,-1 do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1, ATTACHMENTS_MAX_RECEIVE do local itemlink = GetInboxItemLink(index, i2) if itemlink ~= nil and string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if (foundMail == 0 {1})  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
                                         //, Entry, freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
-                                    _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "", MinFreeBagSlots);
+                                    _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "", MinFreeBagSlots );
 
                                     if (Lua.GetReturnValues(lua)[0] == "1" )
                                         _idList.RemoveAt(i);
