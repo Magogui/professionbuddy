@@ -614,7 +614,7 @@ namespace HighVoltz
                 {
                     foreach (var kv in dict)
                     {
-                        if (!string.IsNullOrEmpty(kv.Key))
+                        if (!string.IsNullOrEmpty(kv.Key) && File.Exists(kv.Key))
                         {
                             Log("Preloading profile {0}", kv.Key);
                             ProfileManager.LoadNew(kv.Key);
