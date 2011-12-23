@@ -184,9 +184,9 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="DepositGoldInGbank">
     <CustomAction Code="Log(&quot;Depositing all but {0} gold into GBank&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
-    <!--Eastern Kingdoms-->
     <If Condition="Me.MapId == 0" IgnoreCanRun="True">
-      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+      <!--Stormwind-->
+      <If Condition="Me.ZoneId == 1519" IgnoreCanRun="True">
         <!--Stormwind 'Human' GuildBank-->
         <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &lt; DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
           <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8920.106" Y="621.256" Z="100.226" />
@@ -195,6 +195,30 @@
         <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &gt;= DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
           <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="-8315.161" Y="582.8967" Z="100.3132" />
         </If>
+      </If>
+    </If>
+    <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+      <!--Org-->
+      <If Condition="Me.ZoneId == 1637" IgnoreCanRun="True">
+        <!--Valley of Strength GuildBank-->
+        <If Condition="DistanceTo(1533.167, -4362.145, 20.54772) &lt; DistanceTo(1886.409, -4683.326, 38.5004)" IgnoreCanRun="True">
+          <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="1533.167" Y="-4362.145" Z="20.54772" />
+        </If>
+        <!--Valley of Honor GuildBank-->
+        <If Condition="DistanceTo(1533.167, -4362.145, 20.54772) &gt;= DistanceTo(-1886.409, -4683.326, 38.5004)" IgnoreCanRun="True">
+          <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="1886.409" Y="-4683.326" Z="38.5004" />
+        </If>
+      </If>
+    </If>
+    <!--Dalaran-->
+    <If Condition="Me.ZoneId == 4395" IgnoreCanRun="True">
+      <!--North GuildBank-->
+      <If Condition="DistanceTo(5961.328, 616.5127, 650.6276) &lt; DistanceTo(5651.325, 682.1651, 651.9932)" IgnoreCanRun="True">
+        <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5961.328" Y="616.5127" Z="650.6276" />
+      </If>
+      <!--Valley of Honor GuildBank-->
+      <If Condition="DistanceTo(5961.328, 616.5127, 650.6276) &gt;= DistanceTo(5651.325, 682.1651, 651.9932)" IgnoreCanRun="True">
+        <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5651.325" Y="682.1651" Z="651.9932" />
       </If>
     </If>
     <!--loop until Gbank frame is opened-->
