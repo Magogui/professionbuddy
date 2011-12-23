@@ -57,7 +57,7 @@
     <CustomAction Code="Lua.DoString(&quot;CloseTrainer()&quot;);" />
     <WaitAction Condition="false" Timeout="2000" />
     <SellItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" ItemID="0" Count="0" SellItemType="Greys" />
-    <SellItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" ItemID="0" Count="0" SellItemType="Whites" />
+    <SellItemAction NpcEntry="28742" X="5707.309" Y="612.2144" Z="646.6996" ItemID="43646" Count="0" SellItemType="Specific" />
     <CustomAction Code="Lua.DoString(&quot;CloseMerchant()&quot;);" />
   </SubRoutine>
   <SubRoutine SubRoutineName="EquipFishingPole">
