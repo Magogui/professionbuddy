@@ -89,8 +89,11 @@
     </If>
   </While>
   <SubRoutine SubRoutineName="MailItems">
+    <CustomAction Code="var8 = CharacterSettings.Instance.MailRecipient;" />
+    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
+    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)var8;" />
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
     <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
