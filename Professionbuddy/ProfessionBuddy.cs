@@ -39,6 +39,9 @@ using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Windows.Media;
+using System.Windows.Documents;
+using System.Windows.Threading;
 
 namespace HighVoltz
 {
@@ -666,7 +669,8 @@ namespace HighVoltz
 
         public static void Log(string format, params object[] args)
         {
-            Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
+            //Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
+            LogInvoker(Brushes.LightSteelBlue, format, args);
         }
 
         public static void Debug(string format, params object[] args)
@@ -674,6 +678,38 @@ namespace HighVoltz
             Logging.WriteDebug(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
+        static string _logHeader;
+        static System.Windows.Controls.RichTextBox _rtbLog;
+        delegate void LogDelegate(SolidColorBrush brush, string format, params object[] args);
+
+        static void LogInvoker(SolidColorBrush brush, string format, params object[] args)
+        {
+            if (System.Windows.Application.Current.Dispatcher.Thread == Thread.CurrentThread)
+                Log(brush, format, args);
+            else
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new LogDelegate(Log), brush, format, args);
+        }
+
+        static void Log(SolidColorBrush brush, string format, params object[] args)
+        {
+            try
+            {
+                if (_rtbLog == null)
+                    _rtbLog = (System.Windows.Controls.RichTextBox)System.Windows.Application.Current.MainWindow.FindName("rtbLog");
+                TextRange headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
+                headerTR.Text = _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version));
+                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.DodgerBlue);
+
+                TextRange MessageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
+                MessageTR.Text = String.Format(format + Environment.NewLine, args);
+                MessageTR.ApplyPropertyValue(TextElement.ForegroundProperty, brush);
+            }
+            catch
+            {
+                Logging.Write("PB: "+format, args);
+            }
+        }
+    
         #endregion
 
     }
