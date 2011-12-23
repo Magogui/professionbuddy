@@ -376,9 +376,10 @@ namespace HighVoltz
                         Lua.DoString(_loginLua);
                         Thread.Sleep(2000);
                     }
+                    TreeRoot.Start();
                     Professionbuddy.Instance.LoadTradeSkills();
                     MainForm.Instance.InitTradeSkillTab();
-                    TreeRoot.Start();
+                    MainForm.Instance.InitTradeSkillTab();
                     _isSwitchingToons = false;
                     Professionbuddy.Instance.IsRunning = true;
                 }) { IsBackground = true }.Start();

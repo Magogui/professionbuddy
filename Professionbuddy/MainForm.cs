@@ -102,8 +102,6 @@ namespace HighVoltz
             else
                 RemoveProfileSettingsTab();
 
-            if (PB.TradeSkillList.Count > 0)
-                TradeSkillTabControl.Visible = true;
             UpdateControls();
         }
 
@@ -164,6 +162,9 @@ namespace HighVoltz
                 TradeSkillTabControl.TabPages.Add(new TradeSkillListView(i));
             }
             TradeSkillTabControl.ResumeLayout();
+
+            if (PB.TradeSkillList.Count > 0)
+                TradeSkillTabControl.Visible = true;
         }
         #endregion
 
