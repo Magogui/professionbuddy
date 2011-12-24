@@ -100,6 +100,9 @@ namespace HighVoltz
                     }
                     catch { }
                 }).Start();
+            // Initialize is called when bot is started.. we need to hook these events before that.
+            Styx.BotEvents.Profile.OnNewOuterProfileLoaded += new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
+            Styx.Logic.Profiles.Profile.OnUnknownProfileElement += new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
         }
         #endregion
 
@@ -411,9 +414,6 @@ namespace HighVoltz
             {
                 if (!_init)
                 {
-                    Styx.BotEvents.Profile.OnNewOuterProfileLoaded += new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
-                    Styx.Logic.Profiles.Profile.OnUnknownProfileElement += new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
-
                     Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
                     Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
                     Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);

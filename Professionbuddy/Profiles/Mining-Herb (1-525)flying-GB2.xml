@@ -88,7 +88,7 @@
             <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
           </If>
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+        <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="TrainInStormwind" />
         </If>
       </If>
@@ -131,7 +131,7 @@
             <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
           </If>
         </If>
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+        <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var6-(int)var5 &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var8 - (int)var7 &lt;= 25 )" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="TrainInOrg" />
         </If>
       </If>
@@ -158,7 +158,7 @@
         <InteractionAction Entry="195142" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
       </If>
-      <If Condition="Me.MapId == 0 &amp;&amp; (((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 350 || !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 350)|| !(bool)Settings[&quot;Herb&quot;]))" IgnoreCanRun="True">
+      <If Condition="Me.MapId == 0 &amp;&amp; (((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &lt; 350 || !(bool)Settings[&quot;Mining&quot;]) || (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &lt; 350)|| !(bool)Settings[&quot;Herb&quot;]))" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <FlyToAction Dismount="True" X="-8984.83" Y="863.0924" Z="124.4113" />
           <InteractionAction Entry="195141" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
@@ -171,7 +171,7 @@
         <CustomAction Code="CTM(-11930.31, -3209.613, -1.836873);" />
         <WaitAction Condition="Me.MapId == 530" Timeout="25000" />
       </If>
-      <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;=350)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;=350)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+      <If Condition=" (((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 &gt;=350 )|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 &gt;=350)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
         <If Condition="Me.MapId == 530" IgnoreCanRun="True">
           <FlyToAction Dismount="False" X="-252.0331" Y="965.9687" Z="90.23502" />
           <CustomAction Code="CTM(-247.3961, 890.3077, 96.21683);" />
@@ -238,7 +238,6 @@
           </If>
         </If>
       </If>
-      <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 1" IgnoreCanRun="True" />
       <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="1662.198" Y="-4132.378" Z="56.96952" />
         <InteractionAction Entry="195142" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />

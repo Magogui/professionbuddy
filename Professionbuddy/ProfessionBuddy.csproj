@@ -153,7 +153,6 @@
     <EmbeddedResource Include="MaterialListForm.resx">
       <DependentUpon>MaterialListForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Icons\Guide.rtf" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -174,9 +173,6 @@
     <EmbeddedResource Include="Icons\OpenPL.bmp" />
     <EmbeddedResource Include="Icons\paste_32x32.png" />
     <EmbeddedResource Include="Icons\SaveHL.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Icons\settings_48.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
