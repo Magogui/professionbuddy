@@ -58,7 +58,7 @@ namespace HighVoltz.Composites
                 {
                     if (ProfileType == LoadProfileType.Honorbuddy)
                     {
-                        Professionbuddy.Log("Loading Profile :{0}, previous profile was {1}", absPath,ProfileManager.XmlLocation);
+                        Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath,ProfileManager.XmlLocation);
                         if (string.IsNullOrEmpty(Path))
                         {
                             ProfileManager.LoadEmpty();

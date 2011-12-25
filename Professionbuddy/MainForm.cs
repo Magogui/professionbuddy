@@ -785,7 +785,7 @@ namespace HighVoltz
                 string xmlfile = zip ? (string.IsNullOrEmpty(PB.CurrentProfile.XmlPath) ?
                     Path.ChangeExtension(saveFileDialog.FileName, ".xml") : PB.CurrentProfile.XmlPath)
                     : saveFileDialog.FileName;
-                Professionbuddy.Log("Packaging profile to {0}", saveFileDialog.FileName);
+                Professionbuddy.Log("Saving profile to {0}", saveFileDialog.FileName);
                 PB.CurrentProfile.SaveXml(xmlfile);
                 if (zip)
                     PB.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);

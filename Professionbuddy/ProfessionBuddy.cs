@@ -39,7 +39,6 @@ using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Globalization;
 using System.Security.Cryptography;
-using System.Windows.Media;
 using System.Windows.Documents;
 using System.Windows.Threading;
 
@@ -53,7 +52,7 @@ namespace HighVoltz
         // <itemId,count>
         public DataStore DataStore { get; private set; }
         // path to the currently loaded HB profile
-        public string HonorBuddyProfilePath { get; set; }
+        public static string HonorBuddyProfilePath { get; set; }
         // dictionary that keeps track of material list using item ID for key and number required as value
         public Dictionary<uint, int> MaterialList { get; private set; }
         public List<uint> ProtectedItems { get; private set; }
@@ -343,22 +342,24 @@ namespace HighVoltz
             }
         }
 
-        void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
+        static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
             {
                 LoadProfile(ProfileManager.XmlLocation);
                 if (MainForm.IsValid)
                 {
-                    if (ProfileSettings.Settings.Count > 0)
+                    if (Instance.ProfileSettings.Settings.Count > 0)
                         MainForm.Instance.AddProfileSettingsTab();
                     else
                         MainForm.Instance.RemoveProfileSettingsTab();
                 }
+                BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                 if (!string.IsNullOrEmpty(HonorBuddyProfilePath) && File.Exists(HonorBuddyProfilePath))
                     ProfileManager.LoadNew(HonorBuddyProfilePath, true);
                 else
                     ProfileManager.LoadEmpty();
+                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
             }
             else
                 HonorBuddyProfilePath = ProfileManager.XmlLocation;
@@ -620,14 +621,21 @@ namespace HighVoltz
                         if (!string.IsNullOrEmpty(kv.Key) && File.Exists(kv.Key))
                         {
                             Log("Preloading profile {0}", kv.Key);
+                            // unhook event to prevent recursive loop
+                            Styx.BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                             ProfileManager.LoadNew(kv.Key);
+                            Styx.BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                             return;
                         }
                     }
                 }
             }
             if (ProfileManager.CurrentProfile == null)
+            {
+                Styx.BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                 ProfileManager.LoadEmpty();
+                Styx.BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+            }
         }
 
         static internal List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
@@ -666,11 +674,24 @@ namespace HighVoltz
         {
             Logging.Write(System.Drawing.Color.Red, "Err: " + format, args);
         }
+        static string _logHeader;
+        static string Header
+        {
+            get
+            {
+                return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version));
+            }
+        }
 
         public static void Log(string format, params object[] args)
         {
             //Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
-            LogInvoker(Brushes.LightSteelBlue, format, args);
+            LogInvoker(System.Drawing.Color.DodgerBlue, Header, System.Drawing.Color.LightSteelBlue, format, args);
+        }
+
+        public static void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
+        {
+            LogInvoker(headerColor, header, msgColor, format, args);
         }
 
         public static void Debug(string format, params object[] args)
@@ -678,38 +699,40 @@ namespace HighVoltz
             Logging.WriteDebug(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
-        static string _logHeader;
         static System.Windows.Controls.RichTextBox _rtbLog;
-        delegate void LogDelegate(SolidColorBrush brush, string format, params object[] args);
+        delegate void LogDelegate(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args);
 
-        static void LogInvoker(SolidColorBrush brush, string format, params object[] args)
+        static void LogInvoker(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
         {
             if (System.Windows.Application.Current.Dispatcher.Thread == Thread.CurrentThread)
-                Log(brush, format, args);
+                LogInternal(headerColor, header, msgColor, format, args);
             else
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(new LogDelegate(Log), brush, format, args);
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), headerColor, header, msgColor, format, args);
         }
 
-        static void Log(SolidColorBrush brush, string format, params object[] args)
+        static void LogInternal(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
         {
             try
             {
                 if (_rtbLog == null)
                     _rtbLog = (System.Windows.Controls.RichTextBox)System.Windows.Application.Current.MainWindow.FindName("rtbLog");
+                System.Windows.Media.Color headerColorMedia = System.Windows.Media.Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B);
+                System.Windows.Media.Color msgColorMedia = System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B);
+
                 TextRange headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
-                headerTR.Text = _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version));
-                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.DodgerBlue);
+                headerTR.Text = header;
+                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(headerColorMedia));
 
                 TextRange MessageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
                 MessageTR.Text = String.Format(format + Environment.NewLine, args);
-                MessageTR.ApplyPropertyValue(TextElement.ForegroundProperty, brush);
+                MessageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(msgColorMedia));
             }
             catch
             {
-                Logging.Write("PB: "+format, args);
+                Logging.Write("PB: " + format, args);
             }
         }
-    
+
         #endregion
 
     }

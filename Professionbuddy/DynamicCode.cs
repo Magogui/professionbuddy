@@ -173,6 +173,10 @@ namespace HighVoltz
             uint InbagCount (uint id) {return Helpers.InbagCount(id); }
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
+            void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
+            {
+                Professionbuddy.Log(headerColor, header, msgColor, format, args);
+            }
             float DistanceTo(double x,double y,double z) {return Helpers.DistanceTo(x,y,z); }
             float DistanceTo(WoWPoint p) {return Helpers.DistanceTo(p.X,p.Y,p.Z); }
             void MoveTo(double x,double y,double z) {Helpers.MoveTo(x,y,z); }

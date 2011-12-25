@@ -9,6 +9,9 @@
   <Settings Type="Int32" DefaultValue="0" Name="Fake Herbalism MaxLevel" Summary="used for debuging only.." Category="Debug" />
   <Settings Type="Int32" DefaultValue="0" Name="Fake Mining Level" Summary="used for debuging only.." Category="Debug" />
   <Settings Type="Int32" DefaultValue="0" Name="Fake Mining MaxLevel" Summary="used for debuging only.." Category="Debug" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining: {0}&quot;,Settings[&quot;Mining&quot;]);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
   <CustomAction Code="var1 = false;" />
   <!--var2 = Gather Mines?-->
   <CustomAction Code="var2 = Settings[&quot;Mining&quot;];" />
@@ -297,7 +300,7 @@
         <If Condition="Me.IsHorde" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="TrainInOrg" />
         </If>
-        <CustomAction Code="Log(&quot;Stopping HB since We are 525 herb/mining&quot;);" />
+        <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Stopping HB since We are 525 herb/mining&quot;);" />
         <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
       </If>
       <If Condition="Me.MapId == 1 &amp;&amp; DistanceTo(1804.349, -4346.937, -10.66582) &lt; 70" IgnoreCanRun="True">
@@ -340,6 +343,7 @@
     </If>
   </While>
   <SubRoutine SubRoutineName="EmptyBagsInIronforge">
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Ironforge&quot;);" />
     <!--Front of Ironforge gates-->
     <FlyToAction Dismount="False" X="-5043.242" Y="-805.4196" Z="504.7747" />
     <FlyToAction Dismount="False" X="-4982.075" Y="-879.6846" Z="512.5381" />
@@ -356,6 +360,7 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInStormwind">
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Stormwind&quot;);" />
     <!--Front of AH area-->
     <FlyToAction Dismount="True" X="-8355.722" Y="641.4622" Z="95.28886" />
     <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
@@ -370,6 +375,7 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInStormwind">
     <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Training in Stormwind&quot;);" />
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
       <FlyToAction Dismount="True" X="-8419.147" Y="666.6985" Z="94.58031" />
       <TrainSkillAction NpcEntry="5513" X="-8433.48" Y="688.922" Z="96.31891" />
@@ -385,7 +391,7 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInUndercity">
-    <CustomAction Code="Log(&quot;Empting my bags in UnderCity&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Undercity&quot;);" />
     <FlyToAction Dismount="True" X="1688.531" Y="730.3077" Z="73.82889" />
     <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
@@ -400,6 +406,7 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInUndercity">
     <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Training in Undercity&quot;);" />
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
       <TrainSkillAction NpcEntry="4614" X="1560.8" Y="355.098" Z="-62.16309" />
       <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
@@ -410,7 +417,7 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInOrg">
-    <CustomAction Code="Log(&quot;Empting my bags in Org&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Org&quot;);" />
     <!--In front of AH area-->
     <FlyToAction Dismount="True" X="2012.031" Y="-4690.59" Z="28.64125" />
     <GetMailAction ItemID="0" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
@@ -424,8 +431,8 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInOrg">
-    <CustomAction Code="Log(&quot;Training in Org&quot;);" />
     <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Training in Org&quot;);" />
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
       <!--In front of Mining trainer building-->
       <FlyToAction Dismount="True" X="2069.483" Y="-4766.704" Z="27.47169" />
@@ -443,7 +450,7 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInDalaran">
-    <CustomAction Code="Log(&quot;Empting my bags in Dalaran&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Dalaran&quot;);" />
     <If Condition="DistanceTo(5896.106, 719.2957, 640.5133) &gt; 100" IgnoreCanRun="True">
       <FlyToAction Dismount="False" X="5341.598" Y="522.6038" Z="440.8728" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
@@ -462,8 +469,8 @@
     <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5901.044" Y="724.9983" Z="639.8762" />
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInDalaran">
-    <CustomAction Code="Log(&quot;Training in Dalaran&quot;);" />
     <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
+    <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Training in Dalaran&quot;);" />
     <If Condition="DistanceTo(5896.106, 719.2957, 640.5133) &gt; 100" IgnoreCanRun="True">
       <FlyToAction Dismount="False" X="5341.598" Y="522.6038" Z="440.8728" />
       <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="5611.935" Y="601.7" Z="796.0209" />
