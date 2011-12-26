@@ -38,7 +38,7 @@
   </If>
   <While Condition="true" IgnoreCanRun="True">
     <!--Check if bags are full and not in city. If true then hearth-->
-    <If Condition="( Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;] ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
+    <If Condition="( Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;] ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
     <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var7).TotalMinutes &gt;= (int)var6 ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
@@ -105,13 +105,11 @@
     <SellItemOnAhAction ItemID="0" MinBuyout="5g50s0c" MaxBuyout="20g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Elemental" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Hearth">
-    <CustomAction Code="Log(&quot;Hearthing&quot;);" />
-    <While Condition="Me.ZoneId != (int)var3;" IgnoreCanRun="True">
-      <!--Dismount and use hearthstone-->
-      <If Condition="!Me.IsCasting" IgnoreCanRun="True">
-        <CustomAction Code="Mount.Dismount();Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
-      </If>
-    </While>
+    <!--Dismount and use hearthstone-->
+    <If Condition="!Me.IsCasting" IgnoreCanRun="True">
+      <CustomAction Code="Log(&quot;Hearthing&quot;);" />
+      <CustomAction Code="Mount.Dismount();Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
+    </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
     <CustomAction Code="Log(&quot;Multi-profile initializing&quot;);" />
