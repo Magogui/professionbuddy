@@ -172,7 +172,17 @@ namespace HighVoltz.Composites
                             item.UseContainerItem();
                         }
                         if (MailFrame.Instance.SendMailItems.Length > 0)
-                            Lua.DoString(string.Format("SendMail ('{0}',' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
+                        {
+                            if (string.IsNullOrEmpty(CharacterSettings.Instance.MailRecipient))
+                            {
+                                Professionbuddy.Err("MailRecipient is empty");
+                                IsDone = true;
+                            }
+                            Professionbuddy.Debug("Sending {0} items via mail", MailFrame.Instance.SendMailItems.Length);
+                            //Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
+                            //run SendMail ('BankerName',' ','');SendMailMailButton:Click();
+                            MailFrame.Instance.SendMail(CharacterSettings.Instance.MailRecipient, "", "", 0);
+                        }
                     }
                     if (IsDone)
                     {
