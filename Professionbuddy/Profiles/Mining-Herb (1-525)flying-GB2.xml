@@ -96,6 +96,9 @@
         </If>
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <If Condition="Me.MapId != 1" IgnoreCanRun="True">
+          <CustomAction Code="MessageBox.Show(&quot;Move to Kalimdor 1st&quot;);TreeRoot.Stop();" />
+        </If>
         <!--Mining 1-50 and Herb 1-50-->
         <If Condition="(int) var9 ==75" IgnoreCanRun="True">
           <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
