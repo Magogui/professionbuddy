@@ -46,7 +46,7 @@ namespace HighVoltz
         static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.Instance.BotPath, "Temp")); } }
 
         public static void WipeTempFolder()
-        {
+        {  
             if (!Directory.Exists(TempFolder))
             {
                 Directory.CreateDirectory(TempFolder);
@@ -304,6 +304,32 @@ namespace HighVoltz
         }
 
         static bool _isSwitchingToons = false;
+            // credit to mvbc of mmocore.com
+        // {0}=character,{1}=server
+            static string _loginLua =
+            "if (RealmList and RealmList:IsVisible()) then " +
+                "for i = 1, select('#',GetRealmCategories()) do " +
+                    "for j = 1, GetNumRealms(i) do " +
+                        "if GetRealmInfo(i, j) == \"{1}\" then " +
+                            "RealmList:Hide() " +
+                            "ChangeRealm(i, j) " +
+                        "end " +
+                    "end " +
+                "end " +
+            "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
+                "if GetServerName() ~= '{1}' and (not RealmList or not RealmList:IsVisible()) then " +
+                    "RequestRealmList(1) " +
+                "else " +
+                    "for i = 1,GetNumCharacters() do " +
+                        "if (GetCharacterInfo(i) == \"{0}\") then " +
+                            "CharacterSelect_SelectCharacter(i) " +
+                            "EnterWorld() " +
+                        "end " +
+                    "end " +
+                "end " +
+            "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
+                "CharacterCreate_Back() " +
+            "end ";
         /// <summary>
         /// Switches to a different character on same account
         /// </summary>
@@ -317,31 +343,7 @@ namespace HighVoltz
                 Professionbuddy.Log("Already switching characters");
                 return;
             }
-            // credit to mvbc of mmocore.com
-            string _loginLua =
-            "if (RealmList and RealmList:IsVisible()) then " +
-                "for i = 1, select('#',GetRealmCategories()) do " +
-                    "for j = 1, GetNumRealms(i) do " +
-                        "if GetRealmInfo(i, j) == '" + server + "' then " +
-                            "RealmList:Hide() " +
-                            "ChangeRealm(i, j) " +
-                        "end " +
-                    "end " +
-                "end " +
-            "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
-                "if GetServerName() ~= '" + server + "' and (not RealmList or not RealmList:IsVisible()) then " +
-                    "RequestRealmList(1) " +
-                "else " +
-                    "for i = 1,GetNumCharacters() do " +
-                        "if (GetCharacterInfo(i) == '" + character + "') then " +
-                            "CharacterSelect_SelectCharacter(i) " +
-                            "EnterWorld() " +
-                        "end " +
-                    "end " +
-                "end " +
-            "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
-                "CharacterCreate_Back() " +
-            "end ";
+            string loginLua = string.Format(_loginLua, server, character);
             _isSwitchingToons = true;
             // reset all actions 
             Professionbuddy.Instance.IsRunning = false;
@@ -377,7 +379,7 @@ namespace HighVoltz
                         Thread.Sleep(2000);
                     while (!ObjectManager.IsInGame)
                     {
-                        Lua.DoString(_loginLua);
+                        Lua.DoString(loginLua);
                         Thread.Sleep(2000);
                     }
                     TreeRoot.Start();
