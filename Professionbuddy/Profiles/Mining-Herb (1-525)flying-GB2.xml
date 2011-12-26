@@ -125,8 +125,11 @@
           </If>
         </If>
         <If Condition="(int) var9 == 300" IgnoreCanRun="True">
+          <If Condition="((bool)var3 &amp;&amp; (int)var7 &lt;225)" IgnoreCanRun="True">
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          </If>
           <!--Mining 175-235 and Herb 225-280-->
-          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt; 235) || ((bool)var3 &amp;&amp; (int)var7 &lt;280)" IgnoreCanRun="True">
+          <If Condition="((bool)var2 &amp;&amp; (int)var5 &lt;235 &amp;&amp; (bool)var3 &amp;&amp; (int)var7&gt;=225 &amp;&amp; (int)var7 &lt;280 ) || (((bool)var2 &amp;&amp; !(bool)var3 &amp;&amp; (int)var5 &lt;235 ) ^ ((bool)var3 &amp;&amp; !(bool)var2 &amp;&amp; (int)var7 &gt;=225 &amp;&amp; (int)var7 &lt; 280))" IgnoreCanRun="True">
             <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
           </If>
           <!--Mining 235-300 and Herb 280-300-->
