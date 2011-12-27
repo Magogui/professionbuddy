@@ -343,7 +343,7 @@ namespace HighVoltz
                 Professionbuddy.Log("Already switching characters");
                 return;
             }
-            string loginLua = string.Format(_loginLua, server, character);
+            string loginLua = string.Format(_loginLua, character, server);
             _isSwitchingToons = true;
             // reset all actions 
             Professionbuddy.Instance.IsRunning = false;
@@ -384,8 +384,11 @@ namespace HighVoltz
                     }
                     TreeRoot.Start();
                     Professionbuddy.Instance.LoadTradeSkills();
-                    MainForm.Instance.InitTradeSkillTab();
-                    MainForm.Instance.InitTradeSkillTab();
+                    if (MainForm.IsValid)
+                    {
+                        MainForm.Instance.InitTradeSkillTab();
+                        MainForm.Instance.InitTradeSkillTab();
+                    }
                     _isSwitchingToons = false;
                     Professionbuddy.Instance.IsRunning = true;
                 }) { IsBackground = true }.Start();

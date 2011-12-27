@@ -89,7 +89,7 @@ namespace HighVoltz.Composites
         ulong lastItemGuid = 0;
         uint lastStackSize = 0;
         int tries = 0;
-        uint timeToWait = 3000;
+        static uint _timeToWait = 3500;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -101,7 +101,7 @@ namespace HighVoltz.Composites
                     LootFrame.Instance.LootAll();
                     return RunStatus.Running;
                 }
-                if (!me.IsCasting && (!castTimer.IsRunning || castTimer.ElapsedMilliseconds >= timeToWait))
+                if (!me.IsCasting && (!castTimer.IsRunning || castTimer.ElapsedMilliseconds >= _timeToWait))
                 {
                     List<WoWItem> ItemList = BuildItemList();
                     if (ItemList == null || ItemList.Count == 0)

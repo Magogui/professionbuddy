@@ -83,9 +83,8 @@ namespace HighVoltz.Composites
                         obj = ObjectManager.Me.CurrentTarget;
                 }
                 else if (InteractType == InteractActionType.GameObject)
-                    obj = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(u => (Entry > 0 && u.Entry == Entry) || (u.SubType == GameObjectType &&
-                        (GameObjectType != WoWGameObjectType.SpellFocus || (GameObjectType == WoWGameObjectType.SpellFocus && u.SpellFocus == SpellFocus))))
-                        .OrderBy(u => u.Distance).FirstOrDefault();
+                    obj = ObjectManager.GetObjectsOfType<WoWGameObject>().OrderBy(u => u.Distance).FirstOrDefault(u => (Entry > 0 && u.Entry == Entry) || (u.SubType == GameObjectType &&
+                        (GameObjectType != WoWGameObjectType.SpellFocus || (GameObjectType == WoWGameObjectType.SpellFocus && u.SpellFocus == SpellFocus))));
                 if (obj != null)
                 {
                     if (!obj.WithinInteractRange)

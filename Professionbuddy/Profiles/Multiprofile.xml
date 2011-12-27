@@ -79,7 +79,7 @@
       <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
         <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
       </If>
-      <If Condition="(bool)Settings[&quot;DepositGoldInGbank&quot;]" IgnoreCanRun="True">
+      <If Condition="(bool)Settings[&quot;DepositGoldInGbank&quot;] &amp;&amp; (int)Me.Gold &gt; (int)Settings[&quot;DepositAllButThisAmountInGBank&quot;]" IgnoreCanRun="True">
         <CallSubRoutine SubRoutineName="DepositGoldInGbank" />
       </If>
       <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
@@ -112,7 +112,16 @@
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
-    <CustomAction Code="Log(&quot;Multi-profile initializing&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
+    <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;*************** Settings ****************&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;SwitchToBanker: {0}&quot;,Settings[&quot;SwitchToBanker&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DepositGoldInGbank: {0}&quot;,Settings[&quot;DepositGoldInGbank&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;MinMinutesPerZone: {0}&quot;,Settings[&quot;MinMinutesPerZone&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;MaxMinutesPerZone: {0}&quot;,Settings[&quot;MaxMinutesPerZone&quot;]);" />
+    <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;***************** Zones *****************&quot;);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hyjal: {0}&quot;,Settings[&quot;Hyjal&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Uldum: {0}&quot;,Settings[&quot;Uldum&quot;]);" />
     <!--store current server name, needed when switching characters.-->
     <CustomAction Code="var1 = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
     <!--set to 'true' if on farmer, otherwise if on banker then it's set to false-->
@@ -159,6 +168,8 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="-8186.149" Y="413.7292" Z="116.7497" />
         <InteractionAction Entry="207694" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+        <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+        <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="-4879.899" Y="-6639.522" Z="10.85343" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="2029.233" Y="-4379.827" Z="97.9757" />
@@ -220,9 +231,8 @@
       </If>
     </If>
     <!--loop until Gbank frame is opened-->
-    <While Condition="Lua.GetReturnVal&lt;int&gt;(&quot;if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end &quot;, 0) != 1" IgnoreCanRun="True">
-      <InteractionAction Entry="0" InteractDelay="2000" InteractType="GameObject" GameObjectType="GuildBank" SpellFocus="Anvil" />
-    </While>
+    <InteractionAction Entry="0" InteractDelay="2000" InteractType="GameObject" GameObjectType="GuildBank" SpellFocus="Anvil" />
+    <WaitAction Condition="false" Timeout="2000" />
     <!--Deposit gold in Gbank-->
     <CustomAction Code="Lua.DoString(&quot;local goldToKeep={0}*10000 local depositAmount=(GetMoney()-goldToKeep) if depositAmount &gt; 0 then DepositGuildBankMoney(depositAmount) end&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
   </SubRoutine>

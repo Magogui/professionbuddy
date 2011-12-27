@@ -159,7 +159,7 @@ namespace HighVoltz.Composites
                 else
                 {
                     List<WoWItem> ItemList = BuildItemList();
-                    if (ItemList == null || ItemList.Count == 0)
+                    if ((ItemList == null || ItemList.Count == 0) && MailFrame.Instance.SendMailItems.Length == 0)
                     {
                         IsDone = true;
                         return RunStatus.Failure;
@@ -179,9 +179,14 @@ namespace HighVoltz.Composites
                                 IsDone = true;
                             }
                             Professionbuddy.Debug("Sending {0} items via mail", MailFrame.Instance.SendMailItems.Length);
-                            //Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();", CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
+                            Lua.DoString(string.Format("SendMail (\"{0}\",\"{1}\",'');SendMailMailButton:Click();",
+                                CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), ItemList[0].Name));
                             //run SendMail ('BankerName',' ','');SendMailMailButton:Click();
-                            MailFrame.Instance.SendMail(CharacterSettings.Instance.MailRecipient, "", "", 0);
+                            //MailFrame.Instance.SendMail(CharacterSettings.Instance.MailRecipient, "", "", 0);
+                        }
+                        else
+                        {
+                            Professionbuddy.Debug("No items placed in the mail slots... something went wrong");
                         }
                     }
                     if (IsDone)

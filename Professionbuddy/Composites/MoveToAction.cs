@@ -110,6 +110,7 @@ namespace HighVoltz.Composites
         }
 
         Stopwatch concludingSw = new Stopwatch();
+        const float speedModifer = 1.8f;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -139,7 +140,9 @@ namespace HighVoltz.Composites
                     if (unit != null)
                         unit.Target();
                 }
-                if (ObjectManager.Me.Location.Distance(loc) > 4.5)
+                float speed = ObjectManager.Me.MovementInfo.CurrentSpeed;
+                Navigator.PathPrecision = speed > 7 ? (speedModifer * speed) / 7f : speedModifer;
+                if (ObjectManager.Me.Location.Distance(loc) > Navigator.PathPrecision)
                 {
                     if (Pathing == NavigationType.ClickToMove)
                         WoWMovement.ClickToMove(loc);

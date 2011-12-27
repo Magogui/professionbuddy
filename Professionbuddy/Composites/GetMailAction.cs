@@ -72,7 +72,7 @@ namespace HighVoltz.Composites
             AutoFindMailBox = true;
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
-            MinFreeBagSlots = 2u;
+            MinFreeBagSlots = 0u;
 
             Properties["GetMailType"].PropertyChanged += new EventHandler(GetMailAction_PropertyChanged);
             Properties["AutoFindMailBox"].PropertyChanged += new EventHandler(AutoFindMailBoxChanged);
@@ -110,9 +110,11 @@ namespace HighVoltz.Composites
         Stopwatch WaitForContentToShowSW = new Stopwatch();
         Stopwatch ConcludingSW = new Stopwatch();
         Stopwatch TimeoutSW = new Stopwatch();
+        Stopwatch _throttleSW = new Stopwatch();
         Stopwatch _refreshInboxSW = new Stopwatch();
 
-        List<uint> _idList ;
+        List<uint> _idList;
+        int _throttleTime;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -149,7 +151,8 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    if (_idList == null) {
+                    if (_idList == null)
+                    {
                         _idList = BuildItemList();
                     }
                     if (!_refreshInboxSW.IsRunning)
@@ -158,18 +161,30 @@ namespace HighVoltz.Composites
                         WaitForContentToShowSW.Start();
                     if (WaitForContentToShowSW.ElapsedMilliseconds < 3000)
                         return RunStatus.Running;
-                    uint freeslots =  ObjectManager.Me.FreeNormalBagSlots;
+                    uint freeslots = ObjectManager.Me.FreeNormalBagSlots;
 
                     if (!ConcludingSW.IsRunning)
                     {
-                        if (_refreshInboxSW.ElapsedMilliseconds < 61000)
+                        if (_refreshInboxSW.ElapsedMilliseconds < 62000)
                         {
+                            if (MinFreeBagSlots > 0 && me.FreeNormalBagSlots - MinFreeBagSlots <= 4)
+                            {
+                                if (!_throttleSW.IsRunning)
+                                    _throttleSW.Start();
+                                if (_throttleSW.ElapsedMilliseconds < (Util.WoWPing * 3) + 50)
+                                    return RunStatus.Running;
+                                else
+                                {
+                                    _throttleSW.Reset();
+                                    _throttleSW.Start();
+                                }
+                            }
                             if (GetMailType == GetMailActionType.AllItems)
                             {
                                 string lua = string.Format("local freeslots = 0 for bag=0,NUM_BAG_SLOTS do local fs, bagType = GetContainerNumFreeSlots(bag) if bagType == 0 then freeslots = freeslots + fs end end if freeslots <= {1} then return 1 end local numItems,totalItems = GetInboxNumItems() local foundMail=0 for index=numItems,1,-1 do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then AutoLootMailItem(index) foundMail = foundMail + 1 break end end local beans = BeanCounterMail and BeanCounterMail:IsVisible() if foundMail == 0 {0}and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ",
                                     CheckNewMail ? "and HasNewMail() == nil " : "", MinFreeBagSlots);
                                 //freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
-                                if (Lua.GetReturnValues(lua)[0] == "1" )
+                                if (Lua.GetReturnValues(lua)[0] == "1")
                                     ConcludingSW.Start();
                             }
                             else
@@ -178,9 +193,9 @@ namespace HighVoltz.Composites
                                 {
                                     string lua = string.Format("local freeslots = 0 for bag=0,NUM_BAG_SLOTS do local fs, bagType = GetContainerNumFreeSlots(bag) if bagType == 0 then freeslots = freeslots + fs end end if freeslots <= {2} then return 1 end local numItems,totalItems = GetInboxNumItems() local foundMail=0 for index=numItems,1,-1 do local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then DeleteInboxItem(index) end if cod == 0 and itemCnt and itemCnt >0  then for i2=1, ATTACHMENTS_MAX_RECEIVE do local itemlink = GetInboxItemLink(index, i2) if itemlink ~= nil and string.find(itemlink,'{0}') then foundMail = foundMail + 1 TakeInboxItem(index, i2) break end end end end if (foundMail == 0 {1})  or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ",
                                         //, Entry, freeslots / 2 >= MinFreeBagSlots ? (freeslots - MinFreeBagSlots) / 2 : 1);
-                                    _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "", MinFreeBagSlots );
+                                    _idList[i], CheckNewMail ? "and HasNewMail() == nil " : "", MinFreeBagSlots);
 
-                                    if (Lua.GetReturnValues(lua)[0] == "1" )
+                                    if (Lua.GetReturnValues(lua)[0] == "1")
                                         _idList.RemoveAt(i);
                                 }
                                 if (_idList.Count == 0)
@@ -206,17 +221,21 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        List<uint> BuildItemList() {
+        List<uint> BuildItemList()
+        {
             List<uint> list = new List<uint>();
             string[] entries = ItemID.Split(',');
-            if (entries != null && entries.Length > 0) {
-                foreach (var entry in entries) {
+            if (entries != null && entries.Length > 0)
+            {
+                foreach (var entry in entries)
+                {
                     uint temp = 0;
                     uint.TryParse(entry.Trim(), out temp);
                     list.Add(temp);
                 }
             }
-            else {
+            else
+            {
                 Professionbuddy.Err("No ItemIDs are specified");
                 IsDone = true;
             }
@@ -230,6 +249,7 @@ namespace HighVoltz.Composites
             ConcludingSW = new Stopwatch();
             TimeoutSW = new Stopwatch();
             _refreshInboxSW = new Stopwatch();
+            _throttleSW = new Stopwatch();
         }
         public override string Name
         {

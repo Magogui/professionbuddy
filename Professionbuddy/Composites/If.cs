@@ -113,7 +113,6 @@ namespace HighVoltz.Composites
                     Selection = node;
                     yield return RunStatus.Running;
                 }
-
                 Selection = null;
                 //node.Stop(context);
                 if (node.LastStatus == RunStatus.Success)
