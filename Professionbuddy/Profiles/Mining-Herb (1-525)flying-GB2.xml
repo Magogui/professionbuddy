@@ -35,7 +35,6 @@
     <CustomAction Code="var6 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Mining MaxLevel&quot;] :(int) Mining.MaxLevel;" />
     <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
     <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int) Herbalism.MaxLevel;" />
-    <CustomAction Code="var9 = (bool)var2 &amp;&amp; (bool)var3 ? (int)var6 &lt; (int)var8 ? var6 : var8:(bool)var2 ? var6 :var8;" />
     <!--disable gathering of mines-->
     <CustomAction Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp; ((int)var5 == (int)var6 || (int)var6 &gt; (int)var8 )) || !(bool)Settings[&quot;Mining&quot;]) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;" />
     <!--enable gathering of mines-->
@@ -44,6 +43,7 @@
     <CustomAction Code="if (((bool)Settings[&quot;Herb&quot;] &amp;&amp; ((int)var7 == (int)var8 || (int)var8 &gt; (int)var6)) || !(bool)Settings[&quot;Herb&quot;]) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = false;" />
     <!--enable Herb in GB2 if enabled in profile Settings and Herb MaxLevel <= Mining.MaxLevel-->
     <CustomAction Code="if ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 != (int)var8 &amp;&amp;  (int)var8 &lt;= (int)var6) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;" />
+    <CustomAction Code="var9 = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? ((int)var6 &lt; (int)var8 ? var6 : var8):(bool)Settings[&quot;Mining&quot;] ? var6 :var8;" />
     <!--Herb/Mining 1-300-->
     <If Condition="(int) var9 &lt;=300" IgnoreCanRun="True">
       <If Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
