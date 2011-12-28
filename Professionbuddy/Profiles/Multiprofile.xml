@@ -182,6 +182,8 @@
     <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) ((List&lt;uint&gt;)var4).Add(5034);" />
     <!--Deepholm-->
     <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) ((List&lt;uint&gt;)var4).Add(5042);" />
+    <!--IF YOU ARE ADDING YOUR OWN ZONES DO NOT ADD THEM BELOW THIS LINE-->
+    <CustomAction Code="var4 = ((List&lt;uint&gt;)var4).OrderBy(z =&gt; z).ToList();" />
     <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
     <If Condition="((List&lt;uint&gt;)var4).Count == 0" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
