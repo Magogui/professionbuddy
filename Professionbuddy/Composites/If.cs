@@ -10,6 +10,8 @@ using PrioritySelector = TreeSharp.PrioritySelector;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Threading;
+using System.ComponentModel.Design;
+using System.Drawing.Design;
 
 
 namespace HighVoltz.Composites
@@ -47,7 +49,7 @@ namespace HighVoltz.Composites
         {
             Properties = new PropertyBag();
             Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool), new DisplayNameAttribute("Ignore Condition until done"));
-            Properties["Condition"] = new MetaProp("Condition", typeof(string));
+            Properties["Condition"] = new MetaProp("Condition", typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
             Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
 
             this.CanRunDelegate = c => false;

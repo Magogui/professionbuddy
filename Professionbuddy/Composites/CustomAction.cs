@@ -62,8 +62,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return string.Format("{0}",
-                    string.IsNullOrEmpty(Code) ? "(" + Name + ")" : "(" + Code + ")");
+                return string.Format("CustomAction:({0})",Code );
             }
         }
         public override string Help

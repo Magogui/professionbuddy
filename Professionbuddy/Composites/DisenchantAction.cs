@@ -183,6 +183,7 @@ namespace HighVoltz.Composites
         {
             IEnumerable<WoWItem> itemQueue = from item in ObjectManager.Me.BagItems
                                              where !IsBlackListed(item) &&
+                                             !Pb.ProtectedItems.Contains(item.Entry) &&
                                              ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
                                              ItemTarget == ItemTargetType.All)
                                              select item;

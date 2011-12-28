@@ -47,7 +47,7 @@ namespace HighVoltz.Composites
             set { Properties["CompileError"].Value = value; }
         }
 
-        public CsharpCodeType CodeType { get; private set; }
+        public CsharpCodeType CodeType { get; protected set; }
 
         virtual public string Code { get; set; }
         public override System.Drawing.Color Color

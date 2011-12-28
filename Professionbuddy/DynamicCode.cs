@@ -38,8 +38,14 @@ namespace HighVoltz
 {
     public class DynamicCode
     {
-        static Dictionary<string, ICSharpCode> CsharpCodeDict;
-
+        static Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
+        static IEnumerable<KeyValuePair<string, HighVoltz.ICSharpCode>> declarations = from dec in CsharpCodeDict
+                                                                                       where dec.Value.CodeType == CsharpCodeType.Declaration
+                                                                                       select dec;
+        static IEnumerable<KeyValuePair<string, HighVoltz.ICSharpCode>> noneDeclarations = from dec in CsharpCodeDict
+                                                                                           where dec.Value.CodeType != CsharpCodeType.Declaration
+                                                                                           select dec;
+        static object _codeDriverInstance;
         public static bool CodeWasModified = true;
 
         static string _tempFolder;
@@ -71,12 +77,13 @@ namespace HighVoltz
 
         static public void GenorateDynamicCode()
         {
-            CsharpCodeDict = new Dictionary<string, ICSharpCode>();
+            CsharpCodeDict.Clear();
             StoreMethodName(Professionbuddy.Instance.CurrentProfile.Branch);
             // check if theres anything to compile
             if (CsharpCodeDict.Count == 0)
                 return;
             Type dynamicType = CompileAndLoad();
+            _codeDriverInstance = Activator.CreateInstance(dynamicType);
             if (dynamicType != null)
             {
                 foreach (MethodInfo method in dynamicType.GetMethods())
@@ -84,9 +91,9 @@ namespace HighVoltz
                     if (CsharpCodeDict.ContainsKey(method.Name))
                     {
                         if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.BoolExpression)
-                            CsharpCodeDict[method.Name].CompiledMethod = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), null, method);
+                            CsharpCodeDict[method.Name].CompiledMethod = (CanRunDecoratorDelegate)Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), _codeDriverInstance, method.Name);
                         else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
-                            CsharpCodeDict[method.Name].CompiledMethod = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), null, method);
+                            CsharpCodeDict[method.Name].CompiledMethod = (System.Action<object>)Delegate.CreateDelegate(typeof(System.Action<object>), _codeDriverInstance, method.Name);
                     }
                 }
             }
@@ -142,9 +149,11 @@ namespace HighVoltz
         using Styx.Combat.CombatRoutine;
         using HighVoltz.Composites;
         public class CodeDriver
-        {";
+        {
+";
         static string postfix =
-            @"static LocalPlayer Me = ObjectManager.Me;
+            @"
+            static LocalPlayer Me = ObjectManager.Me;
             static PbProfileSettings Settings = Professionbuddy.Instance.ProfileSettings;
             static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
             public static Helpers.TradeskillHelper Alchemy { get { return Helpers.Alchemy;} }
@@ -190,6 +199,7 @@ namespace HighVoltz
         }";
         #endregion
         static public StringBuilder CsharpStringBuilder { get; private set; }
+
         static public Type CompileAndLoad()
         {
             CompilerResults results = null;
@@ -218,12 +228,17 @@ namespace HighVoltz
                 // Line numbers are used to identify actions that genorated compile errors.
                 int currentLine = CsharpStringBuilder.ToString().Count(c => c == '\n') + 1;
                 // genorate CanRun Methods
-                foreach (var met in CsharpCodeDict)
+                foreach (var met in declarations)
+                {
+                    CsharpStringBuilder.AppendFormat("{0}\n", met.Value.Code.Replace(Environment.NewLine, ""));
+                    met.Value.CodeLineNumber = currentLine++;
+                }
+                foreach (var met in noneDeclarations)
                 {
                     if (met.Value.CodeType == CsharpCodeType.BoolExpression)
-                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code);
+                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine,""));
                     else if (met.Value.CodeType == CsharpCodeType.Statements)
-                        CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code);
+                        CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
                     met.Value.CodeLineNumber = currentLine++;
                 }
                 CsharpStringBuilder.Append(postfix);
@@ -330,7 +345,7 @@ namespace HighVoltz
         "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
             "CharacterCreate_Back() " +
         "end ";
-                  
+
         /// <summary>
         /// Switches to a different character on same account
         /// </summary>

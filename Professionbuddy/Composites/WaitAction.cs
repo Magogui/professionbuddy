@@ -4,6 +4,8 @@ using System;
 using TreeSharp;
 using System.Threading;
 using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Drawing.Design;
 
 namespace HighVoltz.Composites
 {
@@ -25,7 +27,8 @@ namespace HighVoltz.Composites
             : base(CsharpCodeType.BoolExpression)
         {
             Properties["Timeout"] = new MetaProp("Timeout", typeof(int));
-            Properties["Condition"] = new MetaProp("Condition", typeof(string), new DisplayNameAttribute("Until Condition"));
+            Properties["Condition"] = new MetaProp("Condition", typeof(string), new DisplayNameAttribute("Until Condition"), 
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
 
             Timeout = 2000;
             Condition = "false";

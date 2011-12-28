@@ -36,7 +36,7 @@
     <CustomAction Code="MessageBox.Show(&quot;Switch to your farmer before starting this multiprofile. Must restart HB&quot;);TreeRoot.Stop();" />
   </If>
   <!--Check if GB is current bot and only when farmer is logged on.-->
-  <If Condition="(bool)var2 &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+  <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
     <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
     <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
   </If>
@@ -45,24 +45,25 @@
       <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 63122 then PickupContainerItem(bag,slot) DeleteCursorItem() end end end&quot;);" />
     </If>
     <!--Check if bags are full and not in city. If true then hearth-->
-    <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
+    <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because I have only {0} free bags slots&quot;,Me.FreeNormalBagSlots);" />
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
-    <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;] &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
+    <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;] &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because you forced me to&quot;);" />
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
-    <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var7).TotalMinutes &gt;= (int)var6 ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing out of are because I was in zone for {0} minutes&quot;,var6);" />
+    <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp;&#xD;&#xA; DateTime.Now.Subtract(ZoneStartTime).TotalMinutes &gt;= TimeToSpendInZone) &amp;&amp; &#xD;&#xA;Me.ZoneId != CityZoneID" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing out of here because I was in zone for {0} minutes&quot;,TimeToSpendInZone);" />
       <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = true;" />
+      <CallSubRoutine SubRoutineName="Hearth" />
     </If>
     <!--Check if bags are full and not in city. If true then hearth-->
     <!--Check if we're in factions capital city. Stormwind = 1519. Org = 1637-->
-    <If Condition="Me.ZoneId == (int)var3 &amp;&amp; (bool)var2" IgnoreCanRun="True">
+    <If Condition="Me.ZoneId == CityZoneID &amp;&amp; OnFarmer" IgnoreCanRun="True">
       <!--On Farmer-->
-      <If Condition="(bool)var2" IgnoreCanRun="True">
-        <If Condition="Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+      <If Condition="OnFarmer == true" IgnoreCanRun="True">
+        <If Condition="Me.FreeNormalBagSlots &lt;=15 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
           <If Condition="(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="StoreItemsInGbank" />
             <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
@@ -74,7 +75,7 @@
             <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching to banker&quot;);" />
             <!--Log on Banker-->
             <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
-              <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
+              <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],Realm,&quot;Combat Bot&quot;);" />
               <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
             </If>
             <If Condition="!(bool)Settings[&quot;SwitchToBanker&quot;] &amp;&amp; (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
@@ -84,21 +85,22 @@
         </If>
         <!--Change FarmedZone to the next zone-->
         <If Condition="!(bool)Settings[&quot;RandomZones&quot;]" IgnoreCanRun="True">
-          <CustomAction Code="uint a = ((List&lt;uint&gt;)var4).FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]); Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: ((List&lt;uint&gt;)var4).Min();" />
+          <CustomAction Code="uint a = FarmZoneIDs.FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]);&#xD;&#xA;Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: FarmZoneIDs[0];" />
         </If>
         <If Condition="(bool)Settings[&quot;RandomZones&quot;]" IgnoreCanRun="True">
-          <CustomAction Code="int nextZoneI = 0;if (((List&lt;uint&gt;)var4).Count &gt; 1) {Random r = new Random(); int index = ((List&lt;uint&gt;)var4).IndexOf((uint)Settings[&quot;FarmedZone&quot;]);do{nextZoneI=r.Next(0, ((List&lt;uint&gt;)var4).Count) ;}while ( nextZoneI== index);} Settings[&quot;FarmedZone&quot;] =  ((List&lt;uint&gt;)var4)[nextZoneI];" />
+          <CustomAction Code="int nextZoneI = 0;&#xD;&#xA;if (FarmZoneIDs.Count &gt; 1) &#xD;&#xA;{&#xD;&#xA;  Random r = new Random();&#xD;&#xA;  int index = FarmZoneIDs.IndexOf((uint)Settings[&quot;FarmedZone&quot;]);&#xD;&#xA;  do&#xD;&#xA;  {&#xD;&#xA;    nextZoneI=r.Next(0, FarmZoneIDs.Count);&#xD;&#xA;  }&#xD;&#xA;  while ( nextZoneI== index);&#xD;&#xA;} &#xD;&#xA;Settings[&quot;FarmedZone&quot;] =  FarmZoneIDs[nextZoneI];" />
         </If>
         <CallSubRoutine SubRoutineName="LoadProfile" />
-        <CallSubRoutine SubRoutineName="Use Portal" />
         <If Condition="(bool)Settings[&quot;EnableZoneTimer&quot;]" IgnoreCanRun="True">
-          <CustomAction Code="var6 = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
-          <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,var6);" />
+          <CustomAction Code="TimeToSpendInZone = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
+          <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,TimeToSpendInZone);" />
+          <CustomAction Code="ZoneStartTime = DateTime.Now;" />
         </If>
+        <CallSubRoutine SubRoutineName="Use Portal" />
       </If>
     </If>
     <!--On Banker-->
-    <If Condition="!(bool)var2" IgnoreCanRun="False">
+    <If Condition="OnFarmer == false" IgnoreCanRun="False">
       <!--Get all mail and put it on AH-->
       <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
         <GetMailAction ItemID="" CheckNewMail="True" GetMailType="AllItems" AutoFindMailBox="True" X="0" Y="0" Z="0" MinFreeBagSlots="2" />
@@ -112,7 +114,7 @@
       </If>
       <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching back to farmer&quot;);" />
       <!--Log on Farmer-->
-      <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />
+      <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],Realm,&quot;Gatherbuddy2&quot;);" />
       <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
     </If>
   </While>
@@ -145,6 +147,7 @@
     <WaitAction Condition="!Me.IsCasting" Timeout="10000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
+    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
     <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;*************** Settings ****************&quot;);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;SwitchToBanker: {0}&quot;,Settings[&quot;SwitchToBanker&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DepositGoldInGbank: {0}&quot;,Settings[&quot;DepositGoldInGbank&quot;]);" />
@@ -158,47 +161,49 @@
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Uldum: {0}&quot;,Settings[&quot;Uldum&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Deepholm: {0}&quot;,Settings[&quot;Deepholm&quot;]);" />
+    <Declaration Code="string Realm;" />
+    <Declaration Code="bool OnFarmer;" />
+    <Declaration Code="int CityZoneID,TimeToSpendInZone;" />
+    <Declaration Code="List&lt;uint&gt; FarmZoneIDs;" />
+    <Declaration Code="DateTime ZoneStartTime;" />
     <!--store current server name, needed when switching characters.-->
-    <CustomAction Code="var1 = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
+    <CustomAction Code="Realm = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
     <!--set to 'true' if on farmer, otherwise if on banker then it's set to false-->
-    <CustomAction Code="var2 = Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase);" />
+    <CustomAction Code="OnFarmer = Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase);" />
     <!--ZoneID of bots capital city-->
-    <CustomAction Code="var3 = Me.IsAlliance? 1519:1637;" />
-    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
+    <CustomAction Code="CityZoneID = Me.IsAlliance? 1519:1637;" />
     <!--List of zones IDs that we will farm in accending numerical order-->
-    <CustomAction Code="var4 = new List&lt;uint&gt;();" />
-    <!--current ZoneID-->
-    <CustomAction Code="var5 = 0u;" />
+    <CustomAction Code="FarmZoneIDs = new List&lt;uint&gt;();" />
     <!--Random Time-->
-    <CustomAction Code="var6 = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
-    <CustomAction Code="Log( Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,var6);" />
-    <!--DateTime-->
-    <CustomAction Code="var7 = DateTime.Now;" />
+    <CustomAction Code="TimeToSpendInZone= new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
+    <CustomAction Code="Log( Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,TimeToSpendInZone);" />
+    <CustomAction Code="ZoneStartTime = DateTime.Now;" />
     <!--Hyjal-->
-    <CustomAction Code="if ((bool)Settings[&quot;Hyjal&quot;]) ((List&lt;uint&gt;)var4).Add(616);" />
+    <CustomAction Code="if ((bool)Settings[&quot;Hyjal&quot;]) FarmZoneIDs.Add(616);" />
     <!--Twilight Highlands-->
-    <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) ((List&lt;uint&gt;)var4).Add(4922);" />
+    <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) FarmZoneIDs.Add(4922);" />
     <!--Uldum-->
-    <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) ((List&lt;uint&gt;)var4).Add(5034);" />
+    <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) FarmZoneIDs.Add(5034);" />
     <!--Deepholm-->
-    <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) ((List&lt;uint&gt;)var4).Add(5042);" />
+    <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) FarmZoneIDs.Add(5042);" />
     <!--IF YOU ARE ADDING YOUR OWN ZONES DO NOT ADD THEM BELOW THIS LINE-->
-    <CustomAction Code="var4 = ((List&lt;uint&gt;)var4).OrderBy(z =&gt; z).ToList();" />
+    <CustomAction Code="FarmZoneIDs = FarmZoneIDs.OrderBy(z =&gt; z).ToList();" />
     <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
-    <If Condition="((List&lt;uint&gt;)var4).Count == 0" IgnoreCanRun="True">
+    <If Condition="FarmZoneIDs.Count == 0" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
       <CustomAction Code="TreeRoot.Stop();" />
     </If>
-    <If Condition="Me.ZoneId != (int) var3 &amp;&amp; !((List&lt;uint&gt;)var4).Contains(Me.ZoneId)" IgnoreCanRun="True">
+    <If Condition="Me.ZoneId != CityZoneID &amp;&amp; !FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
-    <If Condition="((List&lt;uint&gt;)var4).Contains(Me.ZoneId)" IgnoreCanRun="True">
+    <If Condition="FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
       <CustomAction Code="Settings[&quot;FarmedZone&quot;] = Me.ZoneId;" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="Use Portal">
-    <CustomAction Code="var5 = Me.ZoneId;" />
+    <Declaration Code="uint currentZoneID;" />
+    <CustomAction Code="currentZoneID = Me.ZoneId;" />
     <!--Hyjal-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
@@ -217,13 +222,13 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="-8186.149" Y="413.7292" Z="116.7497" />
         <InteractionAction Entry="207694" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
-        <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+        <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
         <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="-4879.899" Y="-6639.522" Z="10.85343" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="2029.233" Y="-4379.827" Z="97.9757" />
         <InteractionAction Entry="207686" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
-        <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+        <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
         <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="-4030.426" Y="-6334.861" Z="37.87898" />
       </If>
     </If>
@@ -250,12 +255,12 @@
         <FlyToAction Dismount="True" X="2065.653" Y="-4390.647" Z="98.04689" />
         <InteractionAction Entry="207689" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
-      <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+      <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
       <FlyToAction Dismount="False" X="998.0914" Y="521.6063" Z="-49.33473" />
       <FlyToAction Dismount="False" X="856.4835" Y="494.8993" Z="-63.27364" />
     </If>
     <!--Wait until zone changes.-->
-    <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+    <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="DepositGoldInGbank">
     <CallSubRoutine SubRoutineName="MoveToGbank" />
