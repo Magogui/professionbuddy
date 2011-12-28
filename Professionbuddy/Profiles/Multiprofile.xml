@@ -9,7 +9,7 @@
   <!--********** Credits **********-->
   <!--Extacy -  For help with the Org portals-->
   <!--no1knowsy -  For help with the Org portals-->
-  <!--no1knowsy -  For help with the Org portals-->
+  <!--imdasandman - For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
     <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" />
@@ -27,6 +27,7 @@
     <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" Category="Farmer" />
     <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" />
     <Settings Type="Boolean" DefaultValue="false" Name="RandomZones" Summary="Randomly choose next zone with current zone being excluded." Category="Farmer" />
+    <Settings Type="Boolean" DefaultValue="true" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" />
     <Settings Type="Boolean" DefaultValue="false" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" />
   </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
@@ -40,6 +41,9 @@
     <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
+    <If Condition="(bool)Settings[&quot;DeleteLifegivingSeeds&quot;] &amp;&amp; InbagCount(63122) &gt; 0" IgnoreCanRun="True">
+      <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 63122 then PickupContainerItem(bag,slot) DeleteCursorItem() end end end&quot;);" />
+    </If>
     <!--Check if bags are full and not in city. If true then hearth-->
     <If Condition="( Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;] ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
       <CallSubRoutine SubRoutineName="Hearth" />
@@ -108,11 +112,8 @@
     </If>
   </While>
   <SubRoutine SubRoutineName="MailItems">
-    <CustomAction Code="var8 = CharacterSettings.Instance.MailRecipient;" />
-    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
-    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)var8;" />
   </SubRoutine>
   <SubRoutine SubRoutineName="StoreItemsInGbank">
     <CallSubRoutine SubRoutineName="MoveToGbank" />
@@ -140,12 +141,14 @@
     <WaitAction Condition="!Me.IsCasting" Timeout="10000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
-    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
     <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;*************** Settings ****************&quot;);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;SwitchToBanker: {0}&quot;,Settings[&quot;SwitchToBanker&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DepositGoldInGbank: {0}&quot;,Settings[&quot;DepositGoldInGbank&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;MinMinutesPerZone: {0}&quot;,Settings[&quot;MinMinutesPerZone&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;MaxMinutesPerZone: {0}&quot;,Settings[&quot;MaxMinutesPerZone&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;RandomZones: {0}&quot;,Settings[&quot;RandomZones&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DeleteLifegivingSeeds: {0}&quot;,Settings[&quot;DeleteLifegivingSeeds&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DepositInGbank: {0}&quot;,Settings[&quot;DepositInGbank&quot;]);" />
     <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;***************** Zones *****************&quot;);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hyjal: {0}&quot;,Settings[&quot;Hyjal&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
@@ -157,6 +160,7 @@
     <CustomAction Code="var2 = Lua.GetReturnVal&lt;string&gt;(&quot;return UnitName('player')&quot;,0).Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase);" />
     <!--ZoneID of bots capital city-->
     <CustomAction Code="var3 = Me.IsAlliance? 1519:1637;" />
+    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
     <!--List of zones IDs that we will farm in accending numerical order-->
     <CustomAction Code="var4 = new List&lt;uint&gt;();" />
     <!--current ZoneID-->
@@ -174,6 +178,7 @@
     <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) ((List&lt;uint&gt;)var4).Add(5034);" />
     <!--Deepholm-->
     <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) ((List&lt;uint&gt;)var4).Add(5042);" />
+    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
     <If Condition="((List&lt;uint&gt;)var4).Count == 0" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
       <CustomAction Code="TreeRoot.Stop();" />
