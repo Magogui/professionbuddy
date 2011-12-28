@@ -3,7 +3,7 @@
   <!--ATTENTION: READ BELOW BEFORE YOU START-->
   <!--Set Hearth to Dwarf area in Stormwind if Alliance or Org if horde-->
   <!--Adjust the profile settings especially your banker and farmer name -->
-  <!--if changes are made to settings after profile was running you might need to reload the profile!-->
+  <!--if changes are made to settings after profile was running you might need to restart HB (press stop then start)-->
   <!--You must start HB while logged in your farmer-->
   <!--If you customize this profile (change profiles, AH buyout etc) remember to rename so it doesn't get overwritten when you update from svn-->
   <!--********** Credits **********-->
@@ -12,19 +12,22 @@
   <!--no1knowsy -  For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
-    <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Zones" />
+    <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" />
     <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" Category="Banker" />
     <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" Category="Farmer" />
     <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" />
     <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" />
     <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" Category="Zones" />
+    <Settings Type="Boolean" DefaultValue="false" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" />
     <Settings Type="Boolean" DefaultValue="false" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" />
     <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" />
     <Settings Type="Int32" DefaultValue="200" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" />
     <Settings Type="Boolean" DefaultValue="false" Name="DepositGoldInGbank" Summary="Set to true if you want to banker to depost gold in gbank" Category="Banker" />
     <Settings Type="Boolean" DefaultValue="true" Name="EnableZoneTimer" Summary="Set to true to leave zone after random amount of time spent there." Category="Farmer" />
-    <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" />
     <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" Category="Farmer" />
+    <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" />
+    <Settings Type="Boolean" DefaultValue="false" Name="RandomZones" Summary="Randomly choose next zone with current zone being excluded." Category="Farmer" />
+    <Settings Type="Boolean" DefaultValue="false" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" />
   </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
@@ -42,7 +45,7 @@
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
     <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var7).TotalMinutes &gt;= (int)var6 ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Hearthing out of are because I was in zone for {0} minutes&quot;,var6);" />
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing out of are because I was in zone for {0} minutes&quot;,var6);" />
       <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = true;" />
     </If>
     <!--Check if bags are full and not in city. If true then hearth-->
@@ -51,21 +54,37 @@
       <!--On Farmer-->
       <If Condition="(bool)var2" IgnoreCanRun="True">
         <If Condition="Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
-          <CallSubRoutine SubRoutineName="MailItems" />
-          <CustomAction Code="Log (&quot;Switching to banker&quot;);" />
-          <!--Log on Banker-->
-          <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
-            <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
-            <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+          <If Condition="(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="StoreItemsInGbank" />
+            <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+              <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
+            </If>
+          </If>
+          <If Condition="!(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="MailItems" />
+            <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching to banker&quot;);" />
+            <!--Log on Banker-->
+            <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
+              <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],(string) var1,&quot;Combat Bot&quot;);" />
+              <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+            </If>
+            <If Condition="!(bool)Settings[&quot;SwitchToBanker&quot;] &amp;&amp; (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+              <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
+            </If>
           </If>
         </If>
         <!--Change FarmedZone to the next zone-->
-        <CustomAction Code="uint a = ((List&lt;uint&gt;)var4).FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]); Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: ((List&lt;uint&gt;)var4).Min();" />
+        <If Condition="!(bool)Settings[&quot;RandomZones&quot;]" IgnoreCanRun="True">
+          <CustomAction Code="uint a = ((List&lt;uint&gt;)var4).FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]); Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: ((List&lt;uint&gt;)var4).Min();" />
+        </If>
+        <If Condition="(bool)Settings[&quot;RandomZones&quot;]" IgnoreCanRun="True">
+          <CustomAction Code="int nextZoneI = 0;if (((List&lt;uint&gt;)var4).Count &gt; 1) {Random r = new Random(); int index = ((List&lt;uint&gt;)var4).IndexOf((uint)Settings[&quot;FarmedZone&quot;]);do{nextZoneI=r.Next(0, ((List&lt;uint&gt;)var4).Count) ;}while ( nextZoneI== index);} Settings[&quot;FarmedZone&quot;] =  ((List&lt;uint&gt;)var4)[nextZoneI];" />
+        </If>
         <CallSubRoutine SubRoutineName="LoadProfile" />
         <CallSubRoutine SubRoutineName="Use Portal" />
         <If Condition="(bool)Settings[&quot;EnableZoneTimer&quot;]" IgnoreCanRun="True">
           <CustomAction Code="var6 = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
-          <CustomAction Code="Log( &quot;I will spend {0} minutes in this zone&quot;,var6);" />
+          <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,var6);" />
         </If>
       </If>
     </If>
@@ -82,7 +101,7 @@
       <If Condition="(bool)Settings[&quot;DepositGoldInGbank&quot;] &amp;&amp; (int)Me.Gold &gt; (int)Settings[&quot;DepositAllButThisAmountInGBank&quot;]" IgnoreCanRun="True">
         <CallSubRoutine SubRoutineName="DepositGoldInGbank" />
       </If>
-      <CustomAction Code="Log (&quot;Switching back to farmer&quot;);" />
+      <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching back to farmer&quot;);" />
       <!--Log on Farmer-->
       <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],(string) var1,&quot;Gatherbuddy2&quot;);" />
       <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
@@ -94,6 +113,12 @@
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
     <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
     <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)var8;" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="StoreItemsInGbank">
+    <CallSubRoutine SubRoutineName="MoveToGbank" />
+    <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Storing items in GBank&quot;);" />
+    <PutItemInBankAction Amount="0" ItemID="" NpcEntry="0" GuildTab="0" AutoFindBank="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Bank="Guild" X="0" Y="0" Z="0" />
+    <PutItemInBankAction Amount="0" ItemID="" NpcEntry="0" GuildTab="0" AutoFindBank="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Bank="Guild" X="0" Y="0" Z="0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
     <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="5" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
@@ -107,9 +132,12 @@
   <SubRoutine SubRoutineName="Hearth">
     <!--Dismount and use hearthstone-->
     <If Condition="!Me.IsCasting" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Hearthing&quot;);" />
-      <CustomAction Code="Mount.Dismount();Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing&quot;);" />
+      <CustomAction Code="Mount.Dismount();" />
+      <CustomAction Code="Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
+      <WaitAction Condition="Me.IsCasting" Timeout="2000" />
     </If>
+    <WaitAction Condition="!Me.IsCasting" Timeout="10000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
     <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
@@ -122,6 +150,7 @@
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hyjal: {0}&quot;,Settings[&quot;Hyjal&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Uldum: {0}&quot;,Settings[&quot;Uldum&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Deepholm: {0}&quot;,Settings[&quot;Deepholm&quot;]);" />
     <!--store current server name, needed when switching characters.-->
     <CustomAction Code="var1 = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
     <!--set to 'true' if on farmer, otherwise if on banker then it's set to false-->
@@ -134,7 +163,7 @@
     <CustomAction Code="var5 = 0u;" />
     <!--Random Time-->
     <CustomAction Code="var6 = new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
-    <CustomAction Code="Log( &quot;I will spend {0} minutes in this zone&quot;,var6);" />
+    <CustomAction Code="Log( Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,var6);" />
     <!--DateTime-->
     <CustomAction Code="var7 = DateTime.Now;" />
     <!--Hyjal-->
@@ -143,16 +172,25 @@
     <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) ((List&lt;uint&gt;)var4).Add(4922);" />
     <!--Uldum-->
     <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) ((List&lt;uint&gt;)var4).Add(5034);" />
+    <!--Deepholm-->
+    <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) ((List&lt;uint&gt;)var4).Add(5042);" />
+    <If Condition="((List&lt;uint&gt;)var4).Count == 0" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
+      <CustomAction Code="TreeRoot.Stop();" />
+    </If>
     <If Condition="Me.ZoneId != (int) var3 &amp;&amp; !((List&lt;uint&gt;)var4).Contains(Me.ZoneId)" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
+      <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
       <CallSubRoutine SubRoutineName="Hearth" />
+    </If>
+    <If Condition="((List&lt;uint&gt;)var4).Contains(Me.ZoneId)" IgnoreCanRun="True">
+      <CustomAction Code="Settings[&quot;FarmedZone&quot;] = Me.ZoneId;" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="Use Portal">
     <CustomAction Code="var5 = Me.ZoneId;" />
     <!--Hyjal-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Using Portal to Hyjal&quot;);" />
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="-8212.33" Y="399.0208" Z="117.273" />
         <InteractionAction Entry="207692" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
@@ -164,7 +202,7 @@
     </If>
     <!--Twilight Highlands-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Using Portal to Twilight Highlands&quot;);" />
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Twilight Highlands&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="-8186.149" Y="413.7292" Z="116.7497" />
         <InteractionAction Entry="207694" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
@@ -174,11 +212,13 @@
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="2029.233" Y="-4379.827" Z="97.9757" />
         <InteractionAction Entry="207686" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+        <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+        <MoveToAction MoveType="Location" Pathing="ClickToMove" Entry="0" X="-4030.426" Y="-6334.861" Z="37.87898" />
       </If>
     </If>
     <!--Uldum-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
-      <CustomAction Code="Log(&quot;Using Portal to Uldum&quot;);" />
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Uldum&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" X="-8233.281" Y="415.5955" Z="117.4477" />
         <InteractionAction Entry="207695" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
@@ -188,11 +228,34 @@
         <InteractionAction Entry="207687" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
     </If>
+    <!--Deepholm-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Deepholm&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="-8223.319" Y="451.1823" Z="117.4883" />
+        <InteractionAction Entry="207693" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" X="2065.653" Y="-4390.647" Z="98.04689" />
+        <InteractionAction Entry="207689" InteractDelay="2000" InteractType="GameObject" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
+      <FlyToAction Dismount="False" X="998.0914" Y="521.6063" Z="-49.33473" />
+      <FlyToAction Dismount="False" X="856.4835" Y="494.8993" Z="-63.27364" />
+    </If>
     <!--Wait until zone changes.-->
     <WaitAction Condition="Me.ZoneId != (uint) var5" Timeout="20000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="DepositGoldInGbank">
-    <CustomAction Code="Log(&quot;Depositing all but {0} gold into GBank&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
+    <CallSubRoutine SubRoutineName="MoveToGbank" />
+    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Depositing all but {0} gold into GBank&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
+    <InteractionAction Entry="0" InteractDelay="2000" InteractType="GameObject" GameObjectType="GuildBank" SpellFocus="Anvil" />
+    <WaitAction Condition="false" Timeout="2000" />
+    <!--Deposit gold in Gbank-->
+    <CustomAction Code="Lua.DoString(&quot;local goldToKeep={0}*10000 local depositAmount=(GetMoney()-goldToKeep) if depositAmount &gt; 0 then DepositGuildBankMoney(depositAmount) end&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToGbank">
+    <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Move to nearest GBank&quot;);" />
     <If Condition="Me.MapId == 0" IgnoreCanRun="True">
       <!--Stormwind-->
       <If Condition="Me.ZoneId == 1519" IgnoreCanRun="True">
@@ -230,22 +293,17 @@
         <MoveToAction MoveType="Location" Pathing="Navigator" Entry="0" X="5651.325" Y="682.1651" Z="651.9932" />
       </If>
     </If>
-    <!--loop until Gbank frame is opened-->
-    <InteractionAction Entry="0" InteractDelay="2000" InteractType="GameObject" GameObjectType="GuildBank" SpellFocus="Anvil" />
-    <WaitAction Condition="false" Timeout="2000" />
-    <!--Deposit gold in Gbank-->
-    <CustomAction Code="Lua.DoString(&quot;local goldToKeep={0}*10000 local depositAmount=(GetMoney()-goldToKeep) if depositAmount &gt; 0 then DepositGuildBankMoney(depositAmount) end&quot;,Settings[&quot;DepositAllButThisAmountInGBank&quot;]);" />
   </SubRoutine>
   <SubRoutine SubRoutineName="LoadProfile">
     <!--Hyjal-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
       <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Loading Herb&amp;Mining profile for Hyjal&quot;);" />
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Herb&amp;Mining profile for Hyjal&quot;);" />
         <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Hyjal.Nuetral)Mines&amp;Herbs.xml" ProfileType="Honorbuddy" />
       </If>
       <!--if herb gathering is off in GB2 load a mine only profile.-->
       <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Loading Mining profile for Hyjal&quot;);" />
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Mining profile for Hyjal&quot;);" />
         <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Hyjal.Nuetral)Mines.xml" ProfileType="Honorbuddy" />
       </If>
     </If>
@@ -253,23 +311,23 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-          <CustomAction Code="Log(&quot;Loading Alliance Herb&amp;Mining profile for Twilight Highlands&quot;);" />
+          <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Alliance Herb&amp;Mining profile for Twilight Highlands&quot;);" />
           <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Alliance)Herb&amp;Mines.xml" ProfileType="Honorbuddy" />
         </If>
         <!--if herb gathering is off in GB2 load a mine only profile.-->
         <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-          <CustomAction Code="Log(&quot;Loading Alliance Mining profile for Twilight Highlands&quot;);" />
+          <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Alliance Mining profile for Twilight Highlands&quot;);" />
           <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Alliance)Mines.xml" ProfileType="Honorbuddy" />
         </If>
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-          <CustomAction Code="Log(&quot;Loading Horde Herb&amp;Mining profile for Twilight Highlands&quot;);" />
+          <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Horde Herb&amp;Mining profile for Twilight Highlands&quot;);" />
           <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Horde)Herb&amp;mines.xml" ProfileType="Honorbuddy" />
         </If>
         <!--if herb gathering is off in GB2 load a mine only profile.-->
         <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-          <CustomAction Code="Log(&quot;Loading Horde Mining profile for Twilight Highlands&quot;);" />
+          <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Horde Mining profile for Twilight Highlands&quot;);" />
           <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(TwilightHighlands.Horde)Mines.xml" ProfileType="Honorbuddy" />
         </If>
       </If>
@@ -277,14 +335,19 @@
     <!--Uldum-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
       <If Condition="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Loading Herb&amp;Mining profile for Uldum&quot;);" />
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Herb&amp;Mining profile for Uldum&quot;);" />
         <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Uldum.Nuetral)Mines&amp;Herbs.xml" ProfileType="Honorbuddy" />
       </If>
       <!--if herb gathering is off in GB2 load a mine only profile.-->
       <If Condition="!Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Loading Mining profile for Uldum&quot;);" />
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Mining profile for Uldum&quot;);" />
         <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Uldum.Nuetral)Mines.xml" ProfileType="Honorbuddy" />
       </If>
+    </If>
+    <!--Deepholm-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading Herb&amp;Mining profile for Deepholm&quot;);" />
+      <LoadProfileAction Path="HBProfiles\GatheringProfiles\(GB2)(Deepholm.Nuetral)Herb&amp;Mines.xml" ProfileType="Honorbuddy" />
     </If>
   </SubRoutine>
 </Professionbuddy>

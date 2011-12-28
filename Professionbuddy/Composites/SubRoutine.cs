@@ -50,7 +50,6 @@ namespace HighVoltz.Composites
                     Selection = node;
                     yield return RunStatus.Running;
                 }
-
                 Selection = null;
                 node.Stop(context);
                 if (node.LastStatus == RunStatus.Success)
@@ -59,6 +58,7 @@ namespace HighVoltz.Composites
                     yield break;
                 }
             }
+            _executed = true;
             yield return RunStatus.Failure;
             yield break;
             //}
@@ -66,6 +66,7 @@ namespace HighVoltz.Composites
 
         virtual public void Reset()
         {
+            _executed = false;
             recursiveReset(this);
         }
         void recursiveReset(GroupComposite gc)
@@ -77,14 +78,21 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as GroupComposite);
             }
         }
-        public bool IsDone
+        //public bool IsDone
+        //{
+        //    get
+        //    {
+        //        return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
+        //    }
+        //}
+        bool _executed = false;
+        virtual public bool IsDone
         {
             get
             {
-                return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
+                return _executed ;
             }
         }
-
         public virtual object Clone()
         {
             SubRoutine pd = new SubRoutine()

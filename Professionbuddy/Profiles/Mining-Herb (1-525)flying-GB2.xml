@@ -36,11 +36,11 @@
     <CustomAction Code="var7 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
     <CustomAction Code="var8 = (bool)Settings[&quot;UseFakeSkills&quot;] ? Settings[&quot;Fake Herbalism MaxLevel&quot;] :(int) Herbalism.MaxLevel;" />
     <!--disable gathering of mines-->
-    <CustomAction Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp; ((int)var5 == (int)var6 || (int)var6 &gt; (int)var8 )) || !(bool)Settings[&quot;Mining&quot;]) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;" />
+    <CustomAction Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp; ((int)var5 == (int)var6 || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var6 &gt; (int)var8 ))) || !(bool)Settings[&quot;Mining&quot;]) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;" />
     <!--enable gathering of mines-->
     <CustomAction Code="if ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var5 != (int)var6 &amp;&amp; (int)var6 &lt;= (int)var8) var2 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;" />
     <!--disable gathering of herbs-->
-    <CustomAction Code="if (((bool)Settings[&quot;Herb&quot;] &amp;&amp; ((int)var7 == (int)var8 || (int)var8 &gt; (int)var6)) || !(bool)Settings[&quot;Herb&quot;]) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = false;" />
+    <CustomAction Code="if (((bool)Settings[&quot;Herb&quot;] &amp;&amp; ((int)var7 == (int)var8 || ((bool)Settings[&quot;Mining&quot;] &amp;&amp; (int)var8 &gt; (int)var6))) || !(bool)Settings[&quot;Herb&quot;]) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = false;" />
     <!--enable Herb in GB2 if enabled in profile Settings and Herb MaxLevel <= Mining.MaxLevel-->
     <CustomAction Code="if ((bool)Settings[&quot;Herb&quot;] &amp;&amp; (int)var7 != (int)var8 &amp;&amp;  (int)var8 &lt;= (int)var6) var3 = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;" />
     <CustomAction Code="var9 = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? ((int)var6 &lt; (int)var8 ? var6 : var8):(bool)Settings[&quot;Mining&quot;] ? var6 :var8;" />

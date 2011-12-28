@@ -726,6 +726,7 @@ namespace HighVoltz
                 TextRange MessageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
                 MessageTR.Text = String.Format(format + Environment.NewLine, args);
                 MessageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(msgColorMedia));
+                Logging.DebugOnly(header + MessageTR.Text);
             }
             catch
             {
