@@ -84,6 +84,7 @@ namespace HighVoltz.Composites
         }
 
         Stopwatch castTimer = new Stopwatch();
+        Stopwatch lootSW = new Stopwatch();
         List<ulong> blacklistedItems = new List<ulong>();
         Stopwatch blacklistSw = new Stopwatch();
         ulong lastItemGuid = 0;
@@ -97,12 +98,16 @@ namespace HighVoltz.Composites
             {
                 if (me.IsFlying)
                     return RunStatus.Failure;
+                if (lootSW.IsRunning && lootSW.ElapsedMilliseconds < 1000)
+                    return RunStatus.Running;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
                     LootFrame.Instance.LootAll();
+                    lootSW.Reset();
+                    lootSW.Start();
                     return RunStatus.Running;
                 }
-                uint timeToWait = ((uint)ActionType*1000) + 2000;
+                uint timeToWait = ((uint)ActionType*1000) + 2500;
                 if (!me.IsCasting && (!castTimer.IsRunning || castTimer.ElapsedMilliseconds >= timeToWait))
                 {
                     List<WoWItem> ItemList = BuildItemList();

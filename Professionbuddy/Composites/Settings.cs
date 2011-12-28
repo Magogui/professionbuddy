@@ -46,6 +46,18 @@ namespace HighVoltz.Composites
             set { Properties["Category"].Value = value; }
         }
 
+        public bool Global
+        {
+            get { return (bool)Properties["Global"].Value; }
+            set { Properties["Global"].Value = value; }
+        }
+
+        public bool Hidden
+        {
+            get { return (bool)Properties["Hidden"].Value; }
+            set { Properties["Hidden"].Value = value; }
+        }
+
         public Settings()
         {
             Properties["DefaultValue"] = new MetaProp("DefaultValue", typeof(string), new DisplayNameAttribute("Default Value"));
@@ -53,12 +65,16 @@ namespace HighVoltz.Composites
             Properties["Name"] = new MetaProp("Name", typeof(string));
             Properties["Summary"] = new MetaProp("Summary", typeof(string));
             Properties["Category"] = new MetaProp("Category", typeof(string));
+            Properties["Global"] = new MetaProp("Global", typeof(bool));
+            Properties["Hidden"] = new MetaProp("Hidden", typeof(bool));
 
             DefaultValue = "true";
             Type = TypeCode.Boolean;
             SettingName = "SettingName";
             Summary = "This is a summary of what this setting does";
             Category = "Misc";
+            Global = false;
+            Hidden = false;
         }
 
         public override object Clone()
@@ -69,6 +85,8 @@ namespace HighVoltz.Composites
                 Type = this.Type,
                 Summary = this.Summary,
                 Category = this.Category,
+                Global = this.Global,
+                Hidden = this.Hidden
             };
         }
         public override string Help
@@ -107,6 +125,10 @@ namespace HighVoltz.Composites
             SettingName = reader["Name"];
             if (reader.MoveToAttribute("Category"))
                 Category = reader["Category"];
+            if (reader.MoveToAttribute("Global"))
+                Global = bool.Parse(reader["Global"]);
+            if (reader.MoveToAttribute("Hidden"))
+                Hidden = bool.Parse(reader["Hidden"]);           
             Summary = reader["Summary"];
             reader.ReadStartElement();
         }
@@ -117,6 +139,8 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("Name", SettingName);
             writer.WriteAttributeString("Summary", Summary);
             writer.WriteAttributeString("Category", Category);
+            writer.WriteAttributeString("Global", Global.ToString());
+            writer.WriteAttributeString("Hidden", Hidden.ToString());
         }
         #endregion
     }

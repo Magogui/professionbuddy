@@ -491,10 +491,13 @@ namespace HighVoltz
             ProfilePropertyBag = new PropertyBag();
             foreach (var kv in PB.ProfileSettings.Settings)
             {
-                ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
-                    new DescriptionAttribute(kv.Value.Summary), new CategoryAttribute(kv.Value.Category));
-                ProfilePropertyBag[kv.Key].Value = kv.Value.Value;
-                ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(ProfileSettings_PropertyChanged);
+                if (!kv.Value.Hidden)
+                {
+                    ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
+                        new DescriptionAttribute(kv.Value.Summary), new CategoryAttribute(kv.Value.Category));
+                    ProfilePropertyBag[kv.Key].Value = kv.Value.Value;
+                    ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(ProfileSettings_PropertyChanged);
+                }
             }
             pg.SelectedObject = ProfilePropertyBag;
             RightSideTab.SelectTab(1);

@@ -667,6 +667,7 @@ namespace HighVoltz
             }
             ProtectedItems = tempList != null ? tempList : new List<uint>();
         }
+
         #endregion
 
         #region Utilies

@@ -12,23 +12,23 @@
   <!--imdasandman - For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
-    <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" />
-    <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" Category="Banker" />
-    <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" Category="Farmer" />
-    <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" />
-    <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" />
-    <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" Category="Zones" />
-    <Settings Type="Boolean" DefaultValue="false" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" />
-    <Settings Type="Boolean" DefaultValue="false" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" />
-    <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" />
-    <Settings Type="Int32" DefaultValue="200" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" />
-    <Settings Type="Boolean" DefaultValue="false" Name="DepositGoldInGbank" Summary="Set to true if you want to banker to depost gold in gbank" Category="Banker" />
-    <Settings Type="Boolean" DefaultValue="true" Name="EnableZoneTimer" Summary="Set to true to leave zone after random amount of time spent there." Category="Farmer" />
-    <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" Category="Farmer" />
-    <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" />
-    <Settings Type="Boolean" DefaultValue="false" Name="RandomZones" Summary="Randomly choose next zone with current zone being excluded." Category="Farmer" />
-    <Settings Type="Boolean" DefaultValue="true" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" />
-    <Settings Type="Boolean" DefaultValue="false" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" />
+    <Settings Type="UInt32" DefaultValue="0" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" Global="False" Hidden="True" />
+    <Settings Type="String" DefaultValue="" Name="BankerName" Summary="The Name of your banker" Category="Banker" Global="False" Hidden="False" />
+    <Settings Type="String" DefaultValue="" Name="FarmerName" Summary="The Name of your Farmer" Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" Global="True" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" Global="True" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="Uldum" Summary="Farm in Uldum" Category="Zones" Global="True" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="false" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" Global="True" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="false" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" Global="False" Hidden="False" />
+    <Settings Type="Int32" DefaultValue="200" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="false" Name="DepositGoldInGbank" Summary="Set to true if you want to banker to depost gold in gbank" Category="Banker" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="EnableZoneTimer" Summary="Set to true to leave zone after random amount of time spent there." Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Int32" DefaultValue="120" Name="MinMinutesPerZone" Summary="Minimum number of minutes to spend in a zone" Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Int32" DefaultValue="240" Name="MaxMinutesPerZone" Summary="Max number of minutes to spend in a zone" Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="false" Name="RandomZones" Summary="Randomly choose next zone with current zone being excluded." Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="true" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" Global="False" Hidden="False" />
+    <Settings Type="Boolean" DefaultValue="false" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" Global="False" Hidden="False" />
   </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />

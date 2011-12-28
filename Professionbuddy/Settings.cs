@@ -42,19 +42,17 @@ namespace HighVoltz
         public object Value { get; set; }
         public string Summary { get; set; }
         public string Category { get; set; }
+        public bool Global { get; set; }
+        public bool Hidden { get; set; }
     }
 
     public class PbProfileSettings
     {
-        //public Dictionary<string, object> Settings { get; private set; }
-        //public Dictionary<string, string> Summaries { get; private set; }
-        //public Dictionary<string, string> Categories { get; private set; }
         public Dictionary<string, PbProfileSettingEntry> Settings { get; private set; }
 
         public PbProfileSettings()
         {
             Settings = new Dictionary<string, PbProfileSettingEntry>();
-            //Summaries = new Dictionary<string, string>();
         }
         public object this[string name]
         {
@@ -77,7 +75,7 @@ namespace HighVoltz
                     Path.GetFileNameWithoutExtension(Professionbuddy.Instance.CurrentProfile.XmlPath) : "";
             }
         }
-        string SettingsPath
+        string CharacterSettingsPath
         {
             get
             {
@@ -86,18 +84,46 @@ namespace HighVoltz
                     ObjectManager.Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)));
             }
         }
+
+        string GlobalSettingsPath
+        {
+            get
+            {
+                return Path.Combine(Logging.ApplicationPath,
+                    string.Format("Settings\\ProfessionBuddy\\{0}.xml", ProfileName));
+            }
+        }
+
         public void Save()
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.Indent = true;
-                using (XmlWriter writer = XmlWriter.Create(SettingsPath, settings))
-                {
-                    DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                    Dictionary<string, object> temp = Settings.ToDictionary(kv => kv.Key, kv => kv.Value.Value);
-                    serializer.WriteObject(writer, temp);
-                }
+                SaveCharacterSettings();
+                SaveGlobalSettings();
+            }
+        }
+
+        void SaveCharacterSettings()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            using (XmlWriter writer = XmlWriter.Create(CharacterSettingsPath, settings))
+            {
+                DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                Dictionary<string, object> temp = Settings.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                serializer.WriteObject(writer, temp);
+            }
+        }
+
+        void SaveGlobalSettings()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            using (XmlWriter writer = XmlWriter.Create(GlobalSettingsPath, settings))
+            {
+                DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                Dictionary<string, object> temp = Settings.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                serializer.WriteObject(writer, temp);
             }
         }
 
@@ -106,29 +132,61 @@ namespace HighVoltz
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
                 Settings = new Dictionary<string, PbProfileSettingEntry>();
-                if (File.Exists(SettingsPath))
+                LoadCharacterSettings();
+                LoadGlobalSettings();
+                LoadDefaultValues();
+            }
+        }
+        
+        void LoadCharacterSettings ()
+        {
+            if (File.Exists(CharacterSettingsPath))
+            {
+                using (XmlReader reader = XmlReader.Create(CharacterSettingsPath))
                 {
-                    using (XmlReader reader = XmlReader.Create(SettingsPath))
+                    try
                     {
-                        try
+                        DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
+                        if (temp != null)
                         {
-                            DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                            var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
-                            if (temp != null)
+                            foreach (var kv in temp)
                             {
-                                foreach (var kv in temp)
-                                {
-                                    Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value };
-                                }
+                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value};
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Professionbuddy.Err(ex.ToString());
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Professionbuddy.Err(ex.ToString());
                     }
                 }
-                LoadDefaultValues();
+            }
+        }
+
+        void LoadGlobalSettings()
+        {
+            if (File.Exists(GlobalSettingsPath))
+            {
+                using (XmlReader reader = XmlReader.Create(GlobalSettingsPath))
+                {
+                    try
+                    {
+                        DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
+                        if (temp != null)
+                        {
+                            foreach (var kv in temp)
+                            {
+                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value};
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Professionbuddy.Err(ex.ToString());
+                    }
+                }
             }
         }
 
@@ -141,6 +199,8 @@ namespace HighVoltz
                     Settings[setting.SettingName] = new PbProfileSettingEntry() { Value = GetValue(setting.Type, setting.DefaultValue) };
                 Settings[setting.SettingName].Summary = setting.Summary;
                 Settings[setting.SettingName].Category = setting.Category;
+                Settings[setting.SettingName].Global = setting.Global;
+                Settings[setting.SettingName].Hidden = setting.Hidden;
              }
             // remove unused settings..
             Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,kv => kv.Value);
