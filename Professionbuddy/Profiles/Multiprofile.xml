@@ -45,7 +45,12 @@
       <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 63122 then PickupContainerItem(bag,slot) DeleteCursorItem() end end end&quot;);" />
     </If>
     <!--Check if bags are full and not in city. If true then hearth-->
-    <If Condition="( Me.FreeNormalBagSlots &lt;=4 || (bool)Settings[&quot;EmptyBagsNow&quot;] ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
+    <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because I have only {0} free bags slots&quot;,Me.FreeNormalBagSlots);" />
+      <CallSubRoutine SubRoutineName="Hearth" />
+    </If>
+    <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;] &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="False">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because you forced me to&quot;);" />
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>
     <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp; DateTime.Now.Subtract((DateTime)var7).TotalMinutes &gt;= (int)var6 ) &amp;&amp; Me.ZoneId != (int)var3" IgnoreCanRun="True">
@@ -133,7 +138,6 @@
   <SubRoutine SubRoutineName="Hearth">
     <!--Dismount and use hearthstone-->
     <If Condition="!Me.IsCasting" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing&quot;);" />
       <CustomAction Code="Mount.Dismount();" />
       <CustomAction Code="Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
       <WaitAction Condition="Me.IsCasting" Timeout="2000" />
