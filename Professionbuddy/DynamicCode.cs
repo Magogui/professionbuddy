@@ -42,11 +42,11 @@ namespace HighVoltz
 
         public static bool CodeWasModified = true;
 
-        static string _tempFolder ;
+        static string _tempFolder;
         static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.Instance.BotPath, "Temp")); } }
 
         public static void WipeTempFolder()
-        {  
+        {
             if (!Directory.Exists(TempFolder))
             {
                 Directory.CreateDirectory(TempFolder);
@@ -304,38 +304,40 @@ namespace HighVoltz
         }
 
         static bool _isSwitchingToons = false;
-            // credit to mvbc of mmocore.com
+        // credit to mvbc of mmocore.com
         // {0}=character,{1}=server
-            static string _loginLua =
-            "if (RealmList and RealmList:IsVisible()) then " +
-                "for i = 1, select('#',GetRealmCategories()) do " +
-                    "for j = 1, GetNumRealms(i) do " +
-                        "if GetRealmInfo(i, j) == \"{1}\" then " +
-                            "RealmList:Hide() " +
-                            "ChangeRealm(i, j) " +
-                        "end " +
+        static string _loginLua =
+        "if (RealmList and RealmList:IsVisible()) then " +
+            "for i = 1, select('#',GetRealmCategories()) do " +
+                "for j = 1, GetNumRealms(i) do " +
+                    "if GetRealmInfo(i, j) == \"{1}\" then " +
+                        "RealmList:Hide() " +
+                        "ChangeRealm(i, j) " +
                     "end " +
                 "end " +
-            "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
-                "if GetServerName() ~= '{1}' and (not RealmList or not RealmList:IsVisible()) then " +
-                    "RequestRealmList(1) " +
-                "else " +
-                    "for i = 1,GetNumCharacters() do " +
-                        "if (GetCharacterInfo(i) == \"{0}\") then " +
-                            "CharacterSelect_SelectCharacter(i) " +
-                            "EnterWorld() " +
-                        "end " +
+            "end " +
+        "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
+            "if GetServerName() ~= \"{1}\" and (not RealmList or not RealmList:IsVisible()) then " +
+                "RequestRealmList(1) " +
+            "else " +
+                "for i = 1,GetNumCharacters() do " +
+                    "if (GetCharacterInfo(i) == \"{0}\") then " +
+                        "CharacterSelect_SelectCharacter(i) " +
+                        "EnterWorld() " +
                     "end " +
                 "end " +
-            "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
-                "CharacterCreate_Back() " +
-            "end ";
+            "end " +
+        "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
+            "CharacterCreate_Back() " +
+        "end ";
+                  
         /// <summary>
         /// Switches to a different character on same account
         /// </summary>
         /// <param name="character"></param>
         /// <param name="server"></param>
         /// <param name="botName">Name of bot to use on that character</param>
+
         public static void SwitchCharacter(string character, string server, string botName)
         {
             if (_isSwitchingToons)
