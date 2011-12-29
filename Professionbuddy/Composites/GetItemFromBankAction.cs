@@ -374,7 +374,6 @@ namespace HighVoltz.Composites
                    "end " +
                    "if sawItem == 0 then return -1 else return bagged end " 
             , id, amount);
-            Professionbuddy.Log("Attempting to withdraw items");
             int retVal = Lua.GetReturnVal<int>(lua, 0);
             // -1 means no item was found.
             if (retVal == -1)

@@ -171,7 +171,7 @@ namespace HighVoltz.Composites
                             {
                                 if (!_throttleSW.IsRunning)
                                     _throttleSW.Start();
-                                if (_throttleSW.ElapsedMilliseconds < (Util.WoWPing * 3) + 50)
+                                if (_throttleSW.ElapsedMilliseconds <4000 - (me.FreeNormalBagSlots - MinFreeBagSlots)* 1000 )
                                     return RunStatus.Running;
                                 else
                                 {

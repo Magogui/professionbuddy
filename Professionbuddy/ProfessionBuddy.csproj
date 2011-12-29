@@ -78,7 +78,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Composites\CancelAuctionAction.cs" />
     <Compile Include="Composites\Declaration.cs" />
     <Compile Include="Composites\PbRootComposite.cs" />
