@@ -507,6 +507,8 @@ namespace HighVoltz
 
         public void UpdateMaterials()
         {
+            if (!_init)
+                return;
             try
             {
                 lock (MaterialList)
