@@ -179,26 +179,32 @@ namespace HighVoltz.Composites
                         IsDone = true;
                     else
                     {
-                        KeyValuePair<uint, int> kv = ItemList.FirstOrDefault();
+                        uint itemID = ItemList.Keys.FirstOrDefault();
                         bool done = false;
                         if (Bank == BankType.Personal)
-                            done = GetItemFromBank(kv.Key, kv.Value);
+                            done = GetItemFromBank(itemID, ItemList[itemID]);
                         else
                         {
                             // throttle the amount of items being withdrawn from gbank per sec
                             if (!_gbankItemThrottleSW.IsRunning)
                                 _gbankItemThrottleSW.Start();
                             if (_gbankItemThrottleSW.ElapsedMilliseconds < _gbankItemThrottle)
-                                return RunStatus.Success;
+                                return RunStatus.Running;
                             else
                             {
                                 _gbankItemThrottleSW.Reset();
                                 _gbankItemThrottleSW.Start();
                             }
-                            done = GetItemFromGBank(kv.Key, kv.Value);
+                            int ret = GetItemFromGBank(itemID, ItemList[itemID]);
+
+                            ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
+                            if (ItemList[itemID] <= 0)
+                                done = true;
+                            else
+                                done = false;
                         }
                         if (done)
-                            ItemList.Remove(kv.Key);
+                            ItemList.Remove(itemID);
                     }
                     _itemsSW.Reset();
                     _itemsSW.Start();
@@ -294,7 +300,7 @@ namespace HighVoltz.Composites
                         {
                             uint temp = 0;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, !WithdrawAdditively ? Amount - (int)Util.GetCarriedItemCount(temp) : Amount);
+                            items.Add(temp, !WithdrawAdditively ? Amount - (int)Util.GetCarriedItemCount(temp) : Amount == 0 ? int.MaxValue:Amount);
                         }
                     }
                     else
@@ -313,7 +319,13 @@ namespace HighVoltz.Composites
 
         // returns true when done. supports pulsing.
         static Stopwatch queueServerSW;
-        public bool GetItemFromGBank(uint id, int amount)
+        /// <summary>
+        /// Withdraws items from gbank
+        /// </summary>
+        /// <param name="id">item ID</param>
+        /// <param name="amount">amount to withdraw.</param>
+        /// <returns>the amount withdrawn.</returns>
+        public int GetItemFromGBank(uint id, int amount)
         {
             if (queueServerSW == null)
             {
@@ -321,38 +333,38 @@ namespace HighVoltz.Composites
                 queueServerSW.Start();
                 Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
                 Professionbuddy.Log("Queuing server for gbank info");
-                return false;
+                return 0;
             }
             if (queueServerSW.ElapsedMilliseconds < 2000)
             {
-                return false;
+                return 0;
             }
             string lua = string.Format(
                 "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
+                "local  sawItem = 0  " +
                 "local amount = {1} " +
                    "for tab = 1,tabnum do " +
                       "local _,_,iv,_,_, rw = GetGuildBankTabInfo(tab) " +
                       "if iv then " +
                          "SetCurrentGuildBankTab(tab) " +
-                         "local  sawItem = 0  " +
                          "for slot = 1, 98 do " +
                             "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
                             "local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)')) " +
                             "if l == nil and id == {0} then " +
                                "sawItem = 1 " +
-                               "if c + bagged <= amount then " +
+                               "if c  <= amount then " +
                                   "AutoStoreGuildBankItem(tab, slot) " +
-                                  "bagged = bagged + c " +
+                                  "return c " +
                                "else " +
                                   "local itemf  = GetItemFamily(id) " +
                                   "for bag =4 ,0 ,-1 do " +
                                      "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
                                      "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
                                         "local freeSlots = GetContainerFreeSlots(bag) " +
-                                        "SplitGuildBankItem(tab, slot, amount-bagged) " +
+                                        "SplitGuildBankItem(tab, slot, amount-c) " +
                                         "PickupContainerItem(bag, freeSlots[1]) " +
-                                        "return bagged " +
+                                        "return amount-c " +
                                      "end " +
                                   "end " +
                                "end " +
@@ -369,12 +381,7 @@ namespace HighVoltz.Composites
             {
                 Professionbuddy.Log("No items with entry {0} could be found in gbank", id);
             }
-            else if (retVal == -2) // frame was not visible
-            {
-                Professionbuddy.Log("Guildbank frame was not visible, skipping withdrawl");
-            }
-            queueServerSW = null;
-            return true;
+            return retVal;
         }
 
         public bool GetItemFromBank(uint id, int amount)
