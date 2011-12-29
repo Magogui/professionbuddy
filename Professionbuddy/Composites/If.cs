@@ -1,4 +1,5 @@
-﻿using System;
+﻿//!CompilerOption:AddRef:System.Design.dll
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Xml;

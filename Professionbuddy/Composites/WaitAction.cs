@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿//!CompilerOption:AddRef:System.Design.dll
+using System.Diagnostics;
 using System.Xml;
 using System;
 using TreeSharp;

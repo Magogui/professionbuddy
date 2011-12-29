@@ -19,7 +19,8 @@ namespace HighVoltz.Composites
     #region CastSpellAction
     public class RecipeConverter : ExpandableObjectConverter
     {
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }
@@ -32,22 +33,26 @@ namespace HighVoltz.Composites
             Craftable,
             Banker,
         }
-        public RepeatCalculationType RepeatType {
+        public RepeatCalculationType RepeatType
+        {
             get { return (RepeatCalculationType)Properties["RepeatType"].Value; }
             set { Properties["RepeatType"].Value = value; }
         }
         public int CalculatedRepeat { get { return CalculateRepeat(); } }
-        public int Repeat {
+        public int Repeat
+        {
             get { return (int)Properties["Repeat"].Value; }
             set { Properties["Repeat"].Value = value; }
         }
         // number of times repeated.
-        public int Casted {
+        public int Casted
+        {
             get { return (int)Properties["Casted"].Value; }
             set { Properties["Casted"].Value = value; }
         }
         // number of times repeated.
-        public uint Entry {
+        public uint Entry
+        {
             get { return (uint)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
@@ -57,19 +62,23 @@ namespace HighVoltz.Composites
         //    get { return (Recipe)Properties["Recipe"].Value; }
         //    set { Properties["Recipe"].Value = value; }
         //}
-        public bool CastOnItem {
+        public bool CastOnItem
+        {
             get { return (bool)Properties["CastOnItem"].Value; }
             set { Properties["CastOnItem"].Value = value; }
         }
-        public InventoryType ItemType {
+        public InventoryType ItemType
+        {
             get { return (InventoryType)Properties["ItemType"].Value; }
             set { Properties["ItemType"].Value = value; }
         }
-        public uint ItemId {
+        public uint ItemId
+        {
             get { return (uint)Properties["ItemId"].Value; }
             set { Properties["ItemId"].Value = value; }
         }
-        public string SpellName {
+        public string SpellName
+        {
             get { return Recipe != null ? (string)Recipe.Name : Entry.ToString(); }
         }
         public bool IsRecipe { get { return Recipe != null; } }
@@ -80,7 +89,8 @@ namespace HighVoltz.Composites
         uint waitTime;
         uint recastTime;
 
-        public CastSpellAction() {
+        public CastSpellAction()
+        {
             SpamControl = new Stopwatch();
             QueueIsRunning = false;
             Properties["Casted"] = new MetaProp("Casted", typeof(int), new ReadOnlyAttribute(true));
@@ -112,11 +122,13 @@ namespace HighVoltz.Composites
             Properties["Entry"].PropertyChanged += new EventHandler(OnEntryChanged);
             Properties["CastOnItem"].PropertyChanged += CastOnItemChanged;
         }
-        void OnEntryChanged(object sender, EventArgs e) {
+        void OnEntryChanged(object sender, EventArgs e)
+        {
             CheckTradeskillList();
         }
 
-        void CastOnItemChanged(object sender, EventArgs e) {
+        void CastOnItemChanged(object sender, EventArgs e)
+        {
             if (CastOnItem)
             {
                 Properties["ItemType"].Show = true;
@@ -130,13 +142,15 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void CastSpellAction_PropertyChanged(object sender, EventArgs e) {
+        void CastSpellAction_PropertyChanged(object sender, EventArgs e)
+        {
             IsDone = false;
             Pb.UpdateMaterials();
         }
 
         public CastSpellAction(Recipe recipe, int repeat, RepeatCalculationType repeatType)
-            : this() {
+            : this()
+        {
             Recipe = recipe;
             Repeat = repeat;
             Entry = recipe.ID;
@@ -146,7 +160,8 @@ namespace HighVoltz.Composites
             Pb.UpdateMaterials();
         }
 
-        int CalculateRepeat() {
+        int CalculateRepeat()
+        {
             switch (RepeatType)
             {
                 case RepeatCalculationType.Specific:
@@ -166,7 +181,8 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        protected override RunStatus Run(object context) {
+        protected override RunStatus Run(object context)
+        {
             if (!IsDone)
             {
                 if (!IsRecipe)
@@ -242,7 +258,8 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        void OnUnitSpellCastSucceeded(object obj, LuaEventArgs args) {
+        void OnUnitSpellCastSucceeded(object obj, LuaEventArgs args)
+        {
             try
             {
                 if ((string)args.Args[0] == "player" && (uint)((double)args.Args[4]) == Entry)
@@ -266,30 +283,37 @@ namespace HighVoltz.Composites
         }
         // check tradeskill list if spell is a recipe the player knows and updates Recipe if so.
 
-        public void CheckTradeskillList() {
-            Recipe = Pb.TradeSkillList.Where(t => t.Recipes.ContainsKey(Entry)).Select(t => t.Recipes[Entry]).FirstOrDefault();
-            if (IsRecipe)
+        public void CheckTradeskillList()
+        {
+            if (Pb.IsTradeSkillsLoaded)
             {
-                //Properties["Recipe"].Show = true;
-                Properties["SpellName"].Value = SpellName;
-                Pb.UpdateMaterials();
-            }
-            else
-            {
-                //Properties["Recipe"].Show = false;
-                Properties["SpellName"].Value = SpellName;
+                Recipe = Pb.TradeSkillList.Where(t => t.Recipes.ContainsKey(Entry)).Select(t => t.Recipes[Entry]).FirstOrDefault();
+                if (IsRecipe)
+                {
+                    //Properties["Recipe"].Show = true;
+                    Properties["SpellName"].Value = SpellName;
+                    Pb.UpdateMaterials();
+                }
+                else
+                {
+                    //Properties["Recipe"].Show = false;
+                    Properties["SpellName"].Value = SpellName;
+                }
             }
         }
 
-        WoWItem TargetedItem {
-            get {
+        WoWItem TargetedItem
+        {
+            get
+            {
                 return ObjectManager.Me.BagItems.Where(i => (i.ItemInfo.InventoryType == ItemType && ItemId == 0) ||
                     (ItemId > 0 && i.Entry == ItemId)).
                     OrderByDescending(i => i.ItemInfo.Level).ThenBy(i => i.Quality).FirstOrDefault();
             }
         }
 
-        public override void Reset() {
+        public override void Reset()
+        {
             base.Reset();
             SpamControl.Stop();
             SpamControl.Reset();
@@ -302,14 +326,17 @@ namespace HighVoltz.Composites
         public override System.Drawing.Color Color { get { return IsRecipe ? System.Drawing.Color.DarkRed : System.Drawing.Color.Black; } }
         public override string Name { get { return IsRecipe ? "R" : "Cast Spell"; } }
         public override string Title { get { return string.Format("{0}: {1} x{2} ({3})", Name, SpellName, CalculatedRepeat, CalculatedRepeat - Casted); } }
-        public override string Help {
-            get {
+        public override string Help
+        {
+            get
+            {
                 return "This action will cast the specified spell. This should only be used for recipes. To cast other spell use a Custom Action and SpellManager.Cast(). Repeat is the amount of times it will be casted depending on the repeat type used. if Repeat type is set to Specific it will Cast the spell Repeat times." +
                 "Craftable means it will automatically set Repeat based on the number of times the recipe can be repeated with current materials in bags. Banker type uses the info from DataStore and will repeat the spell based on how many of the crafted items you have on yourself or on your alts/bank/gbank." +
                 " So if for example you try to keep a stock 20 of each glyph on your bankers, your banker has 15 Glyph of Arcane Blast and you set repeat to 20, it will make 5 glyphs, The DataStore addon is required to used this mode.";
             }
         }
-        public override object Clone() {
+        public override object Clone()
+        {
             return new CastSpellAction()
             {
                 Entry = this.Entry,
@@ -322,7 +349,8 @@ namespace HighVoltz.Composites
         }
 
 
-        public static List<CastSpellAction> GetCastSpellActionList(Composite pa) {
+        public static List<CastSpellAction> GetCastSpellActionList(Composite pa)
+        {
             if (pa is CastSpellAction)
                 return new List<CastSpellAction> { (pa as CastSpellAction) };
 
@@ -345,7 +373,8 @@ namespace HighVoltz.Composites
         }
 
         #region XmlSerializer
-        public override void ReadXml(XmlReader reader) {
+        public override void ReadXml(XmlReader reader)
+        {
             uint uintVal;
             bool boolVal;
             uint.TryParse(reader["Entry"], out uintVal);
@@ -370,7 +399,8 @@ namespace HighVoltz.Composites
             CheckTradeskillList();
             reader.ReadStartElement();
         }
-        public override void WriteXml(XmlWriter writer) {
+        public override void WriteXml(XmlWriter writer)
+        {
             writer.WriteAttributeString("Entry", Entry.ToString());
             writer.WriteAttributeString("Repeat", Repeat.ToString());
             writer.WriteAttributeString("RepeatType", RepeatType.ToString());
@@ -384,7 +414,8 @@ namespace HighVoltz.Composites
 
     static class WoWSpellExt
     {
-        public static void CastOnItem(this WoWSpell spell, WoWItem item) {
+        public static void CastOnItem(this WoWSpell spell, WoWItem item)
+        {
             using (new FrameLock())
             {
                 spell.Cast();

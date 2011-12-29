@@ -1,4 +1,5 @@
-﻿using System;
+﻿//!CompilerOption:AddRef:System.Design.dll
+using System;
 using System.Xml;
 using Styx.Helpers;
 using TreeSharp;
