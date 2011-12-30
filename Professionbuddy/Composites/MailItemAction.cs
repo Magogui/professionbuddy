@@ -13,6 +13,7 @@ using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace HighVoltz.Composites
 {
@@ -41,6 +42,11 @@ namespace HighVoltz.Composites
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        public int Amount
+        {
+            get { return (int)Properties["Amount"].Value; }
+            set { Properties["Amount"].Value = value; }
+        }
         public bool AutoFindMailBox
         {
             get { return (bool)Properties["AutoFindMailBox"].Value; }
@@ -61,6 +67,7 @@ namespace HighVoltz.Composites
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
             Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
+            Properties["Amount"] = new MetaProp("Amount", typeof(int));
 
             ItemID = "";
             AutoFindMailBox = true;
@@ -69,6 +76,7 @@ namespace HighVoltz.Composites
             UseCategory = true;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
+            Amount = 0;
 
             Properties["Location"].Show = false;
             Properties["ItemID"].Show = false;
@@ -126,6 +134,8 @@ namespace HighVoltz.Composites
         #endregion
 
         WoWGameObject _mailbox;
+        Dictionary<uint, int> ItemList;
+        Stopwatch itemSplitSW = new Stopwatch();
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -158,36 +168,62 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    List<WoWItem> ItemList = BuildItemList();
-                    if ((ItemList == null || ItemList.Count == 0) && MailFrame.Instance.SendMailItems.Length == 0)
+                    // item split in proceess
+                    if (itemSplitSW.IsRunning && itemSplitSW.ElapsedMilliseconds <= 2000)
+                        return RunStatus.Running;
+                    if (ItemList == null)
+                        ItemList = BuildItemList();
+                    if (ItemList.Count == 0)
                     {
+                        if (MailFrame.Instance.SendMailItems.Length > 0)
+                        {
+                            Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();",
+                                CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
+                        }
                         IsDone = true;
                         return RunStatus.Failure;
                     }
                     using (new FrameLock())
                     {
                         MailFrame.Instance.SwitchToSendMailTab();
-                        foreach (WoWItem item in ItemList)
+                        uint itemID = ItemList.Keys.FirstOrDefault();
+                        bool done = false;
+                        int ret = MailItem(itemID, ItemList[itemID]);
+                        // we need to wait for item split to finish if ret == 0
+                        if (ret == 0)
                         {
-                            item.UseContainerItem();
+                            itemSplitSW.Reset();
+                            itemSplitSW.Start();
+                            return RunStatus.Running;
                         }
-                        if (MailFrame.Instance.SendMailItems.Length > 0)
-                        {
-                            if (string.IsNullOrEmpty(CharacterSettings.Instance.MailRecipient))
-                            {
-                                Professionbuddy.Err("MailRecipient is empty");
-                                IsDone = true;
-                            }
-                            Professionbuddy.Debug("Sending {0} items via mail", MailFrame.Instance.SendMailItems.Length);
-                            Lua.DoString(string.Format("SendMail (\"{0}\",\"{1}\",'');SendMailMailButton:Click();",
-                                CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), ItemList[0].Name));
-                            //run SendMail ('BankerName',' ','');SendMailMailButton:Click();
-                            //MailFrame.Instance.SendMail(CharacterSettings.Instance.MailRecipient, "", "", 0);
-                        }
+                        ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
+                        if (ItemList[itemID] <= 0)
+                            done = true;
                         else
+                            done = false;
+                        if (done)
                         {
-                            Professionbuddy.Debug("No items placed in the mail slots... something went wrong");
+                            ItemList.Remove(itemID);
                         }
+                        //foreach (WoWItem item in _itemList)
+                        //{
+                        //    item.UseContainerItem();
+                        //}
+                        //if (MailFrame.Instance.SendMailItems.Length > 0)
+                        //{
+                        //    if (string.IsNullOrEmpty(CharacterSettings.Instance.MailRecipient))
+                        //    {
+                        //        Professionbuddy.Err("MailRecipient is empty");
+                        //        IsDone = true;
+                        //    }
+                        //    Professionbuddy.Debug("Sending {0} items via mail", MailFrame.Instance.SendMailItems.Length);
+                        //    Lua.DoString(string.Format("SendMail (\"{0}\",\"{1}\",'');SendMailMailButton:Click();",
+                        //        CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _itemList[0].Name));
+                        // }
+                        //else
+                        //{
+                        //    Professionbuddy.Debug("No items placed in the mail slots... something went wrong");
+                        //}
                     }
                     if (IsDone)
                     {
@@ -202,25 +238,31 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        List<WoWItem> BuildItemList()
+        Dictionary<uint, int> BuildItemList()
         {
+            Dictionary<uint, int> itemList = new Dictionary<uint, int>();
             IEnumerable<WoWItem> tmpItemlist = from item in me.BagItems
                                                where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
                                                select item;
             if (UseCategory)
-                return tmpItemlist.Where(i => !Pb.ProtectedItems.Contains(i.Entry) &&
-                    i.ItemInfo.ItemClass == Category && subCategoryCheck(i)).Take(12).ToList();
+                foreach (WoWItem item in tmpItemlist)
+                {
+                    if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
+                        subCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
+                    {
+                        itemList.Add(item.Entry, Amount > 0 ? Amount : (int)Util.GetCarriedItemCount(item.Entry));
+                    }
+                }
             else
             {
-                List<uint> idList = new List<uint>();
                 string[] entries = ItemID.Split(',');
                 if (entries != null && entries.Length > 0)
                 {
                     foreach (var entry in entries)
                     {
-                        uint temp = 0;
-                        uint.TryParse(entry.Trim(), out temp);
-                        idList.Add(temp);
+                        uint itemID = 0;
+                        uint.TryParse(entry.Trim(), out itemID);
+                        itemList.Add(itemID, Amount > 0 ? Amount : (int)Util.GetCarriedItemCount(itemID));
                     }
                 }
                 else
@@ -228,8 +270,8 @@ namespace HighVoltz.Composites
                     Professionbuddy.Err("No ItemIDs are specified");
                     IsDone = true;
                 }
-                return tmpItemlist.Where(i => idList.Contains(i.Entry)).Take(12).ToList();
             }
+            return itemList;
         }
 
         bool subCategoryCheck(WoWItem item)
@@ -244,9 +286,75 @@ namespace HighVoltz.Composites
             else
                 return false;
         }
+        // format indexs are ItemID=0, Amount=1, MailRecipient=2
+        static string _mailItemLuaFormat =
+            "local mailItemI =1 " +
+            "local freeBagSlots = 0 " +
+            "local amount = {1} " +
+            "local itemId = {0} " +
+            "local bagged =0 " +
+            "for i=0,NUM_BAG_SLOTS do " +
+               "freeBagSlots = freeBagSlots + GetContainerNumFreeSlots(i) " +
+            "end " +
+            "local bagInfo={{}} " +
+            "local mailTitle " +
+            "for bag = 0,NUM_BAG_SLOTS do " +
+               "for slot=1,GetContainerNumSlots(bag) do " +
+                  "local id = GetContainerItemID(bag,slot) or 0 " +
+                  "local _,c,l = GetContainerItemInfo(bag, slot) " +
+                  "if id == itemId and l == nil then " +
+                     "if mailTitle == nil then mailTitle = GetItemInfo(id) end " +
+                     "table.insert(bagInfo,{{bag,slot,c}}) " +
+                  "end " +
+               "end " +
+            "end " +
+            "local sortF = function (a,b) " +
+               "if a == nil and b == nil or b == nil then return false end " +
+               "if a == nil or  a[3] < b[3] then return true else return false end " +
+            "end " +
+            "if #bagInfo == 0 then return -1 end " +
+            "table.sort(bagInfo,sortF) " +
+            "local bagI = 1 " +
+            "while bagI <= #bagInfo do " +
+               "if GetSendMailItem(mailItemI) == nil then " +
+                  "if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then " +
+                     "PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2]) " +
+                     "ClickSendMailItemButton(mailItemI) " +
+                     "bagged = bagged + bagInfo[bagI][3] " +
+                     "bagI = bagI +1 " +
+                  "else " +
+                     "local cnt = bagInfo[bagI][3]-amount " +
+                     "SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt) " +
+                     "local bagSpaces ={{}} " +
+                     "for b=NUM_BAG_SLOTS,0,-1 do " +
+                        "bagSpaces = GetContainerFreeSlots(b) " +
+                        "if #bagSpaces > 0 then " +
+                           "PickupContainerItem(b,bagSpaces[#bagSpaces]) " +
+                           "return 0 " +
+                        "end " +
+                     "end " +
+                  "end " +
+               "end " +
+               "if bagged >= amount then return -1 end " +
+               "mailItemI = mailItemI + 1 " +
+               "if mailItemI > ATTACHMENTS_MAX_SEND then " +
+                  "SendMail (\"{2}\",mailTitle or ' ','') " +
+                  //"SendMailMailButton:Click() " +
+                  "return bagged " +
+               "end " +
+            "end " +
+            "return bagged ";
+        // return -1 if done,0 if spliting item else the amount of items placed in mail.
+        int MailItem(uint id, int amount)
+        {
+            // format indexs are ItemID=0, Amount=1, MailRecipient=2
+            string lua = string.Format(_mailItemLuaFormat,id,amount, CharacterSettings.Instance.MailRecipient.ToFormatedUTF8());
+            return Lua.GetReturnVal<int>(lua, 0);
+        }
 
         public override void Reset()
         {
+            ItemList = null;
             base.Reset();
         }
         public override string Name
@@ -268,7 +376,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will mail either all items that match Item ID or by item category.Setting Count to 0 will mail all items that match Entry. Note: Count = axact number, not stacks. This mails items to the 'Mail Recipient' from Honorbuddy settings. ";
+                return "This action will mail either all items that match Item ID or by item category.Setting Amount to 0 will mail all items that match Entry. Note: Amount = axact number, not stacks. This mails items to the 'Mail Recipient' from Honorbuddy settings. ";
             }
         }
         public override object Clone()
@@ -283,6 +391,7 @@ namespace HighVoltz.Composites
                 UseCategory = this.UseCategory,
                 Category = this.Category,
                 SubCategory = this.SubCategory,
+                Amount = this.Amount
             };
         }
         #region XmlSerializer
@@ -292,24 +401,16 @@ namespace HighVoltz.Composites
                 ItemID = reader["ItemID"];
             else if (reader.MoveToAttribute("Entry"))
                 ItemID = reader["Entry"];
-            bool autofind;
-            bool.TryParse(reader["AutoFindMailBox"], out autofind);
-            AutoFindMailBox = autofind;
-            bool boolVal = false;
+            AutoFindMailBox = bool.Parse(reader["AutoFindMailBox"]);
+            if (reader.MoveToAttribute("Amount"))
+                Amount = int.Parse(reader["Amount"]);
             if (reader.MoveToAttribute("UseCategory"))
-            {
-                bool.TryParse(reader["UseCategory"], out boolVal);
-                UseCategory = boolVal;
-            }
+                UseCategory = bool.Parse(reader["UseCategory"]);
             if (reader.MoveToAttribute("Category"))
-            {
                 Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
-            }
             string subCatType = "";
             if (reader.MoveToAttribute("SubCategoryType"))
-            {
                 subCatType = reader["SubCategoryType"];
-            }
             if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType))
             {
                 Type t;
@@ -342,6 +443,7 @@ namespace HighVoltz.Composites
             writer.WriteAttributeString("Category", Category.ToString());
             writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
             writer.WriteAttributeString("SubCategory", SubCategory.ToString());
+            writer.WriteAttributeString("Amount", Amount.ToString());
 
             writer.WriteAttributeString("X", loc.X.ToString());
             writer.WriteAttributeString("Y", loc.Y.ToString());

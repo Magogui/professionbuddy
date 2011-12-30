@@ -483,67 +483,6 @@ namespace HighVoltz.Composites
                 }
                 return -1;
             }
-
-            //    string lua = string.Format(
-            //        "local tabnum = GetNumGuildBankTabs() " +
-            //        "local bagged = 0 " +
-            //        "local tabInfo = {{0}} " +
-            //        "local tab = {2} " +
-            //        "local i = 1 " +
-            //        "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
-            //        "while tab <= tabnum do " +
-            //           "local_,_,v,d =GetGuildBankTabInfo(tab) " +
-            //           "if v == 1 and d == 1 then " +
-            //        //"SetCurrentGuildBankTab(tab) " +
-            //              "for slot=1, 98 do " +
-            //                 "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
-            //                 "if c > 0 and l == nil then " +
-            //                    "local id = tonumber(string.match(GetGuildBankItemLink(tab,slot), 'Hitem:(%d+)')) " +
-            //                    "if id == {0} and c < maxStack then " +
-            //                       "tabInfo[i] = {{tab,slot,maxStack-c}} " +
-            //                       "i = i +1 " +
-            //                    "end " +
-            //                 "elseif c == 0 then " +
-            //                    "tabInfo[i] = {{tab,slot,maxStack}} " +
-            //                    "i = i +1 " +
-            //                 "end " +
-            //              "end " +
-            //           "end " +
-            //           "tab = tab + 1 " +
-            //        "end " +
-            //        "i = 1 " +
-            //        "if GetCurrentGuildBankTab() ~= tabInfo[1][1] then " +
-            //            "SetCurrentGuildBankTab(tabInfo[1][1]) " +
-            //            "return 0 " +
-            //        "end " +
-            //        "for bag = 0,4 do " +
-            //           "for slot=1,GetContainerNumSlots(bag) do " +
-            //              "if i > #tabInfo then return -1 end " +
-            //              "local id = GetContainerItemID(bag,slot) " +
-            //              "local _,c,l = GetContainerItemInfo(bag, slot) " +
-            //              "if id == {0} and l == nil then  " +
-            //                 "if GetCurrentGuildBankTab() ~= tabInfo[i][1] then " +
-            //                    "return 0 " +
-            //                 "end " +
-            //                 "if c + bagged <= {1} and c <= tabInfo[i][3] then " +
-            //                    "PickupContainerItem(bag,slot) " +
-            //                    "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
-            //                    "bagged = bagged + c " +
-            //                 "else " +
-            //                    "local cnt = {1}-bagged " +
-            //                    "if cnt > tabInfo[i][3] then cnt = tabInfo[i][3] end " +
-            //                    "SplitContainerItem(bag,slot, cnt) " +
-            //                    "PickupGuildBankItem(tabInfo[i][1] ,tabInfo[i][2]) " +
-            //                    "bagged = bagged + cnt " +
-            //                 "end " +
-            //                 "return c " +
-            //              "end " +
-            //              "i=i+1 " +
-            //           "end " +
-            //        "end " +
-            //        "return -1"
-            //        , id, amount <= 0 ? int.MaxValue : amount, tab, _currentBag, _currentSlot);
-            //    return Lua.GetReturnVal<int>(lua, 0);
         }
 
         const int GuildTabSlotNum = 98;
