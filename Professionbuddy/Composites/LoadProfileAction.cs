@@ -75,6 +75,10 @@ namespace HighVoltz.Composites
                     else
                     {
                         Professionbuddy.LoadProfile(absPath);
+                        if (Pb.ProfileSettings.Settings.Count > 0 && MainForm.IsValid)
+                            MainForm.Instance.AddProfileSettingsTab();
+                        else
+                            MainForm.Instance.RemoveProfileSettingsTab();
                     }
                 }
                 catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
