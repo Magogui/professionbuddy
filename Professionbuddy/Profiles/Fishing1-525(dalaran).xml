@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
+  <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
+    <ChangeBotAction BotName="Combat Bot" />
+  </If>
   <!--Port to dalaran before starting-->
   <!--list of gold coins-->
   <CustomAction Code="var2 = new List&lt;uint&gt;{43641,43639,43637,43635,43634,43632,43627,43629,43640,43638,43636,43628,43633,43631,43630};" />

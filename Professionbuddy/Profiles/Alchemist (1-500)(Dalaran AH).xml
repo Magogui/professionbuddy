@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
+  <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
+    <ChangeBotAction BotName="Combat Bot" />
+  </If>
   <While Condition="Me.FreeNormalBagSlots &lt;= 2" IgnoreCanRun="True">
     <SellItemOnAhAction ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" RunTime="_24_Hours" Amount="10" StackSize="20" IgnoreStackSizeBelow="1" AmountType="Everything" AutoFindAh="True" BidPrecent="95" UndercutPrecent="0.0001" UseCategory="True" Category="Consumable" SubCategoryType="SubCategoryType" SubCategory="None" X="0" Y="0" Z="0" PostIfBelowMinBuyout="True" />
   </While>
