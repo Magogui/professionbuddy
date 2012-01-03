@@ -14,11 +14,13 @@ namespace HighVoltz.Composites
     public class WaitAction : CsharpAction
     {
         virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
+        [PbXmlAttribute()]
         public string Condition
         {
             get { return (string)Properties["Condition"].Value; }
             set { Properties["Condition"].Value = value; }
         }
+        [PbXmlAttribute()]
         public int Timeout
         {
             get { return (int)Properties["Timeout"].Value; }
@@ -100,22 +102,6 @@ namespace HighVoltz.Composites
                 CanRunDelegate = (CanRunDecoratorDelegate)value;
             }
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Condition = reader["Condition"];
-            int timeout;
-            int.TryParse(reader["Timeout"], out timeout);
-            Timeout = timeout;
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Condition", Condition);
-            writer.WriteAttributeString("Timeout", Timeout.ToString());
-        }
-        #endregion
     }
     #endregion
 }

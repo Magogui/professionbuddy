@@ -238,7 +238,7 @@ namespace HighVoltz
             }
         }
 
-        [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
+        [TypeConverter(typeof(PropertyBag.GoldEditorConverter))]
         public class GoldEditorConverter : ExpandableObjectConverter
         {
             public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)

@@ -12,46 +12,50 @@ using Styx.WoWInternals.WoWObjects;
 using Styx.Helpers;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Xml.Serialization;
 
 namespace HighVoltz.Composites
 {
     public class Settings : PBAction
     {
+        [PbXmlAttribute()]
         public string DefaultValue
         {
             get { return (string)Properties["DefaultValue"].Value; }
             set { Properties["DefaultValue"].Value = value; }
         }
-        
+        [PbXmlAttribute()]
         public TypeCode Type
         {
             get { return (TypeCode)Properties["Type"].Value; }
             set { Properties["Type"].Value = value; }
         }
+
+        [PbXmlAttribute("Name")]
         public string SettingName
         {
             get { return (string)Properties["Name"].Value; }
             set { Properties["Name"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public string Summary
         {
             get { return (string)Properties["Summary"].Value; }
             set { Properties["Summary"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public string Category
         {
             get { return (string)Properties["Category"].Value; }
             set { Properties["Category"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public bool Global
         {
             get { return (bool)Properties["Global"].Value; }
             set { Properties["Global"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public bool Hidden
         {
             get { return (bool)Properties["Hidden"].Value; }
@@ -117,31 +121,5 @@ namespace HighVoltz.Composites
                 return true;
             }
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Type = (TypeCode)Enum.Parse(typeof(TypeCode), reader["Type"]);
-            DefaultValue = reader["DefaultValue"];
-            SettingName = reader["Name"];
-            if (reader.MoveToAttribute("Category"))
-                Category = reader["Category"];
-            if (reader.MoveToAttribute("Global"))
-                Global = bool.Parse(reader["Global"]);
-            if (reader.MoveToAttribute("Hidden"))
-                Hidden = bool.Parse(reader["Hidden"]);           
-            Summary = reader["Summary"];
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Type", Type.ToString());
-            writer.WriteAttributeString("DefaultValue", DefaultValue);
-            writer.WriteAttributeString("Name", SettingName);
-            writer.WriteAttributeString("Summary", Summary);
-            writer.WriteAttributeString("Category", Category);
-            writer.WriteAttributeString("Global", Global.ToString());
-            writer.WriteAttributeString("Hidden", Hidden.ToString());
-        }
-        #endregion
     }
 }

@@ -25,11 +25,13 @@ namespace HighVoltz.Composites
     #region FlyToAction
     public class FlyToAction : PBAction
     {
+        [PbXmlAttribute()]
         public bool Dismount {
             get { return (bool)Properties["Dismount"].Value; }
             set { Properties["Dismount"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
@@ -92,27 +94,6 @@ namespace HighVoltz.Composites
         public override void Reset() {
             base.Reset();
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader) {
-            bool dismount;
-            bool.TryParse(reader["Dismount"], out dismount);
-            Dismount = dismount;
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer) {
-            writer.WriteAttributeString("Dismount", Dismount.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
     }
     #endregion
 }

@@ -20,38 +20,79 @@ namespace HighVoltz.Composites
 {
     public class CancelAuctionAction : PBAction
     {
+        [PbXmlAttribute()]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
-            set { Properties["Category"].Value = value; }
+            set
+            {
+                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
+            }
         }
+        [PbXmlAttribute()]
         public object SubCategory
         {
             get { return (object)Properties["SubCategory"].Value; }
-            set { Properties["SubCategory"].Value = value; }
+            set
+            {
+                if (value is string)
+                    value = Enum.Parse(subCategoryType, (string)value);
+                Properties["SubCategory"].Value = value;
+                //UpdateSubCatValue(); 
+            }
+        }
+        Type subCategoryType = typeof(SubCategoryType);
+        [PbXmlAttribute()]
+        public string SubCategoryType
+        {
+            get { return subCategoryType.Name; }
+            set
+            {
+                if (value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof(SubCategoryType);
+                UpdateSubCatValue();
+            }
         }
 
+        void UpdateSubCatValue()
+        {
+            object subVal = Activator.CreateInstance(subCategoryType);
+            int sub = Convert.ToInt32(SubCategory);
+            subVal = Enum.ToObject(subCategoryType, sub);
+            SubCategory = subVal;
+        }
+        [PbXmlAttribute()]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindAh
         {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MinBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MinBuyout"].Value; }
             set { Properties["MinBuyout"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -413,56 +454,5 @@ namespace HighVoltz.Composites
                 SubCategory = this.SubCategory,
             };
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            ItemID = reader["ItemID"];
-            MinBuyout = new PropertyBag.GoldEditor(reader["MinBuyout"]);
-            bool boolVal;
-            bool.TryParse(reader["AutoFindAh"], out boolVal);
-            AutoFindAh = boolVal;
-            bool.TryParse(reader["UseCategory"], out boolVal);
-            UseCategory = boolVal;
-            Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
-            string subCatType = "";
-            subCatType = reader["SubCategoryType"];
-            if (!string.IsNullOrEmpty(subCatType))
-            {
-                Type t;
-                if (subCatType != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatType);
-                    t = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    t = typeof(SubCategoryType);
-                object subVal = Activator.CreateInstance(t);
-                subVal = Enum.Parse(t, reader["SubCategory"]);
-                SubCategory = subVal;
-            }
-
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("AutoFindAh", AutoFindAh.ToString());
-            writer.WriteAttributeString("UseCategory", UseCategory.ToString());
-            writer.WriteAttributeString("Category", Category.ToString());
-            writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
-            writer.WriteAttributeString("SubCategory", SubCategory.ToString());
-            writer.WriteAttributeString("MinBuyout", MinBuyout.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
     }
 }

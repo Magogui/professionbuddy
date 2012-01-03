@@ -20,33 +20,72 @@ namespace HighVoltz.Composites
     #region MailItemAction
     class MailItemAction : PBAction
     {
-        public enum SubCategoryType { None }; // use as a placeholder for item categories with no sub categories
-
+        [PbXmlAttribute()]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
-            set { Properties["Category"].Value = value; }
+            set
+            {
+                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
+            }
         }
+        [PbXmlAttribute()]
         public object SubCategory
         {
             get { return (object)Properties["SubCategory"].Value; }
-            set { Properties["SubCategory"].Value = value; }
+            set
+            {
+                if (value is string)
+                    value = Enum.Parse(subCategoryType, (string)value);
+                Properties["SubCategory"].Value = value;
+                //UpdateSubCatValue(); 
+            }
         }
+        Type subCategoryType = typeof(SubCategoryType);
+        [PbXmlAttribute()]
+        public string SubCategoryType
+        {
+            get { return subCategoryType.Name; }
+            set
+            {
+                if (value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof(SubCategoryType);
+                UpdateSubCatValue();
+            }
+        }
+
+        void UpdateSubCatValue()
+        {
+            object subVal = Activator.CreateInstance(subCategoryType);
+            int sub = Convert.ToInt32(SubCategory);
+            subVal = Enum.ToObject(subCategoryType, sub);
+            SubCategory = subVal;
+        }
+        [PbXmlAttribute()]
+        [PbXmlAttribute("Entry")]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public int Amount
         {
             get { return (int)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindMailBox
         {
             get { return (bool)Properties["AutoFindMailBox"].Value; }
@@ -54,6 +93,7 @@ namespace HighVoltz.Composites
         }
 
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -157,7 +197,11 @@ namespace HighVoltz.Composites
                     if (_mailbox != null)
                         movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, _mailbox.Location, 3);
                     if (movetoPoint == WoWPoint.Zero)
+                    {
+                        Professionbuddy.Err("Unable To find Mailbox");
+                        IsDone = true;
                         return RunStatus.Failure;
+                    }
                     if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
                     else if (_mailbox != null)
@@ -175,7 +219,7 @@ namespace HighVoltz.Composites
                         ItemList = BuildItemList();
                     if (ItemList.Count == 0)
                     {
-                        if (MailFrame.Instance.SendMailItems.Length > 0)
+                        if (Lua.GetReturnVal<int>("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) != nil then return 1 end end return 0 ",0) > 0)
                         {
                             Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();",
                                 CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
@@ -197,6 +241,7 @@ namespace HighVoltz.Composites
                             return RunStatus.Running;
                         }
                         ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
+                        Professionbuddy.Debug("MailItem: sending {0}", itemID);
                         if (ItemList[itemID] <= 0)
                             done = true;
                         else
@@ -205,25 +250,6 @@ namespace HighVoltz.Composites
                         {
                             ItemList.Remove(itemID);
                         }
-                        //foreach (WoWItem item in _itemList)
-                        //{
-                        //    item.UseContainerItem();
-                        //}
-                        //if (MailFrame.Instance.SendMailItems.Length > 0)
-                        //{
-                        //    if (string.IsNullOrEmpty(CharacterSettings.Instance.MailRecipient))
-                        //    {
-                        //        Professionbuddy.Err("MailRecipient is empty");
-                        //        IsDone = true;
-                        //    }
-                        //    Professionbuddy.Debug("Sending {0} items via mail", MailFrame.Instance.SendMailItems.Length);
-                        //    Lua.DoString(string.Format("SendMail (\"{0}\",\"{1}\",'');SendMailMailButton:Click();",
-                        //        CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _itemList[0].Name));
-                        // }
-                        //else
-                        //{
-                        //    Professionbuddy.Debug("No items placed in the mail slots... something went wrong");
-                        //}
                     }
                     if (IsDone)
                     {
@@ -394,62 +420,6 @@ namespace HighVoltz.Composites
                 Amount = this.Amount
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"];
-            AutoFindMailBox = bool.Parse(reader["AutoFindMailBox"]);
-            if (reader.MoveToAttribute("Amount"))
-                Amount = int.Parse(reader["Amount"]);
-            if (reader.MoveToAttribute("UseCategory"))
-                UseCategory = bool.Parse(reader["UseCategory"]);
-            if (reader.MoveToAttribute("Category"))
-                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
-            string subCatType = "";
-            if (reader.MoveToAttribute("SubCategoryType"))
-                subCatType = reader["SubCategoryType"];
-            if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType))
-            {
-                Type t;
-                if (subCatType != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatType);
-                    t = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    t = typeof(SubCategoryType);
-                object subVal = Activator.CreateInstance(t);
-                subVal = Enum.Parse(t, reader["SubCategory"]);
-                SubCategory = subVal;
-            }
-
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Entry", ItemID.ToString());
-            writer.WriteAttributeString("AutoFindMailBox", AutoFindMailBox.ToString());
-
-            writer.WriteAttributeString("UseCategory", UseCategory.ToString());
-            writer.WriteAttributeString("Category", Category.ToString());
-            writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
-            writer.WriteAttributeString("SubCategory", SubCategory.ToString());
-            writer.WriteAttributeString("Amount", Amount.ToString());
-
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
     }
     #endregion
 

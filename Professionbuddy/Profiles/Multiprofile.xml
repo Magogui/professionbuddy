@@ -119,8 +119,9 @@
     </If>
   </While>
   <SubRoutine SubRoutineName="MailItems">
-    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" X="0" Y="0" Z="0" />
-    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" X="0" Y="0" Z="0" />
+    <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.SubType == WoWGameObjectType.Mailbox);" Timeout="20000" />
+    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Amount="0" X="0" Y="0" Z="0" />
+    <MailItemAction Entry="" AutoFindMailBox="True" UseCategory="True" Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Amount="0" X="0" Y="0" Z="0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="StoreItemsInGbank">
     <CallSubRoutine SubRoutineName="MoveToGbank" />
@@ -142,9 +143,9 @@
     <If Condition="!Me.IsCasting" IgnoreCanRun="True">
       <CustomAction Code="Mount.Dismount();" />
       <CustomAction Code="Lua.DoString(&quot;UseItemByName(6948)&quot;);" />
-      <WaitAction Condition="Me.IsCasting" Timeout="2000" />
+      <WaitAction Condition="Me.IsCasting" Timeout="11000" />
     </If>
-    <WaitAction Condition="!Me.IsCasting" Timeout="10000" />
+    <WaitAction Condition="Me.ZoneId == CityZoneID" Timeout="20000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
     <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />

@@ -120,7 +120,7 @@ namespace HighVoltz
             IsRunning = true;
 
             // reset all actions 
-            foreach (IPBComposite comp in CurrentProfile.Branch.Children)
+            foreach (IPBComposite comp in PbBehavior.Children)
             {
                 comp.Reset();
             }
@@ -431,7 +431,7 @@ namespace HighVoltz
                         Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
                         Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)))
                     );
-                    root = new PbRootComposite(new PbDecorator(new PrioritySelector()), null);
+                    root = new PbRootComposite(new PbDecorator(), null);
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         root.SecondaryBot = bot;
@@ -515,7 +515,7 @@ namespace HighVoltz
                 {
                     MaterialList.Clear();
                     List<CastSpellAction> castSpellList =
-                        CastSpellAction.GetCastSpellActionList(CurrentProfile.Branch);
+                        CastSpellAction.GetCastSpellActionList(PbBehavior);
                     if (castSpellList != null)
                     {
                         foreach (CastSpellAction ca in castSpellList)
@@ -547,13 +547,13 @@ namespace HighVoltz
                 PbDecorator idComp = Instance.CurrentProfile.LoadFromFile(path);
                 if (idComp != null)
                 {
+                    Instance.PbBehavior = idComp;
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.InitActionTree();
                         MainForm.Instance.RefreshTradeSkillTabs();
                     }
                     Instance.MySettings.LastProfile = path;
-                    Instance.PbBehavior = idComp;
                     Instance.ProfileSettings.Load();
                     DynamicCode.GenorateDynamicCode();
                     Instance.UpdateMaterials();
@@ -612,10 +612,10 @@ namespace HighVoltz
 
         public static void PreLoadHbProfile()
         {
-            if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.CurrentProfile.Branch != null)
+            if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
             {
                 Dictionary<string, Uri> dict = new Dictionary<string, Uri>();
-                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.CurrentProfile.Branch, dict);
+                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.PbBehavior, dict);
                 if (dict.Count > 0)
                 {
                     foreach (var kv in dict)

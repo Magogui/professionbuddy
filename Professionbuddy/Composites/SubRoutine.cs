@@ -9,8 +9,9 @@ using Styx.Helpers;
 
 namespace HighVoltz.Composites
 {
-    class SubRoutine : GroupComposite, IPBComposite, IXmlSerializable
+    class SubRoutine : GroupComposite, IPBComposite
     {
+        [PbXmlAttribute()]
         virtual public string SubRoutineName
         {
             get { return (string)Properties["SubRoutineName"].Value; }
@@ -104,65 +105,5 @@ namespace HighVoltz.Composites
 
         virtual public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
 
-        #region XmlSerializer
-        virtual public void ReadXml(XmlReader reader)
-        {
-            SubRoutineName = reader["SubRoutineName"];
-            // stop reading since there are no child elements
-            if (reader.IsEmptyElement)
-            {
-                reader.ReadStartElement();
-                return;
-            }
-            reader.ReadStartElement();
-            while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
-            {
-                if (reader.NodeType == XmlNodeType.Comment)
-                {
-                    AddChild(new Comment(reader.Value));
-                    reader.Skip();
-                }
-                else
-                {
-                    Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
-                    if (type != null)
-                    {
-                        IPBComposite comp = (IPBComposite)Activator.CreateInstance(type);
-                        if (comp != null)
-                        {
-                            comp.ReadXml(reader);
-                            AddChild((Composite)comp);
-                        }
-                    }
-                    else
-                    {
-                        Logging.Write(System.Drawing.Color.Red, "Failed to load type {0}", type.Name);
-                    }
-                }
-            }
-            if (reader.NodeType == XmlNodeType.EndElement)
-                reader.ReadEndElement();
-        }
-
-        virtual public void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("SubRoutineName", SubRoutineName);
-
-            foreach (IPBComposite comp in Children)
-            {
-                if (comp is Comment)
-                {
-                    writer.WriteComment(((Comment)comp).Text);
-                }
-                else
-                {
-                    writer.WriteStartElement(comp.GetType().Name);
-                    ((IXmlSerializable)comp).WriteXml(writer);
-                    writer.WriteEndElement();
-                }
-            }
-        }
-        virtual public System.Xml.Schema.XmlSchema GetSchema() { return null; }
-        #endregion
     }
 }

@@ -23,7 +23,6 @@ using HighVoltz.Composites;
 
 namespace HighVoltz.Composites
 {
-    #region StackItemsAction
     class StackItemsAction : PBAction
     {
         public StackItemsAction()
@@ -92,5 +91,4 @@ namespace HighVoltz.Composites
             return new StackItemsAction();
         }
     }
-    #endregion
 }

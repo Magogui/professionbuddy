@@ -17,6 +17,7 @@ namespace HighVoltz.Composites
 {
     public class Comment : PBAction
     {
+        [PbXmlAttribute()]
         public string Text
         {
             get { return (string)Properties["Text"].Value; }
@@ -63,16 +64,5 @@ namespace HighVoltz.Composites
                 return true;
             }
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Text = reader["Text"];
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Text", Text);
-        }
-        #endregion
     }
 }

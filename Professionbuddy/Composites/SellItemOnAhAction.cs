@@ -18,90 +18,142 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    
+
     #region SellItemOnAhAction
     class SellItemOnAhAction : PBAction
     {
         public enum RunTimeType { _12_Hours = 1, _24_Hours, _48_Hours, }
         public enum AmountBasedType { Amount, Everything }
+        [PbXmlAttribute()]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
-            set { Properties["Category"].Value = value; }
+            set
+            {
+                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
+            }
         }
+        [PbXmlAttribute()]
         public object SubCategory
         {
             get { return (object)Properties["SubCategory"].Value; }
-            set { Properties["SubCategory"].Value = value; }
+            set 
+            {
+                if (value is string)
+                    value = Enum.Parse(subCategoryType, (string)value);
+                Properties["SubCategory"].Value = value; 
+                //UpdateSubCatValue(); 
+            }
         }
+        Type subCategoryType = typeof(SubCategoryType);
+        [PbXmlAttribute()]
+        public string SubCategoryType
+        {
+            get { return subCategoryType.Name; }
+            set
+            {
+                if (value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof(SubCategoryType);
+                UpdateSubCatValue();               
+            }
+        }
+
+        void UpdateSubCatValue()
+        {
+            object subVal = Activator.CreateInstance(subCategoryType);
+            int sub = Convert.ToInt32(SubCategory);
+            subVal = Enum.ToObject(subCategoryType, sub);
+            SubCategory = subVal;
+        }
+
+        [PbXmlAttribute()]
         public RunTimeType RunTime
         {
             get { return (RunTimeType)Properties["RunTime"].Value; }
             set { Properties["RunTime"].Value = value; }
         }
+        [PbXmlAttribute()]
         public AmountBasedType AmountType
         {
             get { return (AmountBasedType)Properties["AmountType"].Value; }
             set { Properties["AmountType"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [PbXmlAttribute("ItemName")]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MinBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MinBuyout"].Value; }
             set { Properties["MinBuyout"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MaxBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MaxBuyout"].Value; }
             set { Properties["MaxBuyout"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint StackSize
         {
             get { return (uint)Properties["StackSize"].Value; }
             set { Properties["StackSize"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public uint IgnoreStackSizeBelow
         {
             get { return (uint)Properties["IgnoreStackSizeBelow"].Value; }
             set { Properties["IgnoreStackSizeBelow"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public uint Amount
         {
             get { return (uint)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        [PbXmlAttribute()]
         public float BidPrecent
         {
             get { return (float)Properties["BidPrecent"].Value; }
             set { Properties["BidPrecent"].Value = value; }
         }
-        public float UndercutPrecent
+        [PbXmlAttribute()]
+        public double UndercutPrecent
         {
-            get { return (float)Properties["UndercutPrecent"].Value; }
+            get { return (double)Properties["UndercutPrecent"].Value; }
             set { Properties["UndercutPrecent"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindAh
         {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool PostIfBelowMinBuyout
         {
             get { return (bool)Properties["PostIfBelowMinBuyout"].Value; }
             set { Properties["PostIfBelowMinBuyout"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -123,7 +175,7 @@ namespace HighVoltz.Composites
             Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof(float));
-            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof(float));
+            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof(double));
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
             Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
@@ -139,11 +191,12 @@ namespace HighVoltz.Composites
             AmountType = AmountBasedType.Everything;
             AutoFindAh = true;
             BidPrecent = 95f;
-            UndercutPrecent = 0.1f;
+            UndercutPrecent = 0.1;
             loc = WoWPoint.Zero;
             Location = loc.ToInvariantString();
             UseCategory = true;
             Category = WoWItemClass.TradeGoods;
+            SubCategoryType = typeof(WoWItemTradeGoodsClass).Name;
             SubCategory = WoWItemTradeGoodsClass.None;
             PostIfBelowMinBuyout = true;
 
@@ -209,7 +262,7 @@ namespace HighVoltz.Composites
             object subCategory = Callbacks.GetSubCategory(Category);
             Properties["SubCategory"] = new MetaProp("SubCategory", subCategory.GetType(),
                 new DisplayNameAttribute("Item SubCategory"));
-            SubCategory = subCategory;
+            SubCategory = (Enum)subCategory;
             RefreshPropertyGrid();
         }
         #endregion
@@ -314,7 +367,7 @@ namespace HighVoltz.Composites
                         queueTimer.Reset();
                         totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and count >= {3} and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8(),IgnoreStackSizeBelow);
+                            ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8(), IgnoreStackSizeBelow);
                         //Logging.Write("****Copy Below this line****");
                         //Logging.Write(lua);
                         //Logging.Write("****End of copy/paste****");
@@ -492,7 +545,7 @@ namespace HighVoltz.Composites
 
         bool subCategoryCheck(WoWItem item)
         {
-            int sub = (int)SubCategory;
+            int sub = Convert.ToInt32(SubCategory);
             if (sub == -1 || sub == 0)
                 return true;
             object val = item.ItemInfo.GetType().GetProperties().FirstOrDefault(t => t.PropertyType == SubCategory.GetType()).GetValue(item.ItemInfo, null);
@@ -516,9 +569,10 @@ namespace HighVoltz.Composites
         {
             get
             {
+                int sub = Convert.ToInt32(SubCategory);
                 return string.Format("{0}: {1}{2}", Name, UseCategory ?
                     string.Format("{0} {1}", Category,
-                    (SubCategory != null && (int)SubCategory != -1 && (int)SubCategory != 0) ?
+                    (SubCategory != null && sub != -1 && sub != 0) ?
                     "(" + SubCategory + ")" : "") : ItemID,
                     AmountType == AmountBasedType.Amount ? " x" + Amount.ToString() : "");
             }
@@ -552,99 +606,6 @@ namespace HighVoltz.Composites
                 PostIfBelowMinBuyout = this.PostIfBelowMinBuyout,
             };
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint val;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("ItemName"))
-                ItemID = reader["ItemName"];
-            MinBuyout = new PropertyBag.GoldEditor(reader["MinBuyout"]);
-            MaxBuyout = new PropertyBag.GoldEditor(reader["MaxBuyout"]);
-            RunTime = (RunTimeType)Enum.Parse(typeof(RunTimeType), reader["RunTime"]);
-            uint.TryParse(reader["Amount"], out val);
-            Amount = val;
-            uint.TryParse(reader["StackSize"], out val);
-            StackSize = val;
-            if (reader.MoveToAttribute("IgnoreStackSizeBelow"))
-            {
-                uint.TryParse(reader["IgnoreStackSizeBelow"], out val);
-                IgnoreStackSizeBelow = val;
-            }
-
-            AmountType = (AmountBasedType)Enum.Parse(typeof(AmountBasedType), reader["AmountType"]);
-            bool boolVal;
-            bool.TryParse(reader["AutoFindAh"], out boolVal);
-            AutoFindAh = boolVal;
-            BidPrecent = reader["BidPrecent"].ToSingle();
-            UndercutPrecent = reader["UndercutPrecent"].ToSingle();
-            if (reader.MoveToAttribute("UseCategory"))
-            {
-                bool.TryParse(reader["UseCategory"], out boolVal);
-                UseCategory = boolVal;
-            }
-            if (reader.MoveToAttribute("Category"))
-            {
-                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
-            }
-            string subCatType = "";
-            if (reader.MoveToAttribute("SubCategoryType"))
-            {
-                subCatType = reader["SubCategoryType"];
-            }
-            if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType))
-            {
-                Type t;
-                if (subCatType != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatType);
-                    t = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    t = typeof(SubCategoryType);
-                object subVal = Activator.CreateInstance(t);
-                subVal = Enum.Parse(t, reader["SubCategory"]);
-                SubCategory = subVal;
-            }
-
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            if (reader.MoveToAttribute("PostIfBelowMinBuyout"))
-            {
-                bool.TryParse(reader["PostIfBelowMinBuyout"], out boolVal);
-                PostIfBelowMinBuyout = boolVal;
-            }
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("MinBuyout", MinBuyout.ToString());
-            writer.WriteAttributeString("MaxBuyout", MaxBuyout.ToString());
-            writer.WriteAttributeString("RunTime", RunTime.ToString());
-            writer.WriteAttributeString("Amount", Amount.ToString());
-            writer.WriteAttributeString("StackSize", StackSize.ToString());
-            writer.WriteAttributeString("IgnoreStackSizeBelow", IgnoreStackSizeBelow.ToString());
-            writer.WriteAttributeString("AmountType", AmountType.ToString());
-            writer.WriteAttributeString("AutoFindAh", AutoFindAh.ToString());
-            writer.WriteAttributeString("BidPrecent", BidPrecent.ToString(CultureInfo.InvariantCulture));
-            writer.WriteAttributeString("UndercutPrecent", UndercutPrecent.ToString(CultureInfo.InvariantCulture));
-            writer.WriteAttributeString("UseCategory", UseCategory.ToString());
-            writer.WriteAttributeString("Category", Category.ToString());
-            writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
-            writer.WriteAttributeString("SubCategory", SubCategory.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("PostIfBelowMinBuyout", PostIfBelowMinBuyout.ToString());
-        }
-        #endregion
     }
     #endregion
 }

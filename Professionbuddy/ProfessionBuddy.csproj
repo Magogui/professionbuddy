@@ -103,7 +103,6 @@
     <Compile Include="Composites\PbDecorator.cs" />
     <Compile Include="Composites\Comment.cs" />
     <Compile Include="Composites\CommonTypes.cs" />
-    <Compile Include="Composites\ContinentMoveToAction.cs" />
     <Compile Include="Composites\CustomAction.cs" />
     <Compile Include="Composites\FlyToAction.cs" />
     <Compile Include="Composites\GetItemFromBankAction.cs" />

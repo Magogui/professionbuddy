@@ -13,7 +13,8 @@ namespace HighVoltz.Composites
     #region Declaration
     public class Declaration : CsharpAction
     {
-         override public string Code
+        [PbXmlAttribute()]
+        override public string Code
         {
             get { return (string)Properties["Code"].Value; }
             set { Properties["Code"].Value = value; }
@@ -42,7 +43,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return string.Format("{0}:({1})",Name,Code);
+                return string.Format("{0}:({1})", Name, Code);
             }
         }
         public override string Help
@@ -56,19 +57,6 @@ namespace HighVoltz.Composites
         {
             return new Declaration() { Code = this.Code };
         }
-
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Code = reader["Code"];
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Code", Code.ToString());
-        }
-        #endregion
     }
     #endregion
 }

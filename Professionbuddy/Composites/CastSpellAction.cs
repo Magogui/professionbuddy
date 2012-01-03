@@ -33,12 +33,14 @@ namespace HighVoltz.Composites
             Craftable,
             Banker,
         }
+        [PbXmlAttribute()]
         public RepeatCalculationType RepeatType
         {
             get { return (RepeatCalculationType)Properties["RepeatType"].Value; }
             set { Properties["RepeatType"].Value = value; }
         }
         public int CalculatedRepeat { get { return CalculateRepeat(); } }
+        [PbXmlAttribute()]
         public int Repeat
         {
             get { return (int)Properties["Repeat"].Value; }
@@ -51,6 +53,7 @@ namespace HighVoltz.Composites
             set { Properties["Casted"].Value = value; }
         }
         // number of times repeated.
+        [PbXmlAttribute()]
         public uint Entry
         {
             get { return (uint)Properties["Entry"].Value; }
@@ -62,16 +65,19 @@ namespace HighVoltz.Composites
         //    get { return (Recipe)Properties["Recipe"].Value; }
         //    set { Properties["Recipe"].Value = value; }
         //}
+        [PbXmlAttribute()]
         public bool CastOnItem
         {
             get { return (bool)Properties["CastOnItem"].Value; }
             set { Properties["CastOnItem"].Value = value; }
         }
+        [PbXmlAttribute()]
         public InventoryType ItemType
         {
             get { return (InventoryType)Properties["ItemType"].Value; }
             set { Properties["ItemType"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint ItemId
         {
             get { return (uint)Properties["ItemId"].Value; }
@@ -371,44 +377,6 @@ namespace HighVoltz.Composites
             }
             return ret;
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint uintVal;
-            bool boolVal;
-            uint.TryParse(reader["Entry"], out uintVal);
-            Entry = uintVal;
-            uint.TryParse(reader["Repeat"], out uintVal);
-            Repeat = (int)uintVal;
-            RepeatType = (RepeatCalculationType)Enum.Parse(typeof(RepeatCalculationType), reader["RepeatType"]);
-            if (reader.MoveToAttribute("CastOnItem"))
-            {
-                bool.TryParse(reader["CastOnItem"], out boolVal);
-                CastOnItem = boolVal;
-            }
-            if (reader.MoveToAttribute("ItemId"))
-            {
-                uint.TryParse(reader["ItemId"], out uintVal);
-                ItemId = uintVal;
-            }
-            if (reader.MoveToAttribute("ItemType"))
-            {
-                ItemType = (InventoryType)Enum.Parse(typeof(InventoryType), reader["ItemType"]);
-            }
-            CheckTradeskillList();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Entry", Entry.ToString());
-            writer.WriteAttributeString("Repeat", Repeat.ToString());
-            writer.WriteAttributeString("RepeatType", RepeatType.ToString());
-            writer.WriteAttributeString("CastOnItem", CastOnItem.ToString());
-            writer.WriteAttributeString("ItemId", ItemId.ToString());
-            writer.WriteAttributeString("ItemType", ItemType.ToString());
-        }
-        #endregion
     }
     #endregion
 

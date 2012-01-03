@@ -21,6 +21,7 @@ namespace HighVoltz.Composites
     public class If : GroupComposite, ICSharpCode, IPBComposite, ICloneable
     {
         #region Properties
+        [XmlIgnore()]
         virtual public PropertyBag Properties { get; private set; }
         protected PropertyGrid propertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
         protected void RefreshPropertyGrid()
@@ -33,12 +34,13 @@ namespace HighVoltz.Composites
         #endregion
         protected readonly static object _lockObject = new object();
         virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
+        [PbXmlAttribute()]
         virtual public string Condition
         {
             get { return (string)Properties["Condition"].Value; }
             set { Properties["Condition"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         virtual public bool IgnoreCanRun
         {
             get { return (bool)Properties["IgnoreCanRun"].Value; }
@@ -121,7 +123,6 @@ namespace HighVoltz.Composites
                 if (node.LastStatus == RunStatus.Success)
                 {
                     yield return RunStatus.Success;
-                    //yield break; don't break iteration.. While Condition return sucess if at end of loop
                 }
             }
             _executed = true;
@@ -129,38 +130,6 @@ namespace HighVoltz.Composites
             yield break;
             //}
         }
-
-        //private IEnumerator<RunStatus> _current;
-        //public override RunStatus Tick(object context)
-        //{
-        //    //lock (Locker)
-        //    //{
-        //        if (LastStatus.HasValue && LastStatus != RunStatus.Running)
-
-        //        {
-        //            return LastStatus.Value;
-        //        }
-        //        if (_current == null)
-        //        {
-        //            LastStatus = null;
-        //            _current = Execute(context).GetEnumerator();
-        //        }
-        //        if (_current.MoveNext())
-        //        {
-        //            LastStatus = _current.Current;
-        //        }
-        //        //else
-        //        //{
-        //        //    throw new ApplicationException("Nothing to run? Somethings gone terribly, terribly wrong!");
-        //        //}
-
-        //        //if (LastStatus != RunStatus.Running)
-        //        //{
-        //        //    Stop(context);
-        //        //}
-        //        return LastStatus ?? RunStatus.Failure ;
-        //     //}
-        //}
 
         public virtual Delegate CompiledMethod
         {
@@ -198,14 +167,6 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as If);
             }
         }
-        //virtual public bool IsDone
-        //{
-        //    get
-        //    {
-        //        return Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count || !CanRun(null);
-        //    }
-        //}
-
         bool _executed = false;
         /// <summary>
         /// Returns true if the If Condition is finished executing its children or condition isn't met.
@@ -245,72 +206,6 @@ namespace HighVoltz.Composites
         }
 
         virtual public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
-
-        #region XmlSerializer
-        virtual public void ReadXml(XmlReader reader)
-        {
-            Condition = reader["Condition"];
-            bool boolVal;
-            bool.TryParse(reader["IgnoreCanRun"], out boolVal);
-            IgnoreCanRun = boolVal;
-            // stop reading since there are no child elements
-            if (reader.IsEmptyElement)
-            {
-                reader.ReadStartElement();
-                return;
-            }
-            reader.ReadStartElement();
-            while (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.Comment)
-            {
-                if (reader.NodeType == XmlNodeType.Comment)
-                {
-                    AddChild(new Comment(reader.Value));
-                    reader.Skip();
-                }
-                else
-                {
-                    Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
-                    if (type != null)
-                    {
-                        IPBComposite comp = (IPBComposite)Activator.CreateInstance(type);
-                        if (comp != null)
-                        {
-                            comp.ReadXml(reader);
-                            AddChild((Composite)comp);
-                        }
-                    }
-                    else
-                    {
-                        Logging.Write(System.Drawing.Color.Red, "Failed to load type {0}", type.Name);
-                    }
-                }
-            }
-            if (reader.NodeType == XmlNodeType.EndElement)
-                reader.ReadEndElement();
-        }
-
-        virtual public void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Condition", Condition);
-            writer.WriteAttributeString("IgnoreCanRun", IgnoreCanRun.ToString());
-            foreach (IPBComposite comp in Children)
-            {
-                if (comp is Comment)
-                {
-                    writer.WriteComment(((Comment)comp).Text);
-                }
-                else
-                {
-                    writer.WriteStartElement(comp.GetType().Name);
-                    ((IXmlSerializable)comp).WriteXml(writer);
-                    writer.WriteEndElement();
-                }
-            }
-        }
-
-        public System.Xml.Schema.XmlSchema GetSchema() { return null; }
-
-        #endregion
     }
 
 
@@ -369,57 +264,6 @@ namespace HighVoltz.Composites
 
     //    override public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
 
-    //    #region XmlSerializer
-    //    override public void ReadXml(XmlReader reader)
-    //    {
-    //        PrioritySelector ps = (PrioritySelector)DecoratedChild;
-    //        Condition = reader["Condition"];
-    //        bool boolVal;
-    //        bool.TryParse(reader["IgnoreCanRun"], out boolVal);
-    //        IgnoreCanRun = boolVal;
-    //        reader.MoveToAttribute("ChildrenCount");
-    //        int count = reader.ReadContentAsInt();
-    //        reader.ReadStartElement();
-    //        if (count > 0)
-    //        {
-    //            for (int i = 0; i < count; i++)
-    //            {
-    //                Type type = Type.GetType("HighVoltz.Composites." + reader.Name);
-    //                if (type != null)
-    //                {
-    //                    IPBComposite comp = (IPBComposite)Activator.CreateInstance(type);
-    //                    if (comp != null)
-    //                    {
-    //                        comp.ReadXml(reader);
-    //                        ps.AddChild((Composite)comp);
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    Logging.Write(System.Drawing.Color.Red, "Failed to load type {0}", type.Name);
-    //                }
-    //            }
-    //            if (reader.NodeType == XmlNodeType.EndElement)
-    //                reader.ReadEndElement();
-    //        }
-    //    }
-
-    //    override public void WriteXml(XmlWriter writer)
-    //    {
-    //        PrioritySelector ps = (PrioritySelector)DecoratedChild;
-    //        writer.WriteAttributeString("Condition", Condition);
-    //        writer.WriteAttributeString("IgnoreCanRun", IgnoreCanRun.ToString());
-    //        writer.WriteStartAttribute("ChildrenCount");
-    //        writer.WriteValue(ps.Children.Count);
-    //        writer.WriteEndAttribute();
-    //        foreach (IPBComposite comp in ps.Children)
-    //        {
-    //            writer.WriteStartElement(comp.GetType().Name);
-    //            ((IXmlSerializable)comp).WriteXml(writer);
-    //            writer.WriteEndElement();
-    //        }
-    //    }
-
-    //    #endregion
+   
     //}
 }

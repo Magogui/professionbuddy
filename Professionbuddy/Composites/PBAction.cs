@@ -19,7 +19,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    public interface IPBComposite : ICloneable, IXmlSerializable
+    public interface IPBComposite : ICloneable
     {
         PropertyBag Properties { get; }
         string Name { get; }
@@ -31,7 +31,7 @@ namespace HighVoltz.Composites
     }
 
     #region PBAction
-    public abstract class PBAction : Action, IPBComposite, IXmlSerializable
+    public abstract class PBAction : Action, IPBComposite
     {
         protected Professionbuddy Pb;
         protected LocalPlayer me = ObjectManager.Me;
@@ -43,7 +43,7 @@ namespace HighVoltz.Composites
         }
         virtual public string Help { get { return ""; } }
         virtual public string Name { get { return "PBAction"; } }
-        virtual public string Title { get { return string.Format("({0})", Name); } }
+        virtual public string Title { get { return string.Format("({0})", Name); } }        [XmlIgnore()]
         virtual public System.Drawing.Color Color { get { return System.Drawing.Color.Black; } }
         protected PropertyGrid propertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
         protected void RefreshPropertyGrid()
@@ -62,6 +62,7 @@ namespace HighVoltz.Composites
         {
             HasRunOnce = true;
         }
+                [XmlIgnore()]
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()
@@ -73,17 +74,6 @@ namespace HighVoltz.Composites
             IsDone = false;
             HasRunOnce = false;
         }
-        #region XmlSerializer
-        virtual public void ReadXml(XmlReader reader)
-        {
-            reader.ReadStartElement();
-        }
-        virtual public void WriteXml(XmlWriter writer)
-        {
-        }
-        public System.Xml.Schema.XmlSchema GetSchema() { return null; }
-        #endregion
-
     }
     #endregion
 }

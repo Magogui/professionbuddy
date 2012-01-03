@@ -35,22 +35,25 @@ namespace HighVoltz.Composites
         public enum NavigationType { Navigator, ClickToMove };
 
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public MoveToType MoveType
         {
             get { return (MoveToType)Properties["MoveType"].Value; }
             set { Properties["MoveType"].Value = (MoveToType)value; }
         }
+        [PbXmlAttribute()]
         public NavigationType Pathing
         {
             get { return (NavigationType)Properties["Pathing"].Value; }
             set { Properties["Pathing"].Value = (NavigationType)value; }
         }
+        [PbXmlAttribute()]
         public uint Entry
         {
             get { return (uint)Properties["Entry"].Value; }
@@ -292,33 +295,6 @@ namespace HighVoltz.Composites
         {
             return new MoveToAction() { MoveType = this.MoveType, Entry = this.Entry, loc = this.loc, Location = this.Location, Pathing = this.Pathing };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            MoveType = (MoveToType)Enum.Parse(typeof(MoveToType), reader["MoveType"]);
-            if (reader.MoveToAttribute("Pathing"))
-                Pathing = (NavigationType)Enum.Parse(typeof(NavigationType), reader["Pathing"]);
-            uint num;
-            uint.TryParse(reader["Entry"], out num);
-            Entry = num;
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("MoveType", MoveType.ToString());
-            writer.WriteAttributeString("Pathing", Pathing.ToString());
-            writer.WriteAttributeString("Entry", Entry.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
     }
     #endregion
 }

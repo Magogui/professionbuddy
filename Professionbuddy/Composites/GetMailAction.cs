@@ -25,32 +25,39 @@ namespace HighVoltz.Composites
             AllItems,
             Specific,
         }
+        [PbXmlAttribute()]
         public GetMailActionType GetMailType
         {
             get { return (GetMailActionType)Properties["GetMailType"].Value; }
             set { Properties["GetMailType"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [PbXmlAttribute("Entry")]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool CheckNewMail
         {
             get { return (bool)Properties["CheckNewMail"].Value; }
             set { Properties["CheckNewMail"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint MinFreeBagSlots
         {
             get { return (uint)Properties["MinFreeBagSlots"].Value; }
             set { Properties["MinFreeBagSlots"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindMailBox
         {
             get { return (bool)Properties["AutoFindMailBox"].Value; }
             set { Properties["AutoFindMailBox"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -286,50 +293,6 @@ namespace HighVoltz.Composites
                 CheckNewMail = this.CheckNewMail,
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint val;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"];
-            if (reader.MoveToAttribute("CheckNewMail"))
-            {
-                bool boolVal;
-                bool.TryParse(reader["CheckNewMail"], out boolVal);
-                CheckNewMail = boolVal;
-            }
-            GetMailType = (GetMailActionType)Enum.Parse(typeof(GetMailActionType), reader["GetMailType"]);
-            bool autofind;
-            bool.TryParse(reader["AutoFindMailBox"], out autofind);
-            AutoFindMailBox = autofind;
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            if (reader.MoveToAttribute("MinFreeBagSlots"))
-            {
-                uint.TryParse(reader["MinFreeBagSlots"], out val);
-                MinFreeBagSlots = val;
-            }
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("CheckNewMail", CheckNewMail.ToString());
-            writer.WriteAttributeString("GetMailType", GetMailType.ToString());
-            writer.WriteAttributeString("AutoFindMailBox", AutoFindMailBox.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("MinFreeBagSlots", MinFreeBagSlots.ToString());
-        }
-        #endregion
     }
     #endregion
 }

@@ -16,6 +16,7 @@ namespace HighVoltz.Composites
 {
     public class ChangeBotAction : PBAction
     {
+        [PbXmlAttribute()]
         public string BotName
         {
             get { return (string)Properties["BotName"].Value; }
@@ -103,16 +104,5 @@ namespace HighVoltz.Composites
         {
             return new ChangeBotAction() { BotName = this.BotName };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            BotName = reader["BotName"];
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("BotName", BotName.ToString());
-        }
-        #endregion
     }
 }

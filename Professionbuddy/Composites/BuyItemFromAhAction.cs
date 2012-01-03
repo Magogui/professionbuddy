@@ -32,45 +32,51 @@ namespace HighVoltz.Composites
             RecipeMats,
             MaterialList,
         }
+        [PbXmlAttribute()]
         public ItemType ItemListType
         {
             get { return (ItemType)Properties["ItemListType"].Value; }
             set { Properties["ItemListType"].Value = value; }
         }
+        [PbXmlAttribute()]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-
+        [PbXmlAttribute()]
+        [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MaxBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MaxBuyout"].Value; }
             set { Properties["MaxBuyout"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public uint Amount
         {
             get { return (uint)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool BuyAdditively
         {
             get { return (bool)Properties["BuyAdditively"].Value; }
             set { Properties["BuyAdditively"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public bool AutoFindAh
         {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool BidOnItem
         {
             get { return (bool)Properties["BidOnItem"].Value; }
             set { Properties["BidOnItem"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -379,56 +385,6 @@ namespace HighVoltz.Composites
                 BuyAdditively = this.BuyAdditively,
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint val;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"];
-
-            MaxBuyout = new PropertyBag.GoldEditor(reader["MaxBuyout"]);
-            uint.TryParse(reader["Amount"], out val);
-            Amount = val;
-            ItemListType = (ItemType)Enum.Parse(typeof(ItemType), reader["ItemListType"]);
-            bool boolVal;
-            bool.TryParse(reader["AutoFindAh"], out boolVal);
-            AutoFindAh = boolVal;
-
-            if (reader.MoveToAttribute("BuyAdditively"))
-            {
-                bool.TryParse(reader["BuyAdditively"], out boolVal);
-                BuyAdditively = boolVal;
-            }
-
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            if (reader.MoveToAttribute("BidOnItem"))
-            {
-                bool.TryParse(reader["BidOnItem"], out boolVal);
-                BidOnItem = boolVal;
-            }
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("MaxBuyout", MaxBuyout.ToString());
-            writer.WriteAttributeString("Amount", Amount.ToString());
-            writer.WriteAttributeString("ItemListType", ItemListType.ToString());
-            writer.WriteAttributeString("AutoFindAh", AutoFindAh.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("BidOnItem", BidOnItem.ToString());
-            writer.WriteAttributeString("BuyAdditively", BuyAdditively.ToString());
-        }
-        #endregion
     }
     #endregion
 }

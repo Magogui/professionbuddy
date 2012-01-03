@@ -12,6 +12,7 @@ namespace HighVoltz.Composites
     class CustomAction : CsharpAction
     {
         public System.Action<object> Action { get; set; }
+        [PbXmlAttribute()]
         override public string Code
         {
             get { return (string)Properties["Code"].Value; }
@@ -89,18 +90,6 @@ namespace HighVoltz.Composites
                 Action = (System.Action<object>)value;
             }
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Code = reader["Code"];
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Code", Code.ToString());
-        }
-        #endregion
     }
     #endregion
 }

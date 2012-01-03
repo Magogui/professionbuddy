@@ -22,29 +22,31 @@ namespace HighVoltz.Composites
             NPC,
             GameObject,
         }
+        [PbXmlAttribute()]
         public InteractActionType InteractType
         {
             get { return (InteractActionType)Properties["InteractType"].Value; }
             set { Properties["InteractType"].Value = value; }
         }
-        /// <summary>
-        /// NPC/Object Entry ID
-        /// </summary>
+        [PbXmlAttribute()]
         public uint Entry
         {
             get { return (uint)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint InteractDelay
         {
             get { return (uint)Properties["InteractDelay"].Value; }
             set { Properties["InteractDelay"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWGameObjectType GameObjectType
         {
             get { return (WoWGameObjectType)Properties["GameObjectType"].Value; }
             set { Properties["GameObjectType"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWSpellFocus SpellFocus
         {
             get { return (WoWSpellFocus)Properties["SpellFocus"].Value; }
@@ -59,11 +61,11 @@ namespace HighVoltz.Composites
             Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof(WoWGameObjectType), new DisplayNameAttribute("GameObject Type"));
             Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof(WoWSpellFocus), new DisplayNameAttribute("SpellFocus"));
 
-            InteractDelay=Entry = 0u;
+            InteractDelay = Entry = 0u;
             InteractType = InteractActionType.GameObject;
             GameObjectType = WoWGameObjectType.Mailbox;
             SpellFocus = WoWSpellFocus.Anvil;
-            
+
             Properties["SpellFocus"].Show = false;
             Properties["InteractType"].PropertyChanged += new EventHandler(InteractionAction_PropertyChanged);
             Properties["GameObjectType"].PropertyChanged += InteractionAction_PropertyChanged;
@@ -88,10 +90,10 @@ namespace HighVoltz.Composites
                 if (obj != null)
                 {
                     if (!obj.WithinInteractRange)
-                        Util.MoveTo(WoWMathHelper.CalculatePointFrom(me.Location,obj.Location,3));
+                        Util.MoveTo(WoWMathHelper.CalculatePointFrom(me.Location, obj.Location, 3));
                     else
                     {
-                        if (InteractDelay >0 && (!interactSw.IsRunning || interactSw.ElapsedMilliseconds < InteractDelay))
+                        if (InteractDelay > 0 && (!interactSw.IsRunning || interactSw.ElapsedMilliseconds < InteractDelay))
                         {
                             interactSw.Start();
                         }
@@ -159,31 +161,6 @@ namespace HighVoltz.Composites
                 InteractDelay = this.InteractDelay,
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint num;
-            uint.TryParse(reader["Entry"], out num);
-            Entry = num;
-            if (reader.MoveToAttribute("InteractDelay"))
-            {
-                uint.TryParse(reader["InteractDelay"], out num);
-                InteractDelay = num;
-            }
-            InteractType = (InteractActionType)Enum.Parse(typeof(InteractActionType), reader["InteractType"]);
-            GameObjectType = (WoWGameObjectType)Enum.Parse(typeof(WoWGameObjectType), reader["GameObjectType"]);
-            SpellFocus = (WoWSpellFocus)Enum.Parse(typeof(WoWSpellFocus), reader["SpellFocus"]);
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Entry", Entry.ToString());
-            writer.WriteAttributeString("InteractDelay", InteractDelay.ToString());
-            writer.WriteAttributeString("InteractType", InteractType.ToString());
-            writer.WriteAttributeString("GameObjectType", GameObjectType.ToString());
-            writer.WriteAttributeString("SpellFocus", SpellFocus.ToString());
-        }
-        #endregion
     }
     #endregion
 }

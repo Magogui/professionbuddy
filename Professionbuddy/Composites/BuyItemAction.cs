@@ -25,27 +25,34 @@ namespace HighVoltz.Composites
             SpecificItem,
             Material,
         }
+        [PbXmlAttribute()]
         public uint NpcEntry {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
+        [PbXmlAttribute()]
+        [PbXmlAttribute("Entry")]
         public string ItemID {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public BuyItemActionType BuyItemType {
             get { return (BuyItemActionType)Properties["BuyItemType"].Value; }
             set { Properties["BuyItemType"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint Count {
             get { return (uint)Properties["Count"].Value; }
             set { Properties["Count"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool BuyAdditively
         {
             get { return (bool)Properties["BuyAdditively"].Value; }
@@ -242,49 +249,6 @@ namespace HighVoltz.Composites
                 BuyAdditively = this.BuyAdditively
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader) {
-            uint val;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"]; 
-            uint.TryParse(reader["Count"], out val);
-            Count = val;
-            BuyItemType = (BuyItemActionType)Enum.Parse(typeof(BuyItemActionType), reader["BuyItemType"]);
-            if (reader.MoveToAttribute("NpcEntry"))
-            {
-                uint.TryParse(reader["NpcEntry"], out val);
-                NpcEntry = val;
-            }
-            if (reader.MoveToAttribute("BuyAdditively"))
-            {
-                bool boolVal = false;
-                bool.TryParse(reader["BuyAdditively"], out boolVal);
-                BuyAdditively = boolVal;
-            }
-            if (reader.MoveToAttribute("X"))
-            {
-                float x, y, z;
-                x = reader["X"].ToSingle();
-                y = reader["Y"].ToSingle();
-                z = reader["Z"].ToSingle();
-                loc = new WoWPoint(x, y, z);
-                Location = loc.ToInvariantString();
-            }
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer) {
-            writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("Count", Count.ToString());
-            writer.WriteAttributeString("BuyItemType", BuyItemType.ToString());
-            writer.WriteAttributeString("BuyAdditively", BuyAdditively.ToString());
-        }
-        #endregion
     }
     #endregion
 }

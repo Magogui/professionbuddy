@@ -78,14 +78,15 @@ namespace HighVoltz
         static public void GenorateDynamicCode()
         {
             CsharpCodeDict.Clear();
-            StoreMethodName(Professionbuddy.Instance.CurrentProfile.Branch);
+            StoreMethodName(Professionbuddy.Instance.PbBehavior);
             // check if theres anything to compile
             if (CsharpCodeDict.Count == 0)
                 return;
             Type dynamicType = CompileAndLoad();
-            _codeDriverInstance = Activator.CreateInstance(dynamicType);
             if (dynamicType != null)
             {
+                _codeDriverInstance = Activator.CreateInstance(dynamicType);
+
                 foreach (MethodInfo method in dynamicType.GetMethods())
                 {
                     if (CsharpCodeDict.ContainsKey(method.Name))
@@ -236,7 +237,7 @@ namespace HighVoltz
                 foreach (var met in noneDeclarations)
                 {
                     if (met.Value.CodeType == CsharpCodeType.BoolExpression)
-                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine,""));
+                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
                     else if (met.Value.CodeType == CsharpCodeType.Statements)
                         CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
                     met.Value.CodeLineNumber = currentLine++;
@@ -364,7 +365,7 @@ namespace HighVoltz
             _isSwitchingToons = true;
             // reset all actions 
             Professionbuddy.Instance.IsRunning = false;
-            foreach (IPBComposite comp in Professionbuddy.Instance.CurrentProfile.Branch.Children)
+            foreach (IPBComposite comp in Professionbuddy.Instance.PbBehavior.Children)
             {
                 comp.Reset();
             }

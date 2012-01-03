@@ -26,47 +26,56 @@ namespace HighVoltz.Composites
             SpecificItem,
             Materials,
         }
+        [PbXmlAttribute()]
         public BankType Bank
         {
             get { return (BankType)Properties["Bank"].Value; }
             set { Properties["Bank"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint MinFreeBagSlots
         {
             get { return (uint)Properties["MinFreeBagSlots"].Value; }
             set { Properties["MinFreeBagSlots"].Value = value; }
         }
+        [PbXmlAttribute()]
         public BankWithdrawlItemType GetItemfromBankType
         {
             get { return (BankWithdrawlItemType)Properties["GetItemfromBankType"].Value; }
             set { Properties["GetItemfromBankType"].Value = value; }
         }
+        [PbXmlAttribute()]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
+        [PbXmlAttribute()]
         public int Amount
         {
             get { return (int)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindBank
         {
             get { return (bool)Properties["AutoFindBank"].Value; }
             set { Properties["AutoFindBank"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool WithdrawAdditively
         {
             get { return (bool)Properties["WithdrawAdditively"].Value; }
             set { Properties["WithdrawAdditively"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -465,58 +474,6 @@ namespace HighVoltz.Composites
                 WithdrawAdditively = this.WithdrawAdditively
             };
         }
-
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint id;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"];
-
-            uint.TryParse(reader["Amount"], out id);
-            Amount = (int)id;
-            Bank = (BankType)Enum.Parse(typeof(BankType), reader["Bank"]);
-            GetItemfromBankType = (BankWithdrawlItemType)Enum.Parse(typeof(BankWithdrawlItemType), reader["GetItemfromBankType"]);
-            uint.TryParse(reader["NpcEntry"], out id);
-            NpcEntry = id;
-            bool boolVal;
-            bool.TryParse(reader["AutoFindBank"], out boolVal);
-            AutoFindBank = boolVal;
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            if (reader.MoveToAttribute("MinFreeBagSlots"))
-            {
-                uint.TryParse(reader["MinFreeBagSlots"], out id);
-                MinFreeBagSlots = id;
-            }
-            if (reader.MoveToAttribute("WithdrawAdditively"))
-            {
-                bool.TryParse(reader["WithdrawAdditively"], out boolVal);
-                WithdrawAdditively = boolVal;
-            }
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("Amount", Amount.ToString());
-            writer.WriteAttributeString("Bank", Bank.ToString());
-            writer.WriteAttributeString("GetItemfromBankType", GetItemfromBankType.ToString());
-            writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
-            writer.WriteAttributeString("AutoFindBank", AutoFindBank.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-            writer.WriteAttributeString("MinFreeBagSlots", MinFreeBagSlots.ToString());
-            writer.WriteAttributeString("WithdrawAdditively", WithdrawAdditively.ToString());
-        }
-        #endregion
     }
     #endregion
 

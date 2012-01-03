@@ -22,25 +22,25 @@ namespace HighVoltz.Composites
         public enum DeActionType { Mill = 0, Prospect, Disenchant }
         public enum ItemTargetType { Specific, All }
         public enum DeItemQualites { Epic, Rare, Uncommon }
-
+        [PbXmlAttribute()]
         public DeActionType ActionType
         {
             get { return (DeActionType)Properties["ActionType"].Value; }
             set { Properties["ActionType"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public ItemTargetType ItemTarget
         {
             get { return (ItemTargetType)Properties["ItemTarget"].Value; }
             set { Properties["ItemTarget"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public DeItemQualites ItemQuality
         {
             get { return (DeItemQualites)Properties["ItemQuality"].Value; }
             set { Properties["ItemQuality"].Value = value; }
         }
-
+        [PbXmlAttribute()]
         public int ItemId
         {
             get { return (int)Properties["ItemId"].Value; }
@@ -93,7 +93,6 @@ namespace HighVoltz.Composites
 
         protected override RunStatus Run(object context)
         {
-
             if (!IsDone)
             {
                 if (me.IsFlying)
@@ -243,25 +242,6 @@ namespace HighVoltz.Composites
                 ItemId = this.ItemId
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            ActionType = (DeActionType)Enum.Parse(typeof(DeActionType), reader["ActionType"]);
-            ItemTarget = (ItemTargetType)Enum.Parse(typeof(ItemTargetType), reader["ItemTarget"]);
-            ItemQuality = (DeItemQualites)Enum.Parse(typeof(DeItemQualites), reader["ItemQuality"]);
-            int id = 0;
-            int.TryParse(reader["ItemId"], out id);
-            ItemId = id;
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("ActionType", ActionType.ToString());
-            writer.WriteAttributeString("ItemTarget", ItemTarget.ToString());
-            writer.WriteAttributeString("ItemQuality", ItemQuality.ToString());
-            writer.WriteAttributeString("ItemId", ItemId.ToString());
-        }
-        #endregion
     }
     #endregion
     static class WoWitemExt

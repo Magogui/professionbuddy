@@ -192,7 +192,7 @@ namespace HighVoltz
 
         public void LoadDefaultValues()
         {
-            List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.CurrentProfile.Branch);
+            List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.PbBehavior);
             foreach (var setting in settingsList)
             {
                 if (!Settings.ContainsKey(setting.SettingName))

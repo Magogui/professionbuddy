@@ -18,11 +18,13 @@ namespace HighVoltz.Composites
             Honorbuddy,
             Professionbuddy,
         }
+        [PbXmlAttribute()]
         public string Path
         {
             get { return (string)Properties["Path"].Value; }
             set { Properties["Path"].Value = value; }
         }
+        [PbXmlAttribute()]
         public LoadProfileType ProfileType
         {
             get { return (LoadProfileType)Properties["ProfileType"].Value; }
@@ -33,7 +35,6 @@ namespace HighVoltz.Composites
         {
             Properties["Path"] = new MetaProp("Path", typeof(string), new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)));
             Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType));
-
             Path = "";
             ProfileType = LoadProfileType.Honorbuddy;
 
@@ -104,19 +105,6 @@ namespace HighVoltz.Composites
         {
             return new LoadProfileAction() { Path = this.Path, ProfileType = this.ProfileType };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            Path = reader["Path"];
-            ProfileType = (LoadProfileType)Enum.Parse(typeof(LoadProfileType), reader["ProfileType"]);
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Path", Path);
-            writer.WriteAttributeString("ProfileType", ProfileType.ToString());
-        }
-        #endregion
     }
     #endregion
 }

@@ -247,7 +247,7 @@ namespace HighVoltz
             if (ActionTree.SelectedNode != null)
                 selectedIndex = ActionTree.Nodes.IndexOf(ActionTree.SelectedNode);
             ActionTree.Nodes.Clear();
-            foreach (IPBComposite composite in PB.CurrentProfile.Branch.Children)
+            foreach (IPBComposite composite in PB.PbBehavior.Children)
             {
                 TreeNode node = new TreeNode(composite.Title);
                 node.ForeColor = composite.Color;
@@ -405,7 +405,7 @@ namespace HighVoltz
             else
             {
                 ActionTree.Nodes.Add(newNode);
-                PB.CurrentProfile.Branch.AddChild((Composite)newNode.Tag);
+                PB.PbBehavior.AddChild((Composite)newNode.Tag);
             }
             ActionTree.ResumeLayout();
         }
@@ -567,22 +567,20 @@ namespace HighVoltz
         void PopulateActionGridView()
         {
             ActionGridView.Rows.Clear();
-            Assembly asm = Assembly.GetExecutingAssembly();
-            foreach (Type type in asm.GetTypes())
+            IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
+                                        where (typeof(IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
+                                        select t;
+            foreach (Type type in pbTypes)
             {
-                if (type.GetInterface("IPBComposite") != null && !type.IsAbstract)
-                {
-                    IPBComposite pa = (IPBComposite)Activator.CreateInstance(type);
-                    DataGridViewRow row = new DataGridViewRow();
-                    DataGridViewTextBoxCell cell = new DataGridViewTextBoxCell();
-                    cell.Value = pa.Name;
-                    row.Cells.Add(cell);
-                    row.Tag = pa;
-                    row.Height = 16;
-                    ActionGridView.Rows.Add(row);
-                    row.DefaultCellStyle.ForeColor = pa.Color;
-                    //row.DefaultCellStyle.SelectionBackColor = pa.Color;
-                }
+                IPBComposite pa = (IPBComposite)Activator.CreateInstance(type);
+                DataGridViewRow row = new DataGridViewRow();
+                DataGridViewTextBoxCell cell = new DataGridViewTextBoxCell();
+                cell.Value = pa.Name;
+                row.Cells.Add(cell);
+                row.Tag = pa;
+                row.Height = 16;
+                ActionGridView.Rows.Add(row);
+                row.DefaultCellStyle.ForeColor = pa.Color;
             }
         }
         #endregion
@@ -914,7 +912,7 @@ namespace HighVoltz
             //    Logging.Write("{0} {1}", kv.Key, kv.Value);
 
             Logging.Write("** ActionSelector **");
-            printComposite(PB.CurrentProfile.Branch, 0);
+            printComposite(PB.PbBehavior, 0);
 
             //Logging.Write("** Material List **");
             //foreach (var kv in PB.MaterialList)

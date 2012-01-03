@@ -32,6 +32,9 @@ using HighVoltz.Composites;
 
 using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Xml.Linq;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace HighVoltz
 {
@@ -40,7 +43,7 @@ namespace HighVoltz
         public PbProfile()
         {
             ProfilePath = XmlPath = "";
-            Branch = new PrioritySelector();
+            //Branch = new PrioritySelector();
         }
         public PbProfile(string path)
         {
@@ -58,7 +61,7 @@ namespace HighVoltz
         /// <summary>
         /// Profile behavior.
         /// </summary>
-        public PrioritySelector Branch { get; protected set; }
+        //public PrioritySelector Branch { get; protected set; }
 
         public PbDecorator LoadFromFile(string path)
         {
@@ -88,20 +91,8 @@ namespace HighVoltz
                             }
                         }
                     }
-                    Branch.Children.Clear();
-                    PbDecorator idComp;
-                    XmlReaderSettings settings = new XmlReaderSettings();
-                    settings.IgnoreWhitespace = true;
-                    settings.IgnoreProcessingInstructions = true;
-                    settings.IgnoreComments = false;
-
-                    using (XmlReader reader = XmlReader.Create(path, settings))
-                    {
-                        idComp = new PbDecorator(Branch);
-                        idComp.ReadXml(reader);
-                    }
                     XmlPath = path;
-                    return idComp;
+                    return (PbDecorator)Load(XElement.Load(path), new PbDecorator() as GroupComposite);
                 }
                 else
                 {
@@ -112,18 +103,169 @@ namespace HighVoltz
             catch (Exception ex) { Professionbuddy.Err(ex.ToString()); return null; }
         }
 
+        GroupComposite Load(XElement xml, GroupComposite comp)
+        {
+            foreach (XNode node in xml.Nodes())
+            {
+                if (node.NodeType == XmlNodeType.Comment)
+                {
+                    comp.AddChild(new Comment(((XComment)node).Value));
+                }
+                else if (node.NodeType == XmlNodeType.Element)
+                {
+                    XElement element = (XElement)node;
+                    Type type = Type.GetType("HighVoltz.Composites." + element.Name);
+                    if (type == null)
+                    {
+                        IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
+                                                    where (typeof(IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
+                                                    select t;
+                        type = pbTypes.FirstOrDefault(t => t.GetCustomAttributes(typeof(XmlRootAttribute), true).Any(a => ((XmlRootAttribute)a).ElementName == element.Name));
+                        if (pbTypes == null)
+                            throw new InvalidOperationException(string.Format("Unable to bind XML Element: {0} to a Type", element.Name));
+                    }
+                    Composite pbComp = (Composite)Activator.CreateInstance(type);
+                    var pbXmlAttrs = from pi in type.GetProperties()
+                                     from attr in (PbXmlAttributeAttribute[])pi.GetCustomAttributes(typeof(PbXmlAttributeAttribute), true)
+                                     where attr != null
+                                     let name = attr.AttributeName != null ? attr.AttributeName : pi.Name
+                                     select new { name, pi };
+
+                    Dictionary<string, PropertyInfo> piDict = pbXmlAttrs.ToDictionary(kv => kv.name, kv => kv.pi);
+                    Dictionary<string, string> attributes = element.Attributes().ToDictionary(k => k.Name.ToString(), v => v.Value);
+                    // use legacy X,Y,Z location for backwards compatability
+                    if (attributes.ContainsKey("X"))
+                    {
+                        string location = string.Format("{0},{1},{2}", attributes["X"], attributes["Y"], attributes["Z"]);
+                        piDict["Location"].SetValue(pbComp, location, null);
+                        attributes.Remove("X");
+                        attributes.Remove("Y");
+                        attributes.Remove("Z");
+                    }
+                    foreach (KeyValuePair<string, string> attr in attributes)
+                    {
+                        if (piDict.ContainsKey(attr.Key))
+                        {
+                            PropertyInfo pi = piDict[attr.Key];
+                            // check if there is a type converter attached
+                            TypeConverterAttribute typeConverterAttr = (TypeConverterAttribute)pi.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
+                            if (typeConverterAttr != null)
+                            {
+                                try
+                                {
+                                    TypeConverter typeConverter = (TypeConverter)Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
+                                    if (typeConverter.CanConvertFrom(typeof(string)))
+                                    {
+                                        pi.SetValue(pbComp, typeConverter.ConvertFrom(null, System.Globalization.CultureInfo.CurrentCulture, attr.Value), null);
+                                    }
+                                    else
+                                        Professionbuddy.Err("The TypeConvert {0} can not convert from string.", typeConverterAttr.ConverterTypeName);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Professionbuddy.Err("Type conversion for {0} has failed.\n{1}", type.Name + attr.Key, ex);
+                                }
+                            }
+                            else
+                            {
+                                if (pi.PropertyType.IsEnum)
+                                    pi.SetValue(pbComp, Enum.Parse(pi.PropertyType, attr.Value), null);
+                                else
+                                    pi.SetValue(pbComp, Convert.ChangeType(attr.Value, pi.PropertyType), null);
+                            }
+                        }
+                        else
+                            Professionbuddy.Err("Unable to bind xml attribute: {0} to Type: {1}", attr.Key, type);
+                    }
+                    if (pbComp is GroupComposite)
+                        Load(element, pbComp as GroupComposite);
+                    comp.AddChild(pbComp);
+                }
+            }
+            return comp;
+        }
+
+        static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
+        {
+            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path) &&
+                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
+            {
+                Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction)comp).Path, UriKind.Relative));
+                string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);
+                string profilePath = Path.Combine(pbProfileDirectory, ((LoadProfileAction)comp).Path);
+                if (!dict.ContainsKey(profilePath))
+                    dict.Add(profilePath, profileUri);
+            }
+            if (comp is GroupComposite)
+            {
+                foreach (Composite c in ((GroupComposite)comp).Children)
+                {
+                    GetHbprofiles(pbProfilePath, c, dict);
+                }
+            }
+        }
 
         public void SaveXml(string file)
         {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
-            using (XmlWriter writer = XmlWriter.Create(file, settings))
-            {
-                ((PbRootComposite)Professionbuddy.Instance.Root).PbBotBase.WriteXml(writer);
-            }
+            Save(new XElement("Professionbuddy"), Professionbuddy.Instance.PbBehavior).Save(file);
             XmlPath = file;
         }
 
+        XElement Save(XElement xml, GroupComposite comp)
+        {
+            foreach (Composite pbComp in comp.Children)
+            {
+                if (pbComp is Comment)
+                {
+                    xml.Add(new XComment(((Comment)pbComp).Text));
+                }
+                else
+                {
+                    XElement newElement = new XElement(pbComp.GetType().Name);
+                    XmlRootAttribute rootAttr = (XmlRootAttribute)pbComp.GetType().GetCustomAttributes(typeof(XmlRootAttribute), true).FirstOrDefault();
+                    if (rootAttr != null)
+                        newElement.Name = rootAttr.ElementName;
+                    List<PropertyInfo> piList = pbComp.GetType().GetProperties().
+                        Where(p => p.GetCustomAttributes(typeof(PbXmlAttributeAttribute), true).
+                        Any()).ToList();
+                    foreach (PropertyInfo pi in piList)
+                    {
+                        List<PbXmlAttributeAttribute> pList = ((PbXmlAttributeAttribute[])pi.GetCustomAttributes(typeof(PbXmlAttributeAttribute), true)).ToList();
+                        string name = pList.Any(a => a.AttributeName == null) ? pi.Name : pList[0].AttributeName;
+                        string value = "";
+                        TypeConverterAttribute typeConverterAttr = (TypeConverterAttribute)pi.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
+                        if (typeConverterAttr != null)
+                        {
+                            try
+                            {
+                                TypeConverter typeConverter = (TypeConverter)Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
+                                if (typeConverter.CanConvertTo(typeof(string)))
+                                {
+                                    value = (string)typeConverter.ConvertTo(pi.GetValue(pbComp, null), typeof(string));
+                                }
+                                else
+                                    Professionbuddy.Err("The TypeConvert {0} can not convert to string.", typeConverterAttr.ConverterTypeName);
+                            }
+                            catch (Exception ex)
+                            {
+                                Professionbuddy.Err("Type conversion for {0}->{1} has failed.\n{2}", comp.GetType().Name, pi.Name, ex);
+                            }
+                        }
+                        else
+                        {
+                            value = pi.GetValue(pbComp, null).ToString();
+                        }
+                        if (pbComp is GroupComposite)
+                            Save(newElement, (GroupComposite)pbComp);
+                        newElement.Add(new XAttribute(name, value));
+                    }
+                    xml.Add(newElement);
+                }
+            }
+            return xml;
+        }
+
+        #region Package
         private const string PackageRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/document";
         private const string ResourceRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/required-resource";
         public void CreatePackage(string path, string profilePath)
@@ -133,7 +275,7 @@ namespace HighVoltz
                 Uri partUriProfile = PackUriHelper.CreatePartUri(
                     new Uri(Path.GetFileName(profilePath), UriKind.Relative));
                 Dictionary<string, Uri> HbProfileUrls = new Dictionary<string, Uri>();
-                GetHbprofiles(profilePath, Professionbuddy.Instance.CurrentProfile.Branch, HbProfileUrls);
+                GetHbprofiles(profilePath, Professionbuddy.Instance.PbBehavior, HbProfileUrls);
                 using (Package package = Package.Open(path, FileMode.Create))
                 {
                     // Add the PB profile
@@ -163,26 +305,6 @@ namespace HighVoltz
             { Professionbuddy.Err(ex.ToString()); }
         }
 
-        static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
-        {
-            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path) &&
-                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
-            {
-                Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction)comp).Path, UriKind.Relative));
-                string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);
-                string profilePath = Path.Combine(pbProfileDirectory, ((LoadProfileAction)comp).Path);
-                if (!dict.ContainsKey(profilePath))
-                    dict.Add(profilePath, profileUri);
-            }
-            if (comp is GroupComposite)
-            {
-                foreach (Composite c in ((GroupComposite)comp).Children)
-                {
-                    GetHbprofiles(pbProfilePath, c, dict);
-                }
-            }
-        }
-
         void CopyStream(Stream source, Stream target)
         {
             const int bufSize = 0x1000;
@@ -203,5 +325,21 @@ namespace HighVoltz
             }
             return fullPath;
         }
+        #endregion
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
+    public class PbXmlAttributeAttribute : Attribute
+    {
+        public PbXmlAttributeAttribute()
+        {
+        }
+
+        public PbXmlAttributeAttribute(string attributeName)
+        {
+            this.AttributeName = attributeName;
+        }
+
+        public string AttributeName { get; private set; }
     }
 }

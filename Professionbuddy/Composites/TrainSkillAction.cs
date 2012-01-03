@@ -17,12 +17,14 @@ namespace HighVoltz.Composites
     #region TrainSkillAction
     class TrainSkillAction : PBAction
     {
+        [PbXmlAttribute()]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -116,29 +118,6 @@ namespace HighVoltz.Composites
         {
             return new TrainSkillAction() { NpcEntry = this.NpcEntry, loc = this.loc, Location = this.Location };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint num;
-            uint.TryParse(reader["NpcEntry"], out num);
-            NpcEntry = num;
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Location = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
-
     }
     #endregion
 }

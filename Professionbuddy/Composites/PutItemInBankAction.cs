@@ -78,55 +78,97 @@ namespace HighVoltz.Composites
                 return !(a == b);
             }
         }
-
+        [PbXmlAttribute()]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
+        [PbXmlAttribute()]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
-            set { Properties["Category"].Value = value; }
+            set
+            {
+                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
+            }
         }
+        [PbXmlAttribute()]
         public object SubCategory
         {
             get { return (object)Properties["SubCategory"].Value; }
-            set { Properties["SubCategory"].Value = value; }
+            set
+            {
+                if (value is string)
+                    value = Enum.Parse(subCategoryType, (string)value);
+                Properties["SubCategory"].Value = value;
+                //UpdateSubCatValue(); 
+            }
+        }
+        Type subCategoryType = typeof(SubCategoryType);
+        [PbXmlAttribute()]
+        public string SubCategoryType
+        {
+            get { return subCategoryType.Name; }
+            set
+            {
+                if (value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof(SubCategoryType);
+                UpdateSubCatValue();
+            }
         }
 
+        void UpdateSubCatValue()
+        {
+            object subVal = Activator.CreateInstance(subCategoryType);
+            int sub = Convert.ToInt32(SubCategory);
+            subVal = Enum.ToObject(subCategoryType, sub);
+            SubCategory = subVal;
+        }
+        [PbXmlAttribute()]
         public BankType Bank
         {
             get { return (BankType)Properties["Bank"].Value; }
             set { Properties["Bank"].Value = value; }
         }
-
+        [PbXmlAttribute("Entry")]
+        [PbXmlAttribute()]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint GuildTab
         {
             get { return (uint)Properties["GuildTab"].Value; }
             set { Properties["GuildTab"].Value = value; }
         }
+        [PbXmlAttribute()]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
+        [PbXmlAttribute()]
         public int Amount
         {
             get { return (int)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
+        [PbXmlAttribute()]
         public bool AutoFindBank
         {
             get { return (bool)Properties["AutoFindBank"].Value; }
             set { Properties["AutoFindBank"].Value = value; }
         }
         WoWPoint loc;
+        [PbXmlAttribute()]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -625,79 +667,6 @@ namespace HighVoltz.Composites
                 SubCategory = this.SubCategory,
             };
         }
-        #region XmlSerializer
-        public override void ReadXml(XmlReader reader)
-        {
-            uint id;
-            uint.TryParse(reader["Amount"], out id);
-            Amount = (int)id;
-            if (reader.MoveToAttribute("ItemID"))
-                ItemID = reader["ItemID"];
-            else if (reader.MoveToAttribute("Entry"))
-                ItemID = reader["Entry"];
-            uint.TryParse(reader["NpcEntry"], out id);
-            NpcEntry = id;
-            uint.TryParse(reader["GuildTab"], out id);
-            GuildTab = id;
-            bool boolVal = false;
-            if (reader.MoveToAttribute("UseCategory"))
-            {
-                bool.TryParse(reader["UseCategory"], out boolVal);
-                UseCategory = boolVal;
-            }
-            if (reader.MoveToAttribute("Category"))
-            {
-                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), reader["Category"]);
-            }
-            string subCatType = "";
-            if (reader.MoveToAttribute("SubCategoryType"))
-            {
-                subCatType = reader["SubCategoryType"];
-            }
-            if (reader.MoveToAttribute("SubCategory") && !string.IsNullOrEmpty(subCatType))
-            {
-                Type t;
-                if (subCatType != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatType);
-                    t = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    t = typeof(SubCategoryType);
-                object subVal = Activator.CreateInstance(t);
-                subVal = Enum.Parse(t, reader["SubCategory"]);
-                SubCategory = subVal;
-            }
-
-            bool autoFind;
-            bool.TryParse(reader["AutoFindBank"], out autoFind);
-            AutoFindBank = autoFind;
-            Bank = (BankType)Enum.Parse(typeof(BankType), reader["Bank"]);
-            float x, y, z;
-            x = reader["X"].ToSingle();
-            y = reader["Y"].ToSingle();
-            z = reader["Z"].ToSingle();
-            loc = new WoWPoint(x, y, z);
-            Properties["Location"].Value = loc.ToInvariantString();
-            reader.ReadStartElement();
-        }
-        public override void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Amount", Amount.ToString());
-            writer.WriteAttributeString("ItemID", ItemID);
-            writer.WriteAttributeString("NpcEntry", NpcEntry.ToString());
-            writer.WriteAttributeString("GuildTab", GuildTab.ToString());
-            writer.WriteAttributeString("AutoFindBank", AutoFindBank.ToString());
-            writer.WriteAttributeString("UseCategory", UseCategory.ToString());
-            writer.WriteAttributeString("Category", Category.ToString());
-            writer.WriteAttributeString("SubCategoryType", SubCategory.GetType().Name);
-            writer.WriteAttributeString("SubCategory", SubCategory.ToString());
-            writer.WriteAttributeString("Bank", Bank.ToString());
-            writer.WriteAttributeString("X", loc.X.ToString());
-            writer.WriteAttributeString("Y", loc.Y.ToString());
-            writer.WriteAttributeString("Z", loc.Z.ToString());
-        }
-        #endregion
     }
     #endregion
 }
