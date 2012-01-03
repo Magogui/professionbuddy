@@ -548,16 +548,16 @@ namespace HighVoltz
                 if (idComp != null)
                 {
                     Instance.PbBehavior = idComp;
-                    if (MainForm.IsValid)
-                    {
-                        MainForm.Instance.InitActionTree();
-                        MainForm.Instance.RefreshTradeSkillTabs();
-                    }
                     Instance.MySettings.LastProfile = path;
                     Instance.ProfileSettings.Load();
                     DynamicCode.GenorateDynamicCode();
                     Instance.UpdateMaterials();
                     PreLoadHbProfile();
+                    if (MainForm.IsValid)
+                    {
+                        MainForm.Instance.InitActionTree();
+                        MainForm.Instance.RefreshTradeSkillTabs();
+                    }
                 }
                 else
                     return false;

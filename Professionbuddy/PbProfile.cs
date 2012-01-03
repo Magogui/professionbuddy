@@ -255,10 +255,10 @@ namespace HighVoltz
                         {
                             value = pi.GetValue(pbComp, null).ToString();
                         }
-                        if (pbComp is GroupComposite)
-                            Save(newElement, (GroupComposite)pbComp);
                         newElement.Add(new XAttribute(name, value));
                     }
+                    if (pbComp is GroupComposite)
+                        Save(newElement, (GroupComposite)pbComp);
                     xml.Add(newElement);
                 }
             }

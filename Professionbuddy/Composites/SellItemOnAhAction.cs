@@ -43,9 +43,9 @@ namespace HighVoltz.Composites
         [PbXmlAttribute()]
         public object SubCategory
         {
-            get 
+            get
             { // since subCategory type is sometimes set last we need to wait at a later peried to actually convert the enum value.
-                return (object)Properties["SubCategory"].Value; 
+                return (object)Properties["SubCategory"].Value;
             }
             set
             {
@@ -276,6 +276,7 @@ namespace HighVoltz.Composites
             SubCategory = (Enum)subCategory;
             RefreshPropertyGrid();
         }
+
         #endregion
 
         List<AuctionEntry> ToScanItemList;
