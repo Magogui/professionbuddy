@@ -35,25 +35,41 @@ namespace HighVoltz.Composites
                 Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
             }
         }
+        string subCatValueString = null;
         [PbXmlAttribute()]
         public object SubCategory
         {
-            get { return (object)Properties["SubCategory"].Value; }
+            get
+            { // since subCategory type is sometimes set last we need to wait at a later peried to actually convert the enum value.
+                return (object)Properties["SubCategory"].Value;
+            }
             set
             {
                 if (value is string)
-                    value = Enum.Parse(subCategoryType, (string)value);
+                {
+                    if (subCatTypeLoaded)
+                    {
+                        value = Enum.Parse(subCategoryType, value as string);
+                    }
+                    else
+                    {
+                        subCatValueString = (string)value;
+                        return;
+                    }
+                }
                 Properties["SubCategory"].Value = value;
                 //UpdateSubCatValue(); 
             }
         }
-        Type subCategoryType = typeof(SubCategoryType);
+        Type subCategoryType = typeof(WoWItemTradeGoodsClass);
+        bool subCatTypeLoaded = false;
         [PbXmlAttribute()]
         public string SubCategoryType
         {
             get { return subCategoryType.Name; }
             set
             {
+                subCatTypeLoaded = true;
                 if (value != "SubCategoryType")
                 {
                     string typeName = string.Format("Styx.{0}", value);
@@ -61,16 +77,12 @@ namespace HighVoltz.Composites
                 }
                 else
                     subCategoryType = typeof(SubCategoryType);
-                UpdateSubCatValue();
+                if (subCatValueString != null)
+                {
+                    SubCategory = Enum.Parse(subCategoryType, subCatValueString);
+                    subCatValueString = null;
+                }
             }
-        }
-
-        void UpdateSubCatValue()
-        {
-            object subVal = Activator.CreateInstance(subCategoryType);
-            int sub = Convert.ToInt32(SubCategory);
-            subVal = Enum.ToObject(subCategoryType, sub);
-            SubCategory = subVal;
         }
         [PbXmlAttribute()]
         public string ItemID
@@ -134,7 +146,7 @@ namespace HighVoltz.Composites
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
-            Properties["Location"].Value = string.Format("<{0}, {1}, {2}>", loc.X, loc.Y, loc.Z);
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             RefreshPropertyGrid();
         }

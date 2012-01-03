@@ -132,7 +132,7 @@ namespace HighVoltz
                         Styx.WoWInternals.ObjectManager.Update();
                     WoWPoint loc = Styx.WoWInternals.ObjectManager.Me.GotTarget ? Styx.WoWInternals.ObjectManager.Me.CurrentTarget.Location :
                         Styx.WoWInternals.ObjectManager.Me.Location;
-                    return string.Format("<{0}, {1}, {2}>", loc.X, loc.Y, loc.Z);
+                    return string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
                 }
                 return value;
             }

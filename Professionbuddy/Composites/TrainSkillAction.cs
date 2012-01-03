@@ -45,7 +45,7 @@ namespace HighVoltz.Composites
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
-            Properties["Location"].Value = string.Format("<{0}, {1}, {2}>", loc.X, loc.Y, loc.Z);
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
             Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
             RefreshPropertyGrid();
         }
