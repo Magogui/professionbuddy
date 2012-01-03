@@ -341,7 +341,6 @@ namespace HighVoltz
                 e.Handled = true;
             }
         }
-
         static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
@@ -445,7 +444,7 @@ namespace HighVoltz
                     DataStore = new DataStore();
                     DataStore.ImportDataStore();
 
-                    if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                    if (string.IsNullOrEmpty(CurrentProfile.XmlPath) && !string.IsNullOrEmpty(MySettings.LastProfile))
                     {
                         try
                         {

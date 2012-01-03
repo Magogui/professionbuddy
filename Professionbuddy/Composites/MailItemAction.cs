@@ -231,7 +231,7 @@ namespace HighVoltz.Composites
                         ItemList = BuildItemList();
                     if (ItemList.Count == 0)
                     {
-                        if (Lua.GetReturnVal<int>("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) != nil then return 1 end end return 0 ",0) > 0)
+                        if (Lua.GetReturnVal<int>("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then return 1 end end return 0 ",0) > 0)
                         {
                             Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();",
                                 CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
@@ -352,14 +352,15 @@ namespace HighVoltz.Composites
             "end " +
             "if #bagInfo == 0 then return -1 end " +
             "table.sort(bagInfo,sortF) " +
-            "local bagI = 1 " +
-            "while bagI <= #bagInfo do " +
+            "local bagI = #bagInfo " +
+            "while bagI > 0 do " +
                "if GetSendMailItem(mailItemI) == nil then " +
+                   "while bagInfo[bagI][3] > amount-bagged and bagI >1 do bagI = bagI - 1 end " +
                   "if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then " +
                      "PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2]) " +
                      "ClickSendMailItemButton(mailItemI) " +
                      "bagged = bagged + bagInfo[bagI][3] " +
-                     "bagI = bagI +1 " +
+                     "bagI = bagI - 1 " +
                   "else " +
                      "local cnt = bagInfo[bagI][3]-amount " +
                      "SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt) " +
