@@ -54,7 +54,7 @@ namespace HighVoltz.Composites
                         IsDone = true;
                     }
                     else
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                 }
                 catch (Exception ex)
                 {

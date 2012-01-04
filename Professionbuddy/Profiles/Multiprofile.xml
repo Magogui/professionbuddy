@@ -42,28 +42,29 @@
     <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
-    <If Condition="(bool)Settings[&quot;DeleteLifegivingSeeds&quot;] &amp;&amp; InbagCount(63122) &gt; 0" IgnoreCanRun="True">
-      <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 63122 then PickupContainerItem(bag,slot) DeleteCursorItem() end end end&quot;);" />
-    </If>
-    <!--Check if bags are full and not in city. If true then hearth-->
-    <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because I have only {0} free bags slots&quot;,Me.FreeNormalBagSlots);" />
-      <CallSubRoutine SubRoutineName="Hearth" />
-    </If>
-    <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;] &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because you forced me to&quot;);" />
-      <CallSubRoutine SubRoutineName="Hearth" />
-    </If>
-    <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp;&#xD;&#xA; DateTime.Now.Subtract(ZoneStartTime).TotalMinutes &gt;= TimeToSpendInZone) &amp;&amp; &#xD;&#xA;Me.ZoneId != CityZoneID" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing out of here because I was in zone for {0} minutes&quot;,TimeToSpendInZone);" />
-      <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = true;" />
-      <CallSubRoutine SubRoutineName="Hearth" />
-    </If>
-    <!--Check if bags are full and not in city. If true then hearth-->
-    <!--Check if we're in factions capital city. Stormwind = 1519. Org = 1637-->
-    <If Condition="Me.ZoneId == CityZoneID &amp;&amp; OnFarmer" IgnoreCanRun="True">
-      <!--On Farmer-->
-      <If Condition="OnFarmer == true" IgnoreCanRun="True">
+    <If Condition="OnFarmer == true" IgnoreCanRun="True">
+      <CustomAction Code="if ((bool)Settings[&quot;EnableZoneTimer&quot;]  &amp;&amp; (ChatThrottleSW.ElapsedMilliseconds &gt;= 60000 || !ChatThrottleSW.IsRunning))&#xD;&#xA;{&#xD;&#xA;    TreeRoot.GoalText = string.Format(&quot;Switching zone in {0} minutes&quot;,&#xD;&#xA;         (int)(TimeToSpendInZone - DateTime.Now.Subtract(ZoneStartTime).TotalMinutes));&#xD;&#xA;   ChatThrottleSW.Reset();&#xD;&#xA;  ChatThrottleSW.Start();&#xD;&#xA;}" />
+      <If Condition="(bool)Settings[&quot;DeleteLifegivingSeeds&quot;] &amp;&amp; InbagCount(63122) &gt; 0" IgnoreCanRun="True">
+        <CustomAction Code="Lua.DoString(&quot;for bag = 0,4 do for slot=1,GetContainerNumSlots(bag) do local id = GetContainerItemID(bag,slot) or 0 if id == 63122 then PickupContainerItem(bag,slot) DeleteCursorItem() end end end&quot;);" />
+      </If>
+      <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because I have only {0} free bags slots&quot;,Me.FreeNormalBagSlots);" />
+        <CallSubRoutine SubRoutineName="Hearth" />
+      </If>
+      <!--Check if bags are full and not in city. If true then hearth-->
+      <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;] &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing because you forced me to&quot;);" />
+        <CallSubRoutine SubRoutineName="Hearth" />
+      </If>
+      <If Condition="((bool)Settings[&quot;EnableZoneTimer&quot;] &amp;&amp;&#xD;&#xA; DateTime.Now.Subtract(ZoneStartTime).TotalMinutes &gt;= TimeToSpendInZone) &amp;&amp; &#xD;&#xA;Me.ZoneId != CityZoneID" IgnoreCanRun="True">
+        <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Hearthing out of here because I was in zone for {0} minutes&quot;,TimeToSpendInZone);" />
+        <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = true;" />
+        <CallSubRoutine SubRoutineName="Hearth" />
+      </If>
+      <!--Check if bags are full and not in city. If true then hearth-->
+      <!--Check if we're in factions capital city. Stormwind = 1519. Org = 1637-->
+      <If Condition="Me.ZoneId == CityZoneID" IgnoreCanRun="True">
+        <!--On Farmer-->
         <If Condition="Me.FreeNormalBagSlots &lt;=15 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
           <If Condition="(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="StoreItemsInGbank" />
@@ -99,8 +100,8 @@
         </If>
         <CallSubRoutine SubRoutineName="Use Portal" />
       </If>
+      <!--On Banker-->
     </If>
-    <!--On Banker-->
     <If Condition="OnFarmer == false" IgnoreCanRun="False">
       <!--Get all mail and put it on AH-->
       <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
@@ -168,6 +169,7 @@
     <Declaration Code="int CityZoneID,TimeToSpendInZone;" />
     <Declaration Code="List&lt;uint&gt; FarmZoneIDs;" />
     <Declaration Code="DateTime ZoneStartTime;" />
+    <Declaration Code="Stopwatch ChatThrottleSW = new Stopwatch();" />
     <!--store current server name, needed when switching characters.-->
     <CustomAction Code="Realm = Lua.GetReturnVal&lt;string&gt;(&quot;return GetRealmName()&quot;,0);" />
     <!--set to 'true' if on farmer, otherwise if on banker then it's set to false-->
@@ -195,7 +197,7 @@
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
       <CustomAction Code="TreeRoot.Stop();" />
     </If>
-    <If Condition="Me.ZoneId != CityZoneID &amp;&amp; !FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
+    <If Condition="OnFarmer &amp;&amp; Me.ZoneId != CityZoneID &amp;&amp; !FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
       <CallSubRoutine SubRoutineName="Hearth" />
     </If>

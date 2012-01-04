@@ -309,7 +309,7 @@ namespace HighVoltz.Composites
                         _itemsSW.Start();
                     }
                     else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                     if (ItemList == null)
                         ItemList = BuildItemList();
                     // no bag space... 
@@ -354,7 +354,7 @@ namespace HighVoltz.Composites
                     Professionbuddy.Log("Deposited Items:[{0}] to {1} Bank", ItemID, Bank);
                 }
                 else
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

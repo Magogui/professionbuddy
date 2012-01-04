@@ -220,13 +220,13 @@ namespace HighVoltz.Composites
                     {
                         _mailbox.Interact();
                     }
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 }
                 else
                 {
                     // item split in proceess
                     if (itemSplitSW.IsRunning && itemSplitSW.ElapsedMilliseconds <= 2000)
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                     if (ItemList == null)
                         ItemList = BuildItemList();
                     if (ItemList.Count == 0)
@@ -250,7 +250,7 @@ namespace HighVoltz.Composites
                         {
                             itemSplitSW.Reset();
                             itemSplitSW.Start();
-                            return RunStatus.Running;
+                            return RunStatus.Success;
                         }
                         ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
                         Professionbuddy.Debug("MailItem: sending {0}", itemID);
@@ -270,7 +270,7 @@ namespace HighVoltz.Composites
                             string.Format("Items that match Id of {0}", ItemID));
                     }
                     else
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                 }
             }
             return RunStatus.Failure;

@@ -4,6 +4,9 @@ using System.Xml;
 using Styx.Helpers;
 using TreeSharp;
 using System.Threading;
+using System.Drawing.Design;
+using System.ComponentModel.Design;
+using System.ComponentModel;
 
 
 namespace HighVoltz.Composites
@@ -23,7 +26,8 @@ namespace HighVoltz.Composites
             : base(CsharpCodeType.Statements)
         {
             this.Action = c => { ;};
-            Properties["Code"] = new MetaProp("Code", typeof(string));
+            Properties["Code"] = new MetaProp("Code", typeof(string),
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
             Code = "";
             Properties["Code"].PropertyChanged += new EventHandler(CustomAction_PropertyChanged);
         }

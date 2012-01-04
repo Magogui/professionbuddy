@@ -54,7 +54,7 @@ namespace HighVoltz.Composites
                     IsDone = _sub.IsDone;
                     // we need to reset so calls to the sub from other places can
                     if (!IsDone)
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                 }
             }
             return RunStatus.Failure;

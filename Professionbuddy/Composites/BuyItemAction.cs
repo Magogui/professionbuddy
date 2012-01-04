@@ -146,7 +146,7 @@ namespace HighVoltz.Composites
                     if (NpcEntry > 0 && me.GotTarget && me.CurrentTarget.Entry != NpcEntry)
                     {
                         MerchantFrame.Instance.Close();
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                     }
                     if (!_concludingSw.IsRunning)
                     {
@@ -188,7 +188,7 @@ namespace HighVoltz.Composites
                     }
                 }
                 if (!IsDone)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

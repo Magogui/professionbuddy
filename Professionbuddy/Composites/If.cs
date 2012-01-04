@@ -97,38 +97,77 @@ namespace HighVoltz.Composites
             }
         }
 
+        //protected override IEnumerable<RunStatus> Execute(object context)
+        //{
+        //    // genorates some exeption.... besides I'm only accessing this from one thread
+        //    //lock (Locker)
+        //    //{
+        //    if (IsDone)
+        //    {
+        //        yield return RunStatus.Failure;
+        //        yield break;
+        //    }
+        //    bool breakIterationEarly = false;
+        //    foreach (Composite node in Children)
+        //    {
+        //        // Keep stepping through the enumeration while it's returing RunStatus.Success
+        //        // or until CanRun() returns false if IgnoreCanRun is false..
+        //        node.Start(context);
+        //        while (node.Tick(context) == RunStatus.Success)
+        //        {
+        //            if (!IgnoreCanRun && !CanRun(context))
+        //            {
+        //                breakIterationEarly = true;
+        //                break;
+        //            }
+        //            Selection = node;
+        //            yield return RunStatus.Success;
+        //        }
+        //        if (breakIterationEarly == true)
+        //            break;
+        //        Selection = null;
+        //        //node.Stop(context);
+        //        if (node.LastStatus == RunStatus.Success)
+        //        {
+        //            yield return RunStatus.Success;
+        //            yield break;
+        //        }
+        //    }
+        //    _executed = true;
+        //    //yield return RunStatus.Failure;
+        //    //yield break;
+        //    //}
+        //}
+        protected bool _isRunning = false;
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            // genorates some exeption.... besides I'm only accessing this from one thread
-            //lock (Locker)
-            //{
-            if (IsDone)
+            if (!IsDone && ((_isRunning && IgnoreCanRun) || CanRun(context)))
             {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            foreach (Composite node in Children)
-            {
-                // Keep stepping through the enumeration while it's returing RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                node.Start(context);
-                while ((IgnoreCanRun || (CanRun(null) && !IgnoreCanRun)) && node != null &&
-                    node.Tick(context) == RunStatus.Running)
+                _isRunning = true;
+                bool shouldBreak = false;
+                foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
                 {
-                    Selection = node;
-                    yield return RunStatus.Running;
+                    child.Start(context);
+                    Selection = child;
+                    while (child.Tick(context) == RunStatus.Running)
+                    {
+                        if (!IgnoreCanRun && !CanRun(context))
+                        {
+                            shouldBreak = true;
+                            break;
+                        }
+                        yield return RunStatus.Running;
+                    }
+                    if (shouldBreak)
+                        break;
+                    if (child.LastStatus == RunStatus.Success)
+                        yield return RunStatus.Success;
                 }
                 Selection = null;
-                //node.Stop(context);
-                if (node.LastStatus == RunStatus.Success)
-                {
-                    yield return RunStatus.Success;
-                }
+                IsDone = true;
+                _isRunning = false;
             }
-            _executed = true;
             yield return RunStatus.Failure;
-            yield break;
-            //}
         }
 
         public virtual Delegate CompiledMethod
@@ -155,7 +194,8 @@ namespace HighVoltz.Composites
 
         virtual public void Reset()
         {
-            _executed = false;
+            _isRunning = IsDone = false;
+            Selection = null;
             recursiveReset(this);
         }
         void recursiveReset(If gc)
@@ -167,17 +207,11 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as If);
             }
         }
-        bool _executed = false;
         /// <summary>
         /// Returns true if the If Condition is finished executing its children or condition isn't met.
         /// </summary>
-        virtual public bool IsDone
-        {
-            get
-            {
-                return _executed || !CanRun(null);
-            }
-        }
+        virtual public bool IsDone { get; set; }
+
         virtual public System.Drawing.Color Color
         {
             get { return string.IsNullOrEmpty(CompileError) ? System.Drawing.Color.Blue : System.Drawing.Color.Red; }
@@ -206,6 +240,14 @@ namespace HighVoltz.Composites
         }
 
         virtual public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
+
+        public void OnProfileLoad(System.Xml.Linq.XElement element)
+        {
+        }
+
+        public void OnProfileSave(System.Xml.Linq.XElement element)
+        {
+        }
     }
 
 
@@ -238,7 +280,7 @@ namespace HighVoltz.Composites
 
     //    public override RunStatus Tick(object context)
     //    {
-    //        if ((LastStatus == RunStatus.Running && IgnoreCanRun) || CanRun(null))
+    //        if ((LastStatus == RunStatus.Success && IgnoreCanRun) || CanRun(null))
     //        {
     //            if (!DecoratedChild.IsRunning)
     //                DecoratedChild.Start(null);
@@ -264,6 +306,6 @@ namespace HighVoltz.Composites
 
     //    override public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
 
-   
+
     //}
 }

@@ -30,29 +30,70 @@ namespace HighVoltz.Composites
         static LocalPlayer Me = ObjectManager.Me;
         //Stopwatch _profilerSW = new Stopwatch();
 
-        public override RunStatus Tick(object context)
+        //public override RunStatus Tick(object context)
+        //{
+        //    if (CanRun)
+        //    {
+        //        try
+        //        {
+        //            if (!base.IsRunning)
+        //                base.Start(context);
+        //            // _profilerSW.Reset(); _profilerSW.Start();
+        //            LastStatus = base.Tick(context) == RunStatus.Success ? RunStatus.Success : RunStatus.Failure;
+        //            //if (LastStatus == RunStatus.Success)
+        //            //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
+        //            //else
+        //            //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
+        //        }
+        //        catch
+        //        {
+        //            LastStatus = RunStatus.Failure;
+        //        }
+        //    }
+        //    else
+        //        LastStatus = RunStatus.Failure;
+        //    return (RunStatus)LastStatus;
+        //}
+
+        public static bool EndOfWhileLoopReturn = false;
+        protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (CanRun)
             {
-                try
+                bool shouldBreak = false;
+                foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
                 {
-                    if (!base.IsRunning)
-                        base.Start(context);
-                    // _profilerSW.Reset(); _profilerSW.Start();
-                    LastStatus = base.Tick(context) == RunStatus.Running ? RunStatus.Running : RunStatus.Failure;
-                    //if (LastStatus == RunStatus.Running)
-                    //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
-                    //else
-                    //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
+                    child.Start(context);
+                    Selection = child;
+                    while (child.Tick(context) == RunStatus.Running)
+                    {
+                        if (!CanRun)
+                        {
+                            shouldBreak = true;
+                            break;
+                        }
+                        yield return RunStatus.Running;
+                    }
+                    if (shouldBreak)
+                        break;
+                    if (EndOfWhileLoopReturn)
+                        yield return RunStatus.Failure;
+                    if (child.LastStatus == RunStatus.Success)
+                        yield return RunStatus.Success;
                 }
-                catch
-                {
-                    LastStatus = RunStatus.Failure;
-                }
+                Selection = null;
             }
-            else
-                LastStatus = RunStatus.Failure;
-            return (RunStatus)LastStatus;
+            yield return RunStatus.Failure;
+        }
+
+        public void Reset()
+        {
+            EndOfWhileLoopReturn = false;
+            Selection = null;
+            foreach (IPBComposite comp in Children)
+            {
+                comp.Reset();
+            }
         }
         public static bool ExitBehavior()
         {

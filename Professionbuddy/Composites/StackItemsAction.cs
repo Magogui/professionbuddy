@@ -67,7 +67,7 @@ namespace HighVoltz.Composites
                     IsDone = Lua.GetReturnVal<int>(lua, 0) == 1;
                 }
                 if (!IsDone)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

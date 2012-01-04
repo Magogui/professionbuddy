@@ -71,7 +71,7 @@ namespace HighVoltz.Composites
                     IsDone = true;
                     TreeRoot.StatusText = string.Format("Arrived at location {0}", loc);
                 }
-                return RunStatus.Running;
+                return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

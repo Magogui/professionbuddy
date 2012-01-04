@@ -31,43 +31,64 @@ namespace HighVoltz.Composites
 
         virtual public PropertyBag Properties { get; private set; }
 
-        // credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
+
+
+        //// credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
+        //protected override IEnumerable<RunStatus> Execute(object context)
+        //{
+        //    //lock (Locker)
+        //    //{
+        //    if (context == null || !(context is string) || (string)context != SubRoutineName)
+        //    {
+        //        yield return RunStatus.Failure;
+        //        yield break;
+        //    }
+        //    foreach (Composite node in Children)
+        //    {
+        //        node.Start(context);
+        //        // Keep stepping through the enumeration while it's returing RunStatus.Success
+        //        // or until CanRun() returns false if IgnoreCanRun is false..
+        //        while (node.Tick(context) == RunStatus.Success)
+        //        {
+        //            Selection = node;
+        //            yield return RunStatus.Success;
+        //        }
+        //        Selection = null;
+        //        node.Stop(context);
+        //        if (node.LastStatus == RunStatus.Success)
+        //        {
+        //            yield return RunStatus.Success;
+        //            yield break;
+        //        }
+        //    }
+        //    _executed = true;
+        //    yield return RunStatus.Failure;
+        //    yield break;
+        //    //}
+        //}
+
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            //lock (Locker)
-            //{
-            if (context == null || !(context is string) || (string)context != SubRoutineName)
+            foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
             {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            foreach (Composite node in Children)
-            {
-                node.Start(context);
-                // Keep stepping through the enumeration while it's returing RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                while (node.Tick(context) == RunStatus.Running)
+                child.Start(context);
+                Selection = child;
+                while (child.Tick(context) == RunStatus.Running)
                 {
-                    Selection = node;
                     yield return RunStatus.Running;
                 }
-                Selection = null;
-                node.Stop(context);
-                if (node.LastStatus == RunStatus.Success)
-                {
+                if (child.LastStatus == RunStatus.Success)
                     yield return RunStatus.Success;
-                    yield break;
-                }
             }
-            _executed = true;
+            Selection = null;
+            IsDone = true;
             yield return RunStatus.Failure;
-            yield break;
-            //}
         }
 
         virtual public void Reset()
         {
-            _executed = false;
+            Selection = null;
+            IsDone = false;
             recursiveReset(this);
         }
         void recursiveReset(GroupComposite gc)
@@ -86,14 +107,8 @@ namespace HighVoltz.Composites
         //        return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
         //    }
         //}
-        bool _executed = false;
-        virtual public bool IsDone
-        {
-            get
-            {
-                return _executed ;
-            }
-        }
+        virtual public bool IsDone { get; set; }
+
         public virtual object Clone()
         {
             SubRoutine pd = new SubRoutine()
@@ -105,5 +120,14 @@ namespace HighVoltz.Composites
 
         virtual public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
 
+
+
+        public void OnProfileLoad(System.Xml.Linq.XElement element)
+        {
+        }
+
+        public void OnProfileSave(System.Xml.Linq.XElement element)
+        {
+        }
     }
 }

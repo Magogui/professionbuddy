@@ -235,7 +235,7 @@ namespace HighVoltz.Composites
                         }
 
                     }
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 }
                 catch (Exception ex)
                 {

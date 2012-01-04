@@ -107,6 +107,7 @@ namespace HighVoltz
         {
             foreach (XNode node in xml.Nodes())
             {
+                
                 if (node.NodeType == XmlNodeType.Comment)
                 {
                     comp.AddChild(new Comment(((XComment)node).Value));
@@ -124,7 +125,8 @@ namespace HighVoltz
                         if (pbTypes == null)
                             throw new InvalidOperationException(string.Format("Unable to bind XML Element: {0} to a Type", element.Name));
                     }
-                    Composite pbComp = (Composite)Activator.CreateInstance(type);
+                    IPBComposite pbComp = (IPBComposite)Activator.CreateInstance(type);
+                    pbComp.OnProfileLoad(element);
                     var pbXmlAttrs = from pi in type.GetProperties()
                                      from attr in (PbXmlAttributeAttribute[])pi.GetCustomAttributes(typeof(PbXmlAttributeAttribute), true)
                                      where attr != null
@@ -179,7 +181,7 @@ namespace HighVoltz
                     }
                     if (pbComp is GroupComposite)
                         Load(element, pbComp as GroupComposite);
-                    comp.AddChild(pbComp);
+                    comp.AddChild((Composite)pbComp);
                 }
             }
             return comp;
@@ -213,7 +215,7 @@ namespace HighVoltz
 
         XElement Save(XElement xml, GroupComposite comp)
         {
-            foreach (Composite pbComp in comp.Children)
+            foreach (IPBComposite pbComp in comp.Children)
             {
                 if (pbComp is Comment)
                 {
@@ -225,6 +227,7 @@ namespace HighVoltz
                     XmlRootAttribute rootAttr = (XmlRootAttribute)pbComp.GetType().GetCustomAttributes(typeof(XmlRootAttribute), true).FirstOrDefault();
                     if (rootAttr != null)
                         newElement.Name = rootAttr.ElementName;
+                    pbComp.OnProfileSave(newElement);
                     List<PropertyInfo> piList = pbComp.GetType().GetProperties().
                         Where(p => p.GetCustomAttributes(typeof(PbXmlAttributeAttribute), true).
                         Any()).ToList();

@@ -147,7 +147,7 @@ namespace HighVoltz.Composites
                             if (ge.Type == GossipEntry.GossipEntryType.Vendor)
                             {
                                 GossipFrame.Instance.SelectGossipOption(ge.Index);
-                                return RunStatus.Running;
+                                return RunStatus.Success;
                             }
                         }
                     }
@@ -216,7 +216,7 @@ namespace HighVoltz.Composites
                     Professionbuddy.Log("SellItemAction Completed for {0}", ItemID);
                     IsDone = true;
                 }
-                return RunStatus.Running;
+                return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

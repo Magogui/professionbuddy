@@ -259,7 +259,7 @@ namespace HighVoltz.Composites
                     }
                 }
                 if (!IsDone)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

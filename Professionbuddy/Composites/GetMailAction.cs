@@ -154,7 +154,7 @@ namespace HighVoltz.Composites
                     {
                         mailbox.Interact();
                     }
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 }
                 else
                 {
@@ -167,7 +167,7 @@ namespace HighVoltz.Composites
                     if (!WaitForContentToShowSW.IsRunning)
                         WaitForContentToShowSW.Start();
                     if (WaitForContentToShowSW.ElapsedMilliseconds < 3000)
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                     uint freeslots = ObjectManager.Me.FreeNormalBagSlots;
 
                     if (!ConcludingSW.IsRunning)
@@ -179,7 +179,7 @@ namespace HighVoltz.Composites
                                 if (!_throttleSW.IsRunning)
                                     _throttleSW.Start();
                                 if (_throttleSW.ElapsedMilliseconds <4000 - (me.FreeNormalBagSlots - MinFreeBagSlots)* 1000 )
-                                    return RunStatus.Running;
+                                    return RunStatus.Success;
                                 else
                                 {
                                     _throttleSW.Reset();
@@ -222,7 +222,7 @@ namespace HighVoltz.Composites
                         Professionbuddy.Log("Mail retrieval of items:{0} finished", GetMailType);
                     }
                     else
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                 }
             }
             return RunStatus.Failure;

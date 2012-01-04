@@ -84,11 +84,11 @@ namespace HighVoltz.Composites
                             if (ge.Type == GossipEntry.GossipEntryType.Trainer)
                             {
                                 GossipFrame.Instance.SelectGossipOption(ge.Index);
-                                return RunStatus.Running;
+                                return RunStatus.Success;
                             }
                         }
                     }
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 }
                 else
                 {

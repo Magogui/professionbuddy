@@ -180,7 +180,7 @@ namespace HighVoltz.Composites
                         _itemsSW.Start();
                     }
                     else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
-                        return RunStatus.Running;
+                        return RunStatus.Success;
                     if (ItemList == null)
                         ItemList = BuildItemList();
                     // no bag space... 
@@ -198,7 +198,7 @@ namespace HighVoltz.Composites
                             if (!_gbankItemThrottleSW.IsRunning)
                                 _gbankItemThrottleSW.Start();
                             if (_gbankItemThrottleSW.ElapsedMilliseconds < _gbankItemThrottle)
-                                return RunStatus.Running;
+                                return RunStatus.Success;
                             else
                             {
                                 _gbankItemThrottleSW.Reset();
@@ -223,7 +223,7 @@ namespace HighVoltz.Composites
                     Professionbuddy.Log("Removed Item:[{0}] from {1} Bank", ItemID, Bank);
                 }
                 else
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

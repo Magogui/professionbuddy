@@ -28,6 +28,8 @@ namespace HighVoltz.Composites
         string Help { get; }
         void Reset();
         bool IsDone { get; }
+        void OnProfileLoad(System.Xml.Linq.XElement element);
+        void OnProfileSave(System.Xml.Linq.XElement element);
     }
 
     #region PBAction
@@ -73,6 +75,16 @@ namespace HighVoltz.Composites
         {
             IsDone = false;
             HasRunOnce = false;
+        }
+
+
+        public void OnProfileLoad(System.Xml.Linq.XElement element)
+        {
+
+        }
+
+        public void OnProfileSave(System.Xml.Linq.XElement element)
+        {
         }
     }
     #endregion

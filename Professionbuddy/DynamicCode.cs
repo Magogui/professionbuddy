@@ -365,10 +365,8 @@ namespace HighVoltz
             _isSwitchingToons = true;
             // reset all actions 
             Professionbuddy.Instance.IsRunning = false;
-            foreach (IPBComposite comp in Professionbuddy.Instance.PbBehavior.Children)
-            {
-                comp.Reset();
-            }
+            Professionbuddy.Instance.PbBehavior.Reset();
+         
             System.Windows.Application.Current.Dispatcher.BeginInvoke(
             new System.Action(() =>
             {

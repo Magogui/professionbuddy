@@ -120,10 +120,7 @@ namespace HighVoltz
             IsRunning = true;
 
             // reset all actions 
-            foreach (IPBComposite comp in PbBehavior.Children)
-            {
-                comp.Reset();
-            }
+            PbBehavior.Reset();
             if (DynamicCode.CodeWasModified)
             {
                 DynamicCode.GenorateDynamicCode();

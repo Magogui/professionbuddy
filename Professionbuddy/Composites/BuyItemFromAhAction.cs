@@ -19,8 +19,8 @@ namespace HighVoltz.Composites
     struct BuyItemEntry
     {
         public string Name;     // localized name
-        public uint Id;                // item ID 
-        public uint BuyAmount;            // amount to buy
+        public uint Id;         // item ID 
+        public uint BuyAmount;  // amount to buy
     }
 
     #region BuyItemFromAhAction
@@ -196,7 +196,7 @@ namespace HighVoltz.Composites
                     }
                 }
                 if (!IsDone)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }

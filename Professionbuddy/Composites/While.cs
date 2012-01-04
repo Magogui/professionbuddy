@@ -17,64 +17,83 @@ namespace HighVoltz.Composites
     {
         //protected override IEnumerable<RunStatus> Execute(object context)
         //{
-        //    while (CanRun(context))
+        //    //lock (Locker)
+        //    //{
+        //    if (!CanRun(null))
         //    {
-        //        foreach (Composite node in Children)
-        //        {
-        //            node.Start(context);
-        //            while (node.Tick(context) == RunStatus.Running &&
-        //                (IgnoreCanRun || (!IgnoreCanRun && CanRun(context))))
-        //            {
-        //                Selection = node;
-        //                yield return RunStatus.Running;
-        //            }
-        //            Selection = null;
-        //        }
-        //        Reset();
-        //        while (Professionbuddy.Instance.SecondaryBot.Root.Tick(null) == RunStatus.Running)
-        //            yield return RunStatus.Running;
+        //        yield return RunStatus.Failure;
+        //        yield break;
         //    }
-        //    yield return RunStatus.Failure;
-        //    yield break;
+        //    bool breakIterationEarly = false;
+        //    foreach (Composite node in Children.SkipWhile(c => Selection != null ? c != Selection : false))
+        //    {
+        //        node.Start(context);
+        //        // Keep stepping through the enumeration while it's returning RunStatus.Success
+        //        // or until CanRun() returns false if IgnoreCanRun is false..
+        //        while (node.Tick(context) == RunStatus.Success)
+        //        {
+        //            if (!IgnoreCanRun && !CanRun(context))
+        //            {
+        //                breakIterationEarly = true;
+        //                break;
+        //            }
+        //            Selection = node;
+        //            yield return RunStatus.Success;
+        //        }
+        //        if (breakIterationEarly == true)
+        //            break;
+        //        if (node.LastStatus == RunStatus.Success)
+        //        {
+        //            yield return RunStatus.Success;
+        //            yield break;
+        //        }
+        //        else
+        //            Selection = null;
+        //    }
+        //    Reset();
+        //    if (CanRun(context))
+        //    {
+        //        yield return RunStatus.Success;
+        //        yield break;
+        //    }
+        //    //}
         //}
+
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            //lock (Locker)
-            //{
-            if (!CanRun(null))
+            if ((_isRunning && IgnoreCanRun) || CanRun(context))
             {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            foreach (Composite node in Children)
-            {
-                node.Start(context);
-                // Keep stepping through the enumeration while it's returning RunStatus.Running
-                // or until CanRun() returns false if IgnoreCanRun is false..
-                while ((IgnoreCanRun || (CanRun(context) && !IgnoreCanRun)) &&
-                    node.Tick(context) == RunStatus.Running)
+                _isRunning = true;
+                PbDecorator.EndOfWhileLoopReturn = false;
+                bool shouldBreak = false;
+                foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
                 {
-                    Selection = node;
-                    yield return RunStatus.Running;
+                    child.Start(context);
+                    Selection = child;
+                    while (child.Tick(context) == RunStatus.Running)
+                    {
+                        if (!IgnoreCanRun && !CanRun(context))
+                        {
+                            shouldBreak = true;
+                            break;
+                        }
+                        yield return RunStatus.Running;
+                    }
+                    if (shouldBreak)
+                        break;
+                    if (child.LastStatus == RunStatus.Success)
+                        yield return RunStatus.Success;
                 }
+                Reset();
                 Selection = null;
-                if (node.LastStatus == RunStatus.Success)
+                if (!shouldBreak && CanRun(context))
                 {
+                    PbDecorator.EndOfWhileLoopReturn = true;
                     yield return RunStatus.Success;
-                    yield break;
                 }
+                _isRunning = false;
             }
-            Reset();
-            if (!CanRun(context))
-            {
-                yield return RunStatus.Failure;
-                yield break;
-            }
-            else
-            {
-                yield return RunStatus.Running;
-            }
-            //}
+            yield return RunStatus.Failure;
         }
 
         override public string Name { get { return "While Condition"; } }

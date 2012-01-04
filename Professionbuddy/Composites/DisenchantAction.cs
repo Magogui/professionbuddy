@@ -98,13 +98,13 @@ namespace HighVoltz.Composites
                 if (me.IsFlying)
                     return RunStatus.Failure;
                 if (lootSW.IsRunning && lootSW.ElapsedMilliseconds < 1000)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
                     LootFrame.Instance.LootAll();
                     lootSW.Reset();
                     lootSW.Start();
-                    return RunStatus.Running;
+                    return RunStatus.Success;
                 }
                 uint timeToWait = ((uint)ActionType*1000) + 2500;
                 if (!me.IsCasting && (!castTimer.IsRunning || castTimer.ElapsedMilliseconds >= timeToWait))
@@ -132,7 +132,7 @@ namespace HighVoltz.Composites
                                     Professionbuddy.Log("Unable to {0} {1}, BlackListing", Name, ItemList[index].Name);
                                     if (!blacklistedItems.Contains(lastItemGuid))
                                         blacklistedItems.Add(lastItemGuid);
-                                    return RunStatus.Running;
+                                    return RunStatus.Success;
                                 }
                             }
                             else
@@ -158,7 +158,7 @@ namespace HighVoltz.Composites
                     }
                 }
                 if (!IsDone)
-                    return RunStatus.Running;
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }
