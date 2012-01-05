@@ -132,23 +132,23 @@ namespace HighVoltz.Composites
 
             Properties["Location"].Show = false;
             Properties["ItemID"].Show = false;
-            Properties["AutoFindMailBox"].PropertyChanged += new EventHandler(AutoFindMailBoxChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["AutoFindMailBox"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindMailBoxChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
         }
 
         #region Callbacks
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
-        void UseCategoryChanged(object sender, EventArgs e)
+        void UseCategoryChanged(object sender, MetaPropArgs e)
         {
             if (UseCategory)
             {
@@ -165,7 +165,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void CategoryChanged(object sender, EventArgs e)
+        void CategoryChanged(object sender, MetaPropArgs e)
         {
             object subCategory = Callbacks.GetSubCategory(Category);
             Properties["SubCategory"] = new MetaProp("SubCategory", subCategory.GetType(),
@@ -174,7 +174,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void AutoFindMailBoxChanged(object sender, EventArgs e)
+        void AutoFindMailBoxChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindMailBox)
                 Properties["Location"].Show = false;

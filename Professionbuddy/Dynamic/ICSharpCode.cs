@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HighVoltz.Composites;
 
-namespace HighVoltz
+namespace HighVoltz.Dynamic
 {
-    public enum CsharpCodeType { BoolExpression, Statements, Declaration }
+    public enum CsharpCodeType { BoolExpression, Statements, Declaration, Expression }
 
     public interface ICSharpCode
     {
@@ -14,5 +15,6 @@ namespace HighVoltz
         CsharpCodeType CodeType { get; }
         string Code { get; }
         Delegate CompiledMethod { get; set; }
+        IPBComposite AttachedComposite { get; }
     }
 }

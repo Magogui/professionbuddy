@@ -65,7 +65,7 @@ namespace HighVoltz.Composites
             Properties["ItemTarget"].PropertyChanged += ItemTargetChanged;
         }
 
-        void ActionTypeChanged(object sender, System.EventArgs e)
+        void ActionTypeChanged(object sender, MetaPropArgs e)
         {
             if (ActionType == DeActionType.Disenchant)
                 Properties["ItemQuality"].Show = true;
@@ -74,7 +74,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void ItemTargetChanged(object sender, System.EventArgs e)
+        void ItemTargetChanged(object sender, MetaPropArgs e)
         {
             if (ItemTarget == ItemTargetType.Specific)
                 Properties["ItemId"].Show = true;
@@ -354,7 +354,7 @@ namespace HighVoltz.Composites
             {225,99},
             {275,120},
             {325,200},
-            {450,346},
+            {450,  380},
         };
         readonly static int[,] EpicItemDeList = new int[,] {
             {1,20},

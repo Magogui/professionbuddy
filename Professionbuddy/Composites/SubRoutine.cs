@@ -6,6 +6,7 @@ using System.Xml.Serialization;
 using TreeSharp;
 using System.Xml;
 using Styx.Helpers;
+using System.Collections.Specialized;
 
 namespace HighVoltz.Composites
 {
@@ -30,42 +31,6 @@ namespace HighVoltz.Composites
         virtual public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
 
         virtual public PropertyBag Properties { get; private set; }
-
-
-
-        //// credits to Apoc http://code.google.com/p/treesharp/source/browse/trunk/TreeSharp/PrioritySelector.cs
-        //protected override IEnumerable<RunStatus> Execute(object context)
-        //{
-        //    //lock (Locker)
-        //    //{
-        //    if (context == null || !(context is string) || (string)context != SubRoutineName)
-        //    {
-        //        yield return RunStatus.Failure;
-        //        yield break;
-        //    }
-        //    foreach (Composite node in Children)
-        //    {
-        //        node.Start(context);
-        //        // Keep stepping through the enumeration while it's returing RunStatus.Success
-        //        // or until CanRun() returns false if IgnoreCanRun is false..
-        //        while (node.Tick(context) == RunStatus.Success)
-        //        {
-        //            Selection = node;
-        //            yield return RunStatus.Success;
-        //        }
-        //        Selection = null;
-        //        node.Stop(context);
-        //        if (node.LastStatus == RunStatus.Success)
-        //        {
-        //            yield return RunStatus.Success;
-        //            yield break;
-        //        }
-        //    }
-        //    _executed = true;
-        //    yield return RunStatus.Failure;
-        //    yield break;
-        //    //}
-        //}
 
         protected override IEnumerable<RunStatus> Execute(object context)
         {
@@ -100,13 +65,7 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as GroupComposite);
             }
         }
-        //public bool IsDone
-        //{
-        //    get
-        //    {
-        //        return (Children.Count(c => ((IPBComposite)c).IsDone) == Children.Count);
-        //    }
-        //}
+
         virtual public bool IsDone { get; set; }
 
         public virtual object Clone()
@@ -122,12 +81,8 @@ namespace HighVoltz.Composites
 
 
 
-        public void OnProfileLoad(System.Xml.Linq.XElement element)
-        {
-        }
+        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
 
-        public void OnProfileSave(System.Xml.Linq.XElement element)
-        {
-        }
+        public void OnProfileSave(System.Xml.Linq.XElement element) { }
     }
 }

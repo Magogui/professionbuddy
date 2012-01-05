@@ -106,23 +106,23 @@ namespace HighVoltz.Composites
             BidOnItem = false;
             BuyAdditively = true;
 
-            Properties["AutoFindAh"].PropertyChanged += new EventHandler(AutoFindAHChanged);
-            Properties["ItemListType"].PropertyChanged += new EventHandler(BuyItemFromAhAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["AutoFindAh"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindAHChanged);
+            Properties["ItemListType"].PropertyChanged += new EventHandler<MetaPropArgs>(BuyItemFromAhAction_PropertyChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Amount"].Show = true;
             Properties["Location"].Show = false;
         }
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void AutoFindAHChanged(object sender, EventArgs e)
+        void AutoFindAHChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindAh)
             {
@@ -134,7 +134,7 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        void BuyItemFromAhAction_PropertyChanged(object sender, EventArgs e)
+        void BuyItemFromAhAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             if (ItemListType == ItemType.MaterialList)
             {

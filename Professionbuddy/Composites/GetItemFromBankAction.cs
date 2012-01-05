@@ -107,23 +107,23 @@ namespace HighVoltz.Composites
 
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
-            Properties["AutoFindBank"].PropertyChanged += new EventHandler(AutoFindBankChanged);
-            Properties["GetItemfromBankType"].PropertyChanged += new EventHandler(GetItemfromBankAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["AutoFindBank"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindBankChanged);
+            Properties["GetItemfromBankType"].PropertyChanged += new EventHandler<MetaPropArgs>(GetItemfromBankAction_PropertyChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
         }
 
         #region Callbacks
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void AutoFindBankChanged(object sender, EventArgs e)
+        void AutoFindBankChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindBank)
             {
@@ -137,7 +137,7 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        void GetItemfromBankAction_PropertyChanged(object sender, EventArgs e)
+        void GetItemfromBankAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             switch (GetItemfromBankType)
             {

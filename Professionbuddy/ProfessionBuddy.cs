@@ -41,6 +41,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Windows.Documents;
 using System.Windows.Threading;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz
 {
@@ -121,9 +122,9 @@ namespace HighVoltz
 
             // reset all actions 
             PbBehavior.Reset();
-            if (DynamicCode.CodeWasModified)
+            if (DynamicCodeCompiler.CodeWasModified)
             {
-                DynamicCode.GenorateDynamicCode();
+                DynamicCodeCompiler.GenorateDynamicCode();
             }
 
             if (MainForm.IsValid)
@@ -419,7 +420,7 @@ namespace HighVoltz
                     Debug("Initializing ...");
                     if (!Directory.Exists(BotPath))
                         Directory.CreateDirectory(BotPath);
-                    DynamicCode.WipeTempFolder();
+                    DynamicCodeCompiler.WipeTempFolder();
                     // force Tripper.Tools.dll to load........
                     new Tripper.Tools.Math.Vector3(0, 0, 0);
 
@@ -546,7 +547,7 @@ namespace HighVoltz
                     Instance.PbBehavior = idComp;
                     Instance.MySettings.LastProfile = path;
                     Instance.ProfileSettings.Load();
-                    DynamicCode.GenorateDynamicCode();
+                    DynamicCodeCompiler.GenorateDynamicCode();
                     Instance.UpdateMaterials();
                     PreLoadHbProfile();
                     if (MainForm.IsValid)

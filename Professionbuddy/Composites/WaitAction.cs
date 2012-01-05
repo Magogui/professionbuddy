@@ -7,6 +7,7 @@ using System.Threading;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {

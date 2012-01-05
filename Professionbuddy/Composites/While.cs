@@ -15,50 +15,7 @@ namespace HighVoltz.Composites
 
     class While : If
     {
-        //protected override IEnumerable<RunStatus> Execute(object context)
-        //{
-        //    //lock (Locker)
-        //    //{
-        //    if (!CanRun(null))
-        //    {
-        //        yield return RunStatus.Failure;
-        //        yield break;
-        //    }
-        //    bool breakIterationEarly = false;
-        //    foreach (Composite node in Children.SkipWhile(c => Selection != null ? c != Selection : false))
-        //    {
-        //        node.Start(context);
-        //        // Keep stepping through the enumeration while it's returning RunStatus.Success
-        //        // or until CanRun() returns false if IgnoreCanRun is false..
-        //        while (node.Tick(context) == RunStatus.Success)
-        //        {
-        //            if (!IgnoreCanRun && !CanRun(context))
-        //            {
-        //                breakIterationEarly = true;
-        //                break;
-        //            }
-        //            Selection = node;
-        //            yield return RunStatus.Success;
-        //        }
-        //        if (breakIterationEarly == true)
-        //            break;
-        //        if (node.LastStatus == RunStatus.Success)
-        //        {
-        //            yield return RunStatus.Success;
-        //            yield break;
-        //        }
-        //        else
-        //            Selection = null;
-        //    }
-        //    Reset();
-        //    if (CanRun(context))
-        //    {
-        //        yield return RunStatus.Success;
-        //        yield break;
-        //    }
-        //    //}
-        //}
-
+     
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if ((_isRunning && IgnoreCanRun) || CanRun(context))

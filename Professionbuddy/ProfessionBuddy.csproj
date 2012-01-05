@@ -82,6 +82,9 @@
     <Compile Include="Composites\Declaration.cs" />
     <Compile Include="Composites\PbRootComposite.cs" />
     <Compile Include="DataStore.cs" />
+    <Compile Include="Dynamic\DynamicProperty.cs" />
+    <Compile Include="Dynamic\Helpers.cs" />
+    <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -99,7 +102,7 @@
     <Compile Include="Composites\CastSpellAction.cs" />
     <Compile Include="Composites\ChangeBotAction.cs" />
     <Compile Include="Composites\CsharpAction.cs" />
-    <Compile Include="ICSharpCode.cs" />
+    <Compile Include="Dynamic\ICSharpCode.cs" />
     <Compile Include="Composites\PbDecorator.cs" />
     <Compile Include="Composites\Comment.cs" />
     <Compile Include="Composites\CommonTypes.cs" />
@@ -123,7 +126,7 @@
     <Compile Include="Composites\TrainSkillAction.cs" />
     <Compile Include="Composites\WaitAction.cs" />
     <Compile Include="Composites\While.cs" />
-    <Compile Include="DynamicCode.cs" />
+    <Compile Include="Dynamic\DynamicCodeCompiler.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

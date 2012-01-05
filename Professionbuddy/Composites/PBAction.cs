@@ -16,6 +16,9 @@ using Styx.Helpers;
 using Styx.Logic.Pathing;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
+using System.Collections;
+using System.Collections.Specialized;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {
@@ -42,11 +45,18 @@ namespace HighVoltz.Composites
             HasRunOnce = false;
             Pb = Professionbuddy.Instance;
             Properties = new PropertyBag();
+            Expressions = new ListDictionary();
         }
         virtual public string Help { get { return ""; } }
         virtual public string Name { get { return "PBAction"; } }
-        virtual public string Title { get { return string.Format("({0})", Name); } }        [XmlIgnore()]
-        virtual public System.Drawing.Color Color { get { return System.Drawing.Color.Black; } }
+        virtual public string Title { get { return string.Format("({0})", Name); } }
+        virtual public ListDictionary Expressions { get; private set; }
+        [XmlIgnore()]
+        System.Drawing.Color _color = System.Drawing.Color.Black;
+        virtual public System.Drawing.Color Color {
+            get { return _color; }
+            set { _color = value; }
+        }
         protected PropertyGrid propertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
         protected void RefreshPropertyGrid()
         {
@@ -54,6 +64,10 @@ namespace HighVoltz.Composites
             {
                 propertyGrid.Refresh();
             }
+        }
+        protected void RegisterDynamicProperty(string propName)
+        {
+            Properties[propName].PropertyChanged += new EventHandler<MetaPropArgs>(DynamicPropertyChanged);
         }
         public virtual bool IsDone { get; protected set; }
         protected bool HasRunOnce { get; set; }
@@ -64,27 +78,28 @@ namespace HighVoltz.Composites
         {
             HasRunOnce = true;
         }
-                [XmlIgnore()]
+        [XmlIgnore()]
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()
         {
             return this;
         }
+
         public virtual void Reset()
         {
             IsDone = false;
             HasRunOnce = false;
         }
 
+        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
 
-        public void OnProfileLoad(System.Xml.Linq.XElement element)
+        public void OnProfileSave(System.Xml.Linq.XElement element) { }
+
+        void DynamicPropertyChanged(object sender, MetaPropArgs e)
         {
-
-        }
-
-        public void OnProfileSave(System.Xml.Linq.XElement element)
-        {
+            ((IDynamicProperty)e.Value).AttachedComposite = this;
+            DynamicCodeCompiler.CodeWasModified = true;
         }
     }
     #endregion

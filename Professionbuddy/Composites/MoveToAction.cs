@@ -75,21 +75,21 @@ namespace HighVoltz.Composites
             Pathing = NavigationType.Navigator;
 
             Properties["Entry"].Show = false;
-            Properties["MoveType"].PropertyChanged += new EventHandler(MoveToAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["MoveType"].PropertyChanged += new EventHandler<MetaPropArgs>(MoveToAction_PropertyChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
         }
 
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint(Location);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void MoveToAction_PropertyChanged(object sender, EventArgs e)
+        void MoveToAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             switch (MoveType)
             {

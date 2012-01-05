@@ -124,16 +124,16 @@ namespace HighVoltz.Composites
             Properties["ItemId"].Show = false;
             Properties["Casted"].PropertyChanged += OnCounterChanged;
             CheckTradeskillList();
-            Properties["RepeatType"].PropertyChanged += new EventHandler(CastSpellAction_PropertyChanged);
-            Properties["Entry"].PropertyChanged += new EventHandler(OnEntryChanged);
+            Properties["RepeatType"].PropertyChanged += new EventHandler<MetaPropArgs>(CastSpellAction_PropertyChanged);
+            Properties["Entry"].PropertyChanged += new EventHandler<MetaPropArgs>(OnEntryChanged);
             Properties["CastOnItem"].PropertyChanged += CastOnItemChanged;
         }
-        void OnEntryChanged(object sender, EventArgs e)
+        void OnEntryChanged(object sender, MetaPropArgs e)
         {
             CheckTradeskillList();
         }
 
-        void CastOnItemChanged(object sender, EventArgs e)
+        void CastOnItemChanged(object sender, MetaPropArgs e)
         {
             if (CastOnItem)
             {
@@ -148,7 +148,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void CastSpellAction_PropertyChanged(object sender, EventArgs e)
+        void CastSpellAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             IsDone = false;
             Pb.UpdateMaterials();
@@ -182,7 +182,7 @@ namespace HighVoltz.Composites
             return Repeat;
         }
 
-        void OnCounterChanged(object sender, EventArgs e)
+        void OnCounterChanged(object sender, MetaPropArgs e)
         {
             RefreshPropertyGrid();
         }

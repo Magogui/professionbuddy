@@ -40,7 +40,7 @@ namespace HighVoltz.Composites
         public object SubCategory
         {
             get
-            { // since subCategory type is sometimes set last we need to wait at a later peried to actually convert the enum value.
+            {
                 return (object)Properties["SubCategory"].Value;
             }
             set
@@ -131,8 +131,8 @@ namespace HighVoltz.Composites
             SubCategory = WoWItemTradeGoodsClass.None;
             MinBuyout = new PropertyBag.GoldEditor("0g0s0c");
 
-            Properties["AutoFindAh"].PropertyChanged += new EventHandler(AutoFindAHChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["AutoFindAh"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindAHChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
 
@@ -141,17 +141,17 @@ namespace HighVoltz.Composites
             Properties["Location"].Show = false;
         }
         #region Callbacks
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void AutoFindAHChanged(object sender, EventArgs e)
+        void AutoFindAHChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindAh)
                 Properties["Location"].Show = false;
@@ -160,7 +160,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void UseCategoryChanged(object sender, EventArgs e)
+        void UseCategoryChanged(object sender, MetaPropArgs e)
         {
             if (UseCategory)
             {
@@ -177,7 +177,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void CategoryChanged(object sender, EventArgs e)
+        void CategoryChanged(object sender, MetaPropArgs e)
         {
             object subCategory = Callbacks.GetSubCategory(Category);
             Properties["SubCategory"] = new MetaProp("SubCategory", subCategory.GetType(),

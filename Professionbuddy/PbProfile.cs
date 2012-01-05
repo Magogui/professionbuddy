@@ -35,6 +35,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Xml.Linq;
 using System.Reflection;
 using System.ComponentModel;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz
 {
@@ -82,12 +83,12 @@ namespace HighVoltz
                                 return null;
                             }
                             PackagePart pbProfilePart = zipFile.GetPart(packageRelation.TargetUri);
-                            path = ExtractPart(pbProfilePart, DynamicCode.TempFolder);
+                            path = ExtractPart(pbProfilePart, DynamicCodeCompiler.TempFolder);
                             var pbProfileRelations = pbProfilePart.GetRelationships();
                             foreach (var rel in pbProfileRelations)
                             {
                                 var hbProfilePart = zipFile.GetPart(rel.TargetUri);
-                                ExtractPart(hbProfilePart, DynamicCode.TempFolder);
+                                ExtractPart(hbProfilePart, DynamicCodeCompiler.TempFolder);
                             }
                         }
                     }

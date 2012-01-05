@@ -67,7 +67,7 @@ namespace HighVoltz.Composites
             SpellFocus = WoWSpellFocus.Anvil;
 
             Properties["SpellFocus"].Show = false;
-            Properties["InteractType"].PropertyChanged += new EventHandler(InteractionAction_PropertyChanged);
+            Properties["InteractType"].PropertyChanged += new EventHandler<MetaPropArgs>(InteractionAction_PropertyChanged);
             Properties["GameObjectType"].PropertyChanged += InteractionAction_PropertyChanged;
         }
 
@@ -110,7 +110,7 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
-        void InteractionAction_PropertyChanged(object sender, EventArgs e)
+        void InteractionAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             switch (GameObjectType)
             {

@@ -81,23 +81,23 @@ namespace HighVoltz.Composites
             Location = loc.ToInvariantString();
             MinFreeBagSlots = 0u;
 
-            Properties["GetMailType"].PropertyChanged += new EventHandler(GetMailAction_PropertyChanged);
-            Properties["AutoFindMailBox"].PropertyChanged += new EventHandler(AutoFindMailBoxChanged);
+            Properties["GetMailType"].PropertyChanged += new EventHandler<MetaPropArgs>(GetMailAction_PropertyChanged);
+            Properties["AutoFindMailBox"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindMailBoxChanged);
             Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
         }
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void AutoFindMailBoxChanged(object sender, EventArgs e)
+        void AutoFindMailBoxChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindMailBox)
                 Properties["Location"].Show = false;
@@ -105,7 +105,7 @@ namespace HighVoltz.Composites
                 Properties["Location"].Show = true;
             RefreshPropertyGrid();
         }
-        void GetMailAction_PropertyChanged(object sender, EventArgs e)
+        void GetMailAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             if (GetMailType == GetMailActionType.AllItems)
                 Properties["ItemID"].Show = false;
@@ -121,7 +121,6 @@ namespace HighVoltz.Composites
         Stopwatch _refreshInboxSW = new Stopwatch();
 
         List<uint> _idList;
-        int _throttleTime;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)

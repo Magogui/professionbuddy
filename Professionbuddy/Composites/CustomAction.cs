@@ -7,6 +7,7 @@ using System.Threading;
 using System.Drawing.Design;
 using System.ComponentModel.Design;
 using System.ComponentModel;
+using HighVoltz.Dynamic;
 
 
 namespace HighVoltz.Composites
@@ -29,12 +30,12 @@ namespace HighVoltz.Composites
             Properties["Code"] = new MetaProp("Code", typeof(string),
                 new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
             Code = "";
-            Properties["Code"].PropertyChanged += new EventHandler(CustomAction_PropertyChanged);
+            Properties["Code"].PropertyChanged += CustomAction_PropertyChanged;
         }
 
-        void CustomAction_PropertyChanged(object sender, EventArgs e)
+        void CustomAction_PropertyChanged(object sender, MetaPropArgs e)
         {
-            DynamicCode.CodeWasModified = true;
+            DynamicCodeCompiler.CodeWasModified = true;
         }
 
         protected override RunStatus Run(object context)

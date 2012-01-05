@@ -56,15 +56,20 @@ namespace HighVoltz
         public Type Type { get; private set; }
         public Attribute[] Attributes { get; private set; }
         public bool Show { get; set; }
-        public event EventHandler PropertyChanged;
+        public event EventHandler<MetaPropArgs> PropertyChanged;
         object val;
         public object Value
         {
             get { return val; }
-            set { val = value; if (PropertyChanged != null) PropertyChanged(this, null); }
+            set { val = value; if (PropertyChanged != null) PropertyChanged(this, new MetaPropArgs(value)); }
         }
     }
+    public class MetaPropArgs : EventArgs
+    {
+        public MetaPropArgs(object val) { this.Value = val; }
 
+        public object Value { get; private set; }
+    }
     public class PropertyBag : ICustomTypeDescriptor
     {
         private readonly Dictionary<string, MetaProp> metaPropList = new Dictionary<string, MetaProp>();
@@ -140,11 +145,13 @@ namespace HighVoltz
 
         public class EntryEditor : UITypeEditor
         {
-            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+            {
                 return UITypeEditorEditStyle.Modal;
             }
 
-            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value) {
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+            {
                 if (Styx.WoWInternals.ObjectManager.IsInGame)
                 {
                     if (!TreeRoot.IsRunning)
@@ -276,7 +283,7 @@ namespace HighVoltz
                 return base.ConvertFrom(context, culture, value);
             }
         }
-        #endregion 
+        #endregion
         #endregion
 
         #region ICustomTypeDescriptor definitions

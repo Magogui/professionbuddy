@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
+using HighVoltz.Dynamic;
 
 
 namespace HighVoltz.Composites
@@ -60,14 +61,14 @@ namespace HighVoltz.Composites
             CompileError = "";
             Properties["CompileError"].Show = false;
 
-            Properties["Condition"].PropertyChanged += new EventHandler(Condition_PropertyChanged);
-            Properties["CompileError"].PropertyChanged += new EventHandler(CompileError_PropertyChanged);
+            Properties["Condition"].PropertyChanged +=Condition_PropertyChanged;
+            Properties["CompileError"].PropertyChanged += CompileError_PropertyChanged;
             IgnoreCanRun = true;
         }
 
         void Condition_PropertyChanged(object sender, EventArgs e)
         {
-            DynamicCode.CodeWasModified = true;
+            DynamicCodeCompiler.CodeWasModified = true;
         }
 
         string lastError = "";
@@ -97,47 +98,6 @@ namespace HighVoltz.Composites
             }
         }
 
-        //protected override IEnumerable<RunStatus> Execute(object context)
-        //{
-        //    // genorates some exeption.... besides I'm only accessing this from one thread
-        //    //lock (Locker)
-        //    //{
-        //    if (IsDone)
-        //    {
-        //        yield return RunStatus.Failure;
-        //        yield break;
-        //    }
-        //    bool breakIterationEarly = false;
-        //    foreach (Composite node in Children)
-        //    {
-        //        // Keep stepping through the enumeration while it's returing RunStatus.Success
-        //        // or until CanRun() returns false if IgnoreCanRun is false..
-        //        node.Start(context);
-        //        while (node.Tick(context) == RunStatus.Success)
-        //        {
-        //            if (!IgnoreCanRun && !CanRun(context))
-        //            {
-        //                breakIterationEarly = true;
-        //                break;
-        //            }
-        //            Selection = node;
-        //            yield return RunStatus.Success;
-        //        }
-        //        if (breakIterationEarly == true)
-        //            break;
-        //        Selection = null;
-        //        //node.Stop(context);
-        //        if (node.LastStatus == RunStatus.Success)
-        //        {
-        //            yield return RunStatus.Success;
-        //            yield break;
-        //        }
-        //    }
-        //    _executed = true;
-        //    //yield return RunStatus.Failure;
-        //    //yield break;
-        //    //}
-        //}
         protected bool _isRunning = false;
         protected override IEnumerable<RunStatus> Execute(object context)
         {
@@ -241,71 +201,10 @@ namespace HighVoltz.Composites
 
         virtual public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
 
-        public void OnProfileLoad(System.Xml.Linq.XElement element)
-        {
-        }
+        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
 
-        public void OnProfileSave(System.Xml.Linq.XElement element)
-        {
-        }
+        public void OnProfileSave(System.Xml.Linq.XElement element) { }
+
+        public IPBComposite AttachedComposite { get { return this; } }
     }
-
-
-
-    //public class If : CsharpCondition
-    //{
-    //    virtual public bool IgnoreCanRun
-    //    {
-    //        get { return (bool)Properties["IgnoreCanRun"].Value; }
-    //        set { Properties["IgnoreCanRun"].Value = value; }
-    //    }
-    //    public If()
-    //        : base(CsharpCodeType.BoolExpression)
-    //    {
-    //        Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool), new DisplayNameAttribute("Ignore Condition until done"));
-    //        IgnoreCanRun = true;
-    //    }
-
-
-    //    override public string Name { get { return "If Condition"; } }
-    //    override public string Title
-    //    {
-    //        get
-    //        {
-    //            return string.Format("If {0}",
-    //                string.IsNullOrEmpty(Condition) ? "Condition" : "(" + Condition + ")");
-    //        }
-    //    }
-
-
-    //    public override RunStatus Tick(object context)
-    //    {
-    //        if ((LastStatus == RunStatus.Success && IgnoreCanRun) || CanRun(null))
-    //        {
-    //            if (!DecoratedChild.IsRunning)
-    //                DecoratedChild.Start(null);
-    //            LastStatus = DecoratedChild.Tick(null);
-    //        }
-    //        else
-    //        {
-    //            LastStatus = RunStatus.Failure;
-    //        }
-    //        return (RunStatus)LastStatus;
-    //    }
-
-    //    public override object Clone()
-    //    {
-    //        If pd = new If()
-    //        {
-    //            CanRunDelegate = this.CanRunDelegate,
-    //            Condition = this.Condition,
-    //            IgnoreCanRun = this.IgnoreCanRun
-    //        };
-    //        return pd;
-    //    }
-
-    //    override public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
-
-
-    //}
 }

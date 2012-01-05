@@ -216,25 +216,25 @@ namespace HighVoltz.Composites
             Properties["NpcEntry"].Show = false;
             Properties["GuildTab"].Show = false;
 
-            Properties["AutoFindBank"].PropertyChanged += new EventHandler(AutoFindBankChanged);
-            Properties["Bank"].PropertyChanged += new EventHandler(PutItemInBankAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["AutoFindBank"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindBankChanged);
+            Properties["Bank"].PropertyChanged += new EventHandler<MetaPropArgs>(PutItemInBankAction_PropertyChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
         }
 
         #region Callbacks
-        void LocationChanged(object sender, EventArgs e)
+        void LocationChanged(object sender, MetaPropArgs e)
         {
             MetaProp mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler(LocationChanged);
+            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
             RefreshPropertyGrid();
         }
 
-        void PutItemInBankAction_PropertyChanged(object sender, EventArgs e)
+        void PutItemInBankAction_PropertyChanged(object sender, MetaPropArgs e)
         {
             if (Bank == BankType.Personal)
             {
@@ -247,7 +247,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void AutoFindBankChanged(object sender, EventArgs e)
+        void AutoFindBankChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindBank)
             {
@@ -261,7 +261,7 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        void UseCategoryChanged(object sender, EventArgs e)
+        void UseCategoryChanged(object sender, MetaPropArgs e)
         {
             if (UseCategory)
             {
@@ -278,7 +278,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void CategoryChanged(object sender, EventArgs e)
+        void CategoryChanged(object sender, MetaPropArgs e)
         {
             object subCategory = Callbacks.GetSubCategory(Category);
             Properties["SubCategory"] = new MetaProp("SubCategory", subCategory.GetType(),

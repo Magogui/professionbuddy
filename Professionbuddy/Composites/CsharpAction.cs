@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {
@@ -11,22 +12,21 @@ namespace HighVoltz.Composites
     public abstract class CsharpAction : PBAction, ICSharpCode
     {
         public CsharpAction()
+            : this(CsharpCodeType.Statements) { }
+
+        public CsharpAction(CsharpCodeType t)
         {
-            CodeType = CsharpCodeType.Statements;
+            CodeType = t;
             Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
-            
+
             CompileError = "";
 
             Properties["CompileError"].Show = false;
-            Properties["CompileError"].PropertyChanged += new EventHandler(CompileError_PropertyChanged);
-        }
-        public CsharpAction(CsharpCodeType t):this()
-        {
-            CodeType = t;
+            Properties["CompileError"].PropertyChanged += CompileError_PropertyChanged;
         }
 
         string lastError = "";
-        void CompileError_PropertyChanged(object sender, EventArgs e)
+        void CompileError_PropertyChanged(object sender, MetaPropArgs e)
         {
             if (CompileError != "" || (CompileError == "" && lastError != ""))
             {
@@ -57,5 +57,9 @@ namespace HighVoltz.Composites
 
         virtual public Delegate CompiledMethod { get; set; }
 
+        public IPBComposite AttachedComposite
+        {
+            get { return this; }
+        }
     }
 }

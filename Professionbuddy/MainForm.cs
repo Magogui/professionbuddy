@@ -20,6 +20,7 @@ using HighVoltz.Composites;
 using Styx.Logic.Profiles;
 using System.Threading;
 using Styx;
+using HighVoltz.Dynamic;
 
 namespace HighVoltz
 {
@@ -496,7 +497,7 @@ namespace HighVoltz
                     ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
                         new DescriptionAttribute(kv.Value.Summary), new CategoryAttribute(kv.Value.Category));
                     ProfilePropertyBag[kv.Key].Value = kv.Value.Value;
-                    ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(ProfileSettings_PropertyChanged);
+                    ProfilePropertyBag[kv.Key].PropertyChanged += ProfileSettings_PropertyChanged;
                 }
             }
             pg.SelectedObject = ProfilePropertyBag;
@@ -504,7 +505,7 @@ namespace HighVoltz
             RightSideTab.ResumeLayout();
         }
 
-        void ProfileSettings_PropertyChanged(object sender, EventArgs e)
+        void ProfileSettings_PropertyChanged(object sender, MetaPropArgs e)
         {
             PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
         }
@@ -690,8 +691,8 @@ namespace HighVoltz
             }
             else
                 Initialize();
-            if (DynamicCode.CodeWasModified)
-                DynamicCode.GenorateDynamicCode();
+            if (DynamicCodeCompiler.CodeWasModified)
+                DynamicCodeCompiler.GenorateDynamicCode();
         }
 
         private void MainForm_ResizeBegin(object sender, EventArgs e)
@@ -720,8 +721,10 @@ namespace HighVoltz
                 ActionTree.ResumeLayout();
             }
 
-            if (DynamicCode.CodeWasModified)
-                DynamicCode.GenorateDynamicCode();
+            if (DynamicCodeCompiler.CodeWasModified)
+            {
+                new Thread(() => DynamicCodeCompiler.GenorateDynamicCode()) { IsBackground = true }.Start();
+            }
         }
 
         private void RemoveButton_Click(object sender, EventArgs e)
