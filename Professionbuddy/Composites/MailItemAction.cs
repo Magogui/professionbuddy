@@ -188,6 +188,7 @@ namespace HighVoltz.Composites
         WoWGameObject _mailbox;
         Dictionary<uint, int> ItemList;
         Stopwatch itemSplitSW = new Stopwatch();
+        string mailSubject = null;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -231,37 +232,38 @@ namespace HighVoltz.Composites
                         ItemList = BuildItemList();
                     if (ItemList.Count == 0)
                     {
-                        if (Lua.GetReturnVal<int>("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then return 1 end end return 0 ",0) > 0)
-                        {
-                            Lua.DoString(string.Format("SendMail (\"{0}\",' ','');SendMailMailButton:Click();",
-                                CharacterSettings.Instance.MailRecipient.ToFormatedUTF8()));
-                        }
+                        Lua.DoString("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then SendMail (\"{0}\",\"{1}\",'') end end ",
+                            CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), mailSubject != null ? mailSubject : " ");
                         IsDone = true;
                         return RunStatus.Failure;
                     }
-                    using (new FrameLock())
+
+                    MailFrame.Instance.SwitchToSendMailTab();
+                    uint itemID = ItemList.Keys.FirstOrDefault();
+                    bool done = false;
+                    WoWItem item = me.BagItems.FirstOrDefault(i => i.Entry == itemID);
+                    mailSubject = item != null ? item.Name : " ";
+                    int ret = MailItem(itemID, ItemList[itemID]);
+                    // we need to wait for item split to finish if ret == 0
+                    // format indexs are MailRecipient=0, Mail subject=1
+                    int mailItemsRet = Lua.GetReturnVal<int>(
+                        string.Format(_mailItemsFormat, CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), mailSubject),
+                        0);
+                    if (ret == 0 || mailItemsRet == 1)
                     {
-                        MailFrame.Instance.SwitchToSendMailTab();
-                        uint itemID = ItemList.Keys.FirstOrDefault();
-                        bool done = false;
-                        int ret = MailItem(itemID, ItemList[itemID]);
-                        // we need to wait for item split to finish if ret == 0
-                        if (ret == 0)
-                        {
-                            itemSplitSW.Reset();
-                            itemSplitSW.Start();
-                            return RunStatus.Success;
-                        }
-                        ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
-                        Professionbuddy.Debug("MailItem: sending {0}", itemID);
-                        if (ItemList[itemID] <= 0)
-                            done = true;
-                        else
-                            done = false;
-                        if (done)
-                        {
-                            ItemList.Remove(itemID);
-                        }
+                        itemSplitSW.Reset();
+                        itemSplitSW.Start();
+                        return RunStatus.Success;
+                    }
+                    ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
+                    Professionbuddy.Debug("MailItem: sending {0}", itemID);
+                    if (ItemList[itemID] <= 0)
+                        done = true;
+                    else
+                        done = false;
+                    if (done)
+                    {
+                        ItemList.Remove(itemID);
                     }
                     if (IsDone)
                     {
@@ -324,7 +326,7 @@ namespace HighVoltz.Composites
             else
                 return false;
         }
-        // format indexs are ItemID=0, Amount=1, MailRecipient=2
+        // format indexs are ItemID=0, Amount=1
         static string _mailItemLuaFormat =
             "local mailItemI =1 " +
             "local freeBagSlots = 0 " +
@@ -335,13 +337,11 @@ namespace HighVoltz.Composites
                "freeBagSlots = freeBagSlots + GetContainerNumFreeSlots(i) " +
             "end " +
             "local bagInfo={{}} " +
-            "local mailTitle " +
             "for bag = 0,NUM_BAG_SLOTS do " +
                "for slot=1,GetContainerNumSlots(bag) do " +
                   "local id = GetContainerItemID(bag,slot) or 0 " +
                   "local _,c,l = GetContainerItemInfo(bag, slot) " +
                   "if id == itemId and l == nil then " +
-                     "if mailTitle == nil then mailTitle = GetItemInfo(id) end " +
                      "table.insert(bagInfo,{{bag,slot,c}}) " +
                   "end " +
                "end " +
@@ -377,17 +377,27 @@ namespace HighVoltz.Composites
                "if bagged >= amount then return -1 end " +
                "mailItemI = mailItemI + 1 " +
                "if mailItemI > ATTACHMENTS_MAX_SEND then " +
-                  "SendMail (\"{2}\",mailTitle or ' ','') " +
-                  //"SendMailMailButton:Click() " +
+            //"SendMailMailButton:Click() " +
                   "return bagged " +
                "end " +
             "end " +
             "return bagged ";
+        // format indexs are MailRecipient=0, Mail subject=1
+        static string _mailItemsFormat =
+                      "local cnt = 0 " +
+                      "for i=1,ATTACHMENTS_MAX_SEND do " +
+                          "if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end " +
+                      "end " +
+                      "if cnt == ATTACHMENTS_MAX_SEND then " +
+                          "SendMail (\"{0}\",\"{1}\",'') " +
+                          "return 1 " +
+                      "end " +
+                      "return 0 ";
         // return -1 if done,0 if spliting item else the amount of items placed in mail.
         int MailItem(uint id, int amount)
         {
             // format indexs are ItemID=0, Amount=1, MailRecipient=2
-            string lua = string.Format(_mailItemLuaFormat,id,amount, CharacterSettings.Instance.MailRecipient.ToFormatedUTF8());
+            string lua = string.Format(_mailItemLuaFormat, id, amount);
             return Lua.GetReturnVal<int>(lua, 0);
         }
 
