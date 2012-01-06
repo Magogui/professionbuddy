@@ -87,7 +87,7 @@ namespace HighVoltz
                 toolStripAddCombo.Items.Add("Banker");
             toolStripAddCombo.SelectedIndex = 0;
 
-            string imagePath = Path.Combine(PB.BotPath, "Icons\\");
+            string imagePath = Path.Combine(Professionbuddy.BotPath, "Icons\\");
             toolStripOpen.Image = Image.FromFile(imagePath + "OpenPL.bmp");
             toolStripSave.Image = Image.FromFile(imagePath + "SaveHL.bmp");
             toolStripCopy.Image = Image.FromFile(imagePath + "copy.png");
@@ -871,7 +871,7 @@ namespace HighVoltz
 #if DLL
             helpView.Rtf = HighVoltz.Properties.Resources.Guide;
 #else
-            helpView.LoadFile(Path.Combine(PB.BotPath, "Guide.rtf"));
+            helpView.LoadFile(Path.Combine(Professionbuddy.BotPath, "Guide.rtf"));
 #endif
             helpWindow.Controls.Add(helpView);
             helpWindow.Show();

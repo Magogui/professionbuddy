@@ -1,89 +1,61 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Design;
-using System.Xml;
 using System.Diagnostics;
-
+using System.Drawing.Design;
 using System.Linq;
-using Styx;
+using HighVoltz.Dynamic;
+using Styx.Helpers;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Merchant;
 using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using Styx.Helpers;
-using System.Collections.Generic;
-using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {
+
     #region BuyItemAction
-    class BuyItemAction : PBAction
+
+    internal sealed class BuyItemAction : PBAction
     {
+        #region BuyItemActionType enum
+
         public enum BuyItemActionType
         {
             SpecificItem,
             Material,
         }
-        [PbXmlAttribute()]
-        public uint NpcEntry
-        {
-            get { return (uint)Properties["NpcEntry"].Value; }
-            set { Properties["NpcEntry"].Value = value; }
-        }
-        WoWPoint loc;
-        [PbXmlAttribute()]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
-        [PbXmlAttribute()]
-        [PbXmlAttribute("Entry")]
-        public string ItemID
-        {
-            get { return (string)Properties["ItemID"].Value; }
-            set { Properties["ItemID"].Value = value; }
-        }
-        [PbXmlAttribute()]
-        public BuyItemActionType BuyItemType
-        {
-            get { return (BuyItemActionType)Properties["BuyItemType"].Value; }
-            set { Properties["BuyItemType"].Value = value; }
-        }
-        [PbXmlAttribute()]
-        [TypeConverter(typeof(DynamicExpression<uint>.DynamivExpressionConverter))]
-        public DynamicExpression<int> Count
-        {
-            get { return (DynamicExpression<int>)Properties["Count"].Value; }
-            set
-            {
-                Properties["Count"].Value = value;
-                DynamicCodeCompiler.CodeWasModified = true;
-            }
-        }
-        [PbXmlAttribute()]
-        public bool BuyAdditively
-        {
-            get { return (bool)Properties["BuyAdditively"].Value; }
-            set { Properties["BuyAdditively"].Value = value; }
-        }
+
+        #endregion
+
+        private Stopwatch _concludingSw = new Stopwatch();
+                          // add pause at the end to give objectmanager a chance to update.
+
+        private WoWPoint _loc;
+
         public BuyItemAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["Count"] = new MetaProp("Count", typeof(DynamicExpression<int>),
-                new TypeConverterAttribute(typeof(DynamicExpression<uint>.DynamivExpressionConverter)));
-            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType), new DisplayNameAttribute("Buy"));
-            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
+            Properties["Location"] = new MetaProp("Location", typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)));
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
+                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                      typeof (UITypeEditor)));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string));
+            Properties["Count"] = new MetaProp("Count", typeof (DynamicExpression<int>),
+                                               new TypeConverterAttribute(
+                                                   typeof (DynamicExpression<uint>.DynamivExpressionConverter)));
+            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
+                                                     new DisplayNameAttribute("Buy"));
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
+                                                       new DisplayNameAttribute("Buy Additively"));
             ItemID = "";
             Count = new DynamicExpression<int>(this, "0"); // dynamic expression
             RegisterDynamicProperty("Count");
             BuyItemType = BuyItemActionType.Material;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             NpcEntry = 0u;
             BuyAdditively = true;
 
@@ -91,18 +63,91 @@ namespace HighVoltz.Composites
             Properties["Count"].Show = false;
             Properties["BuyAdditively"].Show = false;
             Properties["Location"].PropertyChanged += LocationChanged;
-            Properties["BuyItemType"].PropertyChanged += BuyItemAction_PropertyChanged;
+            Properties["BuyItemType"].PropertyChanged += BuyItemActionPropertyChanged;
         }
-        void LocationChanged(object sender, MetaPropArgs e)
+
+        [PbXmlAttribute]
+        public uint NpcEntry
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            get { return (uint) Properties["NpcEntry"].Value; }
+            set { Properties["NpcEntry"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string) Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        [PbXmlAttribute("Entry")]
+        public string ItemID
+        {
+            get { return (string) Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public BuyItemActionType BuyItemType
+        {
+            get { return (BuyItemActionType) Properties["BuyItemType"].Value; }
+            set { Properties["BuyItemType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        [TypeConverter(typeof (DynamicExpression<uint>.DynamivExpressionConverter))]
+        public DynamicExpression<int> Count
+        {
+            get { return (DynamicExpression<int>) Properties["Count"].Value; }
+            set
+            {
+                Properties["Count"].Value = value;
+                DynamicCodeCompiler.CodeWasModified = true;
+            }
+        }
+
+        [PbXmlAttribute]
+        public bool BuyAdditively
+        {
+            get { return (bool) Properties["BuyAdditively"].Value; }
+            set { Properties["BuyAdditively"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return "Buy Item"; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"),
+                                     Name, ItemID, Count, BuyItemType);
+            }
+        }
+
+        public override string Help
+        {
+            get
+            {
+                return
+                    "This action will buy items from a merchant frame, either a specific item or any materials the NPC has that are needed for recipes in the action tree. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
+            }
+        }
+
+        private void LocationChanged(object sender, MetaPropArgs e)
+        {
+            var mp = (MetaProp) sender;
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
-        void BuyItemAction_PropertyChanged(object sender, MetaPropArgs e)
+
+        private void BuyItemActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (BuyItemType)
             {
@@ -119,14 +164,14 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        Stopwatch _concludingSw = new Stopwatch();// add pause at the end to give objectmanager a chance to update.
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
                 if (MerchantFrame.Instance == null || !MerchantFrame.Instance.IsVisible)
                 {
-                    WoWPoint movetoPoint = loc;
+                    WoWPoint movetoPoint = _loc;
                     WoWUnit unit = null;
                     unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
                         OrderBy(o => o.Distance).FirstOrDefault();
@@ -168,11 +213,11 @@ namespace HighVoltz.Composites
                     {
                         if (BuyItemType == BuyItemActionType.SpecificItem)
                         {
-                            List<uint> idList = new List<uint>();
+                            var idList = new List<uint>();
                             string[] entries = ItemID.Split(',');
-                            if (entries != null && entries.Length > 0)
+                            if ( entries.Length > 0)
                             {
-                                foreach (var entry in entries)
+                                foreach (string entry in entries)
                                 {
                                     uint temp = 0;
                                     uint.TryParse(entry.Trim(), out temp);
@@ -186,16 +231,16 @@ namespace HighVoltz.Composites
                                 return RunStatus.Failure;
                             }
                             foreach (uint id in idList)
-                                buyItem(id, (uint)(!BuyAdditively ? Count - (int)Util.GetCarriedItemCount(id) : Count));
+                                BuyItem(id, (uint) (!BuyAdditively ? Count - (int) Util.GetCarriedItemCount(id) : Count));
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {
                             foreach (var kv in Pb.MaterialList)
                             {
                                 // only buy items if we don't have enough in bags...
-                                int amount = kv.Value - (int)Ingredient.GetInBagItemCount(kv.Key);
+                                int amount = kv.Value - (int) Ingredient.GetInBagItemCount(kv.Key);
                                 if (amount > 0)
-                                    buyItem(kv.Key, (uint)amount);
+                                    BuyItem(kv.Key, (uint) amount);
                             }
                         }
                         _concludingSw.Start();
@@ -212,7 +257,7 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        static public void buyItem(uint id, uint count)
+        public static void BuyItem(uint id, uint count)
         {
             bool found = false;
             foreach (MerchantItem mi in MerchantFrame.Instance.GetAllMerchantItems())
@@ -220,8 +265,8 @@ namespace HighVoltz.Composites
                 if (mi.ItemId == id)
                 {
                     // since BuyItem can only by up to 20 items we need to run it multiple times when buying over 20 items
-                    int stacks = (int)(count / 20);
-                    int leftovers = (int)(count % 20);
+                    var stacks = (int) (count/20);
+                    var leftovers = (int) (count%20);
                     if (count >= 20)
                     {
                         //using (new FrameLock()) // framelock was causing DCs
@@ -246,35 +291,20 @@ namespace HighVoltz.Composites
             base.Reset();
             _concludingSw = new Stopwatch();
         }
-        public override string Name
-        {
-            get { return "Buy Item"; }
-        }
-        public override string Title
-        {
-            get { return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"), Name, ItemID, Count, BuyItemType); }
-        }
-
-        public override string Help
-        {
-            get
-            {
-                return "This action will buy items from a merchant frame, either a specific item or any materials the NPC has that are needed for recipes in the action tree. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
-            }
-        }
 
         public override object Clone()
         {
-            return new BuyItemAction()
-            {
-                Count = this.Count,
-                ItemID = this.ItemID,
-                BuyItemType = this.BuyItemType,
-                Location = this.Location,
-                NpcEntry = this.NpcEntry,
-                BuyAdditively = this.BuyAdditively
-            };
+            return new BuyItemAction
+                       {
+                           Count = Count,
+                           ItemID = ItemID,
+                           BuyItemType = BuyItemType,
+                           Location = Location,
+                           NpcEntry = NpcEntry,
+                           BuyAdditively = BuyAdditively
+                       };
         }
     }
+
     #endregion
 }

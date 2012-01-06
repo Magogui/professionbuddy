@@ -59,26 +59,30 @@ namespace HighVoltz
         public List<uint> ProtectedItems { get; private set; }
         public bool IsTradeSkillsLoaded { get; private set; }
 
-        static readonly string _name = "ProfessionBuddy";
-        static string _botPath = Logging.ApplicationPath + @"\Bots\" + _name;
-        public string BotPath { get { return _botPath; } }
+        private const string _name = "ProfessionBuddy";
+        public static string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
 
-        static string _profilePath = Environment.UserName == "highvoltz" ?
-                        @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles" : Path.Combine(_botPath, "Profiles");
-        public string ProfilePath { get { return _profilePath; } }
+        public readonly string ProfilePath = Environment.UserName == "highvoltz" ?
+                        @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles" : Path.Combine(BotPath, "Profiles");
 
         public event EventHandler OnTradeSkillsLoaded;
         public readonly LocalPlayer Me = ObjectManager.Me;
         Svn _svn = new Svn();
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
-        public bool HasDataStoreAddon { get { return DataStore != null ? DataStore.HasDataStoreAddon : false; } }
+        public bool HasDataStoreAddon { get { return DataStore != null && DataStore.HasDataStoreAddon; } }
         // profile Settings.
-        public PbProfileSettings ProfileSettings { get; private set; }
+        readonly PbProfileSettings _profileSettings = new PbProfileSettings();
+        public PbProfileSettings ProfileSettings
+        {
+            get { return _profileSettings; }
+        }
+
         public bool IsRunning = false;
         // static instance
         public static Professionbuddy Instance { get; private set; }
         public Version Version { get { return new Version(1, _svn.Revision); } }
         // test some culture specific stuff.
+        private bool _ctorRunOnce = false;
         public Professionbuddy()
         {
             Instance = this;
@@ -101,8 +105,14 @@ namespace HighVoltz
                     catch { }
                 }).Start();
             // Initialize is called when bot is started.. we need to hook these events before that.
-            Styx.BotEvents.Profile.OnNewOuterProfileLoaded += new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
-            Styx.Logic.Profiles.Profile.OnUnknownProfileElement += new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
+            if (!_ctorRunOnce)
+            {
+                Styx.BotEvents.Profile.OnNewOuterProfileLoaded +=
+                    new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
+                Styx.Logic.Profiles.Profile.OnUnknownProfileElement +=
+                    new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
+                _ctorRunOnce = true;
+            }
         }
         #endregion
 
@@ -203,10 +213,10 @@ namespace HighVoltz
                 OnSkillUpdateSpamSW.Reset();
                 OnSkillUpdateTimerCB(null);
             }
-            if (OnSpellsChangedSpamSW.ElapsedMilliseconds >= 1000)
+            if (_onSpellsChangedSpamSw.ElapsedMilliseconds >= 1000)
             {
-                OnSpellsChangedSpamSW.Stop();
-                OnSpellsChangedSpamSW.Reset();
+                _onSpellsChangedSpamSw.Stop();
+                _onSpellsChangedSpamSw.Reset();
                 OnSpellsChangedCB(null);
             }
         }
@@ -302,13 +312,14 @@ namespace HighVoltz
         #endregion
 
         #region OnSpellsChanged
-        Stopwatch OnSpellsChangedSpamSW = new Stopwatch();
+
+        readonly Stopwatch _onSpellsChangedSpamSw = new Stopwatch();
         public void OnSpellsChanged(object obj, LuaEventArgs args)
         {
-            if (!OnSpellsChangedSpamSW.IsRunning)
+            if (!_onSpellsChangedSpamSw.IsRunning)
             {
                 Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
-                OnSpellsChangedSpamSW.Start();
+                _onSpellsChangedSpamSw.Start();
             }
         }
         public void OnSpellsChangedCB(Object stateInfo)
@@ -339,27 +350,36 @@ namespace HighVoltz
                 e.Handled = true;
             }
         }
+        // Used as a fix when profile is loaded before Inititialize is called
+        static private string _profileToLoad = "";
         static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
             {
-                LoadProfile(ProfileManager.XmlLocation);
-                if (MainForm.IsValid)
+                if (_init)
                 {
-                    if (Instance.ProfileSettings.Settings.Count > 0)
-                        MainForm.Instance.AddProfileSettingsTab();
-                    else
-                        MainForm.Instance.RemoveProfileSettingsTab();
+                    LoadProfile(ProfileManager.XmlLocation);
+                    if (MainForm.IsValid)
+                    {
+                        if (Instance.ProfileSettings.Settings.Count > 0)
+                            MainForm.Instance.AddProfileSettingsTab();
+                        else
+                            MainForm.Instance.RemoveProfileSettingsTab();
+                    }
+                    //BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
+                    //if (!string.IsNullOrEmpty(HonorBuddyProfilePath) && File.Exists(HonorBuddyProfilePath))
+                    //    ProfileManager.LoadNew(HonorBuddyProfilePath, true);
+                    //else
+                    //    ProfileManager.LoadEmpty();
+                    //BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                 }
-                BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                if (!string.IsNullOrEmpty(HonorBuddyProfilePath) && File.Exists(HonorBuddyProfilePath))
-                    ProfileManager.LoadNew(HonorBuddyProfilePath, true);
                 else
-                    ProfileManager.LoadEmpty();
-                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                {
+                    _profileToLoad = ProfileManager.XmlLocation;
+                }
             }
-            else
-                HonorBuddyProfilePath = ProfileManager.XmlLocation;
+            //else
+            //    HonorBuddyProfilePath = ProfileManager.XmlLocation;
         }
 
         #endregion
@@ -379,33 +399,33 @@ namespace HighVoltz
             }
         }
 
-        static PbRootComposite root; //= new PbRootComposite(new PbDecorator(new PrioritySelector()),null);
-        override public TreeSharp.Composite Root
+        readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
+        override public Composite Root
         {
             get
             {
-                return root;
+                return _root;
             }
         }
 
         public PbDecorator PbBehavior
         {
-            get { return root.PbBotBase; }
-            set { root.PbBotBase = value; }
+            get { return _root.PbBotBase; }
+            set { _root.PbBotBase = value; }
         }
 
 
         public BotBase SecondaryBot
         {
-            get { return root.SecondaryBot; }
-            set { root.SecondaryBot = value; }
+            get { return _root.SecondaryBot; }
+            set { _root.SecondaryBot = value; }
         }
 
         #endregion
 
         #region Misc
 
-        bool _init = false;
+        static bool _init = false;
         public void Init()
         {
             try
@@ -428,31 +448,27 @@ namespace HighVoltz
                         Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
                         Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)))
                     );
-                    root = new PbRootComposite(new PbDecorator(), null);
-                    BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
-                    if (bot != null)
-                        root.SecondaryBot = bot;
 
                     IsTradeSkillsLoaded = false;
                     MaterialList = new Dictionary<uint, int>();
                     TradeSkillList = new List<TradeSkill>();
-                    Instance.ProfileSettings = new PbProfileSettings();
                     LoadProtectedItems();
                     LoadTradeSkills();
                     DataStore = new DataStore();
                     DataStore.ImportDataStore();
 
-                    if (string.IsNullOrEmpty(CurrentProfile.XmlPath) && !string.IsNullOrEmpty(MySettings.LastProfile))
+                    if (!string.IsNullOrEmpty(MySettings.LastProfile))
                     {
                         try
                         {
-                            LoadProfile(MySettings.LastProfile);
+                            LoadProfile(string.IsNullOrEmpty(_profileToLoad) ? MySettings.LastProfile : _profileToLoad);
                         }
                         catch (Exception ex) { Err(ex.ToString()); }
                     }
-                    else
-                        ProfileSettings = new PbProfileSettings();
-                    HonorBuddyProfilePath = ProfileManager.XmlLocation;
+                    BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                    if (bot != null)
+                        _root.SecondaryBot = bot;
+                    //HonorBuddyProfilePath = ProfileManager.XmlLocation;
                     _init = true;
                 }
             }

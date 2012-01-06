@@ -49,7 +49,7 @@ namespace HighVoltz.Dynamic
         public static bool CodeWasModified = true;
 
         static string _tempFolder;
-        static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.Instance.BotPath, "Temp")); } }
+        static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.BotPath, "Temp")); } }
 
         public static void WipeTempFolder()
         {
