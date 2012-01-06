@@ -197,7 +197,7 @@ namespace HighVoltz.Dynamic
             bool HasNewMail { get{ return MailFrame.Instance.HasNewMail;}}
             int MailCount { get{ return MailFrame.Instance.MailCount;}}
             bool HasItem (uint id) {return InbagCount(id) > 0; }
-            uint InbagCount (uint id) {return Helpers.InbagCount(id); }
+            int InbagCount (uint id) {return Helpers.InbagCount(id); }
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
             void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 

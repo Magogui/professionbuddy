@@ -23,20 +23,23 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 namespace HighVoltz.Composites
 {
     #region FlyToAction
-    public class FlyToAction : PBAction
+    public sealed class FlyToAction : PBAction
     {
         [PbXmlAttribute()]
-        public bool Dismount {
+        public bool Dismount
+        {
             get { return (bool)Properties["Dismount"].Value; }
             set { Properties["Dismount"].Value = value; }
         }
         WoWPoint loc;
         [PbXmlAttribute()]
-        public string Location {
+        public string Location
+        {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-        public FlyToAction() {
+        public FlyToAction()
+        {
             Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), new DisplayNameAttribute("Dismount on Arrival"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
@@ -46,8 +49,9 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
         }
 
-        void LocationChanged(object sender, MetaPropArgs e) {
-            MetaProp mp = (MetaProp)sender;
+        void LocationChanged(object sender, MetaPropArgs e)
+        {
+            var mp = (MetaProp)sender;
             loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
             Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
@@ -55,7 +59,8 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        protected override RunStatus Run(object context) {
+        protected override RunStatus Run(object context)
+        {
             if (!IsDone)
             {
                 if (ObjectManager.Me.Location.Distance(loc) > 6)
@@ -67,7 +72,7 @@ namespace HighVoltz.Composites
                 {
                     if (Dismount)
                         Mount.Dismount("Dismounting flying mount");
-                        //Lua.DoString("Dismount() CancelShapeshiftForm()");
+                    //Lua.DoString("Dismount() CancelShapeshiftForm()");
                     IsDone = true;
                     TreeRoot.StatusText = string.Format("Arrived at location {0}", loc);
                 }
@@ -77,22 +82,23 @@ namespace HighVoltz.Composites
         }
 
         public override string Name { get { return "Fly To"; } }
-        public override string Title {
-            get {
+        public override string Title
+        {
+            get
+            {
                 return string.Format("{0}: {1} ", Name, Location);
             }
         }
-        public override string Help {
-            get {
+        public override string Help
+        {
+            get
+            {
                 return "This action relies on Flightor, the 3d navigator used by Gatherbuddy2. This action will fly your character to the selected location and dismount on arrival if Dismount is set to true.Be sure to make the target location outdoors and not underneath any obsticles.";
             }
         }
-        public override object Clone() {
+        public override object Clone()
+        {
             return new FlyToAction() { Location = this.Location, Dismount = this.Dismount };
-        }
-
-        public override void Reset() {
-            base.Reset();
         }
     }
     #endregion

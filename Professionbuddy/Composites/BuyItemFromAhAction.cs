@@ -290,10 +290,10 @@ namespace HighVoltz.Composites
 
         List<BuyItemEntry> BuildItemList()
         {
-            List<BuyItemEntry> list = new List<BuyItemEntry>();
-            List<uint> idList = new List<uint>();
+            var list = new List<BuyItemEntry>();
+            var idList = new List<uint>();
             string[] entries = ItemID.Split(',');
-            if (entries != null && entries.Length > 0)
+            if (entries.Length > 0)
             {
                 foreach (var entry in entries)
                 {
@@ -311,34 +311,20 @@ namespace HighVoltz.Composites
             switch (ItemListType)
             {
                 case ItemType.Item:
-                    foreach (uint id in idList)
-                        list.Add(new BuyItemEntry()
-                        {
-                            Id = id,
-                            BuyAmount = !BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount
-                        });
+                    list.AddRange(idList.Select(id => new BuyItemEntry()
+                                                          {
+                                                              Id = id, BuyAmount = (uint) (!BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount)
+                                                          }));
                     break;
                 case ItemType.MaterialList:
-                    foreach (var kv in Pb.MaterialList)
-                    {
-                        list.Add(new BuyItemEntry() { Id = kv.Key, BuyAmount = (uint)kv.Value });
-                    }
+                    list.AddRange(Pb.MaterialList.Select(kv => new BuyItemEntry() {Id = kv.Key, BuyAmount = (uint) kv.Value}));
                     break;
                 case ItemType.RecipeMats:
-                    foreach (uint id in idList)
-                    {
-                        Recipe recipe = (from tradeskill in Pb.TradeSkillList
-                                         where tradeskill.Recipes.ContainsKey(id)
-                                         select tradeskill.Recipes[id]).FirstOrDefault();
-                        if (recipe != null)
-                            foreach (var ingred in recipe.Ingredients)
-                            {
-                                // subtract whatever material we have in bags already
-                                int toBuyAmount = (int)((ingred.Required * Amount) - Ingredient.GetInBagItemCount(ingred.ID));
-                                if (toBuyAmount > 0)
-                                    list.Add(new BuyItemEntry() { Id = ingred.ID, BuyAmount = (uint)toBuyAmount });
-                            }
-                    }
+                    list.AddRange(from id in idList
+                                  select (from tradeskill in Pb.TradeSkillList
+                                          where tradeskill.Recipes.ContainsKey(id)
+                                          select tradeskill.Recipes[id]).FirstOrDefault()
+                                  into recipe where recipe != null from ingred in recipe.Ingredients let toBuyAmount = (int) ((ingred.Required*Amount) - Ingredient.GetInBagItemCount(ingred.ID)) where toBuyAmount > 0 select new BuyItemEntry() {Id = ingred.ID, BuyAmount = (uint) toBuyAmount});
                     break;
             }
             return list;

@@ -29,7 +29,7 @@ namespace HighVoltz
                 {
                     if (ts.Ingredients.ContainsKey(kv.Key))
                     {
-                        uint bankCnt = Util.GetBankItemCount(kv.Key);
+                        int bankCnt = Util.GetBankItemCount(kv.Key);
                         int gBankOrAltsCnt = GetAltsItemCount(kv.Key) - (int)(bankCnt + ts.Ingredients[kv.Key].InBagsCount);
                         MaterialGridView.Rows.Add(ts.Ingredients[kv.Key].Name, kv.Value,
                             ts.Ingredients[kv.Key].InBagsCount, bankCnt, PB.HasDataStoreAddon ? gBankOrAltsCnt:0);

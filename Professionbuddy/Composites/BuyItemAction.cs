@@ -45,7 +45,7 @@ namespace HighVoltz.Composites
             Properties["ItemID"] = new MetaProp("ItemID", typeof (string));
             Properties["Count"] = new MetaProp("Count", typeof (DynamicExpression<int>),
                                                new TypeConverterAttribute(
-                                                   typeof (DynamicExpression<uint>.DynamivExpressionConverter)));
+                                                   typeof (DynamicExpression<int>.DynamivExpressionConverter)));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
                                                      new DisplayNameAttribute("Buy"));
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
@@ -96,7 +96,7 @@ namespace HighVoltz.Composites
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof (DynamicExpression<uint>.DynamivExpressionConverter))]
+        [TypeConverter(typeof (DynamicExpression<int>.DynamivExpressionConverter))]
         public DynamicExpression<int> Count
         {
             get { return (DynamicExpression<int>) Properties["Count"].Value; }

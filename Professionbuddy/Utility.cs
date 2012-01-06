@@ -93,12 +93,12 @@ namespace HighVoltz
         /// </summary>
         /// <param name="itemID"></param>
         /// <returns></returns>
-        public static uint GetBankItemCount(uint itemID)
+        public static int GetBankItemCount(uint itemID)
         {
             try
             {
-                return (uint)ObjectManager.GetObjectsOfType<WoWItem>().
-                    Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) - GetCarriedItemCount(itemID);
+                return (int) (ObjectManager.GetObjectsOfType<WoWItem>().
+                                  Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) - GetCarriedItemCount(itemID));
             }
             catch { return 0; }
         }
@@ -107,9 +107,9 @@ namespace HighVoltz
         /// </summary>
         /// <param name="id">Item ID</param>
         /// <returns>Number of items in player Inventory</returns>
-        public static uint GetCarriedItemCount(uint id)
+        public static int GetCarriedItemCount(uint id)
         {
-            return (uint)ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int) ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)

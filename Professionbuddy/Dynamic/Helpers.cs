@@ -39,9 +39,9 @@ namespace HighVoltz.Dynamic
         {
             Logging.Write(c, f, args);
         }
-        public static uint InbagCount(uint id)
+        public static int InbagCount(uint id)
         {
-            return Ingredient.GetInBagItemCount(id); ;
+            return (int) Ingredient.GetInBagItemCount(id); ;
         }
         public static float DistanceTo(double x, double y, double z)
         {
@@ -175,53 +175,28 @@ namespace HighVoltz.Dynamic
             }
             static public uint CanRepeatNum(uint RecipeID)
             {
-                foreach (TradeSkill ts in Professionbuddy.Instance.TradeSkillList)
-                {
-                    if (ts.Recipes.ContainsKey(RecipeID))
-                    {
-                        return ts.Recipes[RecipeID].CanRepeatNum;
-                    }
-                }
-                return 0;
-            }
-            static public bool CanCraft(uint RecipeID)
-            {
-                foreach (TradeSkill ts in Professionbuddy.Instance.TradeSkillList)
-                {
-                    if (ts.Recipes.ContainsKey(RecipeID))
-                    {
-                        return (ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count)
-                            && ts.Recipes[RecipeID].CanRepeatNum > 0;
-                    }
-                }
-                return false;
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(RecipeID) select ts.Recipes[RecipeID].CanRepeatNum).FirstOrDefault();
             }
 
-            static public bool HasMats(uint RecipeID)
+            static public bool CanCraft(uint RecipeID)
             {
-                return CanRepeatNum(RecipeID) > 0;
+                return (from ts in Professionbuddy.Instance.TradeSkillList
+                        where ts.Recipes.ContainsKey(RecipeID)
+                        select (ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count) && ts.Recipes[RecipeID].CanRepeatNum > 0).FirstOrDefault();
             }
-            static public bool HasRecipe(uint RecipeID)
+
+            static public bool HasMats(uint recipeID)
             {
-                foreach (TradeSkill ts in Professionbuddy.Instance.TradeSkillList)
-                {
-                    if (ts.Recipes.ContainsKey(RecipeID))
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                return CanRepeatNum(recipeID) > 0;
             }
+            static public bool HasRecipe(uint recipeID)
+            {
+                return Professionbuddy.Instance.TradeSkillList.Any(ts => ts.Recipes.ContainsKey(recipeID));
+            }
+
             static public bool HasTools(uint RecipeID)
             {
-                foreach (TradeSkill ts in Professionbuddy.Instance.TradeSkillList)
-                {
-                    if (ts.Recipes.ContainsKey(RecipeID))
-                    {
-                        return ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count;
-                    }
-                }
-                return false;
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(RecipeID) select ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count).FirstOrDefault();
             }
         }
         public static TradeskillHelper Alchemy { get; private set; }

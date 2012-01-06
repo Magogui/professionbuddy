@@ -105,7 +105,7 @@ namespace HighVoltz.Dynamic
             {
                 if (value is string)
                 {
-                    DynamicExpression<T> ge = new DynamicExpression<T>() { Code = (string)value };
+                    var ge = new DynamicExpression<T>() { Code = (string)value };
                     return ge;
                 }
                 return base.ConvertFrom(context, culture, value);

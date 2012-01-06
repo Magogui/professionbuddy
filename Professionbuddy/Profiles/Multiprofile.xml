@@ -212,12 +212,12 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8212.33, 399.0208, 117.273" />
+        <FlyToAction Dismount="True" Location="-8213.249, 399.2894, 121.5205" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207692);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207692" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2042.752, -4395.662, 97.93639" />
+        <FlyToAction Dismount="True" Location="2042.752, -4395.662, 100.9364" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207688);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207688" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -226,14 +226,14 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Twilight Highlands&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8186.149, 413.7292, 116.7497" />
+        <FlyToAction Dismount="True" Location="-8188.005, 415.4178, 122.9138" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207694);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207694" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
         <MoveToAction Location="-4879.899, -6639.522, 10.85343" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2029.233, -4379.827, 97.9757" />
+        <FlyToAction Dismount="True" Location="2029.233, -4379.827, 100.9757" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207686);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207686" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
@@ -244,12 +244,12 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Uldum&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8233.281, 415.5955, 117.4477" />
+        <FlyToAction Dismount="True" Location="-8233.069, 416.3278, 122.2417" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207695);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207695" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2039.67, -4356.288, 98.00434" />
+        <FlyToAction Dismount="True" Location="2039.67, -4356.288, 100.0043" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207687);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207687" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -258,12 +258,12 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Deepholm&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8223.319, 451.1823, 117.4883" />
+        <FlyToAction Dismount="True" Location="-8223.723, 452.1277, 127.5624" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207693);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2065.653, -4390.647, 98.04689" />
+        <FlyToAction Dismount="True" Location="2065.653, -4390.647, 100.0469" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207689);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207689" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
