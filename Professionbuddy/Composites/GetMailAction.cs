@@ -137,6 +137,7 @@ namespace HighVoltz.Composites
             "end " +
             "local beans = BeanCounterMail and BeanCounterMail:IsVisible() " +
             "if foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
+        
         // format index. {0} = ItemID {1}=CheckForNewMail which can be only 1 or 0
         private const string MailByIdFormat =
         "local numItems,totalItems = GetInboxNumItems() " +

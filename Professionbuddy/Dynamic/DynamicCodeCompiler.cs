@@ -38,9 +38,10 @@ namespace HighVoltz.Dynamic
                 {
                     File.Delete(file);
                 }
-                catch (Exception ex)
+                // ReSharper disable EmptyGeneralCatchClause
+                catch
+                // ReSharper restore EmptyGeneralCatchClause
                 {
-                    Professionbuddy.Err(ex.ToString());
                 }
             }
             foreach (string dir in Directory.GetDirectories(TempFolder))
@@ -49,9 +50,10 @@ namespace HighVoltz.Dynamic
                 {
                     Directory.Delete(dir);
                 }
-                catch (Exception ex)
+                // ReSharper disable EmptyGeneralCatchClause
+                catch
+                // ReSharper restore EmptyGeneralCatchClause
                 {
-                    Professionbuddy.Err(ex.ToString());
                 }
             }
         }
