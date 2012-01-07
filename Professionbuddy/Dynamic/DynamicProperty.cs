@@ -9,12 +9,12 @@ using HighVoltz.Composites;
 namespace HighVoltz.Dynamic
 {
 
-    public class DynamicExpression<T> : IDynamicProperty
+    public class DynamicProperty<T> : IDynamicProperty
     {
         Func<object, T> _expressionMethod;
-        public DynamicExpression() : this(null, "") { }
+        public DynamicProperty() : this(null, "") { }
 
-        public DynamicExpression(IPBComposite parent, string code)
+        public DynamicProperty(IPBComposite parent, string code)
         {
             this.Code = code;
             _expressionMethod = context => default(T);
@@ -71,7 +71,7 @@ namespace HighVoltz.Dynamic
 
         public Type ReturnType { get { return typeof(T); } }
 
-        public static implicit operator T(DynamicExpression<T> exp)
+        public static implicit operator T(DynamicProperty<T> exp)
         {
             return exp.Value;
         }
@@ -87,9 +87,9 @@ namespace HighVoltz.Dynamic
 
             public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, System.Type destinationType)
             {
-                if (destinationType == typeof(System.String) && value is DynamicExpression<T>)
+                if (destinationType == typeof(System.String) && value is DynamicProperty<T>)
                 {
-                    return ((DynamicExpression<T>)value).Code;
+                    return ((DynamicProperty<T>)value).Code;
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
@@ -105,7 +105,7 @@ namespace HighVoltz.Dynamic
             {
                 if (value is string)
                 {
-                    var ge = new DynamicExpression<T>() { Code = (string)value };
+                    var ge = new DynamicProperty<T>() { Code = (string)value };
                     return ge;
                 }
                 return base.ConvertFrom(context, culture, value);

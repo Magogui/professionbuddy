@@ -258,9 +258,13 @@ namespace HighVoltz.Dynamic
                     else if (met.Value.CodeType == CsharpCodeType.Statements)
                         CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
                     else if (met.Value.CodeType == CsharpCodeType.Expression)
+                    {
+                        Type retType = ((IDynamicProperty) met.Value).ReturnType;
                         CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return {2};}}\n",
-                            ((IDynamicProperty)met.Value).ReturnType.Name, met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
-                    met.Value.CodeLineNumber = currentLine++;
+                                                         retType.Name, met.Key,
+                                                         met.Value.Code.Replace(Environment.NewLine, ""));
+                        met.Value.CodeLineNumber = currentLine++;
+                    }
                 }
                 CsharpStringBuilder.Append(postfix);
                 results = provider.CompileAssemblyFromSource(

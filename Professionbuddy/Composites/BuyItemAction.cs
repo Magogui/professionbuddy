@@ -43,15 +43,15 @@ namespace HighVoltz.Composites
                                                   new EditorAttribute(typeof (PropertyBag.EntryEditor),
                                                                       typeof (UITypeEditor)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof (string));
-            Properties["Count"] = new MetaProp("Count", typeof (DynamicExpression<int>),
+            Properties["Count"] = new MetaProp("Count", typeof (DynamicProperty<int>),
                                                new TypeConverterAttribute(
-                                                   typeof (DynamicExpression<int>.DynamivExpressionConverter)));
+                                                   typeof (DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
                                                      new DisplayNameAttribute("Buy"));
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
                                                        new DisplayNameAttribute("Buy Additively"));
             ItemID = "";
-            Count = new DynamicExpression<int>(this, "0"); // dynamic expression
+            Count = new DynamicProperty<int>(this, "0"); // dynamic expression
             RegisterDynamicProperty("Count");
             BuyItemType = BuyItemActionType.Material;
             _loc = WoWPoint.Zero;
@@ -96,10 +96,10 @@ namespace HighVoltz.Composites
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof (DynamicExpression<int>.DynamivExpressionConverter))]
-        public DynamicExpression<int> Count
+        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Count
         {
-            get { return (DynamicExpression<int>) Properties["Count"].Value; }
+            get { return (DynamicProperty<int>) Properties["Count"].Value; }
             set
             {
                 Properties["Count"].Value = value;

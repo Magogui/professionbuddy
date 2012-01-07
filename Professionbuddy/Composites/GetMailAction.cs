@@ -142,7 +142,7 @@ namespace HighVoltz.Composites
                 "if foundMail == 1 then break end " +
             "end " +
             "local beans = BeanCounterMail and BeanCounterMail:IsVisible() " +
-            "if foundMail == 0 and ((newMailCheck == true and HasNewMail() == nil) or newMailCheck ==false ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
+            "if foundMail == 0 and ((newMailCheck == true and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
         // format index. {0} = ItemID {1}=CheckForNewMail which can be only 1 or 0
         private const string _mailByIdFormat =
         "local numItems,totalItems = GetInboxNumItems() " +
@@ -165,7 +165,7 @@ namespace HighVoltz.Composites
             "end " +
             "if foundMail == 1 then break end " +
         "end " +
-        "if (foundMail == 0 and ((newMailCheck == true and HasNewMail() == nil) or newMailCheck ==false )) or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ";
+        "if (foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 )) or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ";
 
         List<uint> _idList;
         protected override RunStatus Run(object context)

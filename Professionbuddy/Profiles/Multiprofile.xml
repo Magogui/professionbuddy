@@ -30,6 +30,7 @@
     <Settings DefaultValue="true" Type="Boolean" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="Bots\Professionbuddy\Profiles\HBProfiles\GatheringProfiles" Type="String" Name="ProfileFolderPath" Summary="This is the path to the base profile folder. Inside are subfolders named after the zones they contain profiles for." Category="Advanced" Global="True" Hidden="False" />
+    <Settings DefaultValue="500" Type="Int32" Name="FarmersGold" Summary="Amount of gold the farmer has on him/her" Category="Banker" Global="False" Hidden="True" />
   </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
@@ -74,8 +75,10 @@
           </If>
           <If Condition="!(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="MailItems" />
-            <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching to banker&quot;);" />
+            <!--Save the amount of gold on farmer-->
+            <CustomAction Code="Settings[&quot;FarmersGold&quot;] = (int)Me.Gold;" />
             <!--Log on Banker-->
+            <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Switching to banker&quot;);" />
             <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
               <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],Realm,&quot;Combat Bot&quot;);" />
               <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
@@ -108,6 +111,10 @@
         <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
         <CallSubRoutine SubRoutineName="SellOnAH" />
       </While>
+      <If Condition="(int)Settings[&quot;FarmersGold&quot;] &lt; 200 &amp;&amp; (int)Me.Gold &gt; 600" IgnoreCanRun="True">
+        <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Mailing farmer gold because he/she has less than 200&quot;);" />
+        <CallSubRoutine SubRoutineName="MailFarmerRepairGold" />
+      </If>
       <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
         <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
       </If>
@@ -122,6 +129,7 @@
   </While>
   <SubRoutine SubRoutineName="MailItems">
     <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.SubType == WoWGameObjectType.Mailbox);" Timeout="20000" />
+    <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="0" AutoFindMailBox="True" Location="0, 0, 0" />
     <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
   </SubRoutine>
@@ -178,31 +186,33 @@
     <CustomAction Code="CityZoneID = Me.IsAlliance? 1519:1637;" />
     <!--List of zones IDs that we will farm in accending numerical order-->
     <CustomAction Code="FarmZoneIDs = new List&lt;uint&gt;();" />
-    <!--Random Time-->
-    <CustomAction Code="TimeToSpendInZone= new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
-    <CustomAction Code="Log( Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,TimeToSpendInZone);" />
-    <CustomAction Code="ZoneStartTime = DateTime.Now;" />
-    <!--Hyjal-->
-    <CustomAction Code="if ((bool)Settings[&quot;Hyjal&quot;]) FarmZoneIDs.Add(616);" />
-    <!--Twilight Highlands-->
-    <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) FarmZoneIDs.Add(4922);" />
-    <!--Uldum-->
-    <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) FarmZoneIDs.Add(5034);" />
-    <!--Deepholm-->
-    <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) FarmZoneIDs.Add(5042);" />
-    <!--IF YOU ARE ADDING YOUR OWN ZONES DO NOT ADD THEM BELOW THIS LINE-->
-    <CustomAction Code="FarmZoneIDs = FarmZoneIDs.OrderBy(z =&gt; z).ToList();" />
-    <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
-    <If Condition="FarmZoneIDs.Count == 0" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
-      <CustomAction Code="TreeRoot.Stop();" />
-    </If>
-    <If Condition="OnFarmer &amp;&amp; Me.ZoneId != CityZoneID &amp;&amp; !FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
-      <CallSubRoutine SubRoutineName="Hearth" />
-    </If>
-    <If Condition="FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
-      <CustomAction Code="Settings[&quot;FarmedZone&quot;] = Me.ZoneId;" />
+    <If Condition="OnFarmer" IgnoreCanRun="True">
+      <!--Random Time-->
+      <CustomAction Code="TimeToSpendInZone= new Random().Next((int)Settings[&quot;MinMinutesPerZone&quot;],(int)Settings[&quot;MaxMinutesPerZone&quot;]);" />
+      <CustomAction Code="Log( Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;I will spend {0} minutes in this zone&quot;,TimeToSpendInZone);" />
+      <CustomAction Code="ZoneStartTime = DateTime.Now;" />
+      <!--Hyjal-->
+      <CustomAction Code="if ((bool)Settings[&quot;Hyjal&quot;]) FarmZoneIDs.Add(616);" />
+      <!--Twilight Highlands-->
+      <CustomAction Code="if ((bool)Settings[&quot;Twilight&quot;]) FarmZoneIDs.Add(4922);" />
+      <!--Uldum-->
+      <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) FarmZoneIDs.Add(5034);" />
+      <!--Deepholm-->
+      <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) FarmZoneIDs.Add(5042);" />
+      <!--IF YOU ARE ADDING YOUR OWN ZONES DO NOT ADD THEM BELOW THIS LINE-->
+      <CustomAction Code="FarmZoneIDs = FarmZoneIDs.OrderBy(z =&gt; z).ToList();" />
+      <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
+      <If Condition="FarmZoneIDs.Count == 0" IgnoreCanRun="True">
+        <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Trying to be funny or something? How can you expect to farm anything with all zones disabled?&quot;);" />
+        <CustomAction Code="TreeRoot.Stop();" />
+      </If>
+      <If Condition="FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
+        <CustomAction Code="Settings[&quot;FarmedZone&quot;] = Me.ZoneId;" />
+      </If>
+      <If Condition="Me.ZoneId != CityZoneID &amp;&amp; !FarmZoneIDs.Contains(Me.ZoneId)" IgnoreCanRun="True">
+        <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hearthing since bot isn't in capital or one of the farmed zones&quot;);" />
+        <CallSubRoutine SubRoutineName="Hearth" />
+      </If>
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="Use Portal">
@@ -339,6 +349,16 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
       <CustomAction Code="LoadPorfileFromSubfolder(&quot;Deepholm&quot;);" />
     </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MailFarmerRepairGold">
+    <While Condition="MailFrame.Instance == null || !MailFrame.Instance.IsVisible" IgnoreCanRun="True">
+      <InteractionAction InteractType="GameObject" Entry="0" InteractDelay="0" GameObjectType="Mailbox" SpellFocus="Anvil" />
+    </While>
+    <WaitAction Condition="false" Timeout="2000" />
+    <CustomAction Code=" MailFrame.Instance.SwitchToSendMailTab();" />
+    <WaitAction Condition="false" Timeout="2000" />
+    <CustomAction Code="Lua.DoString(&quot;local a={0} SetSendMailMoney(a*10000) SendMail(\&quot;{1}\&quot;,a..' gold attached','')&quot;,500-(int)Settings[&quot;FarmersGold&quot;],Settings[&quot;FarmerName&quot;]);" />
+    <WaitAction Condition="false" Timeout="2000" />
   </SubRoutine>
   <Declaration Code="void LoadPorfileFromSubfolder(string folder)&#xD;&#xA;        {&#xD;&#xA;            string path = (string) Settings[&quot;ProfileFolderPath&quot;];&#xD;&#xA;            bool isAbsolute = System.IO.Path.IsPathRooted(path);&#xD;&#xA;            if (!isAbsolute)&#xD;&#xA;                path = System.IO.Path.Combine(Logging.ApplicationPath, path);&#xD;&#xA;            path = System.IO.Path.Combine(path, folder);&#xD;&#xA;           path = System.IO.Path.Combine(path, Me.IsHorde? &quot;Horde&quot;:&quot;Alliance&quot;);&#xD;&#xA;            if (System.IO.Directory.Exists(path))&#xD;&#xA;            {&#xD;&#xA;                string[] files = System.IO.Directory.GetFiles(path, &quot;*.xml&quot;, System.IO.SearchOption.TopDirectoryOnly);&#xD;&#xA;                if (files != null &amp;&amp; files.Length &gt; 0)&#xD;&#xA;                {&#xD;&#xA;                    int index = new Random().Next(0, files.Length);&#xD;&#xA;                    Styx.Logic.Profiles.ProfileManager.LoadNew(files[index]);&#xD;&#xA;                     Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Loading profile for zone: {0}&quot;, folder);&#xD;&#xA;                }&#xD;&#xA;                else&#xD;&#xA;                    Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;no profiles found in path: {0}&quot;, path);&#xD;&#xA;            }&#xD;&#xA;            else&#xD;&#xA;                Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;ProfilePath: {0} not found&quot;, path);&#xD;&#xA;        }&#xD;&#xA;" />
 </Professionbuddy>

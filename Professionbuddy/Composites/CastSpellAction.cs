@@ -19,10 +19,6 @@ namespace HighVoltz.Composites
     #region CastSpellAction
     public class RecipeConverter : ExpandableObjectConverter
     {
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-        {
-            return base.ConvertTo(context, culture, value, destinationType);
-        }
     }
     public class CastSpellAction : PBAction
     {
@@ -60,11 +56,7 @@ namespace HighVoltz.Composites
             set { Properties["Entry"].Value = value; }
         }
         public Recipe Recipe { get; private set; }
-        //public Recipe Recipe
-        //{
-        //    get { return (Recipe)Properties["Recipe"].Value; }
-        //    set { Properties["Recipe"].Value = value; }
-        //}
+
         [PbXmlAttribute()]
         public bool CastOnItem
         {
