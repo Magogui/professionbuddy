@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Styx.WoWInternals;
 using Styx.Logic.BehaviorTree;
@@ -41,7 +39,7 @@ namespace HighVoltz.Dynamic
         }
         public static int InbagCount(uint id)
         {
-            return (int) Ingredient.GetInBagItemCount(id); ;
+            return (int) Ingredient.GetInBagItemCount(id);
         }
         public static float DistanceTo(double x, double y, double z)
         {
@@ -56,10 +54,10 @@ namespace HighVoltz.Dynamic
             WoWMovement.ClickToMove(new WoWPoint(x, y, z));
         }
 
-        static bool _isSwitchingToons = false;
+        static bool _isSwitchingToons;
         // credit to mvbc of mmocore.com
         // {0}=character,{1}=server
-        static string _loginLua =
+        const string LoginLua =
         "if (RealmList and RealmList:IsVisible()) then " +
             "for i = 1, select('#',GetRealmCategories()) do " +
                 "for j = 1, GetNumRealms(i) do " +
@@ -98,20 +96,20 @@ namespace HighVoltz.Dynamic
                 Professionbuddy.Log("Already switching characters");
                 return;
             }
-            string loginLua = string.Format(_loginLua, character, server);
+            string loginLua = string.Format(LoginLua, character, server);
             _isSwitchingToons = true;
             // reset all actions 
             Professionbuddy.Instance.IsRunning = false;
             Professionbuddy.Instance.PbBehavior.Reset();
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(
-            new System.Action(() =>
+            new Action(() =>
             {
                 TreeRoot.Stop();
                 BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(botName, StringComparison.OrdinalIgnoreCase) >= 0).Value;
                 if (bot != null)
                 {
-                    if (Professionbuddy.Instance.SecondaryBot != bot)
+                    if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
                         Professionbuddy.Instance.SecondaryBot = bot;
                     if (!bot.Initialized)
                         bot.Initialize();
@@ -150,39 +148,39 @@ namespace HighVoltz.Dynamic
 
         public class TradeskillHelper
         {
-            SkillLine skillLine;
-            WoWSkill wowSkill;
+            readonly SkillLine _skillLine;
+            WoWSkill _wowSkill;
             public TradeskillHelper(SkillLine skillLine)
             {
-                this.skillLine = skillLine;
-                wowSkill = ObjectManager.Me.GetSkill(skillLine);
+                _skillLine = skillLine;
+                _wowSkill = ObjectManager.Me.GetSkill(skillLine);
             }
             public uint Level
             {
                 get
                 {
-                    wowSkill = ObjectManager.Me.GetSkill(skillLine);
-                    return (uint)wowSkill.CurrentValue + wowSkill.Bonus;
+                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    return (uint)_wowSkill.CurrentValue + _wowSkill.Bonus;
                 }
             }
             public uint MaxLevel
             {
                 get
                 {
-                    wowSkill = ObjectManager.Me.GetSkill(skillLine);
-                    return (uint)wowSkill.MaxValue;
+                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    return (uint)_wowSkill.MaxValue;
                 }
             }
-            static public uint CanRepeatNum(uint RecipeID)
+            static public uint CanRepeatNum(uint recipeID)
             {
-                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(RecipeID) select ts.Recipes[RecipeID].CanRepeatNum).FirstOrDefault();
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(recipeID) select ts.Recipes[recipeID].CanRepeatNum).FirstOrDefault();
             }
 
-            static public bool CanCraft(uint RecipeID)
+            static public bool CanCraft(uint recipeID)
             {
                 return (from ts in Professionbuddy.Instance.TradeSkillList
-                        where ts.Recipes.ContainsKey(RecipeID)
-                        select (ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count) && ts.Recipes[RecipeID].CanRepeatNum > 0).FirstOrDefault();
+                        where ts.Recipes.ContainsKey(recipeID)
+                        select (ts.Recipes[recipeID].Tools.Count(t => t.HasTool) == ts.Recipes[recipeID].Tools.Count) && ts.Recipes[recipeID].CanRepeatNum > 0).FirstOrDefault();
             }
 
             static public bool HasMats(uint recipeID)
@@ -194,9 +192,9 @@ namespace HighVoltz.Dynamic
                 return Professionbuddy.Instance.TradeSkillList.Any(ts => ts.Recipes.ContainsKey(recipeID));
             }
 
-            static public bool HasTools(uint RecipeID)
+            static public bool HasTools(uint recipeID)
             {
-                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(RecipeID) select ts.Recipes[RecipeID].Tools.Count(t => t.HasTool) == ts.Recipes[RecipeID].Tools.Count).FirstOrDefault();
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(recipeID) select ts.Recipes[recipeID].Tools.Count(t => t.HasTool) == ts.Recipes[recipeID].Tools.Count).FirstOrDefault();
             }
         }
         public static TradeskillHelper Alchemy { get; private set; }

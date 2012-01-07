@@ -17,7 +17,7 @@ namespace HighVoltz.Composites
 {
     public class Comment : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string Text
         {
             get { return (string)Properties["Text"].Value; }

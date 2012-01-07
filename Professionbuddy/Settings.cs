@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
 using Styx.WoWInternals;
 using System.Xml;
@@ -12,7 +11,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz
 {
-    public class ProfessionBuddySettings : Styx.Helpers.Settings
+    public class ProfessionBuddySettings : Settings
     {
         public static ProfessionBuddySettings Instance { get; private set; }
         public ProfessionBuddySettings(string settingsPath)
@@ -105,11 +104,10 @@ namespace HighVoltz
 
         void SaveCharacterSettings()
         {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
+            var settings = new XmlWriterSettings {Indent = true};
             using (XmlWriter writer = XmlWriter.Create(CharacterSettingsPath, settings))
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
                 Dictionary<string, object> temp = Settings.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
@@ -117,11 +115,10 @@ namespace HighVoltz
 
         void SaveGlobalSettings()
         {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
+            var settings = new XmlWriterSettings {Indent = true};
             using (XmlWriter writer = XmlWriter.Create(GlobalSettingsPath, settings))
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
                 Dictionary<string, object> temp = Settings.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
@@ -146,13 +143,13 @@ namespace HighVoltz
                 {
                     try
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                        var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
                         var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
                         if (temp != null)
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value};
+                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value};
                             }
                         }
                     }
@@ -172,13 +169,13 @@ namespace HighVoltz
                 {
                     try
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
+                        var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
                         var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
                         if (temp != null)
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry() { Value = kv.Value};
+                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value};
                             }
                         }
                     }
@@ -196,7 +193,7 @@ namespace HighVoltz
             foreach (var setting in settingsList)
             {
                 if (!Settings.ContainsKey(setting.SettingName))
-                    Settings[setting.SettingName] = new PbProfileSettingEntry() { Value = GetValue(setting.Type, setting.DefaultValue) };
+                    Settings[setting.SettingName] = new PbProfileSettingEntry { Value = GetValue(setting.Type, setting.DefaultValue) };
                 Settings[setting.SettingName].Summary = setting.Summary;
                 Settings[setting.SettingName].Category = setting.Category;
                 Settings[setting.SettingName].Global = setting.Global;
@@ -251,7 +248,7 @@ namespace HighVoltz
 
         public List<Composites.Settings> GetDefaultSettings(Composite comp)
         {
-            List<Composites.Settings> list = new List<Composites.Settings>();
+            var list = new List<Composites.Settings>();
             GetProfileSettings(comp, ref list);
             return list;
         }

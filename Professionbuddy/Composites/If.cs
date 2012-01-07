@@ -2,12 +2,8 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
-using Styx.Helpers;
 using TreeSharp;
-using System.Diagnostics;
-using PrioritySelector = TreeSharp.PrioritySelector;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Threading;
@@ -19,29 +15,29 @@ using HighVoltz.Dynamic;
 namespace HighVoltz.Composites
 {
 
-    public class If : GroupComposite, ICSharpCode, IPBComposite, ICloneable
+    public class If : GroupComposite, ICSharpCode, IPBComposite
     {
         #region Properties
-        [XmlIgnore()]
+        [XmlIgnore]
         virtual public PropertyBag Properties { get; private set; }
-        protected PropertyGrid propertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
+        protected PropertyGrid PropertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
         protected void RefreshPropertyGrid()
         {
-            if (propertyGrid != null)
+            if (PropertyGrid != null)
             {
-                propertyGrid.Refresh();
+                PropertyGrid.Refresh();
             }
         }
         #endregion
-        protected readonly static object _lockObject = new object();
+        protected readonly static object LockObject = new object();
         virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         virtual public string Condition
         {
             get { return (string)Properties["Condition"].Value; }
             set { Properties["Condition"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         virtual public bool IgnoreCanRun
         {
             get { return (bool)Properties["IgnoreCanRun"].Value; }
@@ -49,21 +45,22 @@ namespace HighVoltz.Composites
         }
 
         public If()
-            : base()
         {
+            // ReSharper disable DoNotCallOverridableMethodsInConstructor
             Properties = new PropertyBag();
             Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool), new DisplayNameAttribute("Ignore Condition until done"));
             Properties["Condition"] = new MetaProp("Condition", typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
             Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
 
-            this.CanRunDelegate = c => false;
+            CanRunDelegate = c => false;
             Condition = "";
             CompileError = "";
             Properties["CompileError"].Show = false;
 
             Properties["Condition"].PropertyChanged +=Condition_PropertyChanged;
-            Properties["CompileError"].PropertyChanged += CompileError_PropertyChanged;
+            Properties["CompileError"].PropertyChanged += CompileErrorPropertyChanged;
             IgnoreCanRun = true;
+            // ReSharper restore DoNotCallOverridableMethodsInConstructor
         }
 
         void Condition_PropertyChanged(object sender, EventArgs e)
@@ -71,17 +68,14 @@ namespace HighVoltz.Composites
             DynamicCodeCompiler.CodeWasModified = true;
         }
 
-        string lastError = "";
-        void CompileError_PropertyChanged(object sender, EventArgs e)
+        string _lastError = "";
+        void CompileErrorPropertyChanged(object sender, EventArgs e)
         {
-            if (CompileError != "" || (CompileError == "" && lastError != ""))
+            if (CompileError != "" || (CompileError == "" && _lastError != ""))
                 MainForm.Instance.RefreshActionTree(this);
-            if (CompileError != "")
-                Properties["CompileError"].Show = true;
-            else
-                Properties["CompileError"].Show = false;
+            Properties["CompileError"].Show = CompileError != "";
             RefreshPropertyGrid();
-            lastError = CompileError;
+            _lastError = CompileError;
         }
 
         protected virtual bool CanRun(object context)
@@ -98,14 +92,16 @@ namespace HighVoltz.Composites
             }
         }
 
+// ReSharper disable InconsistentNaming
         protected bool _isRunning = false;
+// ReSharper restore InconsistentNaming
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (!IsDone && ((_isRunning && IgnoreCanRun) || CanRun(context)))
             {
                 _isRunning = true;
                 bool shouldBreak = false;
-                foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
+                foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
                 {
                     child.Start(context);
                     Selection = child;
@@ -190,8 +186,8 @@ namespace HighVoltz.Composites
 
         public virtual object Clone()
         {
-            If pd = new If()
-            {
+            var pd = new If
+                         {
                 CanRunDelegate = this.CanRunDelegate,
                 Condition = this.Condition,
                 IgnoreCanRun = this.IgnoreCanRun

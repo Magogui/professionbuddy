@@ -1,16 +1,15 @@
-﻿using System;
-using System.Xml;
-using Styx.Helpers;
+﻿using System.Linq;
 using TreeSharp;
 
 
 namespace HighVoltz.Composites
 {
     #region CallSubRoutine
-    class CallSubRoutine : PBAction
+
+    sealed class CallSubRoutine : PBAction
     {
         SubRoutine _sub;
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string SubRoutineName
         {
             get { return (string)Properties["SubRoutineName"].Value; }
@@ -23,7 +22,7 @@ namespace HighVoltz.Composites
             SubRoutineName = "";
         }
 
-        bool ranonce = false;
+        bool _ranonce;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -36,11 +35,12 @@ namespace HighVoltz.Composites
                         IsDone = true;
                     }
                 }
-                if (!ranonce)
+                if (!_ranonce)
                 {
                     // make sure all actions within the subroutine are reset before we start.
-                    _sub.Reset();
-                    ranonce = true;
+                    if (_sub != null) 
+                        _sub.Reset();
+                    _ranonce = true;
                 }
                 if (_sub != null)
                 {
@@ -63,7 +63,7 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            ranonce = false;
+            _ranonce = false;
         }
         bool GetSubRoutine()
         {
@@ -76,14 +76,11 @@ namespace HighVoltz.Composites
 
             if (comp is SubRoutine && ((SubRoutine)comp).SubRoutineName == subName)
                 return (SubRoutine)comp;
-            if (comp is GroupComposite)
+            var groupComposite = comp as GroupComposite;
+            if (groupComposite != null)
             {
-                foreach (var c in ((GroupComposite)comp).Children)
-                {
-                    SubRoutine temp = FindSubRoutineByName(subName, c);
-                    if (temp != null)
-                        return temp;
-                }
+                return (groupComposite).Children.Select(c => FindSubRoutineByName(subName, c)).
+                    FirstOrDefault(temp => temp != null);
             }
             return null;
         }
@@ -99,7 +96,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new CallSubRoutine() { SubRoutineName = this.SubRoutineName };
+            return new CallSubRoutine { SubRoutineName = this.SubRoutineName };
         }
     }
     #endregion

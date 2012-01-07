@@ -50,7 +50,8 @@ namespace HighVoltz
                 {
                     ProfilePath = path;
 
-                    if (Path.GetExtension(path).Equals(".package", StringComparison.InvariantCultureIgnoreCase))
+                    var extension = Path.GetExtension(path);
+                    if (extension != null && extension.Equals(".package", StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (Package zipFile = Package.Open(path, FileMode.Open, FileAccess.Read))
                         {
@@ -71,13 +72,10 @@ namespace HighVoltz
                         }
                     }
                     XmlPath = path;
-                    return (PbDecorator)Load(XElement.Load(path), new PbDecorator() as GroupComposite);
+                    return (PbDecorator)Load(XElement.Load(path), new PbDecorator());
                 }
-                else
-                {
-                    Professionbuddy.Err("Profile: {0} does not exist", path);
-                    return null;
-                }
+                Professionbuddy.Err("Profile: {0} does not exist", path);
+                return null;
             }
             catch (Exception ex) { Professionbuddy.Err(ex.ToString()); return null; }
         }
@@ -129,7 +127,7 @@ namespace HighVoltz
                         {
                             PropertyInfo pi = piDict[attr.Key];
                             // check if there is a type converter attached
-                            TypeConverterAttribute typeConverterAttr = (TypeConverterAttribute)pi.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
+                            var typeConverterAttr = (TypeConverterAttribute)pi.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
                             if (typeConverterAttr != null)
                             {
                                 try
@@ -149,10 +147,10 @@ namespace HighVoltz
                             }
                             else
                             {
-                                if (pi.PropertyType.IsEnum)
-                                    pi.SetValue(pbComp, Enum.Parse(pi.PropertyType, attr.Value), null);
-                                else
-                                    pi.SetValue(pbComp, Convert.ChangeType(attr.Value, pi.PropertyType), null);
+                                pi.SetValue(pbComp,
+                                            pi.PropertyType.IsEnum
+                                                ? Enum.Parse(pi.PropertyType, attr.Value)
+                                                : Convert.ChangeType(attr.Value, pi.PropertyType), null);
                             }
                         }
                         else
@@ -203,7 +201,7 @@ namespace HighVoltz
                 }
                 else
                 {
-                    XElement newElement = new XElement(pbComp.GetType().Name);
+                    var newElement = new XElement(pbComp.GetType().Name);
                     var rootAttr = (XmlRootAttribute)pbComp.GetType().GetCustomAttributes(typeof(XmlRootAttribute), true).FirstOrDefault();
                     if (rootAttr != null)
                         newElement.Name = rootAttr.ElementName;
@@ -292,7 +290,7 @@ namespace HighVoltz
         {
             const int bufSize = 0x1000;
             var buf = new byte[bufSize];
-            int bytesRead = 0;
+            int bytesRead;
             while ((bytesRead = source.Read(buf, 0, bufSize)) > 0)
                 target.Write(buf, 0, bytesRead);
         }
@@ -320,7 +318,7 @@ namespace HighVoltz
 
         public PbXmlAttributeAttribute(string attributeName)
         {
-            this.AttributeName = attributeName;
+            AttributeName = attributeName;
         }
 
         public string AttributeName { get; private set; }

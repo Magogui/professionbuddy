@@ -1,23 +1,10 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.ComponentModel;
 using System.Drawing.Design;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Xml;
-using System.IO;
 using System.Globalization;
-using Styx;
 using Styx.Logic;
-using Styx.Database;
-using Styx.Helpers;
 using Styx.Logic.Pathing;
-using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using Styx.Logic.Profiles;
 using Styx.Logic.BehaviorTree;
-using System.Reflection;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
@@ -25,14 +12,14 @@ namespace HighVoltz.Composites
     #region FlyToAction
     public sealed class FlyToAction : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool Dismount
         {
             get { return (bool)Properties["Dismount"].Value; }
             set { Properties["Dismount"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -43,19 +30,18 @@ namespace HighVoltz.Composites
             Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), new DisplayNameAttribute("Dismount on Arrival"));
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
-            Location = loc.ToInvariantString();
+            Location = _loc.ToInvariantString();
             Dismount = true;
 
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["Location"].PropertyChanged += LocationChanged;
         }
 
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            var mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
@@ -63,10 +49,10 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (ObjectManager.Me.Location.Distance(loc) > 6)
+                if (ObjectManager.Me.Location.Distance(_loc) > 6)
                 {
-                    Flightor.MoveTo(loc);
-                    TreeRoot.StatusText = string.Format("Flying to location {0}", loc);
+                    Flightor.MoveTo(_loc);
+                    TreeRoot.StatusText = string.Format("Flying to location {0}", _loc);
                 }
                 else
                 {
@@ -74,7 +60,7 @@ namespace HighVoltz.Composites
                         Mount.Dismount("Dismounting flying mount");
                     //Lua.DoString("Dismount() CancelShapeshiftForm()");
                     IsDone = true;
-                    TreeRoot.StatusText = string.Format("Arrived at location {0}", loc);
+                    TreeRoot.StatusText = string.Format("Arrived at location {0}", _loc);
                 }
                 return RunStatus.Success;
             }
@@ -98,7 +84,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new FlyToAction() { Location = this.Location, Dismount = this.Dismount };
+            return new FlyToAction { Location = this.Location, Dismount = this.Dismount };
         }
     }
     #endregion

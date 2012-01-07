@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
-using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
+using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
 using Styx.Logic.Pathing;
 using Styx.WoWInternals;
-using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
@@ -24,7 +23,8 @@ namespace HighVoltz.Composites
     }
 
     #region BuyItemFromAhAction
-    class BuyItemFromAhAction : PBAction
+
+    sealed class BuyItemFromAhAction : PBAction
     {
         public enum ItemType
         {
@@ -32,51 +32,52 @@ namespace HighVoltz.Composites
             RecipeMats,
             MaterialList,
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public ItemType ItemListType
         {
             get { return (ItemType)Properties["ItemListType"].Value; }
             set { Properties["ItemListType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MaxBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MaxBuyout"].Value; }
             set { Properties["MaxBuyout"].Value = value; }
         }
-        [PbXmlAttribute()]
-        public uint Amount
+        [PbXmlAttribute]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Amount
         {
-            get { return (uint)Properties["Amount"].Value; }
+            get { return (DynamicProperty<int>)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool BuyAdditively
         {
             get { return (bool)Properties["BuyAdditively"].Value; }
             set { Properties["BuyAdditively"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool AutoFindAh
         {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool BidOnItem
         {
             get { return (bool)Properties["BidOnItem"].Value; }
             set { Properties["BidOnItem"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -88,7 +89,8 @@ namespace HighVoltz.Composites
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
             Properties["MaxBuyout"] = new MetaProp("MaxBuyout", typeof(PropertyBag.GoldEditor),
                 new DisplayNameAttribute("Max Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
-            Properties["Amount"] = new MetaProp("Amount", typeof(uint));
+            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["ItemListType"] = new MetaProp("ItemListType", typeof(ItemType), new DisplayNameAttribute("Buy ..."));
             Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
@@ -97,44 +99,38 @@ namespace HighVoltz.Composites
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
 
             ItemID = "";
-            Amount = 1u;
+            Amount = new DynamicProperty<int>(this, "1");
+            RegisterDynamicProperty("Amount");
             ItemListType = ItemType.Item;
             AutoFindAh = true;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             MaxBuyout = new PropertyBag.GoldEditor("100g0s0c");
             BidOnItem = false;
             BuyAdditively = true;
 
-            Properties["AutoFindAh"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindAHChanged);
-            Properties["ItemListType"].PropertyChanged += new EventHandler<MetaPropArgs>(BuyItemFromAhAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["AutoFindAh"].PropertyChanged += AutoFindAHChanged;
+            Properties["ItemListType"].PropertyChanged += BuyItemFromAhActionPropertyChanged;
+            Properties["Location"].PropertyChanged += LocationChanged;
             Properties["Amount"].Show = true;
             Properties["Location"].Show = false;
         }
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
         void AutoFindAHChanged(object sender, MetaPropArgs e)
         {
-            if (AutoFindAh)
-            {
-                Properties["Location"].Show = false;
-            }
-            else
-            {
-                Properties["Location"].Show = true;
-            }
+            Properties["Location"].Show = !AutoFindAh;
             RefreshPropertyGrid();
         }
-        void BuyItemFromAhAction_PropertyChanged(object sender, MetaPropArgs e)
+
+        void BuyItemFromAhActionPropertyChanged(object sender, MetaPropArgs e)
         {
             if (ItemListType == ItemType.MaterialList)
             {
@@ -151,8 +147,8 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        List<BuyItemEntry> ToQueueNameList;
-        List<BuyItemEntry> ToBuyList;
+        List<BuyItemEntry> _toQueueNameList;
+        List<BuyItemEntry> _toBuyList;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -165,32 +161,32 @@ namespace HighVoltz.Composites
                     }
                     else
                     {
-                        if (ToQueueNameList == null)
+                        if (_toQueueNameList == null)
                         {
-                            ToQueueNameList = BuildItemList();
-                            ToBuyList = new List<BuyItemEntry>();
+                            _toQueueNameList = BuildItemList();
+                            _toBuyList = new List<BuyItemEntry>();
                         }
-                        if ((ToQueueNameList == null || ToQueueNameList.Count == 0) && ToBuyList.Count == 0)
+                        if ((_toQueueNameList == null || _toQueueNameList.Count == 0) && _toBuyList.Count == 0)
                         {
                             IsDone = true;
                             return RunStatus.Failure;
                         }
-                        if (ToQueueNameList.Count > 0)
+                        if (_toQueueNameList != null && _toQueueNameList.Count > 0)
                         {
-                            string name = GetLocalName(ToQueueNameList[0].Id);
+                            string name = GetLocalName(_toQueueNameList[0].Id);
                             if (!string.IsNullOrEmpty(name))
                             {
-                                var item = ToQueueNameList[0];
+                                var item = _toQueueNameList[0];
                                 item.Name = name;
-                                ToBuyList.Add(item);
-                                ToQueueNameList.RemoveAt(0);
+                                _toBuyList.Add(item);
+                                _toQueueNameList.RemoveAt(0);
                             }
                         }
-                        if (ToBuyList.Count > 0)
+                        if (_toBuyList.Count > 0)
                         {
-                            if (BuyFromAH(ToBuyList[0]))
+                            if (BuyFromAH(_toBuyList[0]))
                             {
-                                ToBuyList.RemoveAt(0);
+                                _toBuyList.RemoveAt(0);
                             }
                         }
                     }
@@ -201,34 +197,34 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        Stopwatch queueTimer = new Stopwatch();
-        int totalAuctions = 0;
-        int counter = 0;
-        int page = 0;
+        Stopwatch _queueTimer = new Stopwatch();
+        int _totalAuctions;
+        int _counter;
+        int _page;
         bool BuyFromAH(BuyItemEntry bie)
         {
             bool done = false;
-            if (!queueTimer.IsRunning)
+            if (!_queueTimer.IsRunning)
             {
                 string lua = string.Format("QueryAuctionItems(\"{0}\" ,nil,nil,nil,nil,nil,{1}) return 1",
-                    bie.Name.ToFormatedUTF8(), page);
+                    bie.Name.ToFormatedUTF8(), _page);
                 Lua.GetReturnVal<int>(lua, 0);
                 Professionbuddy.Debug("Searching AH for {0}", bie.Name);
-                queueTimer.Start();
+                _queueTimer.Start();
             }
-            else if (queueTimer.ElapsedMilliseconds <= 10000)
+            else if (_queueTimer.ElapsedMilliseconds <= 10000)
             {
                 if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) == 1)
                 {
-                    totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                    queueTimer.Stop();
-                    queueTimer.Reset();
-                    if (totalAuctions > 0)
+                    _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
+                    _queueTimer.Stop();
+                    _queueTimer.Reset();
+                    if (_totalAuctions > 0)
                     {
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local amountBought={0} local want={1} local each={3} local useBid={4} local buyPrice=0 for index=1, A do local name, _, count,_,_,_,_,minBid,minInc, buyoutPrice,bidNum,isHighBidder,_,_ = GetAuctionItemInfo('list', index) if useBid == 1 and buyoutPrice > each*count and isHighBidder == nil then if bidNum == nil then buyPrice =minBid + minInc else buyPrice = bidNum + minInc end else buyPrice = buyoutPrice end if name == \"{2}\" and buyPrice > 0 and buyPrice <= each*count and amountBought < want then amountBought = amountBought + count PlaceAuctionBid('list', index,buyPrice) end if amountBought >=  want then return -1 end end return amountBought",
-                            counter, bie.BuyAmount, bie.Name.ToFormatedUTF8(), MaxBuyout.TotalCopper, BidOnItem == true ? 1 : 0);
-                        counter = Lua.GetReturnVal<int>(lua, 0);
-                        if (counter == -1 || ++page >= (int)Math.Ceiling((double)totalAuctions / 50))
+                            _counter, bie.BuyAmount, bie.Name.ToFormatedUTF8(), MaxBuyout.TotalCopper, BidOnItem ? 1 : 0);
+                        _counter = Lua.GetReturnVal<int>(lua, 0);
+                        if (_counter == -1 || ++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
                             done = true;
                     }
                     else
@@ -241,17 +237,17 @@ namespace HighVoltz.Composites
             }
             if (done)
             {
-                queueTimer = new Stopwatch();
-                totalAuctions = 0;
-                counter = 0;
-                page = 0;
+                _queueTimer = new Stopwatch();
+                _totalAuctions = 0;
+                _counter = 0;
+                _page = 0;
             }
             return done;
         }
 
         void MovetoAuctioneer()
         {
-            WoWPoint movetoPoint = loc;
+            WoWPoint movetoPoint = _loc;
             WoWUnit auctioneer;
             if (AutoFindAh || movetoPoint == WoWPoint.Zero)
             {
@@ -261,11 +257,11 @@ namespace HighVoltz.Composites
             else
             {
                 auctioneer = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.IsAuctioneer
-                    && o.Location.Distance(loc) < 5)
+                    && o.Location.Distance(_loc) < 5)
                     .OrderBy(o => o.Distance).FirstOrDefault();
             }
             if (auctioneer != null)
-                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, auctioneer.Location, 3);
+                movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, auctioneer.Location, 3);
             else if (movetoPoint == WoWPoint.Zero)
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
@@ -290,14 +286,14 @@ namespace HighVoltz.Composites
 
         List<BuyItemEntry> BuildItemList()
         {
-            List<BuyItemEntry> list = new List<BuyItemEntry>();
-            List<uint> idList = new List<uint>();
+            var list = new List<BuyItemEntry>();
+            var idList = new List<uint>();
             string[] entries = ItemID.Split(',');
-            if (entries != null && entries.Length > 0)
+            if (entries.Length > 0)
             {
                 foreach (var entry in entries)
                 {
-                    uint temp = 0;
+                    uint temp;
                     uint.TryParse(entry.Trim(), out temp);
                     idList.Add(temp);
                 }
@@ -311,34 +307,26 @@ namespace HighVoltz.Composites
             switch (ItemListType)
             {
                 case ItemType.Item:
-                    foreach (uint id in idList)
-                        list.Add(new BuyItemEntry()
-                        {
-                            Id = id,
-                            BuyAmount = (uint) (!BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount)
-                        });
+                    list.AddRange(idList.Select(id => new BuyItemEntry
+                                                          {
+                                                              Id = id,
+                                                              BuyAmount = (uint)(!BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount)
+                                                          }));
                     break;
                 case ItemType.MaterialList:
-                    foreach (var kv in Pb.MaterialList)
-                    {
-                        list.Add(new BuyItemEntry() { Id = kv.Key, BuyAmount = (uint)kv.Value });
-                    }
+                    list.AddRange(Pb.MaterialList.Select(kv => new BuyItemEntry { Id = kv.Key, BuyAmount = (uint)kv.Value }));
                     break;
                 case ItemType.RecipeMats:
-                    foreach (uint id in idList)
-                    {
-                        Recipe recipe = (from tradeskill in Pb.TradeSkillList
-                                         where tradeskill.Recipes.ContainsKey(id)
-                                         select tradeskill.Recipes[id]).FirstOrDefault();
-                        if (recipe != null)
-                            foreach (var ingred in recipe.Ingredients)
-                            {
-                                // subtract whatever material we have in bags already
-                                int toBuyAmount = (int)((ingred.Required * Amount) - Ingredient.GetInBagItemCount(ingred.ID));
-                                if (toBuyAmount > 0)
-                                    list.Add(new BuyItemEntry() { Id = ingred.ID, BuyAmount = (uint)toBuyAmount });
-                            }
-                    }
+                    list.AddRange(from id in idList
+                                  select (from tradeskill in Pb.TradeSkillList
+                                          where tradeskill.Recipes.ContainsKey(id)
+                                          select tradeskill.Recipes[id]).FirstOrDefault()
+                                      into recipe
+                                      where recipe != null
+                                      from ingred in recipe.Ingredients
+                                      let toBuyAmount = (int)((ingred.Required * Amount) - Ingredient.GetInBagItemCount(ingred.ID))
+                                      where toBuyAmount > 0
+                                      select new BuyItemEntry { Id = ingred.ID, BuyAmount = (uint)toBuyAmount });
                     break;
             }
             return list;
@@ -347,8 +335,8 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            ToQueueNameList = null;
-            ToBuyList = null;
+            _toQueueNameList = null;
+            _toBuyList = null;
         }
         public override string Name
         {
@@ -360,7 +348,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: {1} " + (ItemListType != ItemType.MaterialList ? "x" + Amount : ""), Name,
-                    ItemListType != ItemType.MaterialList ? ItemID.ToString() : "Material List");
+                    ItemListType != ItemType.MaterialList ? ItemID : "Material List");
             }
         }
         public override string Help
@@ -373,17 +361,17 @@ namespace HighVoltz.Composites
 
         public override object Clone()
         {
-            return new BuyItemFromAhAction()
-            {
-                ItemID = this.ItemID,
-                MaxBuyout = new PropertyBag.GoldEditor(this.MaxBuyout.ToString()),
-                Amount = this.Amount,
-                ItemListType = this.ItemListType,
-                AutoFindAh = this.AutoFindAh,
-                Location = this.Location,
-                BidOnItem = this.BidOnItem,
-                BuyAdditively = this.BuyAdditively,
-            };
+            return new BuyItemFromAhAction
+                       {
+                           ItemID = this.ItemID,
+                           MaxBuyout = new PropertyBag.GoldEditor(this.MaxBuyout.ToString()),
+                           Amount = this.Amount,
+                           ItemListType = this.ItemListType,
+                           AutoFindAh = this.AutoFindAh,
+                           Location = this.Location,
+                           BidOnItem = this.BidOnItem,
+                           BuyAdditively = this.BuyAdditively,
+                       };
         }
     }
     #endregion

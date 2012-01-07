@@ -1,22 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using TreeSharp;
-using System.Threading;
-using Styx.Logic.BehaviorTree;
-using Styx;
-using System.Xml;
-using Styx.Helpers;
-using System.Windows;
-using System.Diagnostics;
 
 namespace HighVoltz.Composites
 {
-    public class ChangeBotAction : PBAction
+    public sealed class ChangeBotAction : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string BotName
         {
             get { return (string)Properties["BotName"].Value; }
@@ -102,7 +91,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new ChangeBotAction() { BotName = this.BotName };
+            return new ChangeBotAction { BotName = this.BotName };
         }
     }
 }

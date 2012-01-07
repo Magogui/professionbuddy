@@ -9,43 +9,25 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
-using System.IO.Packaging;
-
 using Styx;
 using TreeSharp;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.Logic;
-using Styx.Logic.Combat;
 using System.Diagnostics;
-using Styx.Patchables;
-using Styx.Plugins;
-using Styx.Plugins.PluginClass;
-using Styx.Logic.Pathing;
 using Styx.Logic.BehaviorTree;
 using Styx.WoWInternals.WoWObjects;
-using CommonBehaviors.Actions;
-using System.Xml.Serialization;
-using System.Runtime.Serialization;
-using System.Xml;
 using System.Xml.Linq;
-using Styx.Combat.CombatRoutine;
-using Styx.Logic.POI;
 using HighVoltz.Composites;
-using System.Reflection;
 using Styx.Logic.Profiles;
-using System.Collections.Specialized;
-using Action = TreeSharp.Action;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Windows.Documents;
-using System.Windows.Threading;
 using HighVoltz.Dynamic;
 
 namespace HighVoltz
 {
-    public partial class Professionbuddy : BotBase
+    public class Professionbuddy : BotBase
     {
         #region Declarations
         public ProfessionBuddySettings MySettings;
@@ -59,7 +41,9 @@ namespace HighVoltz
         public List<uint> ProtectedItems { get; private set; }
         public bool IsTradeSkillsLoaded { get; private set; }
 
+        // ReSharper disable InconsistentNaming
         private const string _name = "ProfessionBuddy";
+        // ReSharper restore InconsistentNaming
         public static string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
 
         public readonly string ProfilePath = Environment.UserName == "highvoltz" ?
@@ -67,7 +51,7 @@ namespace HighVoltz
 
         public event EventHandler OnTradeSkillsLoaded;
         public readonly LocalPlayer Me = ObjectManager.Me;
-        Svn _svn = new Svn();
+        readonly Svn _svn = new Svn();
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
         public bool HasDataStoreAddon { get { return DataStore != null && DataStore.HasDataStoreAddon; } }
         // profile Settings.
@@ -77,12 +61,12 @@ namespace HighVoltz
             get { return _profileSettings; }
         }
 
-        public bool IsRunning = false;
+        public bool IsRunning;
         // static instance
         public static Professionbuddy Instance { get; private set; }
         public Version Version { get { return new Version(1, _svn.Revision); } }
         // test some culture specific stuff.
-        private bool _ctorRunOnce = false;
+        private readonly bool _ctorRunOnce;
         public Professionbuddy()
         {
             Instance = this;
@@ -102,15 +86,18 @@ namespace HighVoltz
                         var vInfo = mod.FileVersionInfo;
                         Logging.WriteDebug("V: {0}", vInfo.FileVersion);
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Err(ex.ToString());
+                    }
                 }).Start();
             // Initialize is called when bot is started.. we need to hook these events before that.
             if (!_ctorRunOnce)
             {
-                Styx.BotEvents.Profile.OnNewOuterProfileLoaded +=
-                    new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
-                Styx.Logic.Profiles.Profile.OnUnknownProfileElement +=
-                    new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
+                BotEvents.Profile.OnNewOuterProfileLoaded +=
+                    Profile_OnNewOuterProfileLoaded;
+                Profile.OnUnknownProfileElement +=
+                    Profile_OnUnknownProfileElement;
                 _ctorRunOnce = true;
             }
         }
@@ -122,7 +109,7 @@ namespace HighVoltz
             get { return _name; }
         }
 
-        public override PulseFlags PulseFlags { get { return Styx.PulseFlags.All; } }
+        public override PulseFlags PulseFlags { get { return PulseFlags.All; } }
 
 
         public override void Start()
@@ -146,7 +133,7 @@ namespace HighVoltz
             }
             catch (Exception ex)
             {
-                Err("{0} {1}", SecondaryBot.Name, ex);
+                if (SecondaryBot != null) Err("{0} {1}", SecondaryBot.Name, ex);
             }
         }
 
@@ -189,10 +176,10 @@ namespace HighVoltz
             {
                 if (!MainForm.IsValid)
                 {
-                    new MainForm() { TopLevel = true }.Show();
+                    new MainForm { TopLevel = true }.Show();
                     MainForm.Instance.TopLevel = true;
                 }
-                DialogResult = System.Windows.Forms.DialogResult.OK;
+                DialogResult = DialogResult.OK;
                 MainForm.Instance.Activate();
             }
         }
@@ -201,17 +188,17 @@ namespace HighVoltz
         {
             // Due to some non-thread safe HB api I need to make sure the callbacks are executed from main thread
             // Throttling the events so the callback doesn't get called repeatedly in a short time frame.
-            if (OnBagUpdateSpamSW.ElapsedMilliseconds >= 1000)
+            if (_onBagUpdateSpamSW.ElapsedMilliseconds >= 1000)
             {
-                OnBagUpdateSpamSW.Stop();
-                OnBagUpdateSpamSW.Reset();
-                OnBagUpdateTimerCB(null);
+                _onBagUpdateSpamSW.Stop();
+                _onBagUpdateSpamSW.Reset();
+                OnBagUpdateTimerCB();
             }
-            if (OnSkillUpdateSpamSW.ElapsedMilliseconds >= 1000)
+            if (_onSkillUpdateSpamSW.ElapsedMilliseconds >= 1000)
             {
-                OnSkillUpdateSpamSW.Stop();
-                OnSkillUpdateSpamSW.Reset();
-                OnSkillUpdateTimerCB(null);
+                _onSkillUpdateSpamSW.Stop();
+                _onSkillUpdateSpamSW.Reset();
+                OnSkillUpdateTimerCB();
             }
             if (_onSpellsChangedSpamSw.ElapsedMilliseconds >= 1000)
             {
@@ -231,17 +218,18 @@ namespace HighVoltz
         #region Callbacks
 
         #region OnBagUpdate
-        Stopwatch OnBagUpdateSpamSW = new Stopwatch();
+
+        readonly Stopwatch _onBagUpdateSpamSW = new Stopwatch();
         public void OnBagUpdate(object obj, LuaEventArgs args)
         {
-            if (!OnBagUpdateSpamSW.IsRunning)
+            if (!_onBagUpdateSpamSW.IsRunning)
             {
                 Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
-                OnBagUpdateSpamSW.Start();
+                _onBagUpdateSpamSW.Start();
             }
         }
 
-        void OnBagUpdateTimerCB(Object stateInfo)
+        void OnBagUpdateTimerCB()
         {
             try
             {
@@ -262,19 +250,20 @@ namespace HighVoltz
         #endregion
 
         #region OnSkillUpdate
-        Stopwatch OnSkillUpdateSpamSW = new Stopwatch();
+
+        readonly Stopwatch _onSkillUpdateSpamSW = new Stopwatch();
         public void OnSkillUpdate(object obj, LuaEventArgs args)
         {
             foreach (object o in args.Args)
                 Debug("spell changed {0}", o);
-            if (!OnSkillUpdateSpamSW.IsRunning)
+            if (!_onSkillUpdateSpamSW.IsRunning)
             {
                 Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-                OnSkillUpdateSpamSW.Start();
+                _onSkillUpdateSpamSW.Start();
             }
         }
 
-        void OnSkillUpdateTimerCB(Object stateInfo)
+        void OnSkillUpdateTimerCB()
         {
             Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             try
@@ -366,39 +355,20 @@ namespace HighVoltz
                         else
                             MainForm.Instance.RemoveProfileSettingsTab();
                     }
-                    //BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                    //if (!string.IsNullOrEmpty(HonorBuddyProfilePath) && File.Exists(HonorBuddyProfilePath))
-                    //    ProfileManager.LoadNew(HonorBuddyProfilePath, true);
-                    //else
-                    //    ProfileManager.LoadEmpty();
-                    //BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                 }
                 else
                 {
                     _profileToLoad = ProfileManager.XmlLocation;
                 }
             }
-            //else
-            //    HonorBuddyProfilePath = ProfileManager.XmlLocation;
         }
 
         #endregion
 
         #region Behavior Tree
 
-        static PbProfile _currentProfile = new PbProfile();
-        public PbProfile CurrentProfile
-        {
-            get
-            {
-                return _currentProfile;
-            }
-            private set
-            {
-                _currentProfile = value;
-            }
-        }
-
+        readonly PbProfile _currentProfile = new PbProfile();
+        public PbProfile CurrentProfile { get { return _currentProfile; } }
         readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
         override public Composite Root
         {
@@ -425,7 +395,7 @@ namespace HighVoltz
 
         #region Misc
 
-        static bool _init = false;
+        static bool _init;
         public void Init()
         {
             try
@@ -616,7 +586,7 @@ namespace HighVoltz
                                TreeRoot.Start();
                        }
                    ));
-                    Professionbuddy.Log("Changing SecondaryBot to {0}", botName);
+                    Log("Changing SecondaryBot to {0}", botName);
                 }
             }
             else
@@ -627,7 +597,7 @@ namespace HighVoltz
         {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
             {
-                Dictionary<string, Uri> dict = new Dictionary<string, Uri>();
+                var dict = new Dictionary<string, Uri>();
                 PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.PbBehavior, dict);
                 if (dict.Count > 0)
                 {
@@ -637,9 +607,9 @@ namespace HighVoltz
                         {
                             Log("Preloading profile {0}", kv.Key);
                             // unhook event to prevent recursive loop
-                            Styx.BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
+                            BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                             ProfileManager.LoadNew(kv.Key);
-                            Styx.BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                            BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                             return;
                         }
                     }
@@ -647,9 +617,9 @@ namespace HighVoltz
             }
             if (ProfileManager.CurrentProfile == null)
             {
-                Styx.BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
+                BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                 ProfileManager.LoadEmpty();
-                Styx.BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
             }
         }
 
@@ -661,11 +631,12 @@ namespace HighVoltz
             {
                 list.Add((T)comp);
             }
-            if (comp is GroupComposite)
+            var groupComposite = comp as GroupComposite;
+            if (groupComposite != null)
             {
-                foreach (Composite c in ((GroupComposite)comp).Children)
+                foreach (Composite c in groupComposite.Children)
                 {
-                    GetListOfActionsByType<T>(c, list);
+                    GetListOfActionsByType(c, list);
                 }
             }
             return list;
@@ -678,9 +649,13 @@ namespace HighVoltz
             if (File.Exists(path))
             {
                 XElement xml = XElement.Load(path);
-                tempList = xml.Elements("Item").Select(x => x.Attribute("Entry").Value.ToUint()).Distinct().ToList();
+                tempList = xml.Elements("Item").Select(x =>
+                                                           {
+                                                               var xAttribute = x.Attribute("Entry");
+                                                               return xAttribute != null ? xAttribute.Value.ToUint() : 0;
+                                                           }).Distinct().ToList();
             }
-            ProtectedItems = tempList != null ? tempList : new List<uint>();
+            ProtectedItems = tempList ?? new List<uint>();
         }
 
         #endregion
@@ -735,14 +710,13 @@ namespace HighVoltz
                 System.Windows.Media.Color headerColorMedia = System.Windows.Media.Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B);
                 System.Windows.Media.Color msgColorMedia = System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B);
 
-                TextRange headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
-                headerTR.Text = header;
+                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
                 headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(headerColorMedia));
 
-                TextRange MessageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
+                var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
                 string msg = String.Format(format, args);
-                MessageTR.Text = msg + Environment.NewLine;
-                MessageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(msgColorMedia));
+                messageTR.Text = msg + Environment.NewLine;
+                messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(msgColorMedia));
                 Logging.WriteDebug(header + msg);
             }
             catch

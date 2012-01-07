@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
 using System.Globalization;
 using HighVoltz.Composites;
@@ -13,7 +10,7 @@ namespace HighVoltz.Dynamic
     {
         Func<object, T> _expressionMethod;
         public DynamicProperty() : this(null, "") { }
-
+        public DynamicProperty(string code) : this(null, code) { }
         public DynamicProperty(IPBComposite parent, string code)
         {
             this.Code = code;
@@ -34,10 +31,9 @@ namespace HighVoltz.Dynamic
                     {
                         if (AttachedComposite != null)
                         {
-                            if (value != "")
-                                ((PBAction)AttachedComposite).Color = System.Drawing.Color.Red;
-                            else
-                                ((PBAction)AttachedComposite).Color = System.Drawing.Color.Black;
+                            ((PBAction) AttachedComposite).Color = value != ""
+                                                                       ? System.Drawing.Color.Red
+                                                                       : System.Drawing.Color.Black;
                             MainForm.Instance.RefreshActionTree(AttachedComposite);
                         }
                         else
@@ -63,7 +59,7 @@ namespace HighVoltz.Dynamic
             set { _expressionMethod = (Func<object, T>)value; }
         }
 
-        public Composites.IPBComposite AttachedComposite { get; set; }
+        public IPBComposite AttachedComposite { get; set; }
 
         public string Code { get; set; }
 
@@ -78,23 +74,23 @@ namespace HighVoltz.Dynamic
 
         public class DynamivExpressionConverter : TypeConverter
         {
-            public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             {
                 if (destinationType == typeof(DynamivExpressionConverter))
                     return true;
                 return base.CanConvertTo(context, destinationType);
             }
 
-            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, System.Type destinationType)
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
             {
-                if (destinationType == typeof(System.String) && value is DynamicProperty<T>)
+                if (destinationType == typeof(String) && value is DynamicProperty<T>)
                 {
                     return ((DynamicProperty<T>)value).Code;
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
-            public override bool CanConvertFrom(ITypeDescriptorContext context, System.Type sourceType)
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
                 if (sourceType == typeof(string))
                     return true;
@@ -105,7 +101,7 @@ namespace HighVoltz.Dynamic
             {
                 if (value is string)
                 {
-                    var ge = new DynamicProperty<T>() { Code = (string)value };
+                    var ge = new DynamicProperty<T> { Code = (string)value };
                     return ge;
                 }
                 return base.ConvertFrom(context, culture, value);

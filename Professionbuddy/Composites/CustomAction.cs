@@ -16,7 +16,7 @@ namespace HighVoltz.Composites
     class CustomAction : CsharpAction
     {
         public System.Action<object> Action { get; set; }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         override public string Code
         {
             get { return (string)Properties["Code"].Value; }

@@ -1,9 +1,6 @@
 ﻿//!CompilerOption:AddRef:System.Design.dll
-using System;
-using System.Xml;
-using Styx.Helpers;
+
 using TreeSharp;
-using System.Threading;
 using System.Drawing.Design;
 using System.ComponentModel;
 using System.ComponentModel.Design;
@@ -12,9 +9,9 @@ using HighVoltz.Dynamic;
 namespace HighVoltz.Composites
 {
     #region Declaration
-    public class Declaration : CsharpAction
+    public sealed class Declaration : CsharpAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         override public string Code
         {
             get { return (string)Properties["Code"].Value; }
@@ -56,7 +53,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new Declaration() { Code = this.Code };
+            return new Declaration { Code = this.Code };
         }
     }
     #endregion

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Styx.Logic.Pathing;
 using Styx;
 using System.ComponentModel;
@@ -11,49 +10,47 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.Helpers;
 using TreeSharp;
-using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
-using Styx.WoWInternals.WoWCache;
 
 namespace HighVoltz.Composites
 {
-    public class CancelAuctionAction : PBAction
+    public sealed class CancelAuctionAction : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
             set
             {
-                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString()); ;
+                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString());
             }
         }
-        string subCatValueString = null;
-        [PbXmlAttribute()]
+        string _subCatValueString;
+        [PbXmlAttribute]
         public object SubCategory
         {
             get
             {
-                return (object)Properties["SubCategory"].Value;
+                return Properties["SubCategory"].Value;
             }
             set
             {
                 if (value is string)
                 {
-                    if (subCatTypeLoaded)
+                    if (_subCatTypeLoaded)
                     {
-                        value = Enum.Parse(subCategoryType, value as string);
+                        value = Enum.Parse(_subCategoryType, value as string);
                     }
                     else
                     {
-                        subCatValueString = (string)value;
+                        _subCatValueString = (string)value;
                         return;
                     }
                 }
@@ -61,50 +58,50 @@ namespace HighVoltz.Composites
                 //UpdateSubCatValue(); 
             }
         }
-        Type subCategoryType = typeof(WoWItemTradeGoodsClass);
-        bool subCatTypeLoaded = false;
-        [PbXmlAttribute()]
+        Type _subCategoryType = typeof(WoWItemTradeGoodsClass);
+        bool _subCatTypeLoaded;
+        [PbXmlAttribute]
         public string SubCategoryType
         {
-            get { return subCategoryType.Name; }
+            get { return _subCategoryType.Name; }
             set
             {
-                subCatTypeLoaded = true;
+                _subCatTypeLoaded = true;
                 if (value != "SubCategoryType")
                 {
                     string typeName = string.Format("Styx.{0}", value);
-                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                    _subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
                 }
                 else
-                    subCategoryType = typeof(SubCategoryType);
-                if (subCatValueString != null)
+                    _subCategoryType = typeof(SubCategoryType);
+                if (_subCatValueString != null)
                 {
-                    SubCategory = Enum.Parse(subCategoryType, subCatValueString);
-                    subCatValueString = null;
+                    SubCategory = Enum.Parse(_subCategoryType, _subCatValueString);
+                    _subCatValueString = null;
                 }
             }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool AutoFindAh
         {
             get { return (bool)Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         [TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MinBuyout
         {
             get { return (PropertyBag.GoldEditor)Properties["MinBuyout"].Value; }
             set { Properties["MinBuyout"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -124,15 +121,15 @@ namespace HighVoltz.Composites
 
             ItemID = "0";
             AutoFindAh = true;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             UseCategory = false;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
             MinBuyout = new PropertyBag.GoldEditor("0g0s0c");
 
-            Properties["AutoFindAh"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindAHChanged);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["AutoFindAh"].PropertyChanged += AutoFindAHChanged;
+            Properties["Location"].PropertyChanged += LocationChanged;
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
 
@@ -143,20 +140,16 @@ namespace HighVoltz.Composites
         #region Callbacks
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
         void AutoFindAHChanged(object sender, MetaPropArgs e)
         {
-            if (AutoFindAh)
-                Properties["Location"].Show = false;
-            else
-                Properties["Location"].Show = true;
+            Properties["Location"].Show = !AutoFindAh;
             RefreshPropertyGrid();
         }
 
@@ -187,8 +180,8 @@ namespace HighVoltz.Composites
         }
         #endregion
 
-        List<AuctionEntry> ToScanItemList;
-        List<AuctionEntry> ToCancelItemList;
+        List<AuctionEntry> _toScanItemList;
+        List<AuctionEntry> _toCancelItemList;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -201,39 +194,38 @@ namespace HighVoltz.Composites
                     }
                     else if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('owner') == 1 then return 1 else return 0 end ", 0) == 1)
                     {
-                        if (ToScanItemList == null)
+                        if (_toScanItemList == null)
                         {
-                            ToScanItemList = BuildScanItemList();
-                            ToCancelItemList = new List<AuctionEntry>();
+                            _toScanItemList = BuildScanItemList();
+                            _toCancelItemList = new List<AuctionEntry>();
                         }
 
-                        if (ToScanItemList.Count > 0)
+                        if (_toScanItemList.Count > 0)
                         {
-                            AuctionEntry ae = ToScanItemList[0];
+                            AuctionEntry ae = _toScanItemList[0];
                             bool scanDone = ScanAh(ref ae);
-                            ToScanItemList[0] = ae; // update
+                            _toScanItemList[0] = ae; // update
                             if (scanDone)
                             {
-                                ToCancelItemList.Add(ae);
-                                ToScanItemList.RemoveAt(0);
+                                _toCancelItemList.Add(ae);
+                                _toScanItemList.RemoveAt(0);
                             }
-                            if (ToScanItemList.Count == 0)
+                            if (_toScanItemList.Count == 0)
                                 Professionbuddy.Debug("Finished scanning for items");
                         }
                         else
                         {
-                            if (ToCancelItemList.Count == 0)
+                            if (_toCancelItemList.Count == 0)
                             {
-                                ToScanItemList = null;
+                                _toScanItemList = null;
                                 IsDone = true;
                                 return RunStatus.Failure;
                             }
-                            else if (CancelAuction(ToCancelItemList[0]))
+                            if (CancelAuction(_toCancelItemList[0]))
                             {
-                                ToCancelItemList.RemoveAt(0);
+                                _toCancelItemList.RemoveAt(0);
                             }
                         }
-
                     }
                     return RunStatus.Success;
                 }
@@ -247,35 +239,35 @@ namespace HighVoltz.Composites
 
         #region Auction House
 
-        Stopwatch queueTimer = new Stopwatch();
-        int totalAuctions = 0;
-        int page = 0;
+        readonly Stopwatch _queueTimer = new Stopwatch();
+        int _totalAuctions;
+        int _page;
         bool ScanAh(ref AuctionEntry ae)
         {
             bool scanned = false;
-            if (!queueTimer.IsRunning)
+            if (!_queueTimer.IsRunning)
             {
                 string lua = string.Format("QueryAuctionItems(\"{0}\" ,nil,nil,nil,nil,nil,{1}) return 1",
-                    ae.Name.ToFormatedUTF8(), page);
+                    ae.Name.ToFormatedUTF8(), _page);
                 Lua.GetReturnVal<int>(lua, 0);
                 Professionbuddy.Debug("Searching AH for {0}", ae.Name);
-                queueTimer.Start();
+                _queueTimer.Start();
             }
-            else if (queueTimer.ElapsedMilliseconds <= 10000)
+            else if (_queueTimer.ElapsedMilliseconds <= 10000)
             {
                 using (new FrameLock())
                 {
                     if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) == 1)
                     {
-                        queueTimer.Reset();
-                        totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
+                        _queueTimer.Reset();
+                        _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo, ae.myAuctions, ae.Name.ToFormatedUTF8());
+                            ae.LowestBo, ae.MyAuctions, ae.Name.ToFormatedUTF8());
 
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
-                        uint.TryParse(retVals[1], out ae.myAuctions);
-                        if (++page >= (int)Math.Ceiling((double)totalAuctions / 50))
+                        uint.TryParse(retVals[1], out ae.MyAuctions);
+                        if (++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
                             scanned = true;
                     }
                 }
@@ -288,9 +280,9 @@ namespace HighVoltz.Composites
             if (scanned)
             {
                 Professionbuddy.Debug("lowest buyout {0}", ae.LowestBo);
-                queueTimer.Reset();
-                totalAuctions = 0;
-                page = 0;
+                _queueTimer.Reset();
+                _totalAuctions = 0;
+                _page = 0;
             }
             return scanned;
         }
@@ -299,7 +291,7 @@ namespace HighVoltz.Composites
         {
             string lua = String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
                 ae.Id, MinBuyout.TotalCopper, ae.LowestBo);
-            int numCanceled = Lua.GetReturnVal<int>(lua, 0);
+            var numCanceled = Lua.GetReturnVal<int>(lua, 0);
             if (numCanceled > 0)
             {
                 Professionbuddy.Log("Canceled {0} x{1}", ae.Name, numCanceled);
@@ -312,10 +304,10 @@ namespace HighVoltz.Composites
             //string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
             //    0);
 
-            Dictionary<uint, string> ret = new Dictionary<uint, string>();
+            var ret = new Dictionary<uint, string>();
             using (new FrameLock())
             {
-                int numOfMyItemsOnAH = Lua.GetReturnVal<int>("return GetNumAuctionItems('owner')", 0);
+                var numOfMyItemsOnAH = Lua.GetReturnVal<int>("return GetNumAuctionItems('owner')", 0);
                 for (int i = 1; i <= numOfMyItemsOnAH; i++)
                 {
                     List<string> luaRet = Lua.GetReturnValues(string.Format("local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', {0}) return id,name,sold", i));
@@ -335,7 +327,7 @@ namespace HighVoltz.Composites
 
         void MoveToAh()
         {
-            WoWPoint movetoPoint = loc;
+            WoWPoint movetoPoint = _loc;
             WoWUnit auctioneer;
             if (AutoFindAh || movetoPoint == WoWPoint.Zero)
             {
@@ -345,11 +337,11 @@ namespace HighVoltz.Composites
             else
             {
                 auctioneer = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.IsAuctioneer
-                    && o.Location.Distance(loc) < 5)
+                    && o.Location.Distance(_loc) < 5)
                     .OrderBy(o => o.Distance).FirstOrDefault();
             }
             if (auctioneer != null)
-                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, auctioneer.Location, 3);
+                movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, auctioneer.Location, 3);
             else if (movetoPoint == WoWPoint.Zero)
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
@@ -380,7 +372,7 @@ namespace HighVoltz.Composites
                         ItemInfo info = ItemInfo.FromId(aucKV.Key);
                         if (info != null)
                         {
-                            if (info.ItemClass == Category && subCategoryCheck(info.SubClassId))
+                            if (info.ItemClass == Category && SubCategoryCheck(info.SubClassId))
                             {
                                 tmpItemlist.Add(new AuctionEntry(aucKV.Value, aucKV.Key, 0, 0));
                             }
@@ -394,17 +386,16 @@ namespace HighVoltz.Composites
             {
                 if (ItemID == "0" || ItemID == "")
                 {
-                    foreach (var kv in myAucs)
-                        tmpItemlist.Add(new AuctionEntry(kv.Value, kv.Key, 0, 0));
+                    tmpItemlist.AddRange(myAucs.Select(kv => new AuctionEntry(kv.Value, kv.Key, 0, 0)));
                 }
                 else
                 {
                     string[] entries = ItemID.Split(',');
-                    if (entries != null && entries.Length > 0)
+                    if (entries.Length > 0)
                     {
                         foreach (var entry in entries)
                         {
-                            uint id = 0;
+                            uint id;
                             uint.TryParse(entry.Trim(), out id);
                             if (myAucs.ContainsKey(id))
                                 tmpItemlist.Add(new AuctionEntry(myAucs[id], id, 0, 0));
@@ -416,22 +407,17 @@ namespace HighVoltz.Composites
             return tmpItemlist;
         }
 
-        Func<WoWItem, IEnumerable<AuctionEntry>, bool> containsItem = (i, en) => { return en.Count(ae => ae.Id == i.Entry) > 0; };
-
-        bool subCategoryCheck(object subCat)
+        bool SubCategoryCheck(object subCat)
         {
-            int sub = (int)SubCategory;
-            if (sub == -1 || sub == 0 || (int)subCat == sub)
-                return true;
-            else
-                return false;
+            var sub = (int)SubCategory;
+            return sub == -1 || sub == 0 || (int)subCat == sub;
         }
 
         public override void Reset()
         {
             base.Reset();
-            ToScanItemList = null;
-            ToCancelItemList = null;
+            _toScanItemList = null;
+            _toCancelItemList = null;
         }
         public override string Name
         {
@@ -456,15 +442,15 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new CancelAuctionAction()
-            {
-                ItemID = this.ItemID,
-                AutoFindAh = this.AutoFindAh,
-                Location = this.Location,
-                UseCategory = this.UseCategory,
-                Category = this.Category,
-                SubCategory = this.SubCategory,
-            };
+            return new CancelAuctionAction
+                       {
+                           ItemID = this.ItemID,
+                           AutoFindAh = this.AutoFindAh,
+                           Location = this.Location,
+                           UseCategory = this.UseCategory,
+                           Category = this.Category,
+                           SubCategory = this.SubCategory,
+                       };
         }
     }
 }

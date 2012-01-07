@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using System.Xml;
 using Styx;
-using Styx.Logic;
-using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.Logic.BehaviorTree;
@@ -17,30 +14,31 @@ using TreeSharp;
 namespace HighVoltz.Composites
 {
     #region DisenchantAction
-    class DisenchantAction : PBAction
+
+    sealed class DisenchantAction : PBAction
     {
         public enum DeActionType { Mill = 0, Prospect, Disenchant }
         public enum ItemTargetType { Specific, All }
         public enum DeItemQualites { Epic, Rare, Uncommon }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public DeActionType ActionType
         {
             get { return (DeActionType)Properties["ActionType"].Value; }
             set { Properties["ActionType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public ItemTargetType ItemTarget
         {
             get { return (ItemTargetType)Properties["ItemTarget"].Value; }
             set { Properties["ItemTarget"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public DeItemQualites ItemQuality
         {
             get { return (DeItemQualites)Properties["ItemQuality"].Value; }
             set { Properties["ItemQuality"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public int ItemId
         {
             get { return (int)Properties["ItemId"].Value; }
@@ -67,50 +65,43 @@ namespace HighVoltz.Composites
 
         void ActionTypeChanged(object sender, MetaPropArgs e)
         {
-            if (ActionType == DeActionType.Disenchant)
-                Properties["ItemQuality"].Show = true;
-            else
-                Properties["ItemQuality"].Show = false;
+            Properties["ItemQuality"].Show = ActionType == DeActionType.Disenchant;
             RefreshPropertyGrid();
         }
 
         void ItemTargetChanged(object sender, MetaPropArgs e)
         {
-            if (ItemTarget == ItemTargetType.Specific)
-                Properties["ItemId"].Show = true;
-            else
-                Properties["ItemId"].Show = false;
+            Properties["ItemId"].Show = ItemTarget == ItemTargetType.Specific;
             RefreshPropertyGrid();
         }
 
-        Stopwatch castTimer = new Stopwatch();
-        Stopwatch lootSW = new Stopwatch();
-        List<ulong> blacklistedItems = new List<ulong>();
-        Stopwatch blacklistSw = new Stopwatch();
-        ulong lastItemGuid = 0;
-        uint lastStackSize = 0;
-        int tries = 0;
+        readonly Stopwatch _castTimer = new Stopwatch();
+        readonly Stopwatch _lootSw = new Stopwatch();
+        readonly List<ulong> _blacklistedItems = new List<ulong>();
+        ulong _lastItemGuid;
+        uint _lastStackSize;
+        int _tries;
 
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                if (me.IsFlying)
+                if (Me.IsFlying)
                     return RunStatus.Failure;
-                if (lootSW.IsRunning && lootSW.ElapsedMilliseconds < 1000)
+                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < 1000)
                     return RunStatus.Success;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
                     LootFrame.Instance.LootAll();
-                    lootSW.Reset();
-                    lootSW.Start();
+                    _lootSw.Reset();
+                    _lootSw.Start();
                     return RunStatus.Success;
                 }
-                uint timeToWait = ((uint)ActionType*1000) + 2500;
-                if (!me.IsCasting && (!castTimer.IsRunning || castTimer.ElapsedMilliseconds >= timeToWait))
+                uint timeToWait = ((uint)ActionType * 1000) + 2500;
+                if (!Me.IsCasting && (!_castTimer.IsRunning || _castTimer.ElapsedMilliseconds >= timeToWait))
                 {
-                    List<WoWItem> ItemList = BuildItemList();
-                    if (ItemList == null || ItemList.Count == 0)
+                    List<WoWItem> itemList = BuildItemList();
+                    if (itemList == null || itemList.Count == 0)
                     {
                         IsDone = true;
                         Professionbuddy.Log("Done {0}ing", ActionType);
@@ -118,39 +109,39 @@ namespace HighVoltz.Composites
                     else
                     { // skip 'locked' items
                         int index = 0;
-                        for (; index <= ItemList.Count; index++)
+                        for (; index <= itemList.Count; index++)
                         {
-                            if (!ItemList[index].IsDisabled)
+                            if (!itemList[index].IsDisabled)
                                 break;
                         }
-                        if (index < ItemList.Count)
+                        if (index < itemList.Count)
                         {
-                            if (ItemList[index].Guid == lastItemGuid && lastStackSize == ItemList[index].StackCount)
+                            if (itemList[index].Guid == _lastItemGuid && _lastStackSize == itemList[index].StackCount)
                             {
-                                if (++tries >= 3)
+                                if (++_tries >= 3)
                                 {
-                                    Professionbuddy.Log("Unable to {0} {1}, BlackListing", Name, ItemList[index].Name);
-                                    if (!blacklistedItems.Contains(lastItemGuid))
-                                        blacklistedItems.Add(lastItemGuid);
+                                    Professionbuddy.Log("Unable to {0} {1}, BlackListing", Name, itemList[index].Name);
+                                    if (!_blacklistedItems.Contains(_lastItemGuid))
+                                        _blacklistedItems.Add(_lastItemGuid);
                                     return RunStatus.Success;
                                 }
                             }
                             else
                             {
-                                tries = 0;
+                                _tries = 0;
                             }
-                            WoWSpell spell = WoWSpell.FromId(spellId);
+                            WoWSpell spell = WoWSpell.FromId(SpellId);
                             if (spell != null)
                             {
-                                TreeRoot.GoalText = string.Format("{0}ing {1}", ActionType, ItemList[index].Name);
+                                TreeRoot.GoalText = string.Format("{0}ing {1}", ActionType, itemList[index].Name);
                                 Professionbuddy.Log(TreeRoot.GoalText);
                                 //Lua.DoString("CastSpellByID({0}) UseContainerItem({1}, {2})",
                                 //    spellId, ItemList[index].BagIndex + 1, ItemList[index].BagSlot + 1);
-                                spell.CastOnItem(ItemList[index]);
-                                lastItemGuid = ItemList[index].Guid;
-                                lastStackSize = ItemList[index].StackCount;
-                                castTimer.Reset();
-                                castTimer.Start();
+                                spell.CastOnItem(itemList[index]);
+                                _lastItemGuid = itemList[index].Guid;
+                                _lastStackSize = itemList[index].StackCount;
+                                _castTimer.Reset();
+                                _castTimer.Start();
                             }
                             else
                                 IsDone = true;
@@ -162,7 +153,7 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
-        int spellId
+        int SpellId
         {
             get
             {
@@ -190,7 +181,7 @@ namespace HighVoltz.Composites
             switch (ActionType)
             {
                 case DeActionType.Disenchant:
-                    return itemQueue.Where(i => i.CanDisenchant() && checkItemQuality(i)).ToList();
+                    return itemQueue.Where(i => i.CanDisenchant() && CheckItemQuality(i)).ToList();
                 case DeActionType.Mill:
                     return itemQueue.Where(i => i.CanMill() && i.StackCount >= 5).ToList();
                 case DeActionType.Prospect:
@@ -201,10 +192,10 @@ namespace HighVoltz.Composites
 
         bool IsBlackListed(WoWItem item)
         {
-            return blacklistedItems.Contains(item.Guid);
+            return _blacklistedItems.Contains(item.Guid);
         }
 
-        bool checkItemQuality(WoWItem item)
+        bool CheckItemQuality(WoWItem item)
         {
             if (ItemQuality == DeItemQualites.Uncommon && item.Quality == WoWItemQuality.Uncommon)
                 return true;
@@ -221,7 +212,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return string.Format("{0}: {1} {2}", Name, ItemTarget == ItemTargetType.Specific ? ItemId.ToString() : "All"
+                return string.Format("{0}: {1} {2}", Name, ItemTarget == ItemTargetType.Specific ? ItemId.ToString(CultureInfo.InvariantCulture) : "All"
                     , ItemTarget == ItemTargetType.All && ActionType == DeActionType.Disenchant ? ItemQuality.ToString() : "");
             }
         }
@@ -249,8 +240,8 @@ namespace HighVoltz.Composites
 
         #region Prospect List
         // (itemId,required level)
-        static Dictionary<uint, int> ProspectList = new Dictionary<uint, int>()
-        {
+        static readonly Dictionary<uint, int> ProspectList = new Dictionary<uint, int>
+                                                                 {
             {2770, 20}, //Copper Ore
             {2771, 50}, //Tin Ore
             {2772, 125}, //Iron Ore
@@ -269,8 +260,8 @@ namespace HighVoltz.Composites
 
         #region Millable Herb List
         // (itemId,required level)
-        static Dictionary<uint, int> MillableHerbList = new Dictionary<uint, int>()
-        {
+        static readonly Dictionary<uint, int> MillableHerbList = new Dictionary<uint, int>
+                                                                     {
             {765, 1},       //Silverleaf
             {2447, 1},      //Peacebloom
             {2449, 1},      //Earthroot
@@ -325,7 +316,7 @@ namespace HighVoltz.Composites
 
         #region Disenchant Info
         // format [skillLevel,max iLevel]
-        readonly static int[,] UncommonItemDeList = new int[,] {
+        readonly static int[,] UncommonItemDeList = new[,] {
             {1,20},
             {25,25},
             {50,30},
@@ -339,9 +330,9 @@ namespace HighVoltz.Composites
             {275,120},
             {325,150},
             {350,182},
-            {425,333},
-        };
-        readonly static int[,] RareItemDeList = new int[,] {
+            {425,333}
+                                                           };
+        readonly static int[,] RareItemDeList = new[,] {
             {1,20},
             {25,25},
             {50,30},
@@ -354,9 +345,9 @@ namespace HighVoltz.Composites
             {225,99},
             {275,120},
             {325,200},
-            {450,  380},
-        };
-        readonly static int[,] EpicItemDeList = new int[,] {
+            {450,  380}
+                                                       };
+        readonly static int[,] EpicItemDeList = new[,] {
             {1,20},
             {25,25},
             {50,30},
@@ -365,8 +356,8 @@ namespace HighVoltz.Composites
             {125,88},
             {225,164},
             {375,284},
-            {475,372},
-        };
+            {475,372}
+                                                       };
         #endregion
 
         public static bool CanMill(this WoWItem item)
@@ -404,11 +395,10 @@ namespace HighVoltz.Composites
             // returns true if item is found in the dictionary and player meets the level requirement
             if (deList != null)
             {
-                int x = 0;
+                int x;
                 int iLevel = item.ItemInfo.Level;
                 for (x = 0; x < deList.Length / 2; x++)
                 {
-                    int a = deList[x, 1];
                     if (iLevel <= deList[x, 1])
                     {
                         Professionbuddy.Log("We can disenchant {0} found in bag {1} at slot {2}",

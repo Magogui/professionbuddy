@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TreeSharp;
-using System.Xml;
 using System.Xml.Serialization;
 using Styx.WoWInternals.WoWObjects;
 using Styx.WoWInternals;
 using Styx;
 using Styx.Logic;
-using System.Diagnostics;
-using Styx.Helpers;
-using System.ComponentModel;
 
 namespace HighVoltz.Composites
 {
@@ -27,41 +21,16 @@ namespace HighVoltz.Composites
                 return StyxWoW.IsInWorld && !ExitBehavior() && Professionbuddy.Instance.IsRunning;
             }
         }
-        static LocalPlayer Me = ObjectManager.Me;
-        //Stopwatch _profilerSW = new Stopwatch();
 
-        //public override RunStatus Tick(object context)
-        //{
-        //    if (CanRun)
-        //    {
-        //        try
-        //        {
-        //            if (!base.IsRunning)
-        //                base.Start(context);
-        //            // _profilerSW.Reset(); _profilerSW.Start();
-        //            LastStatus = base.Tick(context) == RunStatus.Success ? RunStatus.Success : RunStatus.Failure;
-        //            //if (LastStatus == RunStatus.Success)
-        //            //    Logging.Write("PbBehavior execution: {0}. PB behavior is running", _profilerSW.ElapsedMilliseconds);
-        //            //else
-        //            //    Logging.Write("PbBehavior execution: {0}. SecondaryBot is running", _profilerSW.ElapsedMilliseconds);
-        //        }
-        //        catch
-        //        {
-        //            LastStatus = RunStatus.Failure;
-        //        }
-        //    }
-        //    else
-        //        LastStatus = RunStatus.Failure;
-        //    return (RunStatus)LastStatus;
-        //}
+        static LocalPlayer Me { get { return ObjectManager.Me; } }
 
-        public static bool EndOfWhileLoopReturn = false;
+        public static bool EndOfWhileLoopReturn;
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (CanRun)
             {
                 bool shouldBreak = false;
-                foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
+                foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
                 {
                     child.Start(context);
                     Selection = child;
@@ -102,5 +71,5 @@ namespace HighVoltz.Composites
                 !Me.IsAlive || Me.HealthPercent <= 40;
         }
 
-    }  
+    }
 }

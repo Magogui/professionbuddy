@@ -1,3 +1,11 @@
+Professionbuddy 1.240
+* All 'Count' 'Amount' or 'Repeat' properties now accept any C# expression that returns the correct data type (System.Int32). This includes variables,function calls and more.
+* Multiprofile - the banker will mail the farmer gold if farmer has less than 200g
+* Multiprofile - the included profiles can now be easily replaced by copying your own profiles into the correct Zone and faction subfolder found in Honorbuddy\Bots\Professionbuddy\Profiles\HBProfiles\GatheringProfiles\
+* Multiprofile - attempt at a fix for the issue with getting stucked at a few portals.
+* MailItem will nolonger ignore MinFreeBagSlots
+* Added Vashjir to the list of zone supported by multiprofile.
+
 Professionbuddy 1.159
 * Changed Professionbuddy to a botbase and this change might break some profiles.Read below for fix.
 * Because Professionbuddy is now a bot all profiles that check name of current bot with 'TreeRoot.Current.Name' will have to use 'SecondaryBot.Name' instead

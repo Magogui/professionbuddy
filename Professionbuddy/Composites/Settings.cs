@@ -1,30 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing.Design;
-using System.Linq;
-using System.Xml;
-using Styx;
-using Styx.Logic.Inventory.Frames.MailBox;
-using Styx.Logic.Pathing;
-using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
-using Styx.Helpers;
-using TreeSharp;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Xml.Serialization;
 
 namespace HighVoltz.Composites
 {
-    public class Settings : PBAction
+    public sealed class Settings : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string DefaultValue
         {
             get { return (string)Properties["DefaultValue"].Value; }
             set { Properties["DefaultValue"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public TypeCode Type
         {
             get { return (TypeCode)Properties["Type"].Value; }
@@ -37,25 +24,25 @@ namespace HighVoltz.Composites
             get { return (string)Properties["Name"].Value; }
             set { Properties["Name"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string Summary
         {
             get { return (string)Properties["Summary"].Value; }
             set { Properties["Summary"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string Category
         {
             get { return (string)Properties["Category"].Value; }
             set { Properties["Category"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool Global
         {
             get { return (bool)Properties["Global"].Value; }
             set { Properties["Global"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool Hidden
         {
             get { return (bool)Properties["Hidden"].Value; }
@@ -83,8 +70,8 @@ namespace HighVoltz.Composites
 
         public override object Clone()
         {
-            return new Settings() 
-            { DefaultValue = this.DefaultValue,
+            return new Settings
+                       { DefaultValue = this.DefaultValue,
                 SettingName = this.SettingName,
                 Type = this.Type,
                 Summary = this.Summary,

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing.Design;
+using System.Globalization;
 using System.Linq;
-using System.Xml;
-using Styx.WoWInternals;
+using HighVoltz.Dynamic;
 using Styx.Logic.Pathing;
 using Styx;
 using Styx.Database;
@@ -13,22 +12,21 @@ using Styx.Logic.Inventory.Frames.Merchant;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
-using Styx.Logic.BehaviorTree;
-using System.Threading;
 
 namespace HighVoltz.Composites
 {
     #region SellItemAction
-    class SellItemAction : PBAction
+
+    sealed class SellItemAction : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -42,22 +40,23 @@ namespace HighVoltz.Composites
             Whites,
             Greens,
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public SellItemActionType SellItemType
         {
             get { return (SellItemActionType)Properties["SellItemType"].Value; }
             set { Properties["SellItemType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-        [PbXmlAttribute()]
-        public uint Count
+        [PbXmlAttribute]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Count
         {
-            get { return (uint)Properties["Count"].Value; }
+            get { return (DynamicProperty<int>)Properties["Count"].Value; }
             set { Properties["Count"].Value = value; }
         }
         public SellItemAction()
@@ -65,30 +64,31 @@ namespace HighVoltz.Composites
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["Count"] = new MetaProp("Count", typeof(uint));
+            Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), new DisplayNameAttribute("Sell Item Type"));
 
             ItemID = "";
-            Count = 0u;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            Count = new DynamicProperty<int>(this,"0");
+            RegisterDynamicProperty("Count");
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             NpcEntry = 0u;
 
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["Location"].PropertyChanged += LocationChanged;
             Properties["SellItemType"].Value = SellItemActionType.Specific;
-            Properties["SellItemType"].PropertyChanged += new EventHandler<MetaPropArgs>(SellItemAction_PropertyChanged);
+            Properties["SellItemType"].PropertyChanged += SellItemActionPropertyChanged;
         }
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
-        void SellItemAction_PropertyChanged(object sender, MetaPropArgs e)
+        void SellItemActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (SellItemType)
             {
@@ -104,15 +104,14 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        uint _entry = 0;
+        uint _entry;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
                 if (MerchantFrame.Instance == null || !MerchantFrame.Instance.IsVisible)
                 {
-                    WoWPoint movetoPoint = loc;
-                    WoWUnit unit = null;
+                    WoWPoint movetoPoint = _loc;
                     if (_entry == 0)
                         _entry = NpcEntry;
                     if (_entry == 0)
@@ -123,7 +122,7 @@ namespace HighVoltz.Composites
                         _entry = (uint)npcResults.Entry;
                         movetoPoint = npcResults.Location;
                     }
-                    unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == _entry).
+                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == _entry).
                         OrderBy(o => o.Distance).FirstOrDefault();
                     if (unit != null)
                         movetoPoint = unit.Location;
@@ -156,13 +155,13 @@ namespace HighVoltz.Composites
                 {
                     if (SellItemType == SellItemActionType.Specific)
                     {
-                        List<uint> idList = new List<uint>();
+                        var idList = new List<uint>();
                         string[] entries = ItemID.Split(',');
-                        if (entries != null && entries.Length > 0)
+                        if (entries.Length > 0)
                         {
                             foreach (var entry in entries)
                             {
-                                uint temp = 0;
+                                uint temp;
                                 uint.TryParse(entry.Trim(), out temp);
                                 idList.Add(temp);
                             }
@@ -174,20 +173,17 @@ namespace HighVoltz.Composites
                             return RunStatus.Failure;
                         }
                         List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).
-                            Take((int)Count <= 0 ? int.MaxValue : (int)Count).ToList();
-                        if (itemList != null)
+                            Take((int)Count <= 0 ? int.MaxValue : Count).ToList();
+                        using (new FrameLock())
                         {
-                            using (new FrameLock())
-                            {
-                                foreach (WoWItem item in itemList)
-                                    item.UseContainerItem();
-                            }
+                            foreach (WoWItem item in itemList)
+                                item.UseContainerItem();
                         }
                     }
                     else
                     {
                         List<WoWItem> itemList = null;
-                        IEnumerable<WoWItem> itemQuery = from item in me.BagItems
+                        IEnumerable<WoWItem> itemQuery = from item in Me.BagItems
                                                          where !Pb.ProtectedItems.Contains(item.Entry)
                                                          select item;
                         switch (SellItemType)
@@ -235,7 +231,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("({0}) " +
-                  (SellItemType == SellItemActionType.Specific ? ItemID.ToString() + " x{1} " : SellItemType.ToString()), Name, Count);
+                  (SellItemType == SellItemActionType.Specific ? ItemID.ToString(CultureInfo.InvariantCulture) + " x{1} " : SellItemType.ToString()), Name, Count);
             }
         }
         public override string Help
@@ -247,7 +243,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new SellItemAction() { Count = this.Count, ItemID = this.ItemID, SellItemType = this.SellItemType, NpcEntry = this.NpcEntry, Location = this.Location };
+            return new SellItemAction { Count = this.Count, ItemID = this.ItemID, SellItemType = this.SellItemType, NpcEntry = this.NpcEntry, Location = this.Location };
         }
     }
     #endregion

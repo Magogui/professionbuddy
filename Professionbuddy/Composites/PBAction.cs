@@ -1,22 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Xml;
 using System.Xml.Serialization;
-using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Action = TreeSharp.Action;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing.Design;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Styx;
-using Styx.Database;
-using Styx.Helpers;
-using Styx.Logic.Pathing;
-using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Collections;
 using System.Collections.Specialized;
 using HighVoltz.Dynamic;
 
@@ -39,35 +26,37 @@ namespace HighVoltz.Composites
     public abstract class PBAction : Action, IPBComposite
     {
         protected Professionbuddy Pb;
-        protected LocalPlayer me = ObjectManager.Me;
+        protected LocalPlayer Me = ObjectManager.Me;
         protected PBAction()
         {
             HasRunOnce = false;
             Pb = Professionbuddy.Instance;
+// ReSharper disable DoNotCallOverridableMethodsInConstructor
             Properties = new PropertyBag();
+// ReSharper restore DoNotCallOverridableMethodsInConstructor
             Expressions = new ListDictionary();
         }
         virtual public string Help { get { return ""; } }
         virtual public string Name { get { return "PBAction"; } }
         virtual public string Title { get { return string.Format("({0})", Name); } }
         virtual public ListDictionary Expressions { get; private set; }
-        [XmlIgnore()]
+        [XmlIgnore]
         System.Drawing.Color _color = System.Drawing.Color.Black;
         virtual public System.Drawing.Color Color {
             get { return _color; }
             set { _color = value; }
         }
-        protected PropertyGrid propertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
+        protected PropertyGrid PropertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
         protected void RefreshPropertyGrid()
         {
-            if (propertyGrid != null)
+            if (PropertyGrid != null)
             {
-                propertyGrid.Refresh();
+                PropertyGrid.Refresh();
             }
         }
         protected void RegisterDynamicProperty(string propName)
         {
-            Properties[propName].PropertyChanged += new EventHandler<MetaPropArgs>(DynamicPropertyChanged);
+            Properties[propName].PropertyChanged += DynamicPropertyChanged;
         }
         public virtual bool IsDone { get; protected set; }
         protected bool HasRunOnce { get; set; }
@@ -78,7 +67,6 @@ namespace HighVoltz.Composites
         {
             HasRunOnce = true;
         }
-        [XmlIgnore()]
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()

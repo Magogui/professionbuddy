@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
 using HighVoltz.Dynamic;
 
@@ -11,24 +8,24 @@ namespace HighVoltz.Composites
 
     public abstract class CsharpAction : PBAction, ICSharpCode
     {
-        public CsharpAction()
+        protected CsharpAction()
             : this(CsharpCodeType.Statements) { }
 
-        public CsharpAction(CsharpCodeType t)
+        protected CsharpAction(CsharpCodeType t)
         {
+            // ReSharper disable DoNotCallOverridableMethodsInConstructor
             CodeType = t;
             Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
-
             CompileError = "";
-
             Properties["CompileError"].Show = false;
-            Properties["CompileError"].PropertyChanged += CompileError_PropertyChanged;
+            Properties["CompileError"].PropertyChanged += CompileErrorPropertyChanged;
+            // ReSharper restore DoNotCallOverridableMethodsInConstructor
         }
 
-        string lastError = "";
-        void CompileError_PropertyChanged(object sender, MetaPropArgs e)
+        string _lastError = "";
+        void CompileErrorPropertyChanged(object sender, MetaPropArgs e)
         {
-            if (CompileError != "" || (CompileError == "" && lastError != ""))
+            if (CompileError != "" || (CompileError == "" && _lastError != ""))
             {
                 MainForm.Instance.RefreshActionTree(this);
                 Properties["CompileError"].Show = true;
@@ -36,7 +33,7 @@ namespace HighVoltz.Composites
             else
                 Properties["CompileError"].Show = false;
             RefreshPropertyGrid();
-            lastError = CompileError;
+            _lastError = CompileError;
         }
 
         public int CodeLineNumber { get; set; }

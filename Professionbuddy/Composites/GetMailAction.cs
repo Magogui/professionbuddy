@@ -1,9 +1,7 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
-using System.Xml;
 using Styx;
 using Styx.Logic.Inventory.Frames.MailBox;
 using Styx.Logic.Pathing;
@@ -18,46 +16,47 @@ using System.Collections.Generic;
 namespace HighVoltz.Composites
 {
     #region GetMailAction
-    class GetMailAction : PBAction
+
+    sealed class GetMailAction : PBAction
     {
         public enum GetMailActionType
         {
             AllItems,
             Specific,
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public GetMailActionType GetMailType
         {
             get { return (GetMailActionType)Properties["GetMailType"].Value; }
             set { Properties["GetMailType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         [PbXmlAttribute("Entry")]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool CheckNewMail
         {
             get { return (bool)Properties["CheckNewMail"].Value; }
             set { Properties["CheckNewMail"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public int MinFreeBagSlots
         {
             get { return (int)Properties["MinFreeBagSlots"].Value; }
             set { Properties["MinFreeBagSlots"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool AutoFindMailBox
         {
             get { return (bool)Properties["AutoFindMailBox"].Value; }
             set { Properties["AutoFindMailBox"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -75,52 +74,47 @@ namespace HighVoltz.Composites
 
             ItemID = "";
             CheckNewMail = true;
-            GetMailType = (GetMailActionType)GetMailActionType.AllItems;
+            GetMailType = GetMailActionType.AllItems;
             AutoFindMailBox = true;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             MinFreeBagSlots = 0;
 
-            Properties["GetMailType"].PropertyChanged += new EventHandler<MetaPropArgs>(GetMailAction_PropertyChanged);
-            Properties["AutoFindMailBox"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindMailBoxChanged);
+            Properties["GetMailType"].PropertyChanged += GetMailActionPropertyChanged;
+            Properties["AutoFindMailBox"].PropertyChanged += AutoFindMailBoxChanged;
             Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["Location"].PropertyChanged += LocationChanged;
         }
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
         void AutoFindMailBoxChanged(object sender, MetaPropArgs e)
         {
-            if (AutoFindMailBox)
-                Properties["Location"].Show = false;
-            else
-                Properties["Location"].Show = true;
+            Properties["Location"].Show = !AutoFindMailBox;
             RefreshPropertyGrid();
         }
-        void GetMailAction_PropertyChanged(object sender, MetaPropArgs e)
+
+        void GetMailActionPropertyChanged(object sender, MetaPropArgs e)
         {
-            if (GetMailType == GetMailActionType.AllItems)
-                Properties["ItemID"].Show = false;
-            else
-                Properties["ItemID"].Show = true;
+            Properties["ItemID"].Show = GetMailType != GetMailActionType.AllItems;
             RefreshPropertyGrid();
         }
-        WoWGameObject mailbox;
-        Stopwatch WaitForContentToShowSW = new Stopwatch();
-        Stopwatch ConcludingSW = new Stopwatch();
-        Stopwatch TimeoutSW = new Stopwatch();
+
+        WoWGameObject _mailbox;
+        Stopwatch _waitForContentToShowSW = new Stopwatch();
+        Stopwatch _concludingSW = new Stopwatch();
+        Stopwatch _timeoutSW = new Stopwatch();
         Stopwatch _throttleSW = new Stopwatch();
         Stopwatch _refreshInboxSW = new Stopwatch();
         // format index. {0}=CheckForNewMail which can be only 1 or 0
-        private const string _mailFormat =
+        private const string MailFormat =
             "local numItems,totalItems = GetInboxNumItems() " +
             "local foundMail=0 " +
             "local newMailCheck = {0} " +
@@ -142,9 +136,9 @@ namespace HighVoltz.Composites
                 "if foundMail == 1 then break end " +
             "end " +
             "local beans = BeanCounterMail and BeanCounterMail:IsVisible() " +
-            "if foundMail == 0 and ((newMailCheck == true and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
+            "if foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
         // format index. {0} = ItemID {1}=CheckForNewMail which can be only 1 or 0
-        private const string _mailByIdFormat =
+        private const string MailByIdFormat =
         "local numItems,totalItems = GetInboxNumItems() " +
         "local foundMail=0 " +
         "local newMailCheck = {1} " +
@@ -172,113 +166,105 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (!TimeoutSW.IsRunning)
-                    TimeoutSW.Start();
-                if (TimeoutSW.ElapsedMilliseconds > 300000)
+                if (!_timeoutSW.IsRunning)
+                    _timeoutSW.Start();
+                if (_timeoutSW.ElapsedMilliseconds > 300000)
                     IsDone = true;
-                WoWPoint movetoPoint = loc;
+                WoWPoint movetoPoint = _loc;
                 if (MailFrame.Instance == null || !MailFrame.Instance.IsVisible)
                 {
                     if (AutoFindMailBox || movetoPoint == WoWPoint.Zero)
                     {
-                        mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox)
+                        _mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox)
                             .OrderBy(o => o.Distance).FirstOrDefault();
                     }
                     else
                     {
-                        mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox
-                            && o.Location.Distance(loc) < 10)
+                        _mailbox = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.Mailbox
+                            && o.Location.Distance(_loc) < 10)
                             .OrderBy(o => o.Distance).FirstOrDefault();
                     }
-                    if (mailbox != null)
-                        movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, mailbox.Location, 3);
+                    if (_mailbox != null)
+                        movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, _mailbox.Location, 3);
                     if (movetoPoint == WoWPoint.Zero)
                         return RunStatus.Failure;
                     if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
-                    else if (mailbox != null)
+                    else if (_mailbox != null)
                     {
-                        mailbox.Interact();
+                        _mailbox.Interact();
                     }
                     return RunStatus.Success;
                 }
-                else
+                // mail frame is open.
+                if (_idList == null)
+                    _idList = BuildItemList();
+                if (!_refreshInboxSW.IsRunning)
+                    _refreshInboxSW.Start();
+                if (!_waitForContentToShowSW.IsRunning)
+                    _waitForContentToShowSW.Start();
+                if (_waitForContentToShowSW.ElapsedMilliseconds < 3000)
+                    return RunStatus.Success;
+
+                if (!_concludingSW.IsRunning)
                 {
-                    if (_idList == null)
+                    if (_refreshInboxSW.ElapsedMilliseconds < 64000)
                     {
-                        _idList = BuildItemList();
-                    }
-                    if (!_refreshInboxSW.IsRunning)
-                        _refreshInboxSW.Start();
-                    if (!WaitForContentToShowSW.IsRunning)
-                        WaitForContentToShowSW.Start();
-                    if (WaitForContentToShowSW.ElapsedMilliseconds < 3000)
-                        return RunStatus.Success;
-                    uint freeslots = ObjectManager.Me.FreeNormalBagSlots;
-
-                    if (!ConcludingSW.IsRunning)
-                    {
-                        if (_refreshInboxSW.ElapsedMilliseconds < 64000)
+                        if (MinFreeBagSlots > 0 && Me.FreeNormalBagSlots - MinFreeBagSlots <= 4)
                         {
-                            if (MinFreeBagSlots > 0 && me.FreeNormalBagSlots - MinFreeBagSlots <= 4)
-                            {
-                                if (!_throttleSW.IsRunning)
-                                    _throttleSW.Start();
-                                if (_throttleSW.ElapsedMilliseconds < 4000 - (me.FreeNormalBagSlots - MinFreeBagSlots) * 1000)
-                                    return RunStatus.Success;
-                                else
-                                {
-                                    _throttleSW.Reset();
-                                    _throttleSW.Start();
-                                }
-                            }
-                            if (GetMailType == GetMailActionType.AllItems)
-                            {
-                                string lua = string.Format(_mailFormat, CheckNewMail ? 1 : 0);
-                                if (me.FreeNormalBagSlots <= MinFreeBagSlots || Lua.GetReturnValues(lua)[0] == "1")
-                                    ConcludingSW.Start();
-                            }
-                            else
-                            {
-                                if (_idList.Count > 0 && me.FreeNormalBagSlots > MinFreeBagSlots)
-                                {
-                                    string lua = string.Format(_mailByIdFormat, _idList[0], CheckNewMail ? 1 : 0);
-
-                                    if (Lua.GetReturnValues(lua)[0] == "1")
-                                        _idList.RemoveAt(0);
-                                }
-                                else
-                                    ConcludingSW.Start();
-                            }
+                            if (!_throttleSW.IsRunning)
+                                _throttleSW.Start();
+                            if (_throttleSW.ElapsedMilliseconds < 4000 - (Me.FreeNormalBagSlots - MinFreeBagSlots) * 1000)
+                                return RunStatus.Success;
+                            _throttleSW.Reset();
+                            _throttleSW.Start();
+                        }
+                        if (GetMailType == GetMailActionType.AllItems)
+                        {
+                            string lua = string.Format(MailFormat, CheckNewMail ? 1 : 0);
+                            if (Me.FreeNormalBagSlots <= MinFreeBagSlots || Lua.GetReturnValues(lua)[0] == "1")
+                                _concludingSW.Start();
                         }
                         else
                         {
-                            _refreshInboxSW.Reset();
-                            MailFrame.Instance.Close();
+                            if (_idList.Count > 0 && Me.FreeNormalBagSlots > MinFreeBagSlots)
+                            {
+                                string lua = string.Format(MailByIdFormat, _idList[0], CheckNewMail ? 1 : 0);
+
+                                if (Lua.GetReturnValues(lua)[0] == "1")
+                                    _idList.RemoveAt(0);
+                            }
+                            else
+                                _concludingSW.Start();
                         }
                     }
-                    if (ConcludingSW.ElapsedMilliseconds > 2000)
-                        IsDone = true;
-                    if (IsDone)
-                    {
-                        Professionbuddy.Log("Mail retrieval of items:{0} finished", GetMailType);
-                    }
                     else
-                        return RunStatus.Success;
+                    {
+                        _refreshInboxSW.Reset();
+                        MailFrame.Instance.Close();
+                    }
                 }
+                if (_concludingSW.ElapsedMilliseconds > 2000)
+                    IsDone = true;
+                if (IsDone)
+                {
+                    Professionbuddy.Log("Mail retrieval of items:{0} finished", GetMailType);
+                }
+                else
+                    return RunStatus.Success;
             }
             return RunStatus.Failure;
         }
 
         List<uint> BuildItemList()
         {
-            List<uint> list = new List<uint>();
+            var list = new List<uint>();
             string[] entries = ItemID.Split(',');
-            if (entries != null && entries.Length > 0)
+            if (entries.Length > 0)
             {
                 foreach (var entry in entries)
                 {
-                    uint temp = 0;
+                    uint temp;
                     uint.TryParse(entry.Trim(), out temp);
                     list.Add(temp);
                 }
@@ -294,9 +280,9 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            WaitForContentToShowSW = new Stopwatch();
-            ConcludingSW = new Stopwatch();
-            TimeoutSW = new Stopwatch();
+            _waitForContentToShowSW = new Stopwatch();
+            _concludingSW = new Stopwatch();
+            _timeoutSW = new Stopwatch();
             _refreshInboxSW = new Stopwatch();
             _throttleSW = new Stopwatch();
         }
@@ -312,7 +298,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: {1} " + (GetMailType == GetMailActionType.Specific ? " - " +
-                    ItemID.ToString() : ""), Name, GetMailType);
+                    ItemID : ""), Name, GetMailType);
             }
         }
         public override string Help
@@ -324,11 +310,11 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new GetMailAction()
-            {
+            return new GetMailAction
+                       {
                 ItemID = this.ItemID,
                 GetMailType = this.GetMailType,
-                loc = this.loc,
+                _loc = this._loc,
                 AutoFindMailBox = this.AutoFindMailBox,
                 Location = this.Location,
                 MinFreeBagSlots = this.MinFreeBagSlots,

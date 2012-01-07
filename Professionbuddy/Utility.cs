@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using Styx.Helpers;
 using Styx.Logic;
 using Styx.Logic.Pathing;
 using Styx.Logic.POI;
 using System.Linq;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using Styx.Logic.BehaviorTree;
 using System.Globalization;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 using System.Diagnostics;
@@ -29,7 +27,7 @@ namespace HighVoltz
         /// <summary>
         ///  Random Number Genorator
         /// </summary>
-        public static System.Random Rng = new Random(Environment.TickCount);
+        public static Random Rng = new Random(Environment.TickCount);
         /// <summary>
         /// Creates a random upper/lowercase string
         /// </summary>
@@ -39,7 +37,7 @@ namespace HighVoltz
             get
             {
                 int size = Rng.Next(6, 15);
-                StringBuilder sb = new StringBuilder(size);
+                var sb = new StringBuilder(size);
                 for (int i = 0; i < size; i++)
                 {
                     // random upper/lowercase character using ascii code
@@ -66,8 +64,7 @@ namespace HighVoltz
         {
             if (DateTime.Now.Subtract(_lastMove).TotalSeconds < 4 && _lastPoint != WoWPoint.Zero)
                 return _lastPoint;
-            else
-                return ObjectManager.Me.Location;
+            return ObjectManager.Me.Location;
         }
 
         /// <summary>
@@ -78,9 +75,9 @@ namespace HighVoltz
         static public WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
-            Regex pattern = new Regex(@"-?\d+\.?(\d+)?", RegexOptions.CultureInvariant);
+            var pattern = new Regex(@"-?\d+\.?(\d+)?", RegexOptions.CultureInvariant);
             MatchCollection matches = pattern.Matches(location);
-            if (matches != null)
+            if (matches.Count >= 3)
             {
                 loc.X = matches[0].ToString().ToSingle();
                 loc.Y = matches[1].ToString().ToSingle();
@@ -97,7 +94,7 @@ namespace HighVoltz
         {
             try
             {
-                return (int) (ObjectManager.GetObjectsOfType<WoWItem>().
+                return (int)(ObjectManager.GetObjectsOfType<WoWItem>().
                                   Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) - GetCarriedItemCount(itemID));
             }
             catch { return 0; }
@@ -109,26 +106,19 @@ namespace HighVoltz
         /// <returns>Number of items in player Inventory</returns>
         public static int GetCarriedItemCount(uint id)
         {
-            return (int) ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int)ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
-            int ret = int.MaxValue;
-            foreach (Ingredient ingred in recipe.Ingredients)
-            {
-                int ingredCnt = (int)ingred.InBagItemCount -
-                                (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
-                                     ? Professionbuddy.Instance.MaterialList[ingred.ID]
-                                     : 0);
-                int repeat = (int)System.Math.Floor((double)(ingredCnt / ingred.Required));
-                if (ret > repeat)
-                {
-                    ret = repeat;
-                }
-            }
-            return ret;
+            return (from ingred in recipe.Ingredients
+                    let ingredCnt = (int)ingred.InBagItemCount -
+                                        (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ?
+                                                        Professionbuddy.Instance.MaterialList[ingred.ID] :
+                                                        0)
+                    select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Concat(new[] { int.MaxValue }).Min();
         }
+
         public static bool IsBankFrameOpen { get; private set; }
 
         static internal void OnBankFrameOpened(object obj, LuaEventArgs args)
@@ -143,7 +133,7 @@ namespace HighVoltz
 
 
         static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
-        static Stopwatch _pingSW = new Stopwatch();
+        static readonly Stopwatch PingSW = new Stopwatch();
         /// <summary>
         /// Returns WoW's ping, refreshed every 30 seconds.
         /// </summary>
@@ -151,18 +141,18 @@ namespace HighVoltz
         {
             get
             {
-                if (!_pingSW.IsRunning)
-                    _pingSW.Start();
-                if (_pingSW.ElapsedMilliseconds > 30000)
+                if (!PingSW.IsRunning)
+                    PingSW.Start();
+                if (PingSW.ElapsedMilliseconds > 30000)
                 {
                     _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
-                    _pingSW.Reset();
-                    _pingSW.Start();
+                    PingSW.Reset();
+                    PingSW.Start();
                 }
                 return _ping;
             }
         }
-        const int _cacheSize = 0x500;
+        const int CacheSize = 0x500;
         /// <summary>
         /// Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
         /// </summary>
@@ -174,13 +164,13 @@ namespace HighVoltz
             byte[] patternArray = HexStringToByteArray(pattern);
             bool[] maskArray = MaskStringToBoolArray(mask);
             ProcessModule wowModule = ObjectManager.WoWProcess.MainModule;
-            uint start = (uint)wowModule.BaseAddress.ToInt32();
+            var start = (uint)wowModule.BaseAddress.ToInt32();
             int size = wowModule.ModuleMemorySize;
             var patternLength = mask.Length;
 
-            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(_cacheSize - patternLength))
+            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
             {
-                byte[] cache = ObjectManager.Wow.ReadBytes((uint)start + cacheOffset, _cacheSize > size - cacheOffset ? size - (int)cacheOffset : _cacheSize);
+                byte[] cache = ObjectManager.Wow.ReadBytes(start + cacheOffset, CacheSize > size - cacheOffset ? size - (int)cacheOffset : CacheSize);
                 for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
                 {
                     if (DataCompare(cache, cacheIndex, patternArray, maskArray))
@@ -199,10 +189,10 @@ namespace HighVoltz
 
         static bool[] MaskStringToBoolArray(string mask)
         {
-            return mask.Aggregate(new List<bool>(), (a, b) => { a.Add(b == '?' ? false : true); return a; }).ToArray();
+            return mask.Aggregate(new List<bool>(), (a, b) => { a.Add(b != '?'); return a; }).ToArray();
         }
 
-        static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, bool[] mask)
+        static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, IEnumerable<bool> mask)
         {
             return !mask.Where((t, i) => t && pattern[i] != data[dataOffset + i]).Any();
         }
@@ -216,7 +206,7 @@ namespace HighVoltz
             return val;
         }
 
-        static Encoding _encodeUTF8 = Encoding.UTF8;
+        static readonly Encoding EncodeUtf8 = Encoding.UTF8;
 
         /// <summary>
         /// Converts a string to a float using En-US based culture
@@ -238,8 +228,8 @@ namespace HighVoltz
         /// <returns></returns>
         public static string ToFormatedUTF8(this string text)
         {
-            StringBuilder buffer = new StringBuilder(_encodeUTF8.GetByteCount(text));
-            byte[] utf8Encoded = _encodeUTF8.GetBytes(text);
+            var buffer = new StringBuilder(EncodeUtf8.GetByteCount(text));
+            byte[] utf8Encoded = EncodeUtf8.GetBytes(text);
             foreach (byte b in utf8Encoded)
             {
                 buffer.Append(string.Format("\\{0:D3}", b));
@@ -257,4 +247,3 @@ namespace HighVoltz
         }
     }
 }
-    

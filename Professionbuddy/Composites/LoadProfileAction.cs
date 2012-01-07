@@ -18,13 +18,13 @@ namespace HighVoltz.Composites
             Honorbuddy,
             Professionbuddy,
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string Path
         {
             get { return (string)Properties["Path"].Value; }
             set { Properties["Path"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public LoadProfileType ProfileType
         {
             get { return (LoadProfileType)Properties["ProfileType"].Value; }

@@ -1,18 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.ComponentModel;
-using System.Globalization;
-using Styx;
-using TreeSharp;
-using Styx.Helpers;
-using Styx.WoWInternals;
-using System.Diagnostics;
-using Styx.Logic.Pathing;
-using Styx.WoWInternals.WoWObjects;
-using System.Xml;
-using System.Drawing.Design;
+﻿using Styx;
+
 // Types shared between Composites
 namespace HighVoltz.Composites
 {
@@ -24,7 +11,6 @@ namespace HighVoltz.Composites
         /// Returns the SubCategories enum that goes with the Category enum 'ItemClass'. 
         /// </summary>
         /// <param name="itemClass"></param>
-        /// <param name="propBag"></param>
         /// <returns></returns>
         static public object GetSubCategory(WoWItemClass itemClass)
         {
@@ -69,7 +55,7 @@ namespace HighVoltz.Composites
             Buyout = buyout;
             Bid = bid;
             LowestBo = uint.MaxValue;
-            myAuctions = 0;
+            MyAuctions = 0;
         }
 
         public string Name;
@@ -77,7 +63,7 @@ namespace HighVoltz.Composites
         public uint Buyout;
         public uint Bid;
         public uint LowestBo;
-        public uint myAuctions;
+        public uint MyAuctions;
         public override string ToString()
         {
             return string.Format("Name:{0} Buyout:{1} Competitor:{2}",

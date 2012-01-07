@@ -44,8 +44,7 @@ namespace HighVoltz.Composites
                                                                       typeof (UITypeEditor)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof (string));
             Properties["Count"] = new MetaProp("Count", typeof (DynamicProperty<int>),
-                                               new TypeConverterAttribute(
-                                                   typeof (DynamicProperty<int>.DynamivExpressionConverter)));
+                                               new TypeConverterAttribute(typeof (DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
                                                      new DisplayNameAttribute("Buy"));
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
@@ -139,7 +138,6 @@ namespace HighVoltz.Composites
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            var mp = (MetaProp) sender;
             _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
@@ -172,11 +170,10 @@ namespace HighVoltz.Composites
                 if (MerchantFrame.Instance == null || !MerchantFrame.Instance.IsVisible)
                 {
                     WoWPoint movetoPoint = _loc;
-                    WoWUnit unit = null;
-                    unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
+                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
                         OrderBy(o => o.Distance).FirstOrDefault();
                     if (unit != null)
-                        movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, unit.Location, 3);
+                        movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, unit.Location, 3);
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
                     if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
@@ -204,7 +201,7 @@ namespace HighVoltz.Composites
                 else
                 {
                     // check if we have merchant frame open at correct NPC
-                    if (NpcEntry > 0 && me.GotTarget && me.CurrentTarget.Entry != NpcEntry)
+                    if (NpcEntry > 0 && Me.GotTarget && Me.CurrentTarget.Entry != NpcEntry)
                     {
                         MerchantFrame.Instance.Close();
                         return RunStatus.Success;
@@ -219,7 +216,7 @@ namespace HighVoltz.Composites
                             {
                                 foreach (string entry in entries)
                                 {
-                                    uint temp = 0;
+                                    uint temp;
                                     uint.TryParse(entry.Trim(), out temp);
                                     idList.Add(temp);
                                 }
@@ -231,7 +228,7 @@ namespace HighVoltz.Composites
                                 return RunStatus.Failure;
                             }
                             foreach (uint id in idList)
-                                BuyItem(id, (uint) (!BuyAdditively ? Count - (int) Util.GetCarriedItemCount(id) : Count));
+                                BuyItem(id, (uint) (!BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count));
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {

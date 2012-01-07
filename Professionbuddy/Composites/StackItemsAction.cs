@@ -1,34 +1,13 @@
-﻿using Styx;
-using TreeSharp;
-using Styx.Helpers;
+﻿using TreeSharp;
 using Styx.WoWInternals;
-using Styx.Logic;
-using Styx.Logic.Combat;
 using System.Diagnostics;
-using Styx.Patchables;
-using System.Linq;
-using Styx.Plugins;
-using Styx.Plugins.PluginClass;
-using Styx.Logic.Pathing;
-using Styx.Logic.BehaviorTree;
-using Styx.WoWInternals.WoWObjects;
-using CommonBehaviors.Actions;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.Xml;
-using Styx.Combat.CombatRoutine;
-using Styx.Logic.POI;
-using HighVoltz.Composites;
 
 
 namespace HighVoltz.Composites
 {
     class StackItemsAction : PBAction
     {
-        public StackItemsAction()
-        {
-        }
-        string lua =
+        const string StackLua =
             "local items={} " +
             "local done = 1 " +
             "for bag = 0,4 do " +
@@ -55,16 +34,17 @@ namespace HighVoltz.Composites
                "end " +
             "end " +
             "return done ";
-        Stopwatch throttleSW = new Stopwatch();
+
+        readonly Stopwatch _throttleSW = new Stopwatch();
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                if (!throttleSW.IsRunning || throttleSW.ElapsedMilliseconds > 500)
+                if (!_throttleSW.IsRunning || _throttleSW.ElapsedMilliseconds > 500)
                 {
-                    throttleSW.Reset();
-                    throttleSW.Start();
-                    IsDone = Lua.GetReturnVal<int>(lua, 0) == 1;
+                    _throttleSW.Reset();
+                    _throttleSW.Start();
+                    IsDone = Lua.GetReturnVal<int>(StackLua, 0) == 1;
                 }
                 if (!IsDone)
                     return RunStatus.Success;

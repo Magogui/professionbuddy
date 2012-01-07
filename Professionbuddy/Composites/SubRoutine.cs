@@ -1,36 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
 using TreeSharp;
-using System.Xml;
-using Styx.Helpers;
-using System.Collections.Specialized;
 
 namespace HighVoltz.Composites
 {
-    class SubRoutine : GroupComposite, IPBComposite
+    sealed class SubRoutine : GroupComposite, IPBComposite
     {
-        [PbXmlAttribute()]
-        virtual public string SubRoutineName
+        [PbXmlAttribute]
+        public string SubRoutineName
         {
             get { return (string)Properties["SubRoutineName"].Value; }
             set { Properties["SubRoutineName"].Value = value; }
         }
         public SubRoutine()
-            : base()
         {
             Properties = new PropertyBag();
             Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string));
             SubRoutineName = "";
         }
 
-        virtual public System.Drawing.Color Color { get { return System.Drawing.Color.Blue; } }
-        virtual public string Name { get { return "SubRoutine"; } }
-        virtual public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
+        public System.Drawing.Color Color { get { return System.Drawing.Color.Blue; } }
+        public string Name { get { return "SubRoutine"; } }
+        public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
 
-        virtual public PropertyBag Properties { get; private set; }
+        public PropertyBag Properties { get; private set; }
 
         protected override IEnumerable<RunStatus> Execute(object context)
         {
@@ -52,7 +45,7 @@ namespace HighVoltz.Composites
             yield return RunStatus.Failure;
         }
 
-        virtual public void Reset()
+        public void Reset()
         {
             Selection = null;
             IsDone = false;
@@ -68,18 +61,18 @@ namespace HighVoltz.Composites
             }
         }
 
-        virtual public bool IsDone { get; set; }
+        public bool IsDone { get; set; }
 
-        public virtual object Clone()
+        public object Clone()
         {
-            SubRoutine pd = new SubRoutine()
-            {
-                SubRoutineName = this.SubRoutineName,
-            };
+            var pd = new SubRoutine
+                         {
+                             SubRoutineName = this.SubRoutineName,
+                         };
             return pd;
         }
 
-        virtual public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
+        public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
 
 
 

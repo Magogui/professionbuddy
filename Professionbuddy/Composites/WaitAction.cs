@@ -1,6 +1,5 @@
 ﻿//!CompilerOption:AddRef:System.Design.dll
 using System.Diagnostics;
-using System.Xml;
 using System;
 using TreeSharp;
 using System.Threading;
@@ -12,16 +11,16 @@ using HighVoltz.Dynamic;
 namespace HighVoltz.Composites
 {
     #region WaitAction
-    public class WaitAction : CsharpAction
+    public sealed class WaitAction : CsharpAction
     {
-        virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
-        [PbXmlAttribute()]
+        public CanRunDecoratorDelegate CanRunDelegate { get; set; }
+        [PbXmlAttribute]
         public string Condition
         {
             get { return (string)Properties["Condition"].Value; }
             set { Properties["Condition"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public int Timeout
         {
             get { return (int)Properties["Timeout"].Value; }
@@ -38,19 +37,20 @@ namespace HighVoltz.Composites
             Condition = "false";
             CanRunDelegate = u => false;
         }
-        Stopwatch timeout = new Stopwatch();
+
+        readonly Stopwatch _timeout = new Stopwatch();
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                if (!timeout.IsRunning)
-                    timeout.Start();
+                if (!_timeout.IsRunning)
+                    _timeout.Start();
                 try
                 {
-                    if (timeout.ElapsedMilliseconds >= Timeout || CanRunDelegate(null))
+                    if (_timeout.ElapsedMilliseconds >= Timeout || CanRunDelegate(null))
                     {
-                        timeout.Stop();
-                        timeout.Reset();
+                        _timeout.Stop();
+                        _timeout.Reset();
                         Professionbuddy.Debug("Wait Until {0} Completed",Condition);
                         IsDone = true;
                     }
@@ -82,7 +82,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new WaitAction() { Condition = this.Condition, Timeout = this.Timeout };
+            return new WaitAction { Condition = this.Condition, Timeout = this.Timeout };
         }
         public override string Code
         {

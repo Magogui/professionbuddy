@@ -19,6 +19,7 @@
     <Settings DefaultValue="true" Type="Boolean" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" Global="True" Hidden="False" />
     <Settings DefaultValue="true" Type="Boolean" Name="Uldum" Summary="Farm in Uldum" Category="Zones" Global="True" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" Global="True" Hidden="False" />
+    <Settings DefaultValue="false" Type="Boolean" Name="Vashjir" Summary="Farm in Vashjir" Category="Zones" Global="True" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="true" Type="Boolean" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" Global="False" Hidden="False" />
     <Settings DefaultValue="200" Type="Int32" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" Global="False" Hidden="False" />
@@ -199,6 +200,8 @@
       <CustomAction Code="if ((bool)Settings[&quot;Uldum&quot;]) FarmZoneIDs.Add(5034);" />
       <!--Deepholm-->
       <CustomAction Code="if ((bool)Settings[&quot;Deepholm&quot;]) FarmZoneIDs.Add(5042);" />
+      <!--Vashjir-->
+      <CustomAction Code="if ((bool)Settings[&quot;Vashjir&quot;]) FarmZoneIDs.Add(5145);" />
       <!--IF YOU ARE ADDING YOUR OWN ZONES DO NOT ADD THEM BELOW THIS LINE-->
       <CustomAction Code="FarmZoneIDs = FarmZoneIDs.OrderBy(z =&gt; z).ToList();" />
       <CustomAction Code="CharacterSettings.Instance.MailRecipient = (string)Settings[&quot;BankerName&quot;];" />
@@ -222,7 +225,7 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8213.249, 399.2894, 121.5205" />
+        <FlyToAction Dismount="True" Location="-8211.333, 402.3037, 117.2938" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207692);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207692" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -236,7 +239,7 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 4922" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Twilight Highlands&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8188.005, 415.4178, 122.9138" />
+        <FlyToAction Dismount="True" Location="-8188.495, 417.4927, 116.817" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207694);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207694" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
@@ -254,7 +257,7 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5034" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Uldum&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8233.069, 416.3278, 122.2417" />
+        <FlyToAction Dismount="True" Location="-8231.854, 417.0676, 117.9931" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207695);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207695" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -268,7 +271,7 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Deepholm&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="-8223.723, 452.1277, 127.5624" />
+        <FlyToAction Dismount="True" Location="-8221.344, 449.0011, 117.5582" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207693);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -280,6 +283,33 @@
       <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
       <FlyToAction Dismount="False" Location="998.0914, 521.6063, -49.33473" />
       <FlyToAction Dismount="False" Location="856.4835, 494.8993, -63.27364" />
+    </If>
+    <!--Vashjir-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5145" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Vashjir&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" Location="-8192.883, 446.9316, 116.8686" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry ==207691);" Timeout="10000" />
+        <InteractionAction InteractType="GameObject" Entry="207691" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" Location="2063.337, -4362.29, 98.11018" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207690);" Timeout="10000" />
+        <InteractionAction InteractType="GameObject" Entry="207690" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
+      <!--Kelp Forest-->
+      <If Condition=" Me.ZoneId == 4815" IgnoreCanRun="True">
+        <If Condition="DistanceTo(-4457.208, 3815.211, -84.08506) &lt;=20" IgnoreCanRun="True">
+          <MoveToAction Location="-4457.208, 3815.211, -84.08506" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4435.112, 3822.904, -92.60922" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4432.943, 3813.333, -93.07119" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4444.569, 3805.804, -94.12316" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4439.158, 3793.521, -82.68282" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <FlyToAction Dismount="False" Location="-4429.622, 3818.259, 9.793991" />
+        </If>
+        <FlyToAction Dismount="True" Location="-6406.231, 6427.917, 32.64967" />
+      </If>
     </If>
     <!--Wait until zone changes.-->
     <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
@@ -348,6 +378,10 @@
     <!--Deepholm-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
       <CustomAction Code="LoadPorfileFromSubfolder(&quot;Deepholm&quot;);" />
+    </If>
+    <!--Deepholm-->
+    <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5145" IgnoreCanRun="True">
+      <CustomAction Code="LoadPorfileFromSubfolder(&quot;Vashjir&quot;);" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="MailFarmerRepairGold">

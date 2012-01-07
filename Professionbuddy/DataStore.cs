@@ -10,7 +10,7 @@ namespace HighVoltz
     public class DataStore : Dictionary<uint, int>
     {
         Professionbuddy _pb = Professionbuddy.Instance;
-        ProfessionBuddySettings _settings = Professionbuddy.Instance.MySettings;
+        readonly ProfessionBuddySettings _settings = Professionbuddy.Instance.MySettings;
         public bool HasDataStoreAddon { get; private set; }
 
         public DataStore()
@@ -21,7 +21,7 @@ namespace HighVoltz
         public void ImportDataStore()
         {
             Clear();
-            int tableSize, tableIndex = 1;
+            int tableIndex = 1;
             if (_settings.DataStoreTable == null)
                 _settings.DataStoreTable = Util.RandomString;
             string storeInTableLua =
@@ -98,6 +98,7 @@ namespace HighVoltz
                 if (retVals != null && retVals[0] != "0")
                 {
                     HasDataStoreAddon = true;
+                    int tableSize;
                     int.TryParse(retVals[0], out tableSize);
                     while (true)
                     {
@@ -121,10 +122,10 @@ namespace HighVoltz
                             uint.TryParse(retVals[i], out num);
                             this[id] = (int)num;
                         }
-                        if (retVals == null || tableIndex >= tableSize)
+                        if (tableIndex >= tableSize)
                             break;
                     }
-                    Styx.WoWInternals.Lua.DoString(_settings.DataStoreTable + "={}");
+                    Lua.DoString(_settings.DataStoreTable + "={}");
                     Professionbuddy.Debug("DataStore Imported");
                 }
                 else

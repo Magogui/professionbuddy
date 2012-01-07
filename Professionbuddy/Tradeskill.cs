@@ -121,12 +121,12 @@ namespace HighVoltz
         /// Singleton Instance
         /// </summary>
         public static readonly TradeSkillFrame Instance = new TradeSkillFrame();
-        private static readonly uint _baseAddress;
+        private static readonly uint BaseAddress;
 
         static TradeSkillFrame()
         {
             ProcessModule mod = ObjectManager.WoWProcess.MainModule;
-            uint baseAddress = (uint)mod.BaseAddress;
+            var baseAddress = (uint)mod.BaseAddress;
             if (ProfessionBuddySettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
                 ProfessionBuddySettings.Instance.TradeskillFrameOffset == 0)
             {
@@ -147,7 +147,7 @@ namespace HighVoltz
                         mod.FileVersionInfo.FileVersion);
                 }
             }
-            _baseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + ProfessionBuddySettings.Instance.TradeskillFrameOffset;
+            BaseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + ProfessionBuddySettings.Instance.TradeskillFrameOffset;
         }
 
         public TradeSkillFrame()
@@ -157,11 +157,10 @@ namespace HighVoltz
 
         public static string GetItemCacheName(uint id)
         {
-            var cache = Styx.StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
+            var cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
                 return ObjectManager.Wow.Read<string>(cache.ItemSparse.Name);
-            else
-                return null;
+            return null;
         }
 
         /// <summary>
@@ -194,11 +193,11 @@ namespace HighVoltz
                 ObjectManager.Update();
             WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
 
-            TradeSkill tradeSkill = new TradeSkill(wowSkill);
+            var tradeSkill = new TradeSkill(wowSkill);
 
             //lets copy over to a local variable for performance
-            bool _isVisible = IsVisible;
-            bool loadSkill = Skill != skillLine || !_isVisible;
+            bool isVisible = IsVisible;
+            bool loadSkill = Skill != skillLine || !isVisible;
             string lua = string.Format("{0}{1}{2}{3}",
                 blockFrame && loadSkill ? "if not TradeSkillFrame then LoadAddOn('Blizzard_TradeSkillUI') end local fs = {} local f = EnumerateFrames() while f do if f:IsEventRegistered('TRADE_SKILL_SHOW') == 1 and f:GetName() ~= 'UIParent' then f:UnregisterEvent('TRADE_SKILL_SHOW') table.insert (fs,f) end f = EnumerateFrames(f) end " : "",
                 // have to hard code in mining since I need to cast 'Smelting' not 'Mining' XD
@@ -213,14 +212,14 @@ namespace HighVoltz
                 if (!string.IsNullOrEmpty(lua))
                     Lua.DoString(lua);
 
-                int _recipeCount = RecipeCount;
-                if (Skill != skillLine || _recipeCount <= 0)
+                int recipeCount = RecipeCount;
+                if (Skill != skillLine || recipeCount <= 0)
                 {// we failed to load tradeskill
                     throw new Exception(string.Format("Unable to load {0}", skillLine));
                 }
                 // array of pointers that point to each recipe structure.
                 uint[] recipePtrArray = ObjectManager.Wow.ReadStructArray<uint>(RecipeOffset, RecipeCount);
-                for (int index = 0; index < _recipeCount; index++)
+                for (int index = 0; index < recipeCount; index++)
                 {
                     uint[] recipeData = ObjectManager.Wow.ReadStructArray<uint>(recipePtrArray[index], 9);
                     uint id = recipeData[(int)Recipe.RecipeIndex.RecipeID];
@@ -242,23 +241,23 @@ namespace HighVoltz
         /// </summary>
         ulong Guid
         {
-            get { return ObjectManager.Wow.Read<ulong>(_baseAddress + SkillOffset.Guid); }
+            get { return ObjectManager.Wow.Read<ulong>(BaseAddress + SkillOffset.Guid); }
         }
         /// <summary>
         /// Returns true if the currently loaded tradeskill is from a tradeskill link
         /// </summary>
         public bool IsLinked
         {
-            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.IsLinked); }
+            get { return ObjectManager.Wow.Read<bool>(BaseAddress + SkillOffset.IsLinked); }
         }
 
         new public bool IsVisible
         {
-            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.ShownSkill); }
+            get { return ObjectManager.Wow.Read<bool>(BaseAddress + SkillOffset.ShownSkill); }
         }
         public bool IsLoading
         {
-            get { return ObjectManager.Wow.Read<bool>(_baseAddress + SkillOffset.IsLoading); }
+            get { return ObjectManager.Wow.Read<bool>(BaseAddress + SkillOffset.IsLoading); }
         }
         /// <summary>
         /// Name of currently loaded tradeskill
@@ -277,8 +276,8 @@ namespace HighVoltz
         {
             get
             {
-                int recipe1 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeID1);
-                int recipe2 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeID2);
+                var recipe1 = ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.QueuedRecipeID1);
+                var recipe2 = ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.QueuedRecipeID2);
                 return recipe1 != 0 ? recipe1 : recipe2;
             }
         }
@@ -287,12 +286,12 @@ namespace HighVoltz
         /// </summary>
         public int RecipeCount
         {
-            get { return ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.TotalRecipeCount); }
+            get { return ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.TotalRecipeCount); }
         }
         // offset to the recipe array of pointers.
         uint RecipeOffset
         {
-            get { return ObjectManager.Wow.Read<uint>(_baseAddress + SkillOffset.RecipeArray); }
+            get { return ObjectManager.Wow.Read<uint>(BaseAddress + SkillOffset.RecipeArray); }
         }
         /// <summary>
         /// Number of times a recipe is set to repeat itself
@@ -301,8 +300,8 @@ namespace HighVoltz
         {
             get
             {
-                int repeat1 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeRepeat1);
-                int repeat2 = ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.QueuedRecipeRepeat2);
+                var repeat1 = ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.QueuedRecipeRepeat1);
+                var repeat2 = ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.QueuedRecipeRepeat2);
                 return repeat1 != 0 ? repeat1 : repeat2;
             }
         }
@@ -311,7 +310,7 @@ namespace HighVoltz
         /// </summary>
         int ShownRecipeCount
         {
-            get { return ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.ShownRecipeNum); }
+            get { return ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.ShownRecipeNum); }
         }
         /// <summary>
         /// Opens TradeSkill Frame
@@ -321,7 +320,7 @@ namespace HighVoltz
             Show(Skill);
         }
         /// Opens TradeSkill Frame for the specific skill
-        /// </summary>
+        /// 
         /// <param name="skillLine"></param>
         public void Show(SkillLine skillLine)
         {
@@ -341,12 +340,14 @@ namespace HighVoltz
         /// </summary>
         public SkillLine Skill
         {
-            get { return (SkillLine)ObjectManager.Wow.Read<int>(_baseAddress + SkillOffset.LoadedSkill); }
+            get { return (SkillLine)ObjectManager.Wow.Read<int>(BaseAddress + SkillOffset.LoadedSkill); }
         }
+
         /// <summary>
         /// Updates the skill level, recipe difficulty and adds new recipes.
         /// </summary>
         /// <param name="tradeSkill"></param>
+        /// <param name="blockFrame"> </param>
         public void UpdateTradeSkill(TradeSkill tradeSkill, bool blockFrame)
         {
             if (!ObjectManager.IsInGame || tradeSkill == null)
@@ -359,8 +360,8 @@ namespace HighVoltz
 
             tradeSkill.WoWSkill = ObjectManager.Me.GetSkill(tradeSkill.SkillLine);
             //lets copy over to a local variable for performance
-            bool _isVisible = IsVisible;
-            bool loadSkill = Skill != tradeSkill.SkillLine || !_isVisible;
+            bool isVisible = IsVisible;
+            bool loadSkill = Skill != tradeSkill.SkillLine || !isVisible;
             string lua = string.Format("{0}{1}{2}{3}",
                 blockFrame && loadSkill ? "if not TradeSkillFrame then LoadAddOn('Blizzard_TradeSkillUI') end local fs = {} local f = EnumerateFrames() while f do if f:IsEventRegistered('TRADE_SKILL_SHOW') == 1 then f:UnregisterEvent('TRADE_SKILL_SHOW') table.insert (fs,f) end f = EnumerateFrames(f) end " : "",
                 // have to hard code in mining since I need to cast 'Smelting' not 'Mining' XD
@@ -381,8 +382,8 @@ namespace HighVoltz
                 }
                 // array of pointers that point to each recipe structure.
                 uint[] recipePtrArray = ObjectManager.Wow.ReadStructArray<uint>(RecipeOffset, RecipeCount);
-                int _recipeCount = RecipeCount;
-                for (int index = 0; index < _recipeCount; index++)
+                int recipeCount = RecipeCount;
+                for (int index = 0; index < recipeCount; index++)
                 {
                     uint[] recipeData = ObjectManager.Wow.ReadStructArray<uint>(recipePtrArray[index], 9);
                     uint id = recipeData[(int)Recipe.RecipeIndex.RecipeID];
@@ -410,7 +411,7 @@ namespace HighVoltz
     {
         public TradeSkill(WoWSkill skill)
         {
-            this.WoWSkill = skill;
+            WoWSkill = skill;
             Recipes = new Dictionary<uint, Recipe>();
         }
         public WoWSkill WoWSkill { get; internal set; }
@@ -446,17 +447,17 @@ namespace HighVoltz
         {
             get
             {
-                if (ingredients == null)
+                if (_ingredients == null)
                 {
                     InitIngredientList();
                 }
-                return ingredients;
+                return _ingredients;
             }
         }
 
         internal void InitIngredientList()
         {
-            ingredients = new Dictionary<uint, IngredientSubClass>();
+            _ingredients = new Dictionary<uint, IngredientSubClass>();
             foreach (var recipePair in Recipes)
             {
                 recipePair.Value.InitIngredients();
@@ -464,7 +465,7 @@ namespace HighVoltz
 
         }
 
-        Dictionary<uint, IngredientSubClass> ingredients;
+        Dictionary<uint, IngredientSubClass> _ingredients;
         /// <summary>
         /// List of Tools
         /// </summary>
@@ -472,17 +473,17 @@ namespace HighVoltz
         {
             get
             {
-                if (tools == null)
+                if (_tools == null)
                 {
                     InitToolList();
                 }
-                return tools;
+                return _tools;
             }
         }
-        List<Tool> tools;
+        List<Tool> _tools;
         internal void InitToolList()
         {
-            tools = new List<Tool>();
+            _tools = new List<Tool>();
             foreach (var recipePair in Recipes)
             {
                 recipePair.Value.InitTools();
@@ -528,11 +529,14 @@ namespace HighVoltz
     #region Recipe
     public class Recipe
     {
-        internal TradeSkill parent;
+        internal TradeSkill Parent;
+
         internal struct RecipeIndex
         {
             public const uint RecipeID = 0;
+// ReSharper disable MemberHidesStaticFromOuterClass
             public const uint RecipeDifficulty = 1;
+// ReSharper restore MemberHidesStaticFromOuterClass
             public const uint SubClass1 = 2;
             public const uint SubClass2 = 3;
             public const uint CanRepeatNum = 6;
@@ -548,14 +552,14 @@ namespace HighVoltz
         };
         public enum RecipeDifficulty
         {
-            optimal, medium, easy, trivial
+            Optimal, Medium, Easy, Trivial
         }
-        uint[] recipeData;
+        uint[] _recipeData;
         internal Recipe(uint[] data, TradeSkill parent, SkillLine skill)
         {
-            this.recipeData = data;
-            this.Skill = skill;
-            this.parent = parent;
+            _recipeData = data;
+            Skill = skill;
+            Parent = parent;
         }
         /// <summary>
         /// Returns the color that represents the recipes difficulty
@@ -566,11 +570,11 @@ namespace HighVoltz
             {
                 switch (Difficulty)
                 {
-                    case RecipeDifficulty.optimal:
+                    case RecipeDifficulty.Optimal:
                         return System.Drawing.Color.DarkOrange;
-                    case RecipeDifficulty.medium:
+                    case RecipeDifficulty.Medium:
                         return System.Drawing.Color.Yellow;
-                    case RecipeDifficulty.easy:
+                    case RecipeDifficulty.Easy:
                         return System.Drawing.Color.Lime;
                     default:
                         return System.Drawing.Color.Gray;
@@ -587,7 +591,7 @@ namespace HighVoltz
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
-                    uint cnt = (uint)System.Math.Floor((double)(ingred.InBagItemCount / ingred.Required));
+                    var cnt = (uint)Math.Floor(ingred.InBagItemCount / (double)ingred.Required);
                     if (repeat > cnt)
                     {
                         repeat = cnt;
@@ -606,8 +610,7 @@ namespace HighVoltz
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
-                    uint cnt = (uint)System.Math.Floor((double)
-                        (Ingredient.GetInBagItemCount(ingred.ID) / ingred.Required));
+                    var cnt = (uint)Math.Floor(Ingredient.GetInBagItemCount(ingred.ID) / (double)ingred.Required);
                     if (repeat > cnt)
                     {
                         repeat = cnt;
@@ -619,8 +622,17 @@ namespace HighVoltz
         /// <summary>
         /// Returns ID of the item the recipe makes
         /// </summary>
-        public uint CraftedItemID { get { return (uint)(craftedItemID ?? (craftedItemID = GetCraftedItemID())); } }
-        uint? craftedItemID;
+        public uint CraftedItemID
+        {
+            get
+            {
+                var u = _craftedItemID = GetCraftedItemID();
+                if (u != null)
+                    return (uint)_craftedItemID;
+                return 0;
+            }
+        }
+        uint? _craftedItemID;
 
         uint? GetCraftedItemID()
         {
@@ -628,8 +640,7 @@ namespace HighVoltz
             {
                 return Spell.SpellEffect1.ItemType;
             }
-            else
-                return null;
+            return null;
         }
 
         /// <summary>
@@ -637,34 +648,32 @@ namespace HighVoltz
         /// </summary>
         public RecipeDifficulty Difficulty
         {
-            get { return (RecipeDifficulty)recipeData[(int)RecipeIndex.RecipeDifficulty]; }
+            get { return (RecipeDifficulty)_recipeData[(int)RecipeIndex.RecipeDifficulty]; }
         }
         internal void InitIngredients()
         {  // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
-            if (ingredients != null)
+            if (_ingredients != null)
                 return;
             uint recipeID = ID;
-            ingredients = new List<Ingredient>();
-            WoWDb.DbTable SpelldbTable;
-            WoWDb.Row SpelldbRow;
-            SpelldbTable = StyxWoW.Db[ClientDb.Spell];
-            if (SpelldbTable != null && recipeID <= SpelldbTable.MaxIndex && recipeID >= SpelldbTable.MinIndex)
+            _ingredients = new List<Ingredient>();
+            WoWDb.DbTable spelldbTable = StyxWoW.Db[ClientDb.Spell];
+            if (spelldbTable != null && recipeID <= spelldbTable.MaxIndex && recipeID >= spelldbTable.MinIndex)
             {
-                SpelldbRow = SpelldbTable.GetRow((uint)recipeID);
-                if (SpelldbRow != null)
+                WoWDb.Row spelldbRow = spelldbTable.GetRow(recipeID);
+                if (spelldbRow != null)
                 {
-                    uint reagentIndex = SpelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);// Changed to 43 in WoW 4.2
-                    WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
+                    var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);// Changed to 43 in WoW 4.2
+                    var reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
                         reagentIndex >= reagentDbTable.MinIndex)
                     {
                         WoWDb.Row reagentDbRow = reagentDbTable.GetRow(reagentIndex);
                         for (uint index = 1; index <= 8; index++)
                         {
-                            uint id = reagentDbRow.GetField<uint>(index);
+                            var id = reagentDbRow.GetField<uint>(index);
                             if (id != 0)
                             {
-                                ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + 8), parent.Ingredients));
+                                _ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + 8), Parent.Ingredients));
                             }
                         }
                     }
@@ -676,90 +685,90 @@ namespace HighVoltz
         {
             WoWDb.DbTable dbTable;
             WoWDb.Row dbRow;
-            string header = "";
+            string getHeader = "";
             // if the subclasses are both uint.MaxValue we grab the header name from ClientDb.SkillLine(6)
-            if (recipeData[RecipeIndex.SubClass1] == uint.MaxValue && recipeData[(int)RecipeIndex.SubClass2] == uint.MaxValue)
+            if (_recipeData[RecipeIndex.SubClass1] == uint.MaxValue && _recipeData[(int)RecipeIndex.SubClass2] == uint.MaxValue)
             {
-                dbTable = Styx.StyxWoW.Db[ClientDb.SkillLine];
+                dbTable = StyxWoW.Db[ClientDb.SkillLine];
                 dbRow = dbTable.GetRow((uint)Skill);
-                header = ObjectManager.Wow.Read<string>(dbRow.GetField<uint>(6));
+                getHeader = ObjectManager.Wow.Read<string>(dbRow.GetField<uint>(6));
             }
             else
             {
                 // we need to iterate through ClientDb.ItemSubClass till we find matching
-                dbTable = Styx.StyxWoW.Db[ClientDb.ItemSubClass];
-                for (int i = dbTable.MinIndex; i <= dbTable.MaxIndex; i++)
+                dbTable = StyxWoW.Db[ClientDb.ItemSubClass];
+                for (var i = dbTable.MinIndex; i <= dbTable.MaxIndex; i++)
                 {
                     dbRow = dbTable.GetRow((uint)i);
-                    int iSubClass1 = dbRow.GetField<int>(1);
-                    int iSubClass2 = dbRow.GetField<int>(2);
-                    if (iSubClass1 == recipeData[(int)RecipeIndex.SubClass1] &&
-                        iSubClass2 == recipeData[(int)RecipeIndex.SubClass2])
+                    var iSubClass1 = dbRow.GetField<int>(1);
+                    var iSubClass2 = dbRow.GetField<int>(2);
+                    if (iSubClass1 == _recipeData[(int)RecipeIndex.SubClass1] &&
+                        iSubClass2 == _recipeData[(int)RecipeIndex.SubClass2])
                     {
-                        uint stringPtr = dbRow.GetField<uint>(12);
+                        var stringPtr = dbRow.GetField<uint>(12);
                         // if pointer in field (12) is 0 or it points to null string then use field (11)
                         if (stringPtr == 0 ||
-                            string.IsNullOrEmpty(header = ObjectManager.Wow.Read<string>(stringPtr)))
+                            string.IsNullOrEmpty(getHeader = ObjectManager.Wow.Read<string>(stringPtr)))
                         {
                             stringPtr = dbRow.GetField<uint>(11);
                             if (stringPtr != 0)
-                                header = ObjectManager.Wow.Read<string>(stringPtr);
+                                getHeader = ObjectManager.Wow.Read<string>(stringPtr);
                         }
                         break;
                     }
                 }
             }
-            return header;
+            return getHeader;
         }
         // grab name from dbc
         string GetName()
         {
-            string name = null;
-            WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.Spell];
-            WoWDb.Row r = t.GetRow((uint)ID);
-            uint stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
+            string getName = null;
+            WoWDb.DbTable t = StyxWoW.Db[ClientDb.Spell];
+            WoWDb.Row r = t.GetRow(ID);
+            var stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
             if (stringPtr != 0)
             {
-                name = ObjectManager.Wow.Read<string>(stringPtr);
+                getName = ObjectManager.Wow.Read<string>(stringPtr);
             }
-            return name;
+            return getName;
         }
         // grab name from dbc
         internal void InitTools()
         { // instantizing tools in here and doing a null check to prevent recursion from Trade.Tools() 
-            if (tools != null)
+            if (_tools != null)
                 return;
-            tools = new List<Tool>();
-            WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.Spell];
-            WoWDb.Row spellDbRow = t.GetRow((uint)ID);
-            uint spellReqIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellCastingReqIndex); // changed from 33 to 34 in WOW 4.2
+            _tools = new List<Tool>();
+            WoWDb.DbTable t = StyxWoW.Db[ClientDb.Spell];
+            WoWDb.Row spellDbRow = t.GetRow(ID);
+            var spellReqIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellCastingReqIndex); // changed from 33 to 34 in WOW 4.2
             if (spellReqIndex != 0)
             {
-                t = StyxWoW.Db[Styx.Patchables.ClientDb.SpellCastingRequirements];
+                t = StyxWoW.Db[ClientDb.SpellCastingRequirements];
                 WoWDb.Row spellReqDbRow = t.GetRow(spellReqIndex);
-                uint spellFocusIndex = spellReqDbRow.GetField<uint>(6);
+                var spellFocusIndex = spellReqDbRow.GetField<uint>(6);
                 // anvils, forge etc
                 if (spellFocusIndex != 0)
                 {
-                    tools.Add(GetTool(spellFocusIndex, Tool.ToolType.SpellFocus));
+                    _tools.Add(GetTool(spellFocusIndex, Tool.ToolType.SpellFocus));
                 }
-                uint areaGroupIndex = spellReqDbRow.GetField<uint>(4);
+                var areaGroupIndex = spellReqDbRow.GetField<uint>(4);
                 if (areaGroupIndex != 0)
                 {
-                    t = StyxWoW.Db[Styx.Patchables.ClientDb.AreaGroup];
+                    t = StyxWoW.Db[ClientDb.AreaGroup];
                     WoWDb.Row areaGroupDbRow = t.GetRow(areaGroupIndex);
-                    uint areaTableIndex = areaGroupDbRow.GetField<uint>(1);
+                    var areaTableIndex = areaGroupDbRow.GetField<uint>(1);
                     // not sure which kind of tools this covers
                     if (areaTableIndex != 0)
                     {
-                        tools.Add(GetTool(areaTableIndex, Tool.ToolType.AreaTable));
+                        _tools.Add(GetTool(areaTableIndex, Tool.ToolType.AreaTable));
                     }
                 }
             }
-            uint spellTotemsIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellTotemsIndex); // changed from 45 to 46 in WOW 4.2
+            var spellTotemsIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellTotemsIndex); // changed from 45 to 46 in WOW 4.2
             if (spellTotemsIndex != 0)
             {
-                t = StyxWoW.Db[Styx.Patchables.ClientDb.SpellTotems];
+                t = StyxWoW.Db[ClientDb.SpellTotems];
                 WoWDb.Row spellTotemsDbRow = t.GetRow(spellTotemsIndex);
                 uint cacheIndex = 0, totemCategoryIndex = 0;
                 for (uint i = 1; i <= 4 && cacheIndex == 0; i++)
@@ -772,14 +781,12 @@ namespace HighVoltz
                 // not sure which kind of tools this covers
                 if (cacheIndex != 0)
                 {
-                    tools.Add(GetTool(cacheIndex, Tool.ToolType.Item));
+                    _tools.Add(GetTool(cacheIndex, Tool.ToolType.Item));
                 }
                 // Blacksmith hammer, mining pick 
                 if (totemCategoryIndex != 0)
                 {
-                    t = StyxWoW.Db[Styx.Patchables.ClientDb.TotemCategory];
-                    spellTotemsDbRow = t.GetRow(totemCategoryIndex);
-                    tools.Add(GetTool(totemCategoryIndex, Tool.ToolType.Totem));
+                    _tools.Add(GetTool(totemCategoryIndex, Tool.ToolType.Totem));
                 }
             }
         }
@@ -788,12 +795,12 @@ namespace HighVoltz
         // and returns it.
         Tool GetTool(uint index, Tool.ToolType toolType)
         {
-            Tool newTool = new Tool(index, toolType);
-            Tool tool = parent.Tools.Find(a => a.Equals(newTool));
+            var newTool = new Tool(index, toolType);
+            var tool = Parent.Tools.Find(a => a.Equals(newTool));
             if (tool == null)
             {
                 tool = newTool;
-                parent.Tools.Add(tool);
+                Parent.Tools.Add(tool);
             }
             return tool;
         }
@@ -802,9 +809,9 @@ namespace HighVoltz
         /// </summary>
         public string Header
         {
-            get { return header ?? (header = GetHeader()); }
+            get { return _header ?? (_header = GetHeader()); }
         }
-        string header;
+        string _header;
         /// <summary>
         /// List of ingredients required for the recipe
         /// </summary>
@@ -812,22 +819,24 @@ namespace HighVoltz
         {
             get
             {
-                if (ingredients == null)
+                if (_ingredients == null)
                     InitIngredients();
-                return ingredients.AsReadOnly();
+                if (_ingredients != null)
+                    return _ingredients.AsReadOnly();
+                return null;
             }
         }
-        List<Ingredient> ingredients;
+        List<Ingredient> _ingredients;
         /// <summary>
         /// Name of the Recipe
         /// </summary>
         public string Name
         {
-            get { return name ?? (name = GetName()); }
+            get { return _name ?? (_name = GetName()); }
         }
-        string name;
+        string _name;
 
-        public uint ID { get { return recipeData[RecipeIndex.RecipeID]; } }
+        public uint ID { get { return _recipeData[RecipeIndex.RecipeID]; } }
         /// <summary>
         /// The Skill this recipe is from
         /// </summary>
@@ -835,7 +844,7 @@ namespace HighVoltz
         /// <summary>
         /// Number of Skillup this recipe will grant when crafted
         /// </summary>
-        public uint Skillups { get { return recipeData[RecipeIndex.Skillups]; } }
+        public uint Skillups { get { return _recipeData[RecipeIndex.Skillups]; } }
         /// <summary>
         /// returns the spell that's attached to the recipe
         /// </summary>
@@ -850,16 +859,18 @@ namespace HighVoltz
         {
             get
             {
-                if (tools == null)
+                if (_tools == null)
                     InitTools();
-                return tools.AsReadOnly();
+                if (_tools != null)
+                    return _tools.AsReadOnly();
+                return null;
             }
         }
-        List<Tool> tools;
+        List<Tool> _tools;
 
         internal void Update(uint[] data)
         {
-            this.recipeData = data;
+            _recipeData = data;
         }
     }
     #endregion
@@ -873,26 +884,26 @@ namespace HighVoltz
     // someone give this a good name, kthz
     public class IngredientSubClass
     {
-        internal Ingredient parent;
+        internal Ingredient Parent;
         internal IngredientSubClass(Ingredient parent, uint inBagCount)
         {
-            this.parent = parent;
-            this.InBagsCount = inBagCount;
+            Parent = parent;
+            InBagsCount = inBagCount;
         }
-        static object _nameLockObject = new object();
+        static readonly object NameLockObject = new object();
         public string Name
         {
-            get { lock (_nameLockObject) { return name ?? (name = GetName()); } }
+            get { lock (NameLockObject) { return _name ?? (_name = GetName()); } }
         }
 
         string GetName()
         {
-            string _name = TradeSkillFrame.GetItemCacheName(parent.ID);
-            if (_name == null)
+            string name = TradeSkillFrame.GetItemCacheName(Parent.ID);
+            if (name == null)
             {
                 // ok so it couldn't find the item in cache. since we're going to need to force a load
                 // might as well do a framelock and try load all the items. 
-                IEnumerable<uint> ids = parent.masterList.Keys.Where(id => id != parent.ID);
+                IEnumerable<uint> ids = Parent.MasterList.Keys.Where(id => id != Parent.ID);
 
                 using (new FrameLock())
                 {
@@ -902,9 +913,9 @@ namespace HighVoltz
                     }
                 }
             }
-            return _name;
+            return name;
         }
-        string name;
+        string _name;
         /// <summary>
         /// number of ingredients in players bags
         /// </summary>
@@ -914,7 +925,7 @@ namespace HighVoltz
         /// </summary>
         internal void UpdateInBagsCount()
         {
-            InBagsCount = Ingredient.GetInBagItemCount(parent.ID);
+            InBagsCount = Ingredient.GetInBagItemCount(Parent.ID);
         }
     }
     #endregion
@@ -923,23 +934,23 @@ namespace HighVoltz
     public class Ingredient
     {
         // someone give this a good name, kthz
-        IngredientSubClass subclass;
+        readonly IngredientSubClass _subclass;
         // list where every ingredient is stored, used to save memory usage,
         // this points to the one initilized in a TradeSkill instance
-        internal Dictionary<uint, IngredientSubClass> masterList;
+        internal Dictionary<uint, IngredientSubClass> MasterList;
         internal Ingredient(uint id, uint requiredNum, Dictionary<uint, IngredientSubClass> masterList)
         {
-            this.ID = id;
-            this.Required = requiredNum;
-            this.masterList = masterList;
+            ID = id;
+            Required = requiredNum;
+            MasterList = masterList;
             if (masterList.ContainsKey(id))
             {
-                subclass = masterList[id];
+                _subclass = masterList[id];
             }
             else
             {
-                subclass = new IngredientSubClass(this, GetInBagItemCount(id));
-                masterList.Add(id, subclass);
+                _subclass = new IngredientSubClass(this, GetInBagItemCount(id));
+                masterList.Add(id, _subclass);
             }
         }
         /// <summary>
@@ -947,7 +958,7 @@ namespace HighVoltz
         /// </summary>
         public string Name
         {
-            get { return subclass.Name; }
+            get { return _subclass.Name; }
         }
         /// <summary>
         /// The required number of this reagent needed
@@ -957,7 +968,7 @@ namespace HighVoltz
         /// <summary>
         /// Number of this Reagent in players possession
         /// </summary>
-        public uint InBagItemCount { get { return subclass.InBagsCount; } }
+        public uint InBagItemCount { get { return _subclass.InBagsCount; } }
 
         public static uint GetInBagItemCount(uint id)
         {
@@ -975,17 +986,14 @@ namespace HighVoltz
     {
         internal enum ToolType { SpellFocus, AreaTable, Item, Totem }
 
-        uint index; // index to some DBC, depends on type
-        ToolType toolType;
+        readonly uint _index; // index to some DBC, depends on type
+        readonly ToolType _toolType;
         internal Tool(uint index, ToolType toolType)
         {
-            this.index = index;
-            this.toolType = toolType;
+            _index = index;
+            _toolType = toolType;
             UpdateToolStatus();
-            if (toolType == ToolType.Item)
-                this.ID = index;
-            else
-                this.ID = 0;
+            ID = toolType == ToolType.Item ? index : 0;
         }
 
         public override bool Equals(object obj)
@@ -994,51 +1002,51 @@ namespace HighVoltz
                 return false;
             if (obj is Tool)
             {
-                Tool t = obj as Tool;
-                return this.index == t.index && this.toolType == t.toolType;
+                var t = obj as Tool;
+                return _index == t._index && _toolType == t._toolType;
             }
             return false;
         }
         public override int GetHashCode()
         {
-            return (int)index + (int)toolType * 100000;
+            return (int)_index + (int)_toolType * 100000;
         }
 
         string GetName()
         {
-            string _name = null;
+            string name = null;
             uint stringPtr = 0;
-            switch (toolType)
+            switch (_toolType)
             {
                 case ToolType.SpellFocus:
-                    WoWDb.DbTable t = StyxWoW.Db[Styx.Patchables.ClientDb.SpellFocusObject];
-                    WoWDb.Row r = t.GetRow(index);
+                    WoWDb.DbTable t = StyxWoW.Db[ClientDb.SpellFocusObject];
+                    WoWDb.Row r = t.GetRow(_index);
                     stringPtr = r.GetField<uint>(1);
                     break;
                 case ToolType.AreaTable:
-                    t = StyxWoW.Db[Styx.Patchables.ClientDb.AreaTable];
-                    r = t.GetRow(index);
+                    t = StyxWoW.Db[ClientDb.AreaTable];
+                    r = t.GetRow(_index);
                     stringPtr = r.GetField<uint>(11);
                     break;
                 case ToolType.Item:
-                    _name = TradeSkillFrame.GetItemCacheName(index);
+                    name = TradeSkillFrame.GetItemCacheName(_index);
                     break;
                 case ToolType.Totem:
-                    t = StyxWoW.Db[Styx.Patchables.ClientDb.TotemCategory];
-                    r = t.GetRow(index);
+                    t = StyxWoW.Db[ClientDb.TotemCategory];
+                    r = t.GetRow(_index);
                     stringPtr = r.GetField<uint>(1);
                     break;
             }
             if (stringPtr != 0)
             {
-                _name = ObjectManager.Wow.Read<string>(stringPtr);
+                name = ObjectManager.Wow.Read<string>(stringPtr);
             }
-            return _name;
+            return name;
         }
 
         internal void UpdateToolStatus()
         {
-            switch (toolType)
+            switch (_toolType)
             {
                 case ToolType.SpellFocus:
                 case ToolType.AreaTable:
@@ -1048,13 +1056,11 @@ namespace HighVoltz
                 case ToolType.Totem:
                     if (ID != 0)
                     {
-                        HasTool = ObjectManager.GetObjectsOfType<WoWItem>()
-                            .Where(i => i.Entry == ID).Count() > 0;
+                        HasTool = ObjectManager.GetObjectsOfType<WoWItem>().Any(i => i.Entry == ID);
                     }
                     else
                     {
-                        WoWItem item = ObjectManager.GetObjectsOfType<WoWItem>()
-                            .Where(i => i.Name == Name).FirstOrDefault();
+                        WoWItem item = ObjectManager.GetObjectsOfType<WoWItem>().FirstOrDefault(i => i.Name == Name);
                         if (item != null)
                         {
                             ID = item.Entry;
@@ -1078,9 +1084,9 @@ namespace HighVoltz
         /// </summary>
         public string Name
         {
-            get { return name ?? (name = GetName()); }
+            get { return _name ?? (_name = GetName()); }
         }
-        string name;
+        string _name;
         #endregion
     }
     #endregion

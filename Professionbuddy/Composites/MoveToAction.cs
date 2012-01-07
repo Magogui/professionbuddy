@@ -1,13 +1,9 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Xml;
 using Styx;
 using Styx.Database;
-using Styx.Helpers;
 using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -17,7 +13,7 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 namespace HighVoltz.Composites
 {
     #region MoveToAction
-    public class MoveToAction : PBAction
+    public sealed class MoveToAction : PBAction
     {
         public enum MoveToType
         {
@@ -34,32 +30,32 @@ namespace HighVoltz.Composites
         }
         public enum NavigationType { Navigator, ClickToMove };
 
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public MoveToType MoveType
         {
             get { return (MoveToType)Properties["MoveType"].Value; }
-            set { Properties["MoveType"].Value = (MoveToType)value; }
+            set { Properties["MoveType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public NavigationType Pathing
         {
             get { return (NavigationType)Properties["Pathing"].Value; }
-            set { Properties["Pathing"].Value = (NavigationType)value; }
+            set { Properties["Pathing"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public uint Entry
         {
             get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = (uint)value; }
+            set { Properties["Entry"].Value = value; }
         }
-        private WoWPoint locationDb = WoWPoint.Zero;
+        private WoWPoint _locationDb = WoWPoint.Zero;
 
         public MoveToAction()
         {
@@ -69,27 +65,26 @@ namespace HighVoltz.Composites
             Properties["Pathing"] = new MetaProp("Pathing", typeof(NavigationType), new DisplayNameAttribute("Use"));
 
             Entry = 0u;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             MoveType = MoveToType.Location;
             Pathing = NavigationType.Navigator;
 
             Properties["Entry"].Show = false;
-            Properties["MoveType"].PropertyChanged += new EventHandler<MetaPropArgs>(MoveToAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["MoveType"].PropertyChanged += MoveToActionPropertyChanged;
+            Properties["Location"].PropertyChanged += LocationChanged;
         }
 
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint(Location);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint(Location);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
-        void MoveToAction_PropertyChanged(object sender, MetaPropArgs e)
+        void MoveToActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (MoveType)
             {
@@ -112,8 +107,8 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        Stopwatch concludingSw = new Stopwatch();
-        const float speedModifer = 1.8f;
+        readonly Stopwatch _concludingSw = new Stopwatch();
+        const float SpeedModifer = 1.8f;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -121,16 +116,16 @@ namespace HighVoltz.Composites
 
                 if (MoveType != MoveToType.Location)
                 {
-                    loc = GetLocationFromType(MoveType, Entry);
-                    if (loc == WoWPoint.Zero)
+                    _loc = GetLocationFromType(MoveType, Entry);
+                    if (_loc == WoWPoint.Zero)
                     {
-                        if (locationDb == WoWPoint.Zero)
+                        if (_locationDb == WoWPoint.Zero)
                         {
-                            locationDb = GetLocationFromDB(MoveType, Entry);
+                            _locationDb = GetLocationFromDB(MoveType, Entry);
                         }
-                        loc = locationDb;
+                        _loc = _locationDb;
                     }
-                    if (loc == WoWPoint.Zero)
+                    if (_loc == WoWPoint.Zero)
                     {
                         Professionbuddy.Err("MoveToAction Failed.. Unable to find location from Database");
                         IsDone = true;
@@ -144,24 +139,24 @@ namespace HighVoltz.Composites
                         unit.Target();
                 }
                 float speed = ObjectManager.Me.MovementInfo.CurrentSpeed;
-                Navigator.PathPrecision = speed > 7 ? (speedModifer * speed) / 7f : speedModifer;
-                if (ObjectManager.Me.Location.Distance(loc) > Navigator.PathPrecision)
+                Navigator.PathPrecision = speed > 7 ? (SpeedModifer * speed) / 7f : SpeedModifer;
+                if (ObjectManager.Me.Location.Distance(_loc) > Navigator.PathPrecision)
                 {
                     if (Pathing == NavigationType.ClickToMove)
-                        WoWMovement.ClickToMove(loc);
+                        WoWMovement.ClickToMove(_loc);
                     else
-                        Util.MoveTo(loc);
+                        Util.MoveTo(_loc);
                 }
                 else
                 {
-                    if (!concludingSw.IsRunning)
-                        concludingSw.Start();
-                    else if (concludingSw.ElapsedMilliseconds >= 2000)
+                    if (!_concludingSw.IsRunning)
+                        _concludingSw.Start();
+                    else if (_concludingSw.ElapsedMilliseconds >= 2000)
                     {
                         IsDone = true;
                         Professionbuddy.Log("MoveTo Action completed for type {0}", MoveType);
-                        concludingSw.Stop();
-                        concludingSw.Reset();
+                        _concludingSw.Stop();
+                        _concludingSw.Reset();
                     }
                 }
                 if (!IsDone)
@@ -194,13 +189,13 @@ namespace HighVoltz.Composites
                         obj = ObjectManager.ObjectList.Where(u => {
                             if (u is WoWUnit)
                             {
-                                WoWUnit un = (WoWUnit)u;
+                                var un = (WoWUnit)u;
                                 if (un.IsGuildBanker)
                                     return true;
                             }
                             else if (u is WoWGameObject)
                             {
-                                WoWGameObject go = (WoWGameObject)u;
+                                var go = (WoWGameObject)u;
                                 if (go.SubType == WoWGameObjectType.GuildBank)
                                     return true;
                             }
@@ -225,12 +220,11 @@ namespace HighVoltz.Composites
             {
                 if (obj is WoWUnit && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget != obj))
                 {
-                    entry = ((WoWUnit)obj).Entry;
                     ((WoWUnit)obj).Target();
                 }
                 return obj.Location;
             }
-            else return WoWPoint.Zero;
+            return WoWPoint.Zero;
         }
 
         static public WoWPoint GetLocationFromDB(MoveToType type, uint entry)
@@ -272,8 +266,7 @@ namespace HighVoltz.Composites
             }
             if (npcResults != null)
                 return npcResults.Location;
-            else
-                return WoWPoint.Zero;
+            return WoWPoint.Zero;
         }
         public override string Name { get { return "Move To"; } }
         public override string Title
@@ -281,7 +274,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: {1} " +
-                    ((MoveType == MoveToType.Location) ? Location.ToString() : ""), Name, MoveType);
+                    ((MoveType == MoveToType.Location) ? Location : ""), Name, MoveType);
             }
         }
         public override string Help
@@ -293,7 +286,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new MoveToAction() { MoveType = this.MoveType, Entry = this.Entry, loc = this.loc, Location = this.Location, Pathing = this.Pathing };
+            return new MoveToAction { MoveType = this.MoveType, Entry = this.Entry, _loc = this._loc, Location = this.Location, Pathing = this.Pathing };
         }
     }
     #endregion

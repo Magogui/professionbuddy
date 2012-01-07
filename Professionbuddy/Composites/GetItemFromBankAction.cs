@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
-using System.Xml;
+using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
 using Styx.Logic.Pathing;
@@ -12,13 +11,12 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Reflection;
 
 
 namespace HighVoltz.Composites
 {
     #region GetItemfromBankAction
-    public class GetItemfromBankAction : PBAction
+    public sealed class GetItemfromBankAction : PBAction
     {
         // number of times the recipe will be crafted
         public enum BankWithdrawlItemType
@@ -26,56 +24,56 @@ namespace HighVoltz.Composites
             SpecificItem,
             Materials,
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public BankType Bank
         {
             get { return (BankType)Properties["Bank"].Value; }
             set { Properties["Bank"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public uint MinFreeBagSlots
         {
             get { return (uint)Properties["MinFreeBagSlots"].Value; }
             set { Properties["MinFreeBagSlots"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public BankWithdrawlItemType GetItemfromBankType
         {
             get { return (BankWithdrawlItemType)Properties["GetItemfromBankType"].Value; }
             set { Properties["GetItemfromBankType"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public string ItemID
         {
             get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
-        [PbXmlAttribute()]
-        public int Amount
+        [PbXmlAttribute]
+        public DynamicProperty<int> Amount
         {
-            get { return (int)Properties["Amount"].Value; }
+            get { return (DynamicProperty<int>)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool AutoFindBank
         {
             get { return (bool)Properties["AutoFindBank"].Value; }
             set { Properties["AutoFindBank"].Value = value; }
         }
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public bool WithdrawAdditively
         {
             get { return (bool)Properties["WithdrawAdditively"].Value; }
             set { Properties["WithdrawAdditively"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -83,7 +81,8 @@ namespace HighVoltz.Composites
         }
         public GetItemfromBankAction()
         {
-            Properties["Amount"] = new MetaProp("Amount", typeof(int));
+            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>), 
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
 
             Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint), new DisplayNameAttribute("Min Free Bagslots"));
@@ -94,32 +93,32 @@ namespace HighVoltz.Composites
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool), new DisplayNameAttribute("Withdraw Additively"));
 
-            Amount = 1;
+            Amount = new DynamicProperty<int>(this,"1");
+            RegisterDynamicProperty("Amount");
             ItemID = "";
             MinFreeBagSlots = 2u;
             GetItemfromBankType = BankWithdrawlItemType.SpecificItem;
             Bank = BankType.Personal;
             AutoFindBank = true;
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             NpcEntry = 0u;
             WithdrawAdditively = true;
 
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
-            Properties["AutoFindBank"].PropertyChanged += new EventHandler<MetaPropArgs>(AutoFindBankChanged);
-            Properties["GetItemfromBankType"].PropertyChanged += new EventHandler<MetaPropArgs>(GetItemfromBankAction_PropertyChanged);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["AutoFindBank"].PropertyChanged += AutoFindBankChanged;
+            Properties["GetItemfromBankType"].PropertyChanged += GetItemfromBankActionPropertyChanged;
+            Properties["Location"].PropertyChanged += LocationChanged;
         }
 
         #region Callbacks
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
@@ -137,7 +136,7 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        void GetItemfromBankAction_PropertyChanged(object sender, MetaPropArgs e)
+        void GetItemfromBankActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (GetItemfromBankType)
             {
@@ -158,11 +157,11 @@ namespace HighVoltz.Composites
         #endregion
 
         // key = itemID; value amount to withdrawl
-        Dictionary<uint, int> ItemList = null;
-        bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
+        Dictionary<uint, int> _itemList;
+        static bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch _itemsSW;
-        Stopwatch _gbankItemThrottleSW = new Stopwatch();
-        const long _gbankItemThrottle = 800; //8 times per sec.. round up to nearest 1.
+        readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
+        const long GbankItemThrottle = 800; //8 times per sec.. round up to nearest 1.
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -181,39 +180,33 @@ namespace HighVoltz.Composites
                     }
                     else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
                         return RunStatus.Success;
-                    if (ItemList == null)
-                        ItemList = BuildItemList();
+                    if (_itemList == null)
+                        _itemList = BuildItemList();
                     // no bag space... 
-                    if (me.FreeNormalBagSlots <= MinFreeBagSlots || ItemList.Count == 0)
+                    if (Me.FreeNormalBagSlots <= MinFreeBagSlots || _itemList.Count == 0)
                         IsDone = true;
                     else
                     {
-                        uint itemID = ItemList.Keys.FirstOrDefault();
-                        bool done = false;
+                        uint itemID = _itemList.Keys.FirstOrDefault();
+                        bool done;
                         if (Bank == BankType.Personal)
-                            done = GetItemFromBank(itemID, ItemList[itemID]);
+                            done = GetItemFromBank(itemID, _itemList[itemID]);
                         else
                         {
                             // throttle the amount of items being withdrawn from gbank per sec
                             if (!_gbankItemThrottleSW.IsRunning)
                                 _gbankItemThrottleSW.Start();
-                            if (_gbankItemThrottleSW.ElapsedMilliseconds < _gbankItemThrottle)
+                            if (_gbankItemThrottleSW.ElapsedMilliseconds < GbankItemThrottle)
                                 return RunStatus.Success;
-                            else
-                            {
-                                _gbankItemThrottleSW.Reset();
-                                _gbankItemThrottleSW.Start();
-                            }
-                            int ret = GetItemFromGBank(itemID, ItemList[itemID]);
+                            _gbankItemThrottleSW.Reset();
+                            _gbankItemThrottleSW.Start();
+                            int ret = GetItemFromGBank(itemID, _itemList[itemID]);
 
-                            ItemList[itemID] = ret == -1 ? 0 : ItemList[itemID] - ret;
-                            if (ItemList[itemID] <= 0)
-                                done = true;
-                            else
-                                done = false;
+                            _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
+                            done = _itemList[itemID] <= 0;
                         }
                         if (done)
-                            ItemList.Remove(itemID);
+                            _itemList.Remove(itemID);
                     }
                     _itemsSW.Reset();
                     _itemsSW.Start();
@@ -231,7 +224,7 @@ namespace HighVoltz.Composites
         WoWObject GetLocalBanker()
         {
             WoWObject bank = null;
-            List<WoWObject> bankers = null;
+            List<WoWObject> bankers;
             if (Bank == BankType.Guild)
                 bankers = (from banker in ObjectManager.ObjectList
                            where (banker is WoWGameObject && ((WoWGameObject)banker).SubType == WoWGameObjectType.GuildBank) ||
@@ -245,34 +238,28 @@ namespace HighVoltz.Composites
                                 ((WoWUnit)banker).CanSelect)
                            select banker).ToList();
 
-            if (bankers != null)
+            if (!AutoFindBank && NpcEntry != 0)
+                bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
+            else if (AutoFindBank || _loc == WoWPoint.Zero || NpcEntry == 0)
+                bank = bankers.OrderBy(o => o.Distance).FirstOrDefault();
+            else if (ObjectManager.Me.Location.Distance(_loc) <= 90)
             {
-                if (!AutoFindBank && NpcEntry != 0)
-                    bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
-                else if (AutoFindBank || loc == WoWPoint.Zero || NpcEntry == 0)
-                    bank = bankers.OrderBy(o => o.Distance).FirstOrDefault();
-                else if (ObjectManager.Me.Location.Distance(loc) <= 90)
-                {
-                    bank = bankers.Where(o => o.Location.Distance(loc) < 10).
-                        OrderBy(o => o.Distance).FirstOrDefault();
-                }
+                bank = bankers.Where(o => o.Location.Distance(_loc) < 10).
+                    OrderBy(o => o.Distance).FirstOrDefault();
             }
             return bank;
         }
 
         void MoveToBanker()
         {
-            WoWPoint movetoPoint = loc;
+            WoWPoint movetoPoint = _loc;
             WoWObject bank = GetLocalBanker();
             if (bank != null)
-                movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, bank.Location, 3);
+                movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, bank.Location, 3);
             // search the database
             else if (movetoPoint == WoWPoint.Zero)
             {
-                if (Bank == BankType.Personal)
-                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestBanker, NpcEntry);
-                else
-                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestGB, NpcEntry);
+                movetoPoint = MoveToAction.GetLocationFromDB(Bank == BankType.Personal ? MoveToAction.MoveToType.NearestBanker : MoveToAction.MoveToType.NearestGB, NpcEntry);
             }
             if (movetoPoint == WoWPoint.Zero)
             {
@@ -297,19 +284,19 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, int> BuildItemList()
         {
-            Dictionary<uint, int> items = new Dictionary<uint, int>();
+            var items = new Dictionary<uint, int>();
             switch (GetItemfromBankType)
             {
                 case BankWithdrawlItemType.SpecificItem:
                     //List<uint> idList = new List<uint>();
                     string[] entries = ItemID.Split(',');
-                    if (entries != null && entries.Length > 0)
+                    if (entries.Length > 0)
                     {
                         foreach (var entry in entries)
                         {
-                            uint temp = 0;
+                            uint temp;
                             uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, !WithdrawAdditively ? Amount - (int)Util.GetCarriedItemCount(temp) : Amount == 0 ? int.MaxValue:Amount);
+                            items.Add(temp, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(temp) : Amount == 0 ? int.MaxValue : Amount);
                         }
                     }
                     else
@@ -327,7 +314,7 @@ namespace HighVoltz.Composites
         }
 
         // returns true when done. supports pulsing.
-        static Stopwatch queueServerSW;
+        static Stopwatch _queueServerSW;
         /// <summary>
         /// Withdraws items from gbank
         /// </summary>
@@ -336,15 +323,15 @@ namespace HighVoltz.Composites
         /// <returns>the amount withdrawn.</returns>
         public int GetItemFromGBank(uint id, int amount)
         {
-            if (queueServerSW == null)
+            if (_queueServerSW == null)
             {
-                queueServerSW = new Stopwatch();
-                queueServerSW.Start();
+                _queueServerSW = new Stopwatch();
+                _queueServerSW.Start();
                 Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
                 Professionbuddy.Log("Queuing server for gbank info");
                 return 0;
             }
-            if (queueServerSW.ElapsedMilliseconds < 2000)
+            if (_queueServerSW.ElapsedMilliseconds < 2000)
             {
                 return 0;
             }
@@ -381,9 +368,9 @@ namespace HighVoltz.Composites
                          "end " +
                       "end " +
                    "end " +
-                   "if sawItem == 0 then return -1 else return bagged end " 
+                   "if sawItem == 0 then return -1 else return bagged end "
             , id, amount);
-            int retVal = Lua.GetReturnVal<int>(lua, 0);
+            var retVal = Lua.GetReturnVal<int>(lua, 0);
             // -1 means no item was found.
             if (retVal == -1)
             {
@@ -437,8 +424,8 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            queueServerSW = null;
-            ItemList = null;
+            _queueServerSW = null;
+            _itemList = null;
             _itemsSW = null;
         }
 
@@ -460,19 +447,19 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new GetItemfromBankAction()
-            {
-                ItemID = this.ItemID,
-                Amount = this.Amount,
-                Bank = this.Bank,
-                GetItemfromBankType = this.GetItemfromBankType,
-                loc = this.loc,
-                AutoFindBank = this.AutoFindBank,
-                NpcEntry = this.NpcEntry,
-                Location = this.Location,
-                MinFreeBagSlots = this.MinFreeBagSlots,
-                WithdrawAdditively = this.WithdrawAdditively
-            };
+            return new GetItemfromBankAction
+                       {
+                           ItemID = this.ItemID,
+                           Amount = this.Amount,
+                           Bank = this.Bank,
+                           GetItemfromBankType = this.GetItemfromBankType,
+                           _loc = this._loc,
+                           AutoFindBank = this.AutoFindBank,
+                           NpcEntry = this.NpcEntry,
+                           Location = this.Location,
+                           MinFreeBagSlots = this.MinFreeBagSlots,
+                           WithdrawAdditively = this.WithdrawAdditively
+                       };
         }
     }
     #endregion

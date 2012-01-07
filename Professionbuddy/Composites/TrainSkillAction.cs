@@ -1,8 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing.Design;
 using System.Linq;
-using System.Xml;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Trainer;
 using Styx.Logic.Pathing;
@@ -15,16 +13,17 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 namespace HighVoltz.Composites
 {
     #region TrainSkillAction
-    class TrainSkillAction : PBAction
+
+    sealed class TrainSkillAction : PBAction
     {
-        [PbXmlAttribute()]
+        [PbXmlAttribute]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
-        WoWPoint loc;
-        [PbXmlAttribute()]
+        WoWPoint _loc;
+        [PbXmlAttribute]
         public string Location
         {
             get { return (string)Properties["Location"].Value; }
@@ -34,19 +33,18 @@ namespace HighVoltz.Composites
         {
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            loc = WoWPoint.Zero;
-            Location = loc.ToInvariantString();
+            _loc = WoWPoint.Zero;
+            Location = _loc.ToInvariantString();
             NpcEntry = 0u;
 
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            Properties["Location"].PropertyChanged += LocationChanged;
         }
         void LocationChanged(object sender, MetaPropArgs e)
         {
-            MetaProp mp = (MetaProp)sender;
-            loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= new EventHandler<MetaPropArgs>(LocationChanged);
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
-            Properties["Location"].PropertyChanged += new EventHandler<MetaPropArgs>(LocationChanged);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            Properties["Location"].PropertyChanged -= LocationChanged;
+            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
@@ -57,12 +55,11 @@ namespace HighVoltz.Composites
                 if (TrainerFrame.Instance == null || !TrainerFrame.Instance.IsVisible || !ObjectManager.Me.GotTarget ||
                     (ObjectManager.Me.GotTarget && ObjectManager.Me.CurrentTarget.Entry != NpcEntry))
                 {
-                    WoWPoint movetoPoint = loc;
-                    WoWUnit unit = null;
-                    unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
+                    WoWPoint movetoPoint = _loc;
+                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
                         OrderBy(o => o.Distance).FirstOrDefault();
                     if (unit != null)
-                        movetoPoint = WoWMathHelper.CalculatePointFrom(me.Location, unit.Location, 3);
+                        movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, unit.Location, 3);
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
                     if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
@@ -71,7 +68,7 @@ namespace HighVoltz.Composites
                     }
                     else if (unit != null)
                     {
-                        if (me.IsMoving)
+                        if (Me.IsMoving)
                             WoWMovement.MoveStop();
                         unit.Target();
                         unit.Interact();
@@ -90,12 +87,9 @@ namespace HighVoltz.Composites
                     }
                     return RunStatus.Success;
                 }
-                else
-                {
-                    Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
-                    Professionbuddy.Log("Training Completed ");
-                    IsDone = true;
-                }
+                Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
+                Professionbuddy.Log("Training Completed ");
+                IsDone = true;
             }
             return RunStatus.Failure;
         }
@@ -116,7 +110,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new TrainSkillAction() { NpcEntry = this.NpcEntry, loc = this.loc, Location = this.Location };
+            return new TrainSkillAction { NpcEntry = this.NpcEntry, _loc = this._loc, Location = this.Location };
         }
     }
     #endregion
