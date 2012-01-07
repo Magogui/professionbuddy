@@ -34,7 +34,9 @@ namespace HighVoltz.Composites
 
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            foreach (Composite child in Children.SkipWhile(c => Selection != null ? c != Selection : false))
+            if (context == null || !(context is string) || (string)context != SubRoutineName)
+                yield return RunStatus.Failure;
+            foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
             {
                 child.Start(context);
                 Selection = child;
