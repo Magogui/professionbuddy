@@ -33,26 +33,27 @@ namespace HighVoltz.Composites
 
         public void Load()
         {
-            if (string.IsNullOrEmpty(Path))
-                ProfileManager.LoadEmpty();
-            else
+            string absPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Pb.CurrentProfile.XmlPath), Path);
+            if (ProfileManager.XmlLocation != absPath)
             {
-                string absPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Pb.CurrentProfile.XmlPath), Path);
-                if (ProfileManager.XmlLocation != absPath)
+                try
                 {
-                    try
+                    Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath, ProfileManager.XmlLocation);
+                    if (string.IsNullOrEmpty(Path))
                     {
-                        Professionbuddy.LoadProfile(absPath);
-                        if (Pb.ProfileSettings.Settings.Count > 0 && MainForm.IsValid)
-                            MainForm.Instance.AddProfileSettingsTab();
-                        else
-                            MainForm.Instance.RemoveProfileSettingsTab();
+                        ProfileManager.LoadEmpty();
                     }
-                    catch (Exception ex)
+                    else if (System.IO.File.Exists(absPath))
                     {
-                        Professionbuddy.Err(ex.ToString());
+                        ProfileManager.LoadNew(absPath);
                     }
+                    else
+                    {
+                        Professionbuddy.Err("Unable to load profile {0}", Path);
+                    }
+
                 }
+                catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
             }
         }
 
