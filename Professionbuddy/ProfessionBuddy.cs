@@ -479,6 +479,7 @@ namespace HighVoltz
                         }
                     }
                 }
+                Log("Done Loading Tradeskills.");
                 IsTradeSkillsLoaded = true;
                 if (OnTradeSkillsLoaded != null)
                 {

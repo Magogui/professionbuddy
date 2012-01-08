@@ -30,24 +30,24 @@ namespace HighVoltz.Composites
         #endregion
 
         private Stopwatch _concludingSw = new Stopwatch();
-                          // add pause at the end to give objectmanager a chance to update.
+        // add pause at the end to give objectmanager a chance to update.
 
         private WoWPoint _loc;
 
         public BuyItemAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof (string),
-                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
-                                                                      typeof (UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
-                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
-                                                                      typeof (UITypeEditor)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof (string));
-            Properties["Count"] = new MetaProp("Count", typeof (DynamicProperty<int>),
-                                               new TypeConverterAttribute(typeof (DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
+                                                                      typeof(UITypeEditor)));
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
+                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
+                                                                      typeof(UITypeEditor)));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
+            Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
+                                               new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
+            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType),
                                                      new DisplayNameAttribute("Buy"));
-            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool),
                                                        new DisplayNameAttribute("Buy Additively"));
             ItemID = "";
             Count = new DynamicProperty<int>(this, "0"); // dynamic expression
@@ -68,14 +68,14 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public uint NpcEntry
         {
-            get { return (uint) Properties["NpcEntry"].Value; }
+            get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string) Properties["Location"].Value; }
+            get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
@@ -83,33 +83,29 @@ namespace HighVoltz.Composites
         [PbXmlAttribute("Entry")]
         public string ItemID
         {
-            get { return (string) Properties["ItemID"].Value; }
+            get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
 
         [PbXmlAttribute]
         public BuyItemActionType BuyItemType
         {
-            get { return (BuyItemActionType) Properties["BuyItemType"].Value; }
+            get { return (BuyItemActionType)Properties["BuyItemType"].Value; }
             set { Properties["BuyItemType"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Count
         {
-            get { return (DynamicProperty<int>) Properties["Count"].Value; }
-            set
-            {
-                Properties["Count"].Value = value;
-                DynamicCodeCompiler.CodeWasModified = true;
-            }
+            get { return (DynamicProperty<int>)Properties["Count"].Value; }
+            set { Properties["Count"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool BuyAdditively
         {
-            get { return (bool) Properties["BuyAdditively"].Value; }
+            get { return (bool)Properties["BuyAdditively"].Value; }
             set { Properties["BuyAdditively"].Value = value; }
         }
 
@@ -138,7 +134,7 @@ namespace HighVoltz.Composites
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -212,7 +208,7 @@ namespace HighVoltz.Composites
                         {
                             var idList = new List<uint>();
                             string[] entries = ItemID.Split(',');
-                            if ( entries.Length > 0)
+                            if (entries.Length > 0)
                             {
                                 foreach (string entry in entries)
                                 {
@@ -228,16 +224,16 @@ namespace HighVoltz.Composites
                                 return RunStatus.Failure;
                             }
                             foreach (uint id in idList)
-                                BuyItem(id, (uint) (!BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count));
+                                BuyItem(id, (uint)(!BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count));
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {
                             foreach (var kv in Pb.MaterialList)
                             {
                                 // only buy items if we don't have enough in bags...
-                                int amount = kv.Value - (int) Ingredient.GetInBagItemCount(kv.Key);
+                                int amount = kv.Value - (int)Ingredient.GetInBagItemCount(kv.Key);
                                 if (amount > 0)
-                                    BuyItem(kv.Key, (uint) amount);
+                                    BuyItem(kv.Key, (uint)amount);
                             }
                         }
                         _concludingSw.Start();
@@ -262,8 +258,8 @@ namespace HighVoltz.Composites
                 if (mi.ItemId == id)
                 {
                     // since BuyItem can only by up to 20 items we need to run it multiple times when buying over 20 items
-                    var stacks = (int) (count/20);
-                    var leftovers = (int) (count%20);
+                    var stacks = (int)(count / 20);
+                    var leftovers = (int)(count % 20);
                     if (count >= 20)
                     {
                         //using (new FrameLock()) // framelock was causing DCs
