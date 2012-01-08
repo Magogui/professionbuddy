@@ -209,6 +209,8 @@
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;RandomZones: {0}&quot;,Settings[&quot;RandomZones&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DeleteLifegivingSeeds: {0}&quot;,Settings[&quot;DeleteLifegivingSeeds&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;DepositInGbank: {0}&quot;,Settings[&quot;DepositInGbank&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;CancelAuctions: {0}&quot;,Settings[&quot;CancelAuctions&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Max Stack Number: {0}&quot;,Settings[&quot;Max Stack Number&quot;]);" />
     <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;***************** Zones *****************&quot;);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Hyjal: {0}&quot;,Settings[&quot;Hyjal&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
