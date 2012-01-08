@@ -12,6 +12,7 @@
   <!--imdasandman - For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
   <!--Natfoth - Idea to use GoalText for zone change timer.-->
+  <!--lii - some good ideas-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
     <Settings DefaultValue="0" Type="UInt32" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" Global="False" Hidden="True" />
     <Settings DefaultValue="" Type="String" Name="BankerName" Summary="The Name of your banker" Category="Banker" Global="False" Hidden="False" />
@@ -32,7 +33,8 @@
     <Settings DefaultValue="true" Type="Boolean" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="Bots\Professionbuddy\Profiles\HBProfiles\GatheringProfiles" Type="String" Name="ProfileFolderPath" Summary="This is the path to the base profile folder. Inside are subfolders named after the zones they contain profiles for." Category="Advanced" Global="True" Hidden="False" />
-    <Settings DefaultValue="500" Type="Int32" Name="FarmersGold" Summary="Amount of gold the farmer has on him/her" Category="Banker" Global="False" Hidden="True" />
+    <Settings DefaultValue="true" Type="Boolean" Name="CancelAuctions" Summary="Set to true to cancel auctions before posting on AH" Category="Auction House" Global="False" Hidden="False" />
+    <Settings DefaultValue="100" Type="Int32" Name="Max Stack Number" Summary="Max number of stacks to post on the AH" Category="Auction House" Global="False" Hidden="False" />
   </SubRoutine>
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
@@ -144,6 +146,9 @@
       <!--On Banker-->
     </If>
     <If Condition="OnFarmer == false" IgnoreCanRun="False">
+      <If Condition="(bool)Settings[&quot;CancelAuctions&quot;]" IgnoreCanRun="True">
+        <CancelAuctionAction UseCategory="False" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" AutoFindAh="True" MinBuyout="0g0s0c" Location="0, 0, 0" />
+      </If>
       <!--Get all mail and put it on AH-->
       <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
         <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
@@ -178,13 +183,12 @@
     <PutItemInBankAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="MetalStone" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Elemental" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="5g50s0c" MaxBuyout="20g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Herb" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Cloth" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="Armor" SubCategory="Misc" SubCategoryType="WoWItemArmorClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Elemental" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="0" MinBuyout="5g50s0c" MaxBuyout="20g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="10" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="MetalStone" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Elemental" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="1g50s0c" MaxBuyout="20g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Herb" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Cloth" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction UseCategory="True" Category="Armor" SubCategory="Misc" SubCategoryType="WoWItemArmorClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Hearth">
     <!--Dismount and use hearthstone-->
