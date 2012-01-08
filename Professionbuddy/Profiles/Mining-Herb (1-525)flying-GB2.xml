@@ -452,6 +452,7 @@
       <FlyToAction Dismount="True" Location="1910.606, -4391.944, 43.89495" />
       <TrainSkillAction NpcEntry="46741" Location="1902.69, -4450.71, 53.4155" />
       <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
+      <MoveToAction Location="1889.895, -4445.791, 52.52325" MoveType="Location" Pathing="Navigator" Entry="0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInDalaran">
