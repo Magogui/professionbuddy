@@ -154,7 +154,7 @@ namespace HighVoltz
                             }
                         }
                         else
-                            Professionbuddy.Err("Unable to bind xml attribute: {0} to Type: {1}", attr.Key, type);
+                            Professionbuddy.Log("{0}->{1} appears to be unused",  type,attr.Key);
                     }
                     if (pbComp is GroupComposite)
                         Load(element, pbComp as GroupComposite);
@@ -166,8 +166,7 @@ namespace HighVoltz
 
         static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
         {
-            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path) &&
-                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
+            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path))
             {
                 Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction)comp).Path, UriKind.Relative));
                 string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);

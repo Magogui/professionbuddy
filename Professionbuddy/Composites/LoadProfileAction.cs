@@ -1,45 +1,26 @@
 ﻿using System;
 using System.ComponentModel;
 using TreeSharp;
-using Styx.Helpers;
 using Styx.Logic.Profiles;
-using System.Xml;
-using System.IO;
 using System.Drawing.Design;
-using Styx.Logic.Combat;
 
 namespace HighVoltz.Composites
 {
     #region LoadProfileAction
-    public class LoadProfileAction : PBAction
+    public sealed class LoadProfileAction : PBAction
     {
-        public enum LoadProfileType
-        {
-            Honorbuddy,
-            Professionbuddy,
-        }
         [PbXmlAttribute]
         public string Path
         {
             get { return (string)Properties["Path"].Value; }
             set { Properties["Path"].Value = value; }
         }
-        [PbXmlAttribute]
-        public LoadProfileType ProfileType
-        {
-            get { return (LoadProfileType)Properties["ProfileType"].Value; }
-            set { Properties["ProfileType"].Value = value; }
-        }
-        string folder;
+
         public LoadProfileAction()
         {
             Properties["Path"] = new MetaProp("Path", typeof(string), new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)));
-            Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType));
             Path = "";
-            ProfileType = LoadProfileType.Honorbuddy;
-
-            folder = Logging.ApplicationPath;
-        }  
+        }
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -57,30 +38,11 @@ namespace HighVoltz.Composites
             {
                 try
                 {
-                    if (ProfileType == LoadProfileType.Honorbuddy)
-                    {
-                        Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath,ProfileManager.XmlLocation);
-                        if (string.IsNullOrEmpty(Path))
-                        {
-                            ProfileManager.LoadEmpty();
-                        }
-                        else if (System.IO.File.Exists(absPath))
-                        {
-                            ProfileManager.LoadNew(absPath);
-                        }
-                        else
-                        {
-                            Logging.Write(System.Drawing.Color.Red, "Unable to load profile {0}", Path);
-                        }
-                    }
+                    Professionbuddy.LoadProfile(absPath);
+                    if (Pb.ProfileSettings.Settings.Count > 0 && MainForm.IsValid)
+                        MainForm.Instance.AddProfileSettingsTab();
                     else
-                    {
-                        Professionbuddy.LoadProfile(absPath);
-                        if (Pb.ProfileSettings.Settings.Count > 0 && MainForm.IsValid)
-                            MainForm.Instance.AddProfileSettingsTab();
-                        else
-                            MainForm.Instance.RemoveProfileSettingsTab();
-                    }
+                        MainForm.Instance.RemoveProfileSettingsTab();
                 }
                 catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
             }
@@ -91,7 +53,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return string.Format("{0}: {1} ProfileType:{2}", Name, Path, ProfileType);
+                return string.Format("{0}: {1}", Name, Path);
             }
         }
         public override string Help
@@ -103,7 +65,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new LoadProfileAction() { Path = this.Path, ProfileType = this.ProfileType };
+            return new LoadProfileAction { Path = this.Path };
         }
     }
     #endregion
