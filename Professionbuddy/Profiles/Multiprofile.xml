@@ -173,6 +173,7 @@
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Uldum: {0}&quot;,Settings[&quot;Uldum&quot;]);" />
     <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Deepholm: {0}&quot;,Settings[&quot;Deepholm&quot;]);" />
+    <CustomAction Code="Log(Color.Green,&quot;MultiProfile: &quot;,Color.LightGreen,&quot;Vashjir: {0}&quot;,Settings[&quot;Vashjir&quot;]);" />
     <Declaration Code="string Realm;" />
     <Declaration Code="bool OnFarmer;" />
     <Declaration Code="int CityZoneID,TimeToSpendInZone;" />

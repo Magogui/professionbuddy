@@ -63,34 +63,34 @@
         </If>
         <If Condition=" LowestMinLevel ==75" IgnoreCanRun="True">
           <!--Mining 1-50 and Herb 1-50-->
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel ==150" IgnoreCanRun="True">
           <!--Mining 50-125 and Herb 50-125-->
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel ==225" IgnoreCanRun="True">
           <If Condition="(herb &amp;&amp; HerbLevel &lt; 160)" IgnoreCanRun="True">
             <!--Mining 65-125 and Herb 120-160-->
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="((mining &amp;&amp; MiningLevel &lt; 175) &amp;&amp; (herb &amp;&amp; HerbLevel &gt;= 160 &amp;&amp; HerbLevel &lt; 200)) || (!mining &amp;&amp; herb &amp;&amp; HerbLevel &gt;= 160 &amp;&amp; HerbLevel &lt; 200)" IgnoreCanRun="True">
             <!--Mining 125-175 and Herb 160-200-->
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=175  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=200 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=200 ))" IgnoreCanRun="True">
             <!--Mining 175-235 and Herb 200-260-->
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel ==300" IgnoreCanRun="True">
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 235) || (herb &amp;&amp; HerbLevel &lt; 260)" IgnoreCanRun="True">
             <!--Mining 175-235 and Herb 200-260-->
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=235  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=260 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=260 ))" IgnoreCanRun="True">
             <!--Mining 250-300 and Herb 260-300-->
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 )" IgnoreCanRun="True">
@@ -103,39 +103,39 @@
         </If>
         <!--Mining 1-50 and Herb 1-50-->
         <If Condition=" LowestMinLevel ==75" IgnoreCanRun="True">
-          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+          <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel == 150" IgnoreCanRun="True">
           <!--Mining 50-65 and Herb 50-75-->
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 65) || (herb &amp;&amp; HerbLevel &lt; 75)" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 65-125 and Herb 75-150-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=65  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=75 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=65 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=75 ))" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel == 225" IgnoreCanRun="True">
           <!--Mining 125-175 and Herb 150-225-->
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 175) || (herb &amp;&amp; HerbLevel &lt;225)" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 175-235 and Herb 225-280-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=175  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=225 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=225 ))" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel == 300" IgnoreCanRun="True">
           <If Condition="(herb &amp;&amp; HerbLevel &lt;225)" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 175-235 and Herb 225-280-->
           <If Condition="(herb &amp;&amp; HerbLevel&gt;=225 &amp;&amp; HerbLevel &lt;280 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &lt;235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=225 &amp;&amp; HerbLevel &lt; 280))" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 235-300 and Herb 280-300-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=235 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=280 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=280 ))" IgnoreCanRun="True">
-            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+            <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 )" IgnoreCanRun="True">
@@ -145,7 +145,7 @@
     </If>
     <!--Herb/Mining 300-350-->
     <If Condition=" LowestMinLevel ==375" IgnoreCanRun="True">
-      <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+      <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" />
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.MapId == 530" IgnoreCanRun="True">
@@ -221,10 +221,10 @@
         </If>
       </While>
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 400) || (herb &amp;&amp; HerbLevel &lt; 400)" IgnoreCanRun="True">
-        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" />
       </If>
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=400 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=400 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=400 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=400 ))" IgnoreCanRun="True">
-        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" ProfileType="Honorbuddy" />
+        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" />
       </If>
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt; 450)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 450)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
@@ -284,10 +284,10 @@
         </If>
       </While>
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 475) || (herb &amp;&amp; HerbLevel &lt; 475)" IgnoreCanRun="True">
-        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
+        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" />
       </If>
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=475 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=475 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=475 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=475 ))" IgnoreCanRun="True">
-        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 475-525)(Uldum.Neutral)Herb&amp;Mining-herb.xml" ProfileType="Honorbuddy" />
+        <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 475-525)(Uldum.Neutral)Herb&amp;Mining-herb.xml" />
       </If>
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel == 525)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &gt;= 525)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
