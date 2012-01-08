@@ -33,6 +33,7 @@
     <Settings DefaultValue="true" Type="Boolean" Name="DeleteLifegivingSeeds" Summary="will automatically delete any lifegiving seeds" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="DepositInGbank" Summary="deposits items in Gbank instead of mailing them to banker" Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="Bots\Professionbuddy\Profiles\HBProfiles\GatheringProfiles" Type="String" Name="ProfileFolderPath" Summary="This is the path to the base profile folder. Inside are subfolders named after the zones they contain profiles for." Category="Advanced" Global="True" Hidden="False" />
+    <Settings DefaultValue="100" Type="Int32" Name="FarmersGold" Summary="Amount of gold on farmer" Category="Auction House" Global="False" Hidden="True" />
     <Settings DefaultValue="true" Type="Boolean" Name="CancelAuctions" Summary="Set to true to cancel auctions before posting on AH" Category="Auction House" Global="False" Hidden="False" />
     <Settings DefaultValue="100" Type="Int32" Name="Max Stack Number" Summary="Max number of stacks to post on the AH" Category="Auction House" Global="False" Hidden="False" />
   </SubRoutine>
