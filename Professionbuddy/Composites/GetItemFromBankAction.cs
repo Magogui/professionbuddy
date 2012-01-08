@@ -55,6 +55,7 @@ namespace HighVoltz.Composites
             set { Properties["NpcEntry"].Value = value; }
         }
         [PbXmlAttribute]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Amount
         {
             get { return (DynamicProperty<int>)Properties["Amount"].Value; }
