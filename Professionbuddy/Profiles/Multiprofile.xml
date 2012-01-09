@@ -51,7 +51,7 @@
     <If Condition="OnFarmer == true" IgnoreCanRun="True">
       <!--Kelp Forest-->
       <If Condition=" Me.ZoneId == 4815" IgnoreCanRun="True">
-        <!--Alliance-->
+        <!--Alliance start-->
         <If Condition="DistanceTo(-4457.208, 3815.211, -84.08506) &lt;=20" IgnoreCanRun="True">
           <MoveToAction Location="-4457.208, 3815.211, -84.08506" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4435.112, 3822.904, -92.60922" MoveType="Location" Pathing="ClickToMove" Entry="0" />
@@ -60,11 +60,17 @@
           <MoveToAction Location="-4439.158, 3793.521, -82.68282" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <FlyToAction Dismount="False" Location="-4429.622, 3818.259, 9.793991" />
         </If>
-        <!--Horde-->
+        <!--Horde start-->
         <If Condition="DistanceTo(-4610.313, 3976.323, -76.19572) &lt;=20" IgnoreCanRun="True">
           <MoveToAction Location="-4610.313, 3976.323, -76.19572" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4600.814, 3963.996, -77.08904" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <FlyToAction Dismount="False" Location="-4592.624, 3963.549, 31.30406" />
+        </If>
+        <!--Smuggler's Scar-->
+        <If Condition="DistanceTo(-4563.792, 3470.485, -101.559) &lt;=20" IgnoreCanRun="True">
+          <MoveToAction Location="-4600.917, 3500.246, -110.1246" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <FlyToAction Dismount="False" Location="-4678.23, 3573.881, -106.3267" />
+          <FlyToAction Dismount="False" Location="-4687.506, 3569.176, 27.10561" />
         </If>
         <FlyToAction Dismount="True" Location="-6406.231, 6427.917, 32.64967" />
       </If>
@@ -174,22 +180,22 @@
   <SubRoutine SubRoutineName="MailItems">
     <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.SubType == WoWGameObjectType.Mailbox);" Timeout="20000" />
     <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="0" AutoFindMailBox="True" Location="0, 0, 0" />
-    <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-    <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+    <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+    <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="StoreItemsInGbank">
     <CallSubRoutine SubRoutineName="MoveToGbank" />
     <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Storing items in GBank&quot;);" />
-    <PutItemInBankAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
-    <PutItemInBankAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
+    <PutItemInBankAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
+    <PutItemInBankAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="MetalStone" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Elemental" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="1g50s0c" MaxBuyout="20g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Herb" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="Cloth" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
-    <SellItemOnAhAction UseCategory="True" Category="Armor" SubCategory="Misc" SubCategoryType="WoWItemArmorClass" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Elemental" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="1g50s0c" MaxBuyout="20g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Herb" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="6g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="Cloth" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="200g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
+    <SellItemOnAhAction Category="Armor" SubCategoryType="WoWItemArmorClass" SubCategory="Misc" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="100g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Hearth">
     <!--Dismount and use hearthstone-->
