@@ -1,6 +1,5 @@
 ﻿//!CompilerOption:Optimize:On
 //!CompilerOption:AddRef:WindowsBase.dll
-
 // Professionbuddy botbase by HighVoltz
 
 using System;

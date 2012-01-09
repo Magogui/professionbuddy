@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing.Design;
 using System.Globalization;
 using System.Linq;
+using System.Xml.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
@@ -85,64 +86,26 @@ namespace HighVoltz.Composites
             get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
-        [PbXmlAttribute]
         public WoWItemClass Category
         {
             get { return (WoWItemClass)Properties["Category"].Value; }
             set
             {
-                Properties["Category"].Value = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), value.ToString());
+                Properties["Category"].Value = value;
             }
         }
-        string _subCatValueString;
-        [PbXmlAttribute]
         public object SubCategory
         {
             get
-            { // since subCategory type is sometimes set last we need to wait at a later peried to actually convert the enum value.
+            {
                 return Properties["SubCategory"].Value;
             }
             set
             {
-                if (value is string)
-                {
-                    if (_subCatTypeLoaded)
-                    {
-                        value = Enum.Parse(_subCategoryType, value as string);
-                    }
-                    else
-                    {
-                        _subCatValueString = (string)value;
-                        return;
-                    }
-                }
                 Properties["SubCategory"].Value = value;
-                //UpdateSubCatValue(); 
             }
         }
-        Type _subCategoryType = typeof(WoWItemTradeGoodsClass);
-        bool _subCatTypeLoaded;
-        [PbXmlAttribute]
-        public string SubCategoryType
-        {
-            get { return _subCategoryType.Name; }
-            set
-            {
-                _subCatTypeLoaded = true;
-                if (value != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", value);
-                    _subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    _subCategoryType = typeof(SubCategoryType);
-                if (_subCatValueString != null)
-                {
-                    SubCategory = Enum.Parse(_subCategoryType, _subCatValueString);
-                    _subCatValueString = null;
-                }
-            }
-        }
+
         [PbXmlAttribute]
         public BankType Bank
         {
@@ -202,7 +165,7 @@ namespace HighVoltz.Composites
             Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
 
-            Amount = new DynamicProperty<int>(this,"0");
+            Amount = new DynamicProperty<int>(this, "0");
             RegisterDynamicProperty("Amount");
             ItemID = "";
             Bank = BankType.Personal;
@@ -648,19 +611,52 @@ namespace HighVoltz.Composites
         {
             return new PutItemInBankAction
                        {
-                ItemID = this.ItemID,
-                Amount = this.Amount,
-                Bank = this.Bank,
-                NpcEntry = this.NpcEntry,
-                _loc = this._loc,
-                GuildTab = this.GuildTab,
-                AutoFindBank = this.AutoFindBank,
-                Parent = this.Parent,
-                Location = this.Location,
-                UseCategory = this.UseCategory,
-                Category = this.Category,
-                SubCategory = this.SubCategory,
-            };
+                           ItemID = this.ItemID,
+                           Amount = this.Amount,
+                           Bank = this.Bank,
+                           NpcEntry = this.NpcEntry,
+                           _loc = this._loc,
+                           GuildTab = this.GuildTab,
+                           AutoFindBank = this.AutoFindBank,
+                           Parent = this.Parent,
+                           Location = this.Location,
+                           UseCategory = this.UseCategory,
+                           Category = this.Category,
+                           SubCategory = this.SubCategory,
+                       };
+        }
+
+        public override void OnProfileLoad(XElement element)
+        {
+            var cat = element.Attribute("Category");
+            var subCatAttr = element.Attribute("SubCategory");
+            var subCatTypeAttr = element.Attribute("SubCategoryType");
+            if (cat != null)
+            {
+                Category = (WoWItemClass) Enum.Parse(typeof (WoWItemClass), cat.Value);
+                cat.Remove();
+            }
+            if (subCatAttr != null && subCatTypeAttr != null)
+            {
+                Type subCategoryType;
+                if (subCatTypeAttr.Value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof(SubCategoryType);
+                SubCategory = Enum.Parse(subCategoryType, subCatAttr.Value);
+                subCatAttr.Remove();
+                subCatTypeAttr.Remove();
+            }
+        }
+
+        public override void OnProfileSave(XElement element)
+        {
+            element.Add(new XAttribute("Category", Category.ToString()));
+            element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
+            element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
         }
     }
     #endregion

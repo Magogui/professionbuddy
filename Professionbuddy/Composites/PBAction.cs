@@ -80,9 +80,9 @@ namespace HighVoltz.Composites
             HasRunOnce = false;
         }
 
-        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
+        public virtual void OnProfileLoad(System.Xml.Linq.XElement element) { }
 
-        public void OnProfileSave(System.Xml.Linq.XElement element) { }
+        public virtual void OnProfileSave(System.Xml.Linq.XElement element) { }
 
         void DynamicPropertyChanged(object sender, MetaPropArgs e)
         {
