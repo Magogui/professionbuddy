@@ -20,6 +20,10 @@
   <SellBlue>False</SellBlue>
   <SellPurple>False</SellPurple>
 
+   <Blackspots>
+	<Blackspot X="-4063.43" Y="-3928.65" Z="182.765 Radius="200" />
+  </Blackspots>
+  
 	<Vendors>
 		<Vendor Name="Brundall Chiselgut" Entry="50382" Type="Repair" X="-4847.408" Y="-6610.934" Z="9.416821" />
 	</Vendors>

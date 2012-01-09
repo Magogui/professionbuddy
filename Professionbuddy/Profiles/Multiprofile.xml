@@ -17,11 +17,11 @@
     <Settings DefaultValue="0" Type="UInt32" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" Global="False" Hidden="True" />
     <Settings DefaultValue="" Type="String" Name="BankerName" Summary="The Name of your banker" Category="Banker" Global="False" Hidden="False" />
     <Settings DefaultValue="" Type="String" Name="FarmerName" Summary="The Name of your Farmer" Category="Farmer" Global="False" Hidden="False" />
-    <Settings DefaultValue="true" Type="Boolean" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" Global="True" Hidden="False" />
-    <Settings DefaultValue="true" Type="Boolean" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" Global="True" Hidden="False" />
-    <Settings DefaultValue="true" Type="Boolean" Name="Uldum" Summary="Farm in Uldum" Category="Zones" Global="True" Hidden="False" />
-    <Settings DefaultValue="false" Type="Boolean" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" Global="True" Hidden="False" />
-    <Settings DefaultValue="false" Type="Boolean" Name="Vashjir" Summary="Farm in Vashjir" Category="Zones" Global="True" Hidden="False" />
+    <Settings DefaultValue="true" Type="Boolean" Name="Hyjal" Summary="Farm in Hyjal " Category="Zones" Global="False" Hidden="False" />
+    <Settings DefaultValue="true" Type="Boolean" Name="Twilight" Summary="Farm in Twilight Highlands" Category="Zones" Global="False" Hidden="False" />
+    <Settings DefaultValue="true" Type="Boolean" Name="Uldum" Summary="Farm in Uldum" Category="Zones" Global="False" Hidden="False" />
+    <Settings DefaultValue="false" Type="Boolean" Name="Deepholm" Summary="Farm in Deepholm" Category="Zones" Global="False" Hidden="False" />
+    <Settings DefaultValue="false" Type="Boolean" Name="Vashjir" Summary="Farm in Vashjir" Category="Zones" Global="False" Hidden="False" />
     <Settings DefaultValue="false" Type="Boolean" Name="EmptyBagsNow" Summary="Set to true to empty bags now." Category="Farmer" Global="False" Hidden="False" />
     <Settings DefaultValue="true" Type="Boolean" Name="SwitchToBanker" Summary="Set this to true if you want to switch to banker to AH items." Category="Banker" Global="False" Hidden="False" />
     <Settings DefaultValue="200" Type="Int32" Name="DepositAllButThisAmountInGBank" Summary="Deposits all gold except this amount." Category="Banker" Global="False" Hidden="False" />
@@ -51,7 +51,7 @@
     <If Condition="OnFarmer == true" IgnoreCanRun="True">
       <!--Kelp Forest-->
       <If Condition=" Me.ZoneId == 4815" IgnoreCanRun="True">
-        <!--Alliance start-->
+        <!--Alliance-->
         <If Condition="DistanceTo(-4457.208, 3815.211, -84.08506) &lt;=20" IgnoreCanRun="True">
           <MoveToAction Location="-4457.208, 3815.211, -84.08506" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4435.112, 3822.904, -92.60922" MoveType="Location" Pathing="ClickToMove" Entry="0" />
@@ -60,17 +60,11 @@
           <MoveToAction Location="-4439.158, 3793.521, -82.68282" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <FlyToAction Dismount="False" Location="-4429.622, 3818.259, 9.793991" />
         </If>
-        <!--Horde start-->
+        <!--Horde-->
         <If Condition="DistanceTo(-4610.313, 3976.323, -76.19572) &lt;=20" IgnoreCanRun="True">
-          <MoveToAction Location="-4610.313, 3976.323, -76.19572" MoveType="Location" Pathing="ClickToMove" Entry="0" />
-          <MoveToAction Location="-4600.814, 3963.996, -77.08904" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4610.633, 3974.902, -76.31163" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <MoveToAction Location="-4601.422, 3960.537, -73.73101" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <FlyToAction Dismount="False" Location="-4592.624, 3963.549, 31.30406" />
-        </If>
-        <!--Smuggler's Scar-->
-        <If Condition="DistanceTo(-4563.792, 3470.485, -101.559) &lt;=20" IgnoreCanRun="True">
-          <MoveToAction Location="-4600.917, 3500.246, -110.1246" MoveType="Location" Pathing="ClickToMove" Entry="0" />
-          <FlyToAction Dismount="False" Location="-4678.23, 3573.881, -106.3267" />
-          <FlyToAction Dismount="False" Location="-4687.506, 3569.176, 27.10561" />
         </If>
         <FlyToAction Dismount="True" Location="-6406.231, 6427.917, 32.64967" />
       </If>
@@ -157,9 +151,12 @@
         <CancelAuctionAction UseCategory="False" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" AutoFindAh="True" MinBuyout="0g0s0c" Location="0, 0, 0" />
       </If>
       <!--Get all mail and put it on AH-->
-      <While Condition="HasNewMail || MailCount&gt; 0" IgnoreCanRun="True">
+      <Declaration Code="bool StopGettingMail;" />
+      <CustomAction Code=" StopGettingMail = false;" />
+      <While Condition="(HasNewMail || MailCount&gt; 0) &amp;&amp; ! StopGettingMail" IgnoreCanRun="True">
         <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
         <CallSubRoutine SubRoutineName="SellOnAH" />
+        <CustomAction Code="if (Me.NormalBagsFull)  StopGettingMail = true;" />
       </While>
       <If Condition="(int)Settings[&quot;FarmersGold&quot;] &lt; 200 &amp;&amp; (int)Me.Gold &gt; 600" IgnoreCanRun="True">
         <CustomAction Code="Log (Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Mailing farmer gold because he/she has less than 200&quot;);" />
@@ -362,42 +359,46 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="MoveToGbank">
     <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Move to nearest GBank&quot;);" />
+    <Declaration Code="List&lt;WoWPoint&gt; GBankLocations = new List&lt;WoWPoint&gt;();" />
+    <Declaration Code="WoWPoint GbankLocation;" />
+    <CustomAction Code="GBankLocations.Clear();" />
+    <CustomAction Code="GbankLocation = WoWPoint.Zero;" />
     <If Condition="Me.MapId == 0" IgnoreCanRun="True">
       <!--Stormwind-->
       <If Condition="Me.ZoneId == 1519" IgnoreCanRun="True">
         <!--Stormwind 'Human' GuildBank-->
-        <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &lt; DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
-          <MoveToAction Location="-8920.106, 621.256, 100.226" MoveType="Location" Pathing="Navigator" Entry="0" />
-        </If>
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(-8920.106, 621.256, 100.226));" />
         <!--Stormwind 'Dwarf' GuildBank-->
-        <If Condition="DistanceTo(-8920.106, 621.256, 100.226) &gt;= DistanceTo(-8315.161, 582.8967, 100.3132)" IgnoreCanRun="True">
-          <MoveToAction Location="-8315.161, 582.8967, 100.3132" MoveType="Location" Pathing="Navigator" Entry="0" />
-        </If>
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(-8315.161, 582.8967, 100.3132));" />
       </If>
     </If>
     <If Condition="Me.MapId == 1" IgnoreCanRun="True">
       <!--Org-->
       <If Condition="Me.ZoneId == 1637" IgnoreCanRun="True">
         <!--Valley of Strength GuildBank-->
-        <If Condition="DistanceTo(1533.167, -4362.145, 20.54772) &lt; DistanceTo(1886.409, -4683.326, 38.5004)" IgnoreCanRun="True">
-          <MoveToAction Location="1533.167, -4362.145, 20.54772" MoveType="Location" Pathing="Navigator" Entry="0" />
-        </If>
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(1533.167, -4362.145, 20.54772));" />
         <!--Valley of Honor GuildBank-->
-        <If Condition="DistanceTo(1533.167, -4362.145, 20.54772) &gt;= DistanceTo(-1886.409, -4683.326, 38.5004)" IgnoreCanRun="True">
-          <MoveToAction Location="1886.409, -4683.326, 38.5004" MoveType="Location" Pathing="Navigator" Entry="0" />
-        </If>
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(1886.409, -4683.326, 38.5004));" />
+        <!--Valley of Wisdom GuildBank-->
+        <MoveToAction Location="1863.807, -4093.358, 185.3996" MoveType="Location" Pathing="Navigator" Entry="0" />
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(1863.807, -4093.358, 185.3996));" />
       </If>
     </If>
     <!--Dalaran-->
     <If Condition="Me.ZoneId == 4395" IgnoreCanRun="True">
       <!--North GuildBank-->
-      <If Condition="DistanceTo(5961.328, 616.5127, 650.6276) &lt; DistanceTo(5651.325, 682.1651, 651.9932)" IgnoreCanRun="True">
-        <MoveToAction Location="5961.328, 616.5127, 650.6276" MoveType="Location" Pathing="Navigator" Entry="0" />
-      </If>
+      <CustomAction Code="GBankLocations.Add(new WoWPoint(5961.328, 616.5127, 650.6276));" />
       <!--Valley of Honor GuildBank-->
-      <If Condition="DistanceTo(5961.328, 616.5127, 650.6276) &gt;= DistanceTo(5651.325, 682.1651, 651.9932)" IgnoreCanRun="True">
-        <MoveToAction Location="5651.325, 682.1651, 651.9932" MoveType="Location" Pathing="Navigator" Entry="0" />
-      </If>
+      <CustomAction Code="GBankLocations.Add(new WoWPoint(5651.325, 682.1651, 651.9932));" />
+    </If>
+    <If Condition="GBankLocations.Count== 0" IgnoreCanRun="True">
+      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;There is no gbank found in your area&quot;);" />
+    </If>
+    <If Condition="GBankLocations.Count &gt; 0" IgnoreCanRun="True">
+      <CustomAction Code="GbankLocation  = GBankLocations.OrderBy( pnt =&gt; pnt.Distance(Me.Location)).FirstOrDefault();" />
+      <While Condition="DistanceTo(GbankLocation) &gt; 5" IgnoreCanRun="True">
+        <CustomAction Code="MoveTo(GbankLocation);" />
+      </While>
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="LoadProfile">

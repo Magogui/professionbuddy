@@ -14,6 +14,11 @@
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining: {0}&quot;,Settings[&quot;Mining&quot;]);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;UseFakeSkills: {0}&quot;,Settings[&quot;UseFakeSkills&quot;]);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.Level: {0}&quot;,Mining.Level);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.MaxLevel: {0}&quot;,Mining.MaxLevel);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herbalism.Level: {0}&quot;,Herbalism.Level);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herbalism.MaxLevel: {0}&quot;,Herbalism.MaxLevel);" />
   <CustomAction Code="var1 = false;" />
   <!--mining = Gather Mines?-->
   <CustomAction Code="mining = (bool)Settings[&quot;Mining&quot;];" />
