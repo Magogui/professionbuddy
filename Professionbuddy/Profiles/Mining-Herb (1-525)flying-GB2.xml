@@ -74,7 +74,7 @@
             <!--Mining 65-125 and Herb 120-160-->
             <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" />
           </If>
-          <If Condition="((mining &amp;&amp; MiningLevel &lt; 175) &amp;&amp; (herb &amp;&amp; HerbLevel &gt;= 160 &amp;&amp; HerbLevel &lt; 200)) || (!mining &amp;&amp; herb &amp;&amp; HerbLevel &gt;= 160 &amp;&amp; HerbLevel &lt; 200)" IgnoreCanRun="True">
+          <If Condition="(herb &amp;&amp; HerbLevel&gt;=160 &amp;&amp; HerbLevel &lt;200 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &lt;175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=160 &amp;&amp; HerbLevel &lt; 200 ))" IgnoreCanRun="True">
             <!--Mining 125-175 and Herb 160-200-->
             <LoadProfileAction Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" />
           </If>
@@ -355,12 +355,12 @@
     <FlyToAction Dismount="True" Location="-4908.107, -974.3073, 501.4522" />
     <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="False" Location="-4908.314, -975.7229, 501.4461" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-      <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInStormwind">
@@ -369,12 +369,12 @@
     <FlyToAction Dismount="True" Location="-8355.722, 641.4622, 95.28886" />
     <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-      <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInStormwind">
@@ -399,13 +399,13 @@
     <FlyToAction Dismount="True" Location="1688.531, 730.3077, 73.82889" />
     <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-      <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <MoveToAction Location="1560.8, 355.098, -62.16309" MoveType="Location" Pathing="Navigator" Entry="0" />
-      <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInUndercity">
@@ -426,13 +426,13 @@
     <FlyToAction Dismount="True" Location="2012.031, -4690.59, 28.64125" />
     <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-      <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <MoveToAction Location="2012.031, -4690.59, 28.64125" MoveType="Location" Pathing="Navigator" Entry="0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInOrg">
@@ -465,12 +465,12 @@
     </If>
     <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <SellItemOnAhAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
-      <SellItemOnAhAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
+      <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction UseCategory="True" Category="Gem" SubCategory="None" SubCategoryType="WoWItemGemClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction UseCategory="True" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
     <MoveToAction Location="5901.044, 724.9983, 639.8762" MoveType="Location" Pathing="Navigator" Entry="0" />
   </SubRoutine>
