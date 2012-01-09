@@ -402,8 +402,7 @@ namespace HighVoltz.Composites
             List<WoWObject> bankers;
             if (Bank == BankType.Guild)
                 bankers = (from banker in ObjectManager.ObjectList
-                           where (banker is WoWGameObject && ((WoWGameObject)banker).SubType == WoWGameObjectType.GuildBank) ||
-                             (banker is WoWUnit && ((WoWUnit)banker).IsGuildBanker && ((WoWUnit)banker).IsAlive && ((WoWUnit)banker).CanSelect)
+                           where IsValidGuildBank(banker)
                            select banker).ToList();
             else
                 bankers = (from banker in ObjectManager.ObjectList
@@ -422,6 +421,21 @@ namespace HighVoltz.Composites
                     OrderBy(o => o.Distance).FirstOrDefault();
             }
             return bank;
+        }
+
+        bool IsValidGuildBank(WoWObject obj)
+        {
+            if (obj is WoWGameObject)
+            {
+                var banker = (WoWGameObject)obj;
+                return banker.SubType == WoWGameObjectType.GuildBank && (banker.CreatedByGuid == 0 || banker.CreatedByGuid == Me.Guid);
+            }
+            if (obj is WoWUnit)
+            {
+                var banker = (WoWUnit)obj;
+                return banker.IsGuildBanker && banker.IsAlive && banker.CanSelect;
+            }
+            return false;
         }
 
         #region GuildBank
