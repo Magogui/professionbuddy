@@ -29,6 +29,7 @@
  
    <Blackspots>
 		<Blackspot X="-4063.43" Y="-3928.65" Z="182.765" Radius="200" />
+		<Blackspot X="-3857.25" Y="-4085.16" Z="178.191" Radius="200"/>
   </Blackspots>
   
   <Hotspots>
