@@ -166,7 +166,8 @@ namespace HighVoltz
 
         static internal void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
         {
-            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path))
+            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction)comp).Path) && 
+                ((LoadProfileAction)comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)  
             {
                 Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction)comp).Path, UriKind.Relative));
                 string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);

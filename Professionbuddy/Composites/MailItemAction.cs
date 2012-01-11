@@ -205,6 +205,9 @@ namespace HighVoltz.Composites
                 uint itemID = _itemList.Keys.FirstOrDefault();
                 WoWItem item = Me.BagItems.FirstOrDefault(i => i.Entry == itemID);
                 _mailSubject = item != null ? item.Name : " ";
+                if (string.IsNullOrEmpty(_mailSubject))
+                    _mailSubject = " ";
+                Professionbuddy.Debug("MailItem: sending {0}", itemID);
                 int ret = MailItem(itemID, _itemList[itemID]);
                 // we need to wait for item split to finish if ret == 0
                 // format indexs are MailRecipient=0, Mail subject=1
@@ -218,7 +221,7 @@ namespace HighVoltz.Composites
                     return RunStatus.Success;
                 }
                 _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
-                Professionbuddy.Debug("MailItem: sending {0}", itemID);
+
                 bool done = _itemList[itemID] <= 0;
                 if (done)
                 {
@@ -286,6 +289,70 @@ namespace HighVoltz.Composites
             }
             return false;
         }
+        /*    
+local amount = 100 
+local itemId = 53038  
+local mailto = "bankerName"
+local mailItemI =1  
+local freeBagSlots = 0  
+local bagged =0  
+for i=0,NUM_BAG_SLOTS do  
+   freeBagSlots = freeBagSlots  GetContainerNumFreeSlots(i)  
+end  
+local bagInfo={}  
+for bag = 0,NUM_BAG_SLOTS do  
+   for slot=1,GetContainerNumSlots(bag) do  
+      local id = GetContainerItemID(bag,slot) or 0  
+      local _,c,l = GetContainerItemInfo(bag, slot)  
+      if id == itemId and l == nil then  
+         table.insert(bagInfo,{bag,slot,c})  
+      end  
+   end  
+end  
+local sortF = function (a,b)  
+   if a == nil and b == nil or b == nil then return false end  
+   if a == nil or  a[3] < b[3] then return true else return false end  
+end  
+if #bagInfo == 0 then return -1 end  
+table.sort(bagInfo,sortF)  
+local bagI = #bagInfo  
+while bagI > 0 do  
+   if GetSendMailItem(mailItemI) == nil then  
+      while bagInfo[bagI][3] > amount-bagged and bagI >1 do bagI = bagI - 1 end  
+      if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then  
+         PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2])  
+         ClickSendMailItemButton(mailItemI)  
+         bagged = bagged + bagInfo[bagI][3]  
+         bagI = bagI - 1  
+      else  
+         local cnt = bagInfo[bagI][3]-amount  
+         SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt)  
+         local bagSpaces ={}   for b=NUM_BAG_SLOTS,0,-1 do  
+            bagSpaces = GetContainerFreeSlots(b)  
+            if #bagSpaces > 0 then  
+               PickupContainerItem(b,bagSpaces[#bagSpaces])  
+               return 0  
+            end  
+         end  
+      end  
+   end  
+   if bagged >= amount then return -1 end  
+   mailItemI = mailItemI + 1  
+   if mailItemI > ATTACHMENTS_MAX_SEND then  
+      break  
+   end  
+end  
+local cnt = 0 
+for i=1,ATTACHMENTS_MAX_SEND do 
+   if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end 
+end 
+if cnt == ATTACHMENTS_MAX_SEND then 
+   SendMail (mailto," ",'') 
+   return 1 
+end 
+return 0 
+        */
+
         // format indexs are ItemID=0, Amount=1
         private const string MailItemLuaFormat =
             "local mailItemI =1 " +
@@ -295,7 +362,8 @@ namespace HighVoltz.Composites
             "local bagged =0 " +
             "for i=0,NUM_BAG_SLOTS do " +
                 "freeBagSlots = freeBagSlots + GetContainerNumFreeSlots(i) " +
-            "end " + "local bagInfo={{}} " +
+            "end " +
+            "local bagInfo={{}} " +
             "for bag = 0,NUM_BAG_SLOTS do " +
                 "for slot=1,GetContainerNumSlots(bag) do " +
                     "local id = GetContainerItemID(bag,slot) or 0 " +
@@ -334,7 +402,7 @@ namespace HighVoltz.Composites
             "end " +
         "if bagged >= amount then return -1 end " +
             "mailItemI = mailItemI + 1 " +
-            "if mailItemI > ATTACHMENTS_MAX_SEND then " +//"SendMailMailButton:Click() " +
+            "if mailItemI > ATTACHMENTS_MAX_SEND then " +
                 "return bagged " +
             "end " +
         "end " +

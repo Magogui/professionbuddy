@@ -9,6 +9,13 @@ namespace HighVoltz.Composites
     #region LoadProfileAction
     public sealed class LoadProfileAction : PBAction
     {
+        public enum LoadProfileType { Honorbuddy, Professionbuddy }
+        [PbXmlAttribute]
+        public LoadProfileType ProfileType
+        {
+            get { return (LoadProfileType)Properties["ProfileType"].Value; } 
+            set { Properties["ProfileType"].Value = value; }
+        }  
         [PbXmlAttribute]
         public string Path
         {
@@ -19,7 +26,9 @@ namespace HighVoltz.Composites
         public LoadProfileAction()
         {
             Properties["Path"] = new MetaProp("Path", typeof(string), new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)));
-            Path = "";
+            Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType));
+            Path = ""; 
+            ProfileType = LoadProfileType.Honorbuddy;  
         }
         protected override RunStatus Run(object context)
         {
