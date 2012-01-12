@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using HighVoltz.Composites;
 using HighVoltz.Dynamic;
+using Styx.Logic.Combat;
 using TreeSharp;
 
 namespace HighVoltz
@@ -22,7 +23,6 @@ namespace HighVoltz
         public PbProfile()
         {
             ProfilePath = XmlPath = "";
-            //Branch = new PrioritySelector();
         }
         public PbProfile(string path)
         {

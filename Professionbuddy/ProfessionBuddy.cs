@@ -34,8 +34,6 @@ namespace HighVoltz
         public List<TradeSkill> TradeSkillList { get; private set; }
         // <itemId,count>
         public DataStore DataStore { get; private set; }
-        // path to the currently loaded HB profile
-        public static string HonorBuddyProfilePath { get; set; }
         // dictionary that keeps track of material list using item ID for key and number required as value
         public Dictionary<uint, int> MaterialList { get; private set; }
         public List<uint> ProtectedItems { get; private set; }
@@ -44,13 +42,13 @@ namespace HighVoltz
         // ReSharper disable InconsistentNaming
         private const string _name = "ProfessionBuddy";
         // ReSharper restore InconsistentNaming
-        public static string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
+        public static readonly string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
 
         public readonly string ProfilePath = Environment.UserName == "highvoltz" ?
                         @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles" : Path.Combine(BotPath, "Profiles");
 
         public event EventHandler OnTradeSkillsLoaded;
-        public readonly LocalPlayer Me = ObjectManager.Me;
+        static readonly LocalPlayer Me = ObjectManager.Me;
         readonly Svn _svn = new Svn();
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
         public bool HasDataStoreAddon { get { return DataStore != null && DataStore.HasDataStoreAddon; } }
@@ -64,7 +62,7 @@ namespace HighVoltz
         public bool IsRunning;
         // static instance
         public static Professionbuddy Instance { get; private set; }
-        public Version Version { get { return new Version(1, _svn.Revision); } }
+        private Version Version { get { return new Version(1, _svn.Revision); } }
         // test some culture specific stuff.
         private readonly bool _ctorRunOnce;
         public Professionbuddy()
@@ -170,7 +168,7 @@ namespace HighVoltz
         {
             public InvisiForm()
             {
-                Size = new System.Drawing.Size(0, 0);
+                Size = new Size(0, 0);
             }
             protected override void OnLoad(EventArgs e)
             {
@@ -204,7 +202,7 @@ namespace HighVoltz
             {
                 _onSpellsChangedSpamSw.Stop();
                 _onSpellsChangedSpamSw.Reset();
-                OnSpellsChangedCB(null);
+                OnSpellsChangedCB();
             }
         }
 
@@ -220,7 +218,8 @@ namespace HighVoltz
         #region OnBagUpdate
 
         readonly Stopwatch _onBagUpdateSpamSW = new Stopwatch();
-        public void OnBagUpdate(object obj, LuaEventArgs args)
+
+        private void OnBagUpdate(object obj, LuaEventArgs args)
         {
             if (!_onBagUpdateSpamSW.IsRunning)
             {
@@ -252,7 +251,8 @@ namespace HighVoltz
         #region OnSkillUpdate
 
         readonly Stopwatch _onSkillUpdateSpamSW = new Stopwatch();
-        public void OnSkillUpdate(object obj, LuaEventArgs args)
+
+        private void OnSkillUpdate(object obj, LuaEventArgs args)
         {
             foreach (object o in args.Args)
                 Debug("spell changed {0}", o);
@@ -303,7 +303,8 @@ namespace HighVoltz
         #region OnSpellsChanged
 
         readonly Stopwatch _onSpellsChangedSpamSw = new Stopwatch();
-        public void OnSpellsChanged(object obj, LuaEventArgs args)
+
+        private void OnSpellsChanged(object obj, LuaEventArgs args)
         {
             if (!_onSpellsChangedSpamSw.IsRunning)
             {
@@ -311,7 +312,8 @@ namespace HighVoltz
                 _onSpellsChangedSpamSw.Start();
             }
         }
-        public void OnSpellsChangedCB(Object stateInfo)
+
+        private void OnSpellsChangedCB()
         {
             try
             {
@@ -347,7 +349,19 @@ namespace HighVoltz
             {
                 if (_init)
                 {
-                    LoadProfile(ProfileManager.XmlLocation);
+                    if (Instance.IsRunning)
+                    {
+                        System.Windows.Application.Current.Dispatcher.Invoke(
+                            new System.Action(() =>
+                            {
+                                TreeRoot.Stop();
+                                LoadProfile(ProfileManager.XmlLocation);
+                                TreeRoot.Start();
+                            }
+                        ));
+                    }
+                    else
+                        LoadProfile(ProfileManager.XmlLocation);
                     if (MainForm.IsValid)
                     {
                         if (Instance.ProfileSettings.Settings.Count > 0)
@@ -381,7 +395,7 @@ namespace HighVoltz
         public PbDecorator PbBehavior
         {
             get { return _root.PbBotBase; }
-            set { _root.PbBotBase = value; }
+            private set { _root.PbBotBase = value; }
         }
 
 
@@ -396,7 +410,8 @@ namespace HighVoltz
         #region Misc
 
         static bool _init;
-        public void Init()
+
+        private void Init()
         {
             try
             {
@@ -442,7 +457,7 @@ namespace HighVoltz
                     _init = true;
                 }
             }
-            catch (Exception ex) { Logging.Write(System.Drawing.Color.Red, ex.ToString()); }
+            catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
         }
 
         WoWSkill[] SupportedTradeSkills
@@ -486,7 +501,7 @@ namespace HighVoltz
                     OnTradeSkillsLoaded(this, null);
                 }
             }
-            catch (Exception ex) { Logging.Write(System.Drawing.Color.Red, ex.ToString()); }
+            catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
         }
 
         public void UpdateMaterials()
@@ -594,7 +609,7 @@ namespace HighVoltz
                 Err("Bot with name: {0} was not found", botName);
         }
 
-        public static void PreLoadHbProfile()
+        private static void PreLoadHbProfile()
         {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
             {
@@ -664,7 +679,7 @@ namespace HighVoltz
         #region Utilies
         public static void Err(string format, params object[] args)
         {
-            Logging.Write(System.Drawing.Color.Red, "Err: " + format, args);
+            Logging.Write(Color.Red, "Err: " + format, args);
         }
         static string _logHeader;
         static string Header
@@ -678,23 +693,23 @@ namespace HighVoltz
         public static void Log(string format, params object[] args)
         {
             //Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
-            LogInvoker(System.Drawing.Color.DodgerBlue, Header, System.Drawing.Color.LightSteelBlue, format, args);
+            LogInvoker(Color.DodgerBlue, Header, Color.LightSteelBlue, format, args);
         }
 
-        public static void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
+        public static void Log(Color headerColor, string header, Color msgColor, string format, params object[] args)
         {
             LogInvoker(headerColor, header, msgColor, format, args);
         }
 
         public static void Debug(string format, params object[] args)
         {
-            Logging.WriteDebug(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
+            Logging.WriteDebug(Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
         static System.Windows.Controls.RichTextBox _rtbLog;
-        delegate void LogDelegate(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args);
+        delegate void LogDelegate(Color headerColor, string header, Color msgColor, string format, params object[] args);
 
-        static void LogInvoker(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
+        static void LogInvoker(Color headerColor, string header, Color msgColor, string format, params object[] args)
         {
             if (System.Windows.Application.Current.Dispatcher.Thread == Thread.CurrentThread)
                 LogInternal(headerColor, header, msgColor, format, args);
@@ -702,7 +717,7 @@ namespace HighVoltz
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), headerColor, header, msgColor, format, args);
         }
 
-        static void LogInternal(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args)
+        static void LogInternal(Color headerColor, string header, Color msgColor, string format, params object[] args)
         {
             try
             {
