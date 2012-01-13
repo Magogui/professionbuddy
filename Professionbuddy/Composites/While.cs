@@ -14,7 +14,6 @@ namespace HighVoltz.Composites
             if ((_isRunning && IgnoreCanRun) || CanRun(context))
             {
                 _isRunning = true;
-                PbDecorator.EndOfWhileLoopReturn = false;
                 bool shouldBreak = false;
                 foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
                 {

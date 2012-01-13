@@ -30,6 +30,7 @@ namespace HighVoltz.Composites
             if (CanRun)
             {
                 bool shouldBreak = false;
+                EndOfWhileLoopReturn = false;
                 foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
                 {
                     child.Start(context);
