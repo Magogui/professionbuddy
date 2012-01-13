@@ -270,7 +270,7 @@
     <Declaration Code="uint currentZoneID;" />
     <If Condition="MountHelper.FlyingMounts.Count == 0" IgnoreCanRun="True">
       <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.Red,&quot;Waiting for MountHelper to refresh !!&quot;);" />
-      <WaitAction Condition="MountHelper.FlyingMounts.Count &gt; 0" Timeout="600000" />
+      <WaitAction Condition="MountHelper.FlyingMounts.Count &gt; 0" Timeout="300000" />
     </If>
     <CustomAction Code="currentZoneID = Me.ZoneId;" />
     <!--Hyjal-->
