@@ -493,6 +493,11 @@ namespace HighVoltz.Composites
                         }
                         return depositAmount;
                     }
+                    if (tab > 0)
+                    {
+                        Professionbuddy.Log("Guild Tab: {0} is full",tab);
+                        return -1;
+                    }
                     if (tab == 0 && currentTab < tabCnt)
                     {
                         Lua.DoString("SetCurrentGuildBankTab({0})", currentTab + 1);
@@ -541,7 +546,7 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        public bool PutItemInBank(uint id, int amount)
+        private bool PutItemInBank(uint id, int amount)
         {
             string lua = string.Format(
                 "local bagged = 0 " +

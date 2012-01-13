@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
 using Styx.Logic.Inventory.Frames.Gossip;
@@ -47,7 +48,7 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
-
+        Stopwatch _concludingStopWatch = new Stopwatch();
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -87,9 +88,17 @@ namespace HighVoltz.Composites
                     }
                     return RunStatus.Success;
                 }
-                Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
-                Professionbuddy.Log("Training Completed ");
-                IsDone = true;
+                if (!_concludingStopWatch.IsRunning)
+                {
+                    Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
+                    _concludingStopWatch.Start();
+                }
+                else if (_concludingStopWatch.ElapsedMilliseconds >= 3000)
+                {
+                    _concludingStopWatch.Reset();
+                    Professionbuddy.Log("Training Completed ");
+                    IsDone = true;
+                }
             }
             return RunStatus.Failure;
         }

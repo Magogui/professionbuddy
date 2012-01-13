@@ -13,9 +13,9 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public LoadProfileType ProfileType
         {
-            get { return (LoadProfileType)Properties["ProfileType"].Value; } 
+            get { return (LoadProfileType)Properties["ProfileType"].Value; }
             set { Properties["ProfileType"].Value = value; }
-        }  
+        }
         [PbXmlAttribute]
         public string Path
         {
@@ -27,8 +27,8 @@ namespace HighVoltz.Composites
         {
             Properties["Path"] = new MetaProp("Path", typeof(string), new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)));
             Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType));
-            Path = ""; 
-            ProfileType = LoadProfileType.Honorbuddy;  
+            Path = "";
+            ProfileType = LoadProfileType.Honorbuddy;
         }
         protected override RunStatus Run(object context)
         {
@@ -60,9 +60,10 @@ namespace HighVoltz.Composites
                     {
                         Professionbuddy.Err("Unable to load profile {0}", Path);
                     }
-
                 }
-                catch (Exception ex) { Professionbuddy.Err(ex.ToString()); }
+                catch
+                {
+                }
             }
         }
 

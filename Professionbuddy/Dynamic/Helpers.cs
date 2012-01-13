@@ -35,7 +35,7 @@ namespace HighVoltz.Dynamic
         }
         public static void Log(System.Drawing.Color c, string f, params object[] args)
         {
-            Logging.Write(c, f, args);
+            Logging.Write(c, f, args);  
         }
         public static int InbagCount(uint id)
         {

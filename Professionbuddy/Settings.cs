@@ -31,7 +31,7 @@ namespace HighVoltz
 
         [Setting, DefaultValue(0u)]
         public uint TradeskillFrameOffset { get; set; }
-        
+
         [Setting, DefaultValue("")]
         public string LastBotBase { get; set; }
     }
@@ -63,7 +63,11 @@ namespace HighVoltz
             {
                 Settings[name].Value = value;
                 if (Professionbuddy.Instance.CurrentProfile != null)
+                {
                     Save();
+                    if (MainForm.IsValid)
+                        MainForm.Instance.RefreshSettingsPropertyGrid();
+                }
             }
         }
         string ProfileName
@@ -97,14 +101,18 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                SaveCharacterSettings();
-                SaveGlobalSettings();
+                bool hasGlobalSettings = Settings.Any(setting => setting.Value.Global);
+                bool hasCharacterSettings = Settings.Any(setting => !setting.Value.Global);
+                if (hasGlobalSettings)
+                    SaveGlobalSettings();
+                if (hasCharacterSettings)
+                    SaveCharacterSettings();
             }
         }
 
         void SaveCharacterSettings()
         {
-            var settings = new XmlWriterSettings {Indent = true};
+            var settings = new XmlWriterSettings { Indent = true };
             using (XmlWriter writer = XmlWriter.Create(CharacterSettingsPath, settings))
             {
                 var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
@@ -115,7 +123,7 @@ namespace HighVoltz
 
         void SaveGlobalSettings()
         {
-            var settings = new XmlWriterSettings {Indent = true};
+            var settings = new XmlWriterSettings { Indent = true };
             using (XmlWriter writer = XmlWriter.Create(GlobalSettingsPath, settings))
             {
                 var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
@@ -134,8 +142,8 @@ namespace HighVoltz
                 LoadDefaultValues();
             }
         }
-        
-        void LoadCharacterSettings ()
+
+        void LoadCharacterSettings()
         {
             if (File.Exists(CharacterSettingsPath))
             {
@@ -149,7 +157,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value};
+                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -175,7 +183,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value};
+                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -198,9 +206,9 @@ namespace HighVoltz
                 Settings[setting.SettingName].Category = setting.Category;
                 Settings[setting.SettingName].Global = setting.Global;
                 Settings[setting.SettingName].Hidden = setting.Hidden;
-             }
+            }
             // remove unused settings..
-            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,kv => kv.Value);
+            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 
         object GetValue(TypeCode code, string value)

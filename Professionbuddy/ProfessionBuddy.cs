@@ -351,23 +351,38 @@ namespace HighVoltz
                 {
                     if (Instance.IsRunning)
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(
-                            new System.Action(() =>
-                            {
-                                TreeRoot.Stop();
-                                LoadProfile(ProfileManager.XmlLocation);
-                                TreeRoot.Start();
-                            }
-                        ));
+                        try
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke(
+                                new System.Action(() =>
+                                                      {
+                                                          TreeRoot.Stop();
+                                                          LoadProfile(ProfileManager.XmlLocation);
+                                                          if (MainForm.IsValid)
+                                                          {
+                                                              if (Instance.ProfileSettings.Settings.Count > 0)
+                                                                  MainForm.Instance.AddProfileSettingsTab();
+                                                              else
+                                                                  MainForm.Instance.RemoveProfileSettingsTab();
+                                                          }
+                                                          TreeRoot.Start();
+                                                      }
+                                    ));
+                        }
+                        catch
+                        {
+                        }
                     }
                     else
-                        LoadProfile(ProfileManager.XmlLocation);
-                    if (MainForm.IsValid)
                     {
-                        if (Instance.ProfileSettings.Settings.Count > 0)
-                            MainForm.Instance.AddProfileSettingsTab();
-                        else
-                            MainForm.Instance.RemoveProfileSettingsTab();
+                        LoadProfile(ProfileManager.XmlLocation);
+                        if (MainForm.IsValid)
+                        {
+                            if (Instance.ProfileSettings.Settings.Count > 0)
+                                MainForm.Instance.AddProfileSettingsTab();
+                            else
+                                MainForm.Instance.RemoveProfileSettingsTab();
+                        }
                     }
                 }
                 else

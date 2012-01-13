@@ -476,6 +476,8 @@ namespace HighVoltz
                 AddProfileSettingsTabCallback();
         }
 
+        private PropertyGrid _settingsPropertyGrid;
+        public PropertyGrid SettingsPropertyGrid { get { return _settingsPropertyGrid; } }
         void AddProfileSettingsTabCallback()
         {
             RightSideTab.SuspendLayout();
@@ -485,9 +487,9 @@ namespace HighVoltz
             }
             RightSideTab.TabPages.Add("ProfileSettings", "Profile Settings");
 
-            PropertyGrid pg = new PropertyGrid();
-            pg.Dock = DockStyle.Fill;
-            RightSideTab.TabPages["ProfileSettings"].Controls.Add(pg);
+            _settingsPropertyGrid = new PropertyGrid();
+            _settingsPropertyGrid.Dock = DockStyle.Fill;
+            RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
             ProfilePropertyBag = new PropertyBag();
             foreach (var kv in PB.ProfileSettings.Settings)
@@ -500,15 +502,41 @@ namespace HighVoltz
                     ProfilePropertyBag[kv.Key].PropertyChanged += ProfileSettings_PropertyChanged;
                 }
             }
-            pg.SelectedObject = ProfilePropertyBag;
+            _settingsPropertyGrid.SelectedObject = ProfilePropertyBag;
             RightSideTab.SelectTab(1);
             RightSideTab.ResumeLayout();
+        }
+
+        public void RefreshSettingsPropertyGrid()
+        {
+            if (!IsValid)
+                return;
+            if (ProfileTab.InvokeRequired)
+                ProfileTab.BeginInvoke(new guiInvokeCB(RefreshSettingsPropertyGridCallback));
+            else
+                RefreshSettingsPropertyGridCallback();
+        }
+
+        private void RefreshSettingsPropertyGridCallback()
+        {
+            foreach (var kv in PB.ProfileSettings.Settings)
+            {
+                MetaProp prop = ProfilePropertyBag[kv.Key];
+                if (prop != null)
+                {
+                    prop.PropertyChanged -= ProfileSettings_PropertyChanged;
+                    prop.Value = kv.Value.Value;
+                    prop.PropertyChanged += ProfileSettings_PropertyChanged;
+                }
+            }
+            _settingsPropertyGrid.Refresh();
         }
 
         void ProfileSettings_PropertyChanged(object sender, MetaPropArgs e)
         {
             PB.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
         }
+
 
         public void RemoveProfileSettingsTab()
         {

@@ -295,9 +295,9 @@ namespace HighVoltz.Composites
                     {
                         foreach (var entry in entries)
                         {
-                            uint temp;
-                            uint.TryParse(entry.Trim(), out temp);
-                            items.Add(temp, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(temp) : Amount == 0 ? int.MaxValue : Amount);
+                            uint itemID;
+                            uint.TryParse(entry.Trim(), out itemID);
+                            items.Add(itemID, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(itemID) : Amount == 0 ? int.MaxValue : Amount);
                         }
                     }
                     else
