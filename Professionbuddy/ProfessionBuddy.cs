@@ -352,6 +352,8 @@ namespace HighVoltz
             {
                 if (_init)
                 {
+                    if (_isChangingBot)
+                        return;
                     if (Instance.IsRunning)
                     {
                         try
