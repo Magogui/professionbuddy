@@ -54,6 +54,7 @@ namespace HighVoltz.Dynamic
             WoWMovement.ClickToMove(new WoWPoint(x, y, z));
         }
 
+        public static bool IsSwitchingToons { get { return _isSwitchingToons; } }
         static bool _isSwitchingToons;
         // credit to mvbc of mmocore.com
         // {0}=character,{1}=server
@@ -102,7 +103,7 @@ namespace HighVoltz.Dynamic
             Professionbuddy.Instance.IsRunning = false;
             Professionbuddy.Instance.PbBehavior.Reset();
 
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(
+            System.Windows.Application.Current.Dispatcher.Invoke(
             new Action(() =>
             {
                 TreeRoot.Stop();

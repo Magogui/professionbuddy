@@ -115,9 +115,9 @@ namespace HighVoltz
             Debug("Start Called");
             IsRunning = true;
 
-            // reset all actions 
             if (!_isChangingBot)
-            {
+            {            
+                // reset all actions 
                 PbBehavior.Reset();
                 if (DynamicCodeCompiler.CodeWasModified)
                 {
@@ -600,8 +600,9 @@ namespace HighVoltz
             {
                 if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name || Instance.SecondaryBot == null)
                 {
+                    Instance.IsRunning = false;
                     // execute from GUI thread since this thread will get aborted when switching bot
-                    System.Windows.Application.Current.Dispatcher.BeginInvoke(
+                    System.Windows.Application.Current.Dispatcher.Invoke(
                        new System.Action(() =>
                                              {
                                                  _isChangingBot = true;

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using TreeSharp;
 
 
@@ -50,7 +51,11 @@ namespace HighVoltz.Composites
                     {
                         _sub.Tick(SubRoutineName);
                     }
-                    catch { IsDone = true; _sub.Reset(); return RunStatus.Failure; }
+                    catch (ThreadAbortException)
+                    {
+                        return RunStatus.Success;
+                    }
+                    catch {  }
                     IsDone = _sub.IsDone;
                     // we need to reset so calls to the sub from other places can
                     if (!IsDone)
