@@ -116,10 +116,13 @@ namespace HighVoltz
             IsRunning = true;
 
             // reset all actions 
-            PbBehavior.Reset();
-            if (DynamicCodeCompiler.CodeWasModified)
+            if (!_isChangingBot)
             {
-                DynamicCodeCompiler.GenorateDynamicCode();
+                PbBehavior.Reset();
+                if (DynamicCodeCompiler.CodeWasModified)
+                {
+                    DynamicCodeCompiler.GenorateDynamicCode();
+                }
             }
 
             if (MainForm.IsValid)
@@ -588,6 +591,7 @@ namespace HighVoltz
             return true;
         }
 
+        private static bool _isChangingBot = false;
         public static void ChangeSecondaryBot(string botName)
         {
             BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
@@ -599,23 +603,25 @@ namespace HighVoltz
                     // execute from GUI thread since this thread will get aborted when switching bot
                     System.Windows.Application.Current.Dispatcher.BeginInvoke(
                        new System.Action(() =>
-                       {
-                           bool isRunning = TreeRoot.IsRunning;
-                           if (isRunning)
-                               TreeRoot.Stop();
-                           Instance.SecondaryBot = bot;
-                           if (!bot.Initialized)
-                               bot.Initialize();
-                           if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
-                           {
-                               ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
-                               ProfessionBuddySettings.Instance.Save();
-                           }
-                           if (MainForm.IsValid)
-                               MainForm.Instance.UpdateBotCombo();
-                           if (isRunning)
-                               TreeRoot.Start();
-                       }
+                                             {
+                                                 _isChangingBot = true;
+                                                 bool isRunning = TreeRoot.IsRunning;
+                                                 if (isRunning)
+                                                     TreeRoot.Stop();
+                                                 Instance.SecondaryBot = bot;
+                                                 if (!bot.Initialized)
+                                                     bot.Initialize();
+                                                 if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+                                                 {
+                                                     ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+                                                     ProfessionBuddySettings.Instance.Save();
+                                                 }
+                                                 if (MainForm.IsValid)
+                                                     MainForm.Instance.UpdateBotCombo();
+                                                 if (isRunning)
+                                                     TreeRoot.Start();
+                                                 _isChangingBot = false;
+                                             }
                    ));
                     Log("Changing SecondaryBot to {0}", botName);
                 }

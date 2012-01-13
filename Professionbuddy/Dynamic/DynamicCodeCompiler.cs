@@ -149,6 +149,7 @@ namespace HighVoltz.Dynamic
         using Styx.Plugins.PluginClass;
         using Styx.WoWInternals.World;
         using Styx.Combat.CombatRoutine;
+        using System.Xml.Linq;
         using HighVoltz.Composites;
         using HighVoltz.Dynamic;
         public class CodeDriver
