@@ -195,6 +195,7 @@ namespace HighVoltz.Composites
                     _itemList = BuildItemList();
                 if (_itemList.Count == 0)
                 {
+                    Professionbuddy.Debug("Sending any remaining items already in SendMail item slots. Mail subject will be: {0} ",_mailSubject);
                     Lua.DoString("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then SendMail (\"{0}\",\"{1}\",'') end end ",
                                  CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject ?? " ");
                     IsDone = true;
@@ -231,7 +232,7 @@ namespace HighVoltz.Composites
                 {
                     Professionbuddy.Log("Done sending {0} via mail",
                                         UseCategory ? string.Format("Items that belong to category {0} and subcategory {1}", Category, SubCategory) :
-                                                                                                                                                        string.Format("Items that match Id of {0}", ItemID));
+                                        string.Format("Items that match Id of {0}", ItemID));
                 }
                 else
                     return RunStatus.Success;
@@ -289,69 +290,6 @@ namespace HighVoltz.Composites
             }
             return false;
         }
-        /*    
-local amount = 100 
-local itemId = 53038  
-local mailto = "bankerName"
-local mailItemI =1  
-local freeBagSlots = 0  
-local bagged =0  
-for i=0,NUM_BAG_SLOTS do  
-   freeBagSlots = freeBagSlots  GetContainerNumFreeSlots(i)  
-end  
-local bagInfo={}  
-for bag = 0,NUM_BAG_SLOTS do  
-   for slot=1,GetContainerNumSlots(bag) do  
-      local id = GetContainerItemID(bag,slot) or 0  
-      local _,c,l = GetContainerItemInfo(bag, slot)  
-      if id == itemId and l == nil then  
-         table.insert(bagInfo,{bag,slot,c})  
-      end  
-   end  
-end  
-local sortF = function (a,b)  
-   if a == nil and b == nil or b == nil then return false end  
-   if a == nil or  a[3] < b[3] then return true else return false end  
-end  
-if #bagInfo == 0 then return -1 end  
-table.sort(bagInfo,sortF)  
-local bagI = #bagInfo  
-while bagI > 0 do  
-   if GetSendMailItem(mailItemI) == nil then  
-      while bagInfo[bagI][3] > amount-bagged and bagI >1 do bagI = bagI - 1 end  
-      if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then  
-         PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2])  
-         ClickSendMailItemButton(mailItemI)  
-         bagged = bagged + bagInfo[bagI][3]  
-         bagI = bagI - 1  
-      else  
-         local cnt = bagInfo[bagI][3]-amount  
-         SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt)  
-         local bagSpaces ={}   for b=NUM_BAG_SLOTS,0,-1 do  
-            bagSpaces = GetContainerFreeSlots(b)  
-            if #bagSpaces > 0 then  
-               PickupContainerItem(b,bagSpaces[#bagSpaces])  
-               return 0  
-            end  
-         end  
-      end  
-   end  
-   if bagged >= amount then return -1 end  
-   mailItemI = mailItemI + 1  
-   if mailItemI > ATTACHMENTS_MAX_SEND then  
-      break  
-   end  
-end  
-local cnt = 0 
-for i=1,ATTACHMENTS_MAX_SEND do 
-   if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end 
-end 
-if cnt == ATTACHMENTS_MAX_SEND then 
-   SendMail (mailto," ",'') 
-   return 1 
-end 
-return 0 
-        */
 
         // format indexs are ItemID=0, Amount=1
         private const string MailItemLuaFormat =
@@ -425,6 +363,7 @@ return 0
         {
             // format indexs are ItemID=0, Amount=1, MailRecipient=2
             string lua = string.Format(MailItemLuaFormat, id, amount);
+            Professionbuddy.Debug(lua);
             return Lua.GetReturnVal<int>(lua, 0);
         }
 
@@ -460,7 +399,6 @@ return 0
             return new MailItemAction
                        {
                            ItemID = this.ItemID,
-                           //Recipient = this.Recipient,
                            _loc = this._loc,
                            AutoFindMailBox = this.AutoFindMailBox,
                            Location = this.Location,

@@ -313,7 +313,7 @@ namespace HighVoltz.Composites
 
         #region Auction House
 
-        // indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow
+        // indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow, {4}=MaxStackSize
         public const string ScanAHFormatLua =
             "local A,totalA= GetNumAuctionItems('list') " +
             "local me = GetUnitName('player') " +
@@ -323,7 +323,7 @@ namespace HighVoltz.Composites
                 "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
                     "auctionInfo[1] = floor(buyout/cnt) " +
                 "end " +
-                "if id == {2} and owner == me then auctionInfo[2] = auctionInfo[2] + 1 end " +
+                "if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end " +
             "end " +
             "return unpack(auctionInfo) ";
 
@@ -350,7 +350,7 @@ namespace HighVoltz.Composites
                         _queueTimer.Stop();
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow);
+                        string lua = string.Format(ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow,StackSize);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
                         uint.TryParse(retVals[1], out ae.MyAuctions);

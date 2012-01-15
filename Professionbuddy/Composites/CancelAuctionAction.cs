@@ -261,7 +261,7 @@ namespace HighVoltz.Composites
                     {
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(SellItemOnAhAction.ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, 1);
+                        string lua = string.Format(SellItemOnAhAction.ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, 1,int.MaxValue);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
                         uint.TryParse(retVals[1], out ae.MyAuctions);

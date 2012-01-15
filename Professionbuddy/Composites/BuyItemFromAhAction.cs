@@ -205,7 +205,7 @@ namespace HighVoltz.Composites
         "local each={3} " +
         "local useBid={4} " +
         "local buyPrice=0 " +
-        "for index=1, A do }" +
+        "for index=1, A do " +
             "local name,_,cnt,_,_,_,_,minBid,minInc,buyout,bidNum,isHighBidder,owner,sold,id=GetAuctionItemInfo('list', index) " +
             "if useBid == 1 and buyout > each*cnt and isHighBidder == nil then " +
                 "if bidNum == nil then " +
