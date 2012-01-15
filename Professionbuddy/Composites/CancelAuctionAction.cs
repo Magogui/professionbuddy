@@ -284,11 +284,20 @@ namespace HighVoltz.Composites
             }
             return scanned;
         }
-
+        // Indexes are {0}=ItemID, {1}=MinBuyout, {2}=LowestBuyoutFound
+        private const string CancelAuctionLuaFormat =
+        "local A =GetNumAuctionItems('owner') "+
+        "local cnt=0 "+
+        "for i=A,1,-1 do "+
+            "local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) "+
+            "if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then "+
+                "CancelAuction(i) cnt=cnt+1 "+
+            "end "+
+        "end "+
+        "return cnt";
         bool CancelAuction(AuctionEntry ae)
         {
-            string lua = String.Format("local A =GetNumAuctionItems('owner') local cnt=0 for i=A,1,-1 do local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then CancelAuction(i) cnt=cnt+1 end end return cnt",
-                ae.Id, MinBuyout.TotalCopper, ae.LowestBo);
+            string lua = String.Format(CancelAuctionLuaFormat,ae.Id, MinBuyout.TotalCopper, ae.LowestBo);
             var numCanceled = Lua.GetReturnVal<int>(lua, 0);
             if (numCanceled > 0)
             {
@@ -299,9 +308,6 @@ namespace HighVoltz.Composites
 
         Dictionary<uint, string> GetMyAuctions()
         {
-            //string rawString = Lua.GetReturnVal<string>("local A =GetNumAuctionItems('owner') local myAucs = {} for i=1,A do local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) if sold ~= 1 then myAucs[id]=name end end local ret ='' for k,v in pairs(myAucs) do  ret = ret..k..','..v..'|' end return ret",
-            //    0);
-
             var ret = new Dictionary<uint, string>();
             using (new FrameLock())
             {

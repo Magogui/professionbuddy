@@ -323,7 +323,7 @@ namespace HighVoltz.Composites
                 "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
                     "auctionInfo[1] = floor(buyout/cnt) " +
                 "end " +
-                "if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end " +
+                "if id == {2} and owner == me then auctionInfo[2] = auctionInfo[2] + 1 end " +
             "end " +
             "return unpack(auctionInfo) ";
 

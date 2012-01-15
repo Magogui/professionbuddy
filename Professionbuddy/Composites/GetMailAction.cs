@@ -121,7 +121,7 @@ namespace HighVoltz.Composites
             "for index=numItems,1,-1 do " +
                 "local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) " +
                 "if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then " +
-                "DeleteInboxItem(index) " +
+                    "DeleteInboxItem(index) " +
                 "end " +
                 "if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then " +
                     "for i=1,ATTACHMENTS_MAX_RECEIVE do " +
