@@ -181,10 +181,18 @@
     <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="StoreItemsInGbank">
+    <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
+      <CustomAction Code="SwitchToBot(&quot;Combat Bot&quot;);" />
+      <WaitAction Condition="SecondaryBot.Name == &quot;Combat Bot&quot;" Timeout="20000" />
+    </If>
     <CallSubRoutine SubRoutineName="MoveToGbank" />
     <CustomAction Code="Log( Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Storing items in GBank&quot;);" />
     <PutItemInBankAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
     <PutItemInBankAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
+    <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+      <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
+      <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+    </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
     <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />
@@ -384,8 +392,9 @@
         <!--Valley of Honor GuildBank-->
         <CustomAction Code="GBankLocations.Add(new WoWPoint(1886.409, -4683.326, 38.5004));" />
         <!--Valley of Wisdom GuildBank-->
-        <MoveToAction Location="1863.807, -4093.358, 185.3996" MoveType="Location" Pathing="Navigator" Entry="0" />
-        <CustomAction Code="GBankLocations.Add(new WoWPoint(1863.807, -4093.358, 185.3996));" />
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(1951.516, -4216.525, 37.19798));" />
+        <!--Goblin Slums GuildBank-->
+        <CustomAction Code="GBankLocations.Add(new WoWPoint(1573.427, -4172.664, 51.74817));" />
       </If>
     </If>
     <!--Dalaran-->
