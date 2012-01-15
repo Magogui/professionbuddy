@@ -129,8 +129,15 @@ namespace HighVoltz
                 MainForm.Instance.UpdateControls();
             try
             {
+                try
+                {
                 if (SecondaryBot != null)
                     SecondaryBot.Start();
+                }
+                catch (Exception ex)
+                {
+                    Logging.WriteDebug(ex.ToString());
+                }
             }
             catch (Exception ex)
             {
@@ -370,6 +377,8 @@ namespace HighVoltz
                                                               else
                                                                   MainForm.Instance.RemoveProfileSettingsTab();
                                                           }
+                                                          if (ProfileManager.CurrentProfile == null || string.IsNullOrEmpty(ProfileManager.XmlLocation))
+                                                              ProfileManager.LoadEmpty();
                                                           TreeRoot.Start();
                                                       }
                                     ));
@@ -388,6 +397,8 @@ namespace HighVoltz
                             else
                                 MainForm.Instance.RemoveProfileSettingsTab();
                         }
+                        if (ProfileManager.CurrentProfile == null || string.IsNullOrEmpty(ProfileManager.XmlLocation))
+                            ProfileManager.LoadEmpty();
                     }
                 }
                 else

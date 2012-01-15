@@ -162,18 +162,25 @@ namespace HighVoltz.Composites
 
         int CalculateRepeat()
         {
-            switch (RepeatType)
+            try
             {
-                case RepeatCalculationType.Specific:
-                    return Repeat;
-                case RepeatCalculationType.Craftable:
-                    return IsRecipe ? (int)Recipe.CanRepeatNum2 : Repeat;
-                case RepeatCalculationType.Banker:
-                    if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
-                        return Repeat - Pb.DataStore[Recipe.CraftedItemID];
-                    return Repeat;
+                switch (RepeatType)
+                {
+                    case RepeatCalculationType.Specific:
+                        return Repeat;
+                    case RepeatCalculationType.Craftable:
+                        return IsRecipe ? (int) Recipe.CanRepeatNum2 : Repeat;
+                    case RepeatCalculationType.Banker:
+                        if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
+                            return Repeat - Pb.DataStore[Recipe.CraftedItemID];
+                        return Repeat;
+                }
+                return Repeat;
             }
-            return Repeat;
+            catch
+            {
+                return 0;
+            }
         }
 
         void OnCounterChanged(object sender, MetaPropArgs e)
@@ -223,6 +230,11 @@ namespace HighVoltz.Composites
                             TreeRoot.StatusText = string.Format("Casting: {0}", IsRecipe ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture));
                         }
                         WoWSpell spell = WoWSpell.FromId((int)Entry);
+                        if (spell == null)
+                        {
+                            Professionbuddy.Err("Unable to find a spell with ID {0}",Entry);
+                            return RunStatus.Failure; 
+                        }
                         _recastTime = spell.CastTime;
                         Professionbuddy.Debug("Casting {0}, recast :{1}", spell.Name, _recastTime);
                         if (CastOnItem)

@@ -154,12 +154,12 @@ namespace HighVoltz.Dynamic
         using HighVoltz.Dynamic;
         public class CodeDriver
         {
+            static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
 ";
         const string Postfix =
             @"
             static LocalPlayer Me = ObjectManager.Me;
             static PbProfileSettings Settings = Professionbuddy.Instance.ProfileSettings;
-            static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
             public static Helpers.TradeskillHelper Alchemy { get { return Helpers.Alchemy;} }
             public static Helpers.TradeskillHelper Archaeology { get { return Helpers.Archaeology;} }
             public static Helpers.TradeskillHelper Blacksmithing { get { return Helpers.Blacksmithing;} }
