@@ -82,7 +82,7 @@ namespace HighVoltz.Composites
         }
         public GetItemfromBankAction()
         {
-            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>), 
+            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
                 new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
 
@@ -94,7 +94,7 @@ namespace HighVoltz.Composites
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool), new DisplayNameAttribute("Withdraw Additively"));
 
-            Amount = new DynamicProperty<int>(this,"1");
+            Amount = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Amount");
             ItemID = "";
             MinFreeBagSlots = 2u;
@@ -314,30 +314,9 @@ namespace HighVoltz.Composites
             return items;
         }
 
-        // returns true when done. supports pulsing.
-        static Stopwatch _queueServerSW;
-        /// <summary>
-        /// Withdraws items from gbank
-        /// </summary>
-        /// <param name="id">item ID</param>
-        /// <param name="amount">amount to withdraw.</param>
-        /// <returns>the amount withdrawn.</returns>
-        public int GetItemFromGBank(uint id, int amount)
-        {
-            if (_queueServerSW == null)
-            {
-                _queueServerSW = new Stopwatch();
-                _queueServerSW.Start();
-                Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
-                Professionbuddy.Log("Queuing server for gbank info");
-                return 0;
-            }
-            if (_queueServerSW.ElapsedMilliseconds < 2000)
-            {
-                return 0;
-            }
-            string lua = string.Format(
-                "local tabnum = GetNumGuildBankTabs() " +
+        // indexes are {0} = ItemID, {1} = amount to deposit.
+        const string WithdrawItemFromGBankLuaFormat =
+              "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
                 "local  sawItem = 0  " +
                 "local amount = {1} " +
@@ -369,8 +348,31 @@ namespace HighVoltz.Composites
                          "end " +
                       "end " +
                    "end " +
-                   "if sawItem == 0 then return -1 else return bagged end "
-            , id, amount);
+                   "if sawItem == 0 then return -1 else return bagged end ";
+
+        // returns true when done. supports pulsing.
+        static Stopwatch _queueServerSW;
+        /// <summary>
+        /// Withdraws items from gbank
+        /// </summary>
+        /// <param name="id">item ID</param>
+        /// <param name="amount">amount to withdraw.</param>
+        /// <returns>the amount withdrawn.</returns>
+        public int GetItemFromGBank(uint id, int amount)
+        {
+            if (_queueServerSW == null)
+            {
+                _queueServerSW = new Stopwatch();
+                _queueServerSW.Start();
+                Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
+                Professionbuddy.Log("Queuing server for gbank info");
+                return 0;
+            }
+            if (_queueServerSW.ElapsedMilliseconds < 2000)
+            {
+                return 0;
+            }
+            string lua = string.Format(WithdrawItemFromGBankLuaFormat, id, amount);
             var retVal = Lua.GetReturnVal<int>(lua, 0);
             // -1 means no item was found.
             if (retVal == -1)
@@ -379,10 +381,8 @@ namespace HighVoltz.Composites
             }
             return retVal;
         }
-
-        public bool GetItemFromBank(uint id, int amount)
-        {
-            string lua = string.Format(
+        // indexes are {0} = ItemID, {1} = amount to deposit.
+        const string WithdrawItemFromPersonalBankLuaFormat =
                 "local numSlots = GetNumBankSlots() " +
                 "local splitUsed = 0 " +
                 "local bagged = 0 " +
@@ -416,8 +416,11 @@ namespace HighVoltz.Composites
                       "end " +
                    "end " +
                    "bag1 = bag1 -1 " +
-                "end "
-            , id, amount);
+                "end ";
+
+        public bool GetItemFromBank(uint id, int amount)
+        {
+            string lua = string.Format(WithdrawItemFromPersonalBankLuaFormat, id, amount);
             Lua.DoString(lua);
             return true;
         }

@@ -170,7 +170,7 @@
             this.toolStripOpen.Name = "toolStripOpen";
             this.toolStripOpen.Size = new System.Drawing.Size(40, 22);
             this.toolStripOpen.Text = "Open";
-            this.toolStripOpen.Click += new System.EventHandler(this.toolStripOpen_Click);
+            this.toolStripOpen.Click += new System.EventHandler(this.ToolStripOpenClick);
             // 
             // toolStripSave
             // 
@@ -179,7 +179,7 @@
             this.toolStripSave.Size = new System.Drawing.Size(35, 22);
             this.toolStripSave.Text = "Save";
             this.toolStripSave.ToolTipText = "Save";
-            this.toolStripSave.Click += new System.EventHandler(this.toolStripSave_Click);
+            this.toolStripSave.Click += new System.EventHandler(this.ToolStripSaveClick);
             // 
             // toolStripHelp
             // 
@@ -187,7 +187,7 @@
             this.toolStripHelp.Name = "toolStripHelp";
             this.toolStripHelp.Size = new System.Drawing.Size(36, 22);
             this.toolStripHelp.Text = "Help";
-            this.toolStripHelp.Click += new System.EventHandler(this.toolStripHelp_Click);
+            this.toolStripHelp.Click += new System.EventHandler(this.ToolStripHelpClick);
             // 
             // toolStripSecretButton
             // 
@@ -197,7 +197,7 @@
             this.toolStripSecretButton.Size = new System.Drawing.Size(46, 22);
             this.toolStripSecretButton.Text = "Debug";
             this.toolStripSecretButton.Visible = false;
-            this.toolStripSecretButton.Click += new System.EventHandler(this.toolStripSecretButton_Click);
+            this.toolStripSecretButton.Click += new System.EventHandler(this.ToolStripSecretButtonClick);
             // 
             // MainTabControl
             // 
@@ -252,7 +252,7 @@
             this.ProfileListView.TabIndex = 26;
             this.ProfileListView.UseCompatibleStateImageBehavior = false;
             this.ProfileListView.View = System.Windows.Forms.View.List;
-            this.ProfileListView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ProfileListView_MouseDoubleClick);
+            this.ProfileListView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ProfileListViewMouseDoubleClick);
             // 
             // LoadProfileButton
             // 
@@ -263,7 +263,7 @@
             this.LoadProfileButton.TabIndex = 25;
             this.LoadProfileButton.Text = "Load Profile";
             this.LoadProfileButton.UseVisualStyleBackColor = true;
-            this.LoadProfileButton.Click += new System.EventHandler(this.LoadProfileButton_Click);
+            this.LoadProfileButton.Click += new System.EventHandler(this.LoadProfileButtonClick);
             // 
             // ActionsTab
             // 
@@ -316,8 +316,8 @@
             this.ActionGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ActionGridView.Size = new System.Drawing.Size(250, 360);
             this.ActionGridView.TabIndex = 1;
-            this.ActionGridView.SelectionChanged += new System.EventHandler(this.ActionGridView_SelectionChanged);
-            this.ActionGridView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ActionGridView_MouseMove);
+            this.ActionGridView.SelectionChanged += new System.EventHandler(this.ActionGridViewSelectionChanged);
+            this.ActionGridView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ActionGridViewMouseMove);
             // 
             // Column1
             // 
@@ -401,7 +401,7 @@
             this.toolStripAddBtn.Size = new System.Drawing.Size(33, 21);
             this.toolStripAddBtn.Text = "Add";
             this.toolStripAddBtn.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.toolStripAddBtn.Click += new System.EventHandler(this.toolStripAddBtn_Click);
+            this.toolStripAddBtn.Click += new System.EventHandler(this.ToolStripAddBtnClick);
             // 
             // toolStripReloadBtn
             // 
@@ -410,7 +410,7 @@
             this.toolStripReloadBtn.Name = "toolStripReloadBtn";
             this.toolStripReloadBtn.Size = new System.Drawing.Size(47, 21);
             this.toolStripReloadBtn.Text = "Reload";
-            this.toolStripReloadBtn.Click += new System.EventHandler(this.toolStripReloadBtn_Click);
+            this.toolStripReloadBtn.Click += new System.EventHandler(this.ToolStripReloadBtnClick);
             // 
             // toolStripMaterials
             // 
@@ -559,11 +559,11 @@
             this.ActionTree.Name = "ActionTree";
             this.ActionTree.Size = new System.Drawing.Size(353, 361);
             this.ActionTree.TabIndex = 28;
-            this.ActionTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.ActionTree_ItemDrag);
-            this.ActionTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ActionTree_AfterSelect);
-            this.ActionTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.ActionTree_DragDrop);
-            this.ActionTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.ActionTree_DragEnter);
-            this.ActionTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ActionTree_KeyDown);
+            this.ActionTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.ActionTreeItemDrag);
+            this.ActionTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ActionTreeAfterSelect);
+            this.ActionTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.ActionTreeDragDrop);
+            this.ActionTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.ActionTreeDragEnter);
+            this.ActionTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ActionTreeKeyDown);
             // 
             // ActionGrid
             // 
@@ -575,7 +575,7 @@
             this.ActionGrid.Size = new System.Drawing.Size(353, 129);
             this.ActionGrid.TabIndex = 29;
             this.ActionGrid.ToolbarVisible = false;
-            this.ActionGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.ActionGrid_PropertyValueChanged);
+            this.ActionGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.ActionGridPropertyValueChanged);
             // 
             // toolStrip2
             // 
@@ -607,7 +607,7 @@
             this.toolStripCopy.Size = new System.Drawing.Size(39, 22);
             this.toolStripCopy.Text = "&Copy";
             this.toolStripCopy.ToolTipText = "Copy";
-            this.toolStripCopy.Click += new System.EventHandler(this.toolStripCopy_Click);
+            this.toolStripCopy.Click += new System.EventHandler(this.ToolStripCopyClick);
             // 
             // toolStripCut
             // 
@@ -616,7 +616,7 @@
             this.toolStripCut.Size = new System.Drawing.Size(30, 22);
             this.toolStripCut.Text = "C&ut";
             this.toolStripCut.ToolTipText = "Cut";
-            this.toolStripCut.Click += new System.EventHandler(this.toolStripCut_Click);
+            this.toolStripCut.Click += new System.EventHandler(this.ToolStripCutClick);
             // 
             // toolStripPaste
             // 
@@ -625,7 +625,7 @@
             this.toolStripPaste.Size = new System.Drawing.Size(39, 22);
             this.toolStripPaste.Text = "&Paste";
             this.toolStripPaste.ToolTipText = "Paste";
-            this.toolStripPaste.Click += new System.EventHandler(this.toolStripPaste_Click);
+            this.toolStripPaste.Click += new System.EventHandler(this.ToolStripPasteClick);
             // 
             // toolStripDelete
             // 
@@ -634,7 +634,7 @@
             this.toolStripDelete.Size = new System.Drawing.Size(28, 22);
             this.toolStripDelete.Text = "&Del";
             this.toolStripDelete.ToolTipText = "Delete";
-            this.toolStripDelete.Click += new System.EventHandler(this.toolStripDelete_Click);
+            this.toolStripDelete.Click += new System.EventHandler(this.ToolStripDeleteClick);
             // 
             // toolStripSeparator4
             // 
@@ -645,7 +645,7 @@
             // 
             this.toolStripBotCombo.Name = "toolStripBotCombo";
             this.toolStripBotCombo.Size = new System.Drawing.Size(121, 25);
-            this.toolStripBotCombo.SelectedIndexChanged += new System.EventHandler(this.toolStripBotCombo_SelectedIndexChanged);
+            this.toolStripBotCombo.SelectedIndexChanged += new System.EventHandler(this.ToolStripBotComboSelectedIndexChanged);
             // 
             // toolStripBotConfigButton
             // 
@@ -654,7 +654,7 @@
             this.toolStripBotConfigButton.Name = "toolStripBotConfigButton";
             this.toolStripBotConfigButton.Size = new System.Drawing.Size(47, 22);
             this.toolStripBotConfigButton.Text = "Config";
-            this.toolStripBotConfigButton.Click += new System.EventHandler(this.toolStripBotConfigButton_Click);
+            this.toolStripBotConfigButton.Click += new System.EventHandler(this.ToolStripBotConfigButtonClick);
             // 
             // MainForm
             // 
@@ -668,9 +668,9 @@
             this.Name = "MainForm";
             this.Padding = new System.Windows.Forms.Padding(3);
             this.Text = "Profession Buddy";
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.ResizeBegin += new System.EventHandler(this.MainForm_ResizeBegin);
-            this.ResizeEnd += new System.EventHandler(this.MainForm_ResizeEnd);
+            this.Load += new System.EventHandler(this.MainFormLoad);
+            this.ResizeBegin += new System.EventHandler(this.MainFormResizeBegin);
+            this.ResizeEnd += new System.EventHandler(this.MainFormResizeEnd);
             this.MainSplitContainer.Panel1.ResumeLayout(false);
             this.MainSplitContainer.Panel2.ResumeLayout(false);
             this.MainSplitContainer.ResumeLayout(false);

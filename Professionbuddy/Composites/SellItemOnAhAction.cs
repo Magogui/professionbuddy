@@ -313,6 +313,20 @@ namespace HighVoltz.Composites
 
         #region Auction House
 
+        // indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow
+        public const string ScanAHFormatLua =
+            "local A,totalA= GetNumAuctionItems('list') " +
+            "local me = GetUnitName('player') " +
+            "local auctionInfo = {{{0},{1}}} " +
+            "for index=1, A do " +
+                "local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) " +
+                "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
+                    "auctionInfo[1] = floor(buyout/cnt) " +
+                "end " +
+                "if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end " +
+            "end " +
+            "return unpack(auctionInfo) ";
+
         readonly Stopwatch _queueTimer = new Stopwatch();
         int _totalAuctions;
         int _page;
@@ -336,11 +350,7 @@ namespace HighVoltz.Composites
                         _queueTimer.Stop();
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local me = GetUnitName('player') local auctionInfo = {{{0},{1}}} for index=1, A do local name, _, count,_,_,_,_,minBid,_, buyoutPrice,_,_,owner,_ = GetAuctionItemInfo('list', index) if name == \"{2}\" and owner ~= me and count >= {3} and buyoutPrice > 0 and buyoutPrice/count <  auctionInfo[1] then auctionInfo[1] = floor(buyoutPrice/count) end if owner == me then auctionInfo[2] = auctionInfo[2] + 1 end end return unpack(auctionInfo) ",
-                            ae.LowestBo, ae.MyAuctions, ae.Name.ToFormatedUTF8(), IgnoreStackSizeBelow);
-                        //Logging.Write("****Copy Below this line****");
-                        //Logging.Write(lua);
-                        //Logging.Write("****End of copy/paste****");
+                        string lua = string.Format(ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
                         uint.TryParse(retVals[1], out ae.MyAuctions);
@@ -365,17 +375,9 @@ namespace HighVoltz.Composites
             return scanned;
         }
 
-        bool _posted;
-        int _leftOver;
-        bool SellOnAh(AuctionEntry ae)
-        {
-            if (!_posted)
-            {
-                int subAmount = AmountType == AmountBasedType.Amount ? Amount - (int)ae.MyAuctions : Amount;
-                int amount = AmountType == AmountBasedType.Everything ?
-                    (_leftOver == 0 ? int.MaxValue : _leftOver) :
-                    (_leftOver == 0 ? subAmount : _leftOver);
-                string lua = string.Format(
+
+        // indexs are {0}=ItemID, {1}=amount, {2}=StackSize, {3}=bid, {4}=buyout, {5}=duration(1-3)
+        const string SellOnAHLuaFormat =
                     "local itemID = {0} " +
                     "local amount = {1} " +
                     "local bid = {3} " +
@@ -413,7 +415,18 @@ namespace HighVoltz.Composites
                        "end " +
                     "else " +
                        "return -1 " +
-                    "end", ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int)RunTime);
+                    "end ";
+        bool _posted;
+        int _leftOver;
+        bool SellOnAh(AuctionEntry ae)
+        {
+            if (!_posted)
+            {
+                int subAmount = AmountType == AmountBasedType.Amount ? Amount - (int)ae.MyAuctions : Amount;
+                int amount = AmountType == AmountBasedType.Everything ?
+                    (_leftOver == 0 ? int.MaxValue : _leftOver) :
+                    (_leftOver == 0 ? subAmount : _leftOver);
+                string lua = string.Format(SellOnAHLuaFormat, ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int)RunTime);
                 var ret = Lua.GetReturnVal<int>(lua, 0);
                 if (ret != -1) // returns -1 if waiting for auction to finish posting..
                     _leftOver = ret;

@@ -197,6 +197,33 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
+        //indexs are {0}=ItemsCounter,NumOfItemToBuy, {1}=ItemID, {2}=maxBuyout, {3}=BidOnItem ? 1 : 0
+        private const string BuyFromAHLuaFormat =
+        "local A,totalA= GetNumAuctionItems('list') " +
+        "local amountBought={0} " +
+        "local want={1} " +
+        "local each={3} " +
+        "local useBid={4} " +
+        "local buyPrice=0 " +
+        "for index=1, A do }" +
+            "local name,_,cnt,_,_,_,_,minBid,minInc,buyout,bidNum,isHighBidder,owner,sold,id=GetAuctionItemInfo('list', index) " +
+            "if useBid == 1 and buyout > each*cnt and isHighBidder == nil then " +
+                "if bidNum == nil then " +
+                    "buyPrice = minBid + minInc " +
+                "else " +
+                    "buyPrice = bidNum + minInc " +
+                "end " +
+            "else " +
+                "buyPrice = buyout " +
+            "end " +
+            "if id == {2} and buyPrice > 0 and buyPrice <= each*cnt and amountBought < want then " +
+                "amountBought = amountBought + cnt " +
+                "PlaceAuctionBid('list', index,buyPrice) " +
+            "end " +
+            "if amountBought >=  want then return -1 end " +
+        "end " +
+        "return amountBought ";
+
         Stopwatch _queueTimer = new Stopwatch();
         int _totalAuctions;
         int _counter;
@@ -221,8 +248,8 @@ namespace HighVoltz.Composites
                     _queueTimer.Reset();
                     if (_totalAuctions > 0)
                     {
-                        string lua = string.Format("local A,totalA= GetNumAuctionItems('list') local amountBought={0} local want={1} local each={3} local useBid={4} local buyPrice=0 for index=1, A do local name, _, count,_,_,_,_,minBid,minInc, buyoutPrice,bidNum,isHighBidder,_,_ = GetAuctionItemInfo('list', index) if useBid == 1 and buyoutPrice > each*count and isHighBidder == nil then if bidNum == nil then buyPrice =minBid + minInc else buyPrice = bidNum + minInc end else buyPrice = buyoutPrice end if name == \"{2}\" and buyPrice > 0 and buyPrice <= each*count and amountBought < want then amountBought = amountBought + count PlaceAuctionBid('list', index,buyPrice) end if amountBought >=  want then return -1 end end return amountBought",
-                            _counter, bie.BuyAmount, bie.Name.ToFormatedUTF8(), MaxBuyout.TotalCopper, BidOnItem ? 1 : 0);
+                        string lua = string.Format(BuyFromAHLuaFormat,
+                            _counter, bie.BuyAmount, bie.Id, MaxBuyout.TotalCopper, BidOnItem ? 1 : 0);
                         _counter = Lua.GetReturnVal<int>(lua, 0);
                         if (_counter == -1 || ++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
                             done = true;

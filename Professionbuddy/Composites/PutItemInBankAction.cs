@@ -545,10 +545,8 @@ namespace HighVoltz.Composites
         }
 
         #endregion
-
-        private bool PutItemInBank(uint id, int amount)
-        {
-            string lua = string.Format(
+        // indexes are {0} = ItemID, {1} = amount to deposit.
+        const string DepositItemInPersonalBankLuaFormat = 
                 "local bagged = 0 " +
                 "local bagInfo = {{0}} " +
                 "local bag = -1 " +
@@ -596,8 +594,12 @@ namespace HighVoltz.Composites
                       "end " +
                       "if bagged == {1} then return end " +
                    "end " +
-                "end return "
-                , id, amount <= 0 ? int.MaxValue : amount);
+                "end return ";
+
+        
+        private bool PutItemInBank(uint id, int amount)
+        {
+            string lua = string.Format(DepositItemInPersonalBankLuaFormat, id, amount <= 0 ? int.MaxValue : amount);
             Lua.DoString(lua);
             return true;
         }
