@@ -447,13 +447,16 @@
     <CustomAction Code="MyLog(&quot;Repairing&quot;);" />
     <If Condition="Me.IsAlliance" IgnoreCanRun="True">
       <FlyToAction Dismount="False" Location="-8430.486, 623.2193, 95.50689" />
-      <InteractionAction InteractType="NPC" Entry="5512" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
+      <While Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
+        <InteractionAction InteractType="NPC" Entry="5512" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
+      </While>
     </If>
     <If Condition="Me.IsHorde" IgnoreCanRun="True">
       <FlyToAction Dismount="True" Location="1908.45, -4217.19, 36.98611" />
-      <InteractionAction InteractType="NPC" Entry="3322" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
+      <While Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
+        <InteractionAction InteractType="NPC" Entry="3322" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
+      </While>
     </If>
-    <WaitAction Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" Timeout="5000" />
     <CustomAction Code="MerchantFrame.Instance.RepairAllItems();" />
     <SellItemAction NpcEntry="0" Location="0, 0, 0" SellItemType="Greys" ItemID="0" Count="0" />
     <SellItemAction NpcEntry="0" Location="0, 0, 0" SellItemType="Specific" ItemID="63122" Count="0" />

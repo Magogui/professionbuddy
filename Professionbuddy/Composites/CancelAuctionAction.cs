@@ -267,6 +267,7 @@ namespace HighVoltz.Composites
                         uint.TryParse(retVals[1], out ae.MyAuctions);
                         if (++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
                             scanned = true;
+                       
                     }
                 }
             }
