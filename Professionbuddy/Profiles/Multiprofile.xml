@@ -11,7 +11,7 @@
   <!--no1knowsy -  For help with the Org portals-->
   <!--imdasandman - For help with the Org portals-->
   <!--Thumped - For help with the Org portals-->
-  <!--Natfoth - Idea to use GoalText for zone change timer.-->
+  <!--Natfoth - Idea to use GoalText for zone change timer-->
   <!--lii - some good ideas-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
     <Settings DefaultValue="0" Type="UInt32" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" Global="False" Hidden="True" />
