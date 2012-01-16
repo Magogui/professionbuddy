@@ -4,6 +4,7 @@ using System.Linq;
 using Styx;
 using Styx.Helpers;
 using Styx.Logic.Combat;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
 using System.Diagnostics;
@@ -118,7 +119,8 @@ namespace HighVoltz.Composites
                         else
                         {
                             _interactSw.Reset();
-                            obj.Interact();
+                            Lua.DoString("InteractUnit({0})", obj.Entry);
+                            //obj.Interact();
                             IsDone = true;
                         }
                     }

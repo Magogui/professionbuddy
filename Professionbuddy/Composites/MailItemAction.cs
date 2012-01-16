@@ -197,7 +197,7 @@ namespace HighVoltz.Composites
                 {
                     //Professionbuddy.Debug("Sending any remaining items already in SendMail item slots. Mail subject will be: {0} ",_mailSubject);
                     Lua.DoString("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then SendMail (\"{0}\",\"{1}\",'') end end ",
-                                 CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject ?? " ");
+                        CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject != null?_mailSubject.ToFormatedUTF8(): " ");
                     //Professionbuddy.Debug("Done sending mail");
                     IsDone = true;
                     return RunStatus.Failure;
@@ -213,8 +213,7 @@ namespace HighVoltz.Composites
                 int ret = MailItem(itemID, _itemList[itemID]);
                 // we need to wait for item split to finish if ret == 0
                 // format indexs are MailRecipient=0, Mail subject=1
-                string mailToLua = string.Format(MailItemsFormat, CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject);
-               // Professionbuddy.Debug("{0}", mailToLua);
+                string mailToLua = string.Format(MailItemsFormat, CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject.ToFormatedUTF8());
                 var mailItemsRet = Lua.GetReturnVal<int>(mailToLua, 0);
                 if (ret == 0 || mailItemsRet == 1)
                 {
@@ -364,7 +363,6 @@ namespace HighVoltz.Composites
         {
             // format indexs are ItemID=0, Amount=1, MailRecipient=2
             string lua = string.Format(MailItemLuaFormat, id, amount);
-            //Professionbuddy.Debug("{0}",lua);
             return Lua.GetReturnVal<int>(lua, 0);
         }
 
