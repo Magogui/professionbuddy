@@ -280,12 +280,12 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8211.333, 402.3037, 117.2938" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207692);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207692" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207692" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="2042.752, -4395.662, 100.9364" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207688);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207688" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207688" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
     </If>
     <!--Twilight Highlands-->
@@ -294,14 +294,14 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8188.495, 417.4927, 116.817" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207694);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207694" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207694" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
         <MoveToAction Location="-4879.899, -6639.522, 10.85343" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="2029.233, -4379.827, 100.9757" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207686);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207686" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207686" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
         <MoveToAction Location="-4030.426, -6334.861, 37.87898" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       </If>
@@ -312,12 +312,12 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8231.854, 417.0676, 117.9931" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207695);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207695" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207695" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="2039.67, -4356.288, 100.0043" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207687);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207687" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207687" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
     </If>
     <!--Deepholm-->
@@ -326,12 +326,12 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8221.344, 449.0011, 117.5582" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207693);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="2065.653, -4390.647, 100.0469" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207689);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207689" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207689" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
       <FlyToAction Dismount="False" Location="998.0914, 521.6063, -49.33473" />
@@ -343,12 +343,12 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8192.883, 446.9316, 116.8686" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry ==207691);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207691" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207691" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="2061.209, -4364.834, 98.61539" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207690);" Timeout="10000" />
-        <InteractionAction InteractType="GameObject" Entry="207690" InteractDelay="0" GameObjectType="Transport" SpellFocus="Anvil" />
+        <InteractionAction InteractType="GameObject" Entry="207690" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
     </If>
     <!--Wait until zone changes.-->

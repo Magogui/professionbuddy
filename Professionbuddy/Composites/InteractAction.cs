@@ -27,49 +27,49 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public InteractActionType InteractType
         {
-            get { return (InteractActionType) Properties["InteractType"].Value; }
+            get { return (InteractActionType)Properties["InteractType"].Value; }
             set { Properties["InteractType"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint Entry
         {
-            get { return (uint) Properties["Entry"].Value; }
+            get { return (uint)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint InteractDelay
         {
-            get { return (uint) Properties["InteractDelay"].Value; }
+            get { return (uint)Properties["InteractDelay"].Value; }
             set { Properties["InteractDelay"].Value = value; }
         }
 
         [PbXmlAttribute]
         public WoWGameObjectType GameObjectType
         {
-            get { return (WoWGameObjectType) Properties["GameObjectType"].Value; }
+            get { return (WoWGameObjectType)Properties["GameObjectType"].Value; }
             set { Properties["GameObjectType"].Value = value; }
         }
 
         [PbXmlAttribute]
         public WoWSpellFocus SpellFocus
         {
-            get { return (WoWSpellFocus) Properties["SpellFocus"].Value; }
+            get { return (WoWSpellFocus)Properties["SpellFocus"].Value; }
             set { Properties["SpellFocus"].Value = value; }
         }
 
         public InteractionAction()
         {
-            Properties["Entry"] = new MetaProp("Entry", typeof (uint),
-                                               new EditorAttribute(typeof (PropertyBag.EntryEditor),
-                                                                   typeof (UITypeEditor)));
-            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof (uint));
-            Properties["InteractType"] = new MetaProp("InteractType", typeof (InteractActionType),
+            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
+                                               new EditorAttribute(typeof(PropertyBag.EntryEditor),
+                                                                   typeof(UITypeEditor)));
+            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof(uint));
+            Properties["InteractType"] = new MetaProp("InteractType", typeof(InteractActionType),
                                                       new DisplayNameAttribute("Interact Type"));
-            Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof (WoWGameObjectType),
+            Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof(WoWGameObjectType),
                                                         new DisplayNameAttribute("GameObject Type"));
-            Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof (WoWSpellFocus),
+            Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof(WoWSpellFocus),
                                                     new DisplayNameAttribute("SpellFocus"));
 
             InteractDelay = Entry = 0u;
@@ -119,8 +119,10 @@ namespace HighVoltz.Composites
                         else
                         {
                             _interactSw.Reset();
-                            Lua.DoString("InteractUnit({0})", obj.Entry);
-                            //obj.Interact();
+                            if (InteractType == InteractActionType.NPC)
+                                Lua.DoString("InteractUnit({0})", obj.Entry);
+                            else
+                                obj.Interact();
                             IsDone = true;
                         }
                     }
