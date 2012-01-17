@@ -66,6 +66,12 @@
           <FlyToAction Dismount="False" Location="-4592.624, 3963.549, 31.30406" />
         </If>
         <FlyToAction Dismount="True" Location="-6406.231, 6427.917, 32.64967" />
+        <!--Smuggler's Scar-->
+        <If Condition="DistanceTo(-4561.357, 3469.509, -101.5874) &lt;=40" IgnoreCanRun="True">
+          <MoveToAction Location="-4592.855, 3496.947, -107.3743" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <FlyToAction Dismount="False" Location="-4670.989, 3569.49, -119.4255" />
+          <FlyToAction Dismount="False" Location="-4669.584, 3576.44, 24.28553" />
+        </If>
       </If>
       <!--Vashjir-->
       <If Condition=" Me.ZoneId ==  5145" IgnoreCanRun="True">
@@ -104,25 +110,22 @@
       <If Condition="Me.ZoneId == CityZoneID" IgnoreCanRun="True">
         <!--On Farmer-->
         <If Condition="Me.FreeNormalBagSlots &lt;=15 || (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+          <!--Save the amount of gold on farmer-->
+          <CustomAction Code="Settings[&quot;FarmersGold&quot;] = (int)Me.Gold;" />
           <If Condition="(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="StoreItemsInGbank" />
-            <If Condition="(bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
-              <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
-            </If>
           </If>
           <If Condition="!(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="MailItems" />
-            <!--Save the amount of gold on farmer-->
-            <CustomAction Code="Settings[&quot;FarmersGold&quot;] = (int)Me.Gold;" />
-            <!--Log on Banker-->
+          </If>
+          <!--Log on Banker-->
+          <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
             <CustomAction Code="MyLog(&quot;Switching to banker&quot;);" />
-            <If Condition="(bool)Settings[&quot;SwitchToBanker&quot;]" IgnoreCanRun="True">
-              <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],Realm,&quot;Combat Bot&quot;);" />
-              <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
-            </If>
-            <If Condition="!(bool)Settings[&quot;SwitchToBanker&quot;] &amp;&amp; (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
-              <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
-            </If>
+            <CustomAction Code="SwitchCharacter((string)Settings[&quot;BankerName&quot;],Realm,&quot;Combat Bot&quot;);" />
+            <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
+          </If>
+          <If Condition="!(bool)Settings[&quot;SwitchToBanker&quot;] &amp;&amp; (bool)Settings[&quot;EmptyBagsNow&quot;]" IgnoreCanRun="True">
+            <CustomAction Code="Settings[&quot;EmptyBagsNow&quot;] = false;" />
           </If>
         </If>
         <!--Repair and sell junk-->
@@ -149,6 +152,11 @@
         <CancelAuctionAction UseCategory="False" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" AutoFindAh="True" MinBuyout="0g0s0c" Location="0, 0, 0" />
       </If>
       <!--Get all mail and put it on AH-->
+      <If Condition="(bool)Settings[&quot;DepositInGbank&quot;]" IgnoreCanRun="True">
+        <CallSubRoutine SubRoutineName="WithdrawItemsInGbank" />
+        <CallSubRoutine SubRoutineName="SellOnAH" />
+        <CallSubRoutine SubRoutineName="WithdrawItemsInGbank" />
+      </If>
       <Declaration Code="bool StopGettingMail;" />
       <CustomAction Code=" StopGettingMail = false;" />
       <While Condition="(HasNewMail || MailCount&gt; 0) &amp;&amp; ! StopGettingMail" IgnoreCanRun="True">
@@ -179,6 +187,20 @@
     <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="StoreItemsInGbank">
+    <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
+      <CustomAction Code="SwitchToBot(&quot;Combat Bot&quot;);" />
+      <WaitAction Condition="SecondaryBot.Name == &quot;Combat Bot&quot;" Timeout="20000" />
+    </If>
+    <CallSubRoutine SubRoutineName="MoveToGbank" />
+    <CustomAction Code="MyLog(&quot;Storing items in GBank&quot;);" />
+    <PutItemInBankAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
+    <PutItemInBankAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
+    <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
+      <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
+      <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="WithdrawItemsInGbank">
     <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
       <CustomAction Code="SwitchToBot(&quot;Combat Bot&quot;);" />
       <WaitAction Condition="SecondaryBot.Name == &quot;Combat Bot&quot;" Timeout="20000" />
