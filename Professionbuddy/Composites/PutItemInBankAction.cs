@@ -492,8 +492,9 @@ namespace HighVoltz.Composites
                                 itemToDeposit.BagIndex + 1, itemToDeposit.BagSlot + 1, depositAmount, _bankSlots[bSlotIndex].Bag, _bankSlots[bSlotIndex].Slot);
                         }
                         return depositAmount;
+                        
                     }
-                    if (tab > 0)
+                    if (tab > 0 || currentTab == tabCnt)
                     {
                         Professionbuddy.Log("Guild Tab: {0} is full",tab);
                         return -1;
