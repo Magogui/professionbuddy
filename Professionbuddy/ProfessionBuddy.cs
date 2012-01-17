@@ -611,10 +611,13 @@ namespace HighVoltz
             }
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
-            if (!preloadedHBProfile && _lastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
-                ProfileManager.LoadNew(_lastProfilePath);
-            else
-                ProfileManager.LoadEmpty();
+            if (!preloadedHBProfile)
+            {
+                if (_lastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
+                    ProfileManager.LoadNew(_lastProfilePath);
+                else
+                    ProfileManager.LoadEmpty(); 
+            }
             Instance.MySettings.Save();
         }
 
