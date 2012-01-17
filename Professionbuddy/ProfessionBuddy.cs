@@ -116,7 +116,7 @@ namespace HighVoltz
             IsRunning = true;
 
             if (!_isChangingBot)
-            {            
+            {
                 // reset all actions 
                 PbBehavior.Reset();
                 if (DynamicCodeCompiler.CodeWasModified)
@@ -131,8 +131,8 @@ namespace HighVoltz
             {
                 try
                 {
-                if (SecondaryBot != null)
-                    SecondaryBot.Start();
+                    if (SecondaryBot != null)
+                        SecondaryBot.Start();
                 }
                 catch (Exception ex)
                 {
@@ -353,6 +353,8 @@ namespace HighVoltz
         }
         // Used as a fix when profile is loaded before Inititialize is called
         static private string _profileToLoad = "";
+        static private string _lastProfilePath = "";
+        private static bool _lastProfileIsHBProfile = false;
         static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
@@ -369,7 +371,7 @@ namespace HighVoltz
                                 new System.Action(() =>
                                                       {
                                                           TreeRoot.Stop();
-                                                          LoadProfile(ProfileManager.XmlLocation);
+                                                          LoadPBProfile(ProfileManager.XmlLocation);
                                                           if (MainForm.IsValid)
                                                           {
                                                               if (Instance.ProfileSettings.Settings.Count > 0)
@@ -377,8 +379,6 @@ namespace HighVoltz
                                                               else
                                                                   MainForm.Instance.RemoveProfileSettingsTab();
                                                           }
-                                                          if (ProfileManager.CurrentProfile == null || string.IsNullOrEmpty(ProfileManager.XmlLocation))
-                                                              ProfileManager.LoadEmpty();
                                                           TreeRoot.Start();
                                                       }
                                     ));
@@ -389,7 +389,7 @@ namespace HighVoltz
                     }
                     else
                     {
-                        LoadProfile(ProfileManager.XmlLocation);
+                        LoadPBProfile(ProfileManager.XmlLocation);
                         if (MainForm.IsValid)
                         {
                             if (Instance.ProfileSettings.Settings.Count > 0)
@@ -397,14 +397,18 @@ namespace HighVoltz
                             else
                                 MainForm.Instance.RemoveProfileSettingsTab();
                         }
-                        if (ProfileManager.CurrentProfile == null || string.IsNullOrEmpty(ProfileManager.XmlLocation))
-                            ProfileManager.LoadEmpty();
                     }
+                    _lastProfileIsHBProfile = false;
                 }
                 else
                 {
                     _profileToLoad = ProfileManager.XmlLocation;
                 }
+            }
+            else if (args.NewProfile.XmlElement.Name == "HBProfile")
+            {
+                _lastProfileIsHBProfile = true;
+                _lastProfilePath = ProfileManager.XmlLocation;
             }
         }
 
@@ -477,14 +481,22 @@ namespace HighVoltz
                     {
                         try
                         {
-                            LoadProfile(string.IsNullOrEmpty(_profileToLoad) ? MySettings.LastProfile : _profileToLoad);
+                            if (string.IsNullOrEmpty(_profileToLoad))
+                            {
+                                LoadPBProfile(MySettings.LastProfile);
+                            }
+                            else
+                            {
+                                LoadPBProfile(_profileToLoad);
+                                _lastProfileIsHBProfile = false;
+                            }
+                             
                         }
                         catch (Exception ex) { Err(ex.ToString()); }
                     }
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
-                    //HonorBuddyProfilePath = ProfileManager.XmlLocation;
                     _init = true;
                 }
             }
@@ -568,9 +580,10 @@ namespace HighVoltz
             catch (Exception ex)
             { Err(ex.ToString()); }
         }
-
-        public static bool LoadProfile(string path)
+        
+        public static void LoadPBProfile(string path)
         {
+            bool preloadedHBProfile = false;
             if (File.Exists(path))
             {
                 Log("Loading profile {0}", Path.GetFileName(path));
@@ -582,26 +595,27 @@ namespace HighVoltz
                     Instance.ProfileSettings.Load();
                     DynamicCodeCompiler.GenorateDynamicCode();
                     Instance.UpdateMaterials();
-                    PreLoadHbProfile();
+                    preloadedHBProfile = PreLoadHbProfile();
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.InitActionTree();
                         MainForm.Instance.RefreshTradeSkillTabs();
                     }
                 }
-                else
-                    return false;
             }
             else
             {
                 Err("Profile: {0} does not exist", path);
                 Instance.MySettings.LastProfile = path;
-                return false;
+                return;
             }
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
+            if (!preloadedHBProfile && _lastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
+                ProfileManager.LoadNew(_lastProfilePath);
+            else
+                ProfileManager.LoadEmpty();
             Instance.MySettings.Save();
-            return true;
         }
 
         private static bool _isChangingBot = false;
@@ -643,8 +657,8 @@ namespace HighVoltz
             else
                 Err("Bot with name: {0} was not found", botName);
         }
-
-        private static void PreLoadHbProfile()
+        // returns true if a profile was preloaded
+        private static bool PreLoadHbProfile()
         {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
             {
@@ -661,17 +675,12 @@ namespace HighVoltz
                             BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                             ProfileManager.LoadNew(kv.Key);
                             BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
-                            return;
+                            return true;
                         }
                     }
                 }
             }
-            if (ProfileManager.CurrentProfile == null)
-            {
-                BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                ProfileManager.LoadEmpty();
-                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
-            }
+            return false;
         }
 
         static internal List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite

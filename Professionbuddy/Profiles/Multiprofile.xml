@@ -303,7 +303,7 @@
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207686);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207686" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
-        <MoveToAction Location="-4030.426, -6334.861, 37.87898" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+        <MoveToAction Location="-4035.313, -6340.871, 37.70373" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       </If>
     </If>
     <!--Uldum-->
