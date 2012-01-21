@@ -140,7 +140,7 @@ namespace HighVoltz.Composites
                 }
                 float speed = ObjectManager.Me.MovementInfo.CurrentSpeed;
                 Navigator.PathPrecision = speed > 7 ? (SpeedModifer * speed) / 7f : SpeedModifer;
-                if (ObjectManager.Me.Location.Distance(_loc) > Navigator.PathPrecision)
+                if (ObjectManager.Me.Location.Distance(_loc) >  4.5)
                 {
                     if (Pathing == NavigationType.ClickToMove)
                         WoWMovement.ClickToMove(_loc);
