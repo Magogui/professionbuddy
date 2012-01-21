@@ -84,7 +84,7 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new LoadProfileAction { Path = this.Path };
+            return new LoadProfileAction { Path = this.Path, ProfileType = this.ProfileType};
         }
     }
     #endregion
