@@ -72,7 +72,9 @@
           <FlyToAction Dismount="False" Location="-4670.989, 3569.49, -119.4255" />
           <FlyToAction Dismount="False" Location="-4669.584, 3576.44, 24.28553" />
         </If>
-        <FlyToAction Dismount="True" Location="-6406.231, 6427.917, 32.64967" />
+        <CustomAction Code="Lua.DoString(&quot;Dismount() CancelShapeshiftForm()&quot;);" />
+        <FlyToAction Dismount="False" Location="-6406.231, 6427.917, 32.64967" />
+        <WaitAction Condition="false" Timeout="5000" />
       </If>
       <!--Vashjir-->
       <If Condition=" Me.ZoneId ==  5145" IgnoreCanRun="True">
