@@ -162,7 +162,7 @@ namespace HighVoltz.Composites
         static bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch _itemsSW;
         readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
-        const long GbankItemThrottle = 800; //8 times per sec.. round up to nearest 1.
+        const long GbankItemThrottle = 1000;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)

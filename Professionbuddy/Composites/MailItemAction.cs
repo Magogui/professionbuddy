@@ -197,7 +197,7 @@ namespace HighVoltz.Composites
                 {
                     //Professionbuddy.Debug("Sending any remaining items already in SendMail item slots. Mail subject will be: {0} ",_mailSubject);
                     Lua.DoString("for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then SendMail (\"{0}\",\"{1}\",'') end end ",
-                        CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject != null?_mailSubject.ToFormatedUTF8(): " ");
+                        CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(), _mailSubject != null ? _mailSubject.ToFormatedUTF8() : " ");
                     //Professionbuddy.Debug("Done sending mail");
                     IsDone = true;
                     return RunStatus.Failure;
@@ -308,7 +308,7 @@ namespace HighVoltz.Composites
                     "local _,c,l = GetContainerItemInfo(bag, slot) " +
                     "if id == itemId and l == nil then " +
                         "table.insert(bagInfo,{{bag,slot,c}}) " +
-                     "end " +
+                    "end " +
                 "end " +
             "end " +
             "local sortF = function (a,b) " +
@@ -326,6 +326,7 @@ namespace HighVoltz.Composites
                         "ClickSendMailItemButton(mailItemI) " +
                         "bagged = bagged + bagInfo[bagI][3] " +
                         "bagI = bagI - 1 " +
+                        "return bagged " +
                     "else " +
                         "local cnt = bagInfo[bagI][3]-amount " +
                         "SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt) " +
@@ -338,7 +339,7 @@ namespace HighVoltz.Composites
                     "end " +
                 "end " +
             "end " +
-        "if bagged >= amount then return -1 end " +
+            "if bagged >= amount then return -1 end " +
             "mailItemI = mailItemI + 1 " +
             "if mailItemI > ATTACHMENTS_MAX_SEND then " +
                 "return bagged " +

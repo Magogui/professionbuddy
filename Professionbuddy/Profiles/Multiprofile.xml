@@ -13,7 +13,7 @@
   <!--Thumped - For help with the Org portals-->
   <!--Natfoth - Idea to use GoalText for zone change timer-->
   <!--lii - some good ideas-->
-  <!--Nate8282 - Help with repair coords-->
+  <!--Nate8282 - Help with coords-->
   <SubRoutine SubRoutineName="Do Not Edit these settings directly!!, Use the 'Settings' Tab instead">
     <Settings DefaultValue="0" Type="UInt32" Name="FarmedZone" Summary="Do Not Edit" Category="Misc" Global="False" Hidden="True" />
     <Settings DefaultValue="" Type="String" Name="BankerName" Summary="The Name of your banker" Category="Banker" Global="False" Hidden="False" />
@@ -297,7 +297,7 @@
         <InteractionAction InteractType="GameObject" Entry="207692" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2042.752, -4395.662, 100.9364" />
+        <FlyToAction Dismount="True" Location="2043.486, -4390.976, 98.17226" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207688);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207688" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -313,7 +313,7 @@
         <MoveToAction Location="-4879.899, -6639.522, 10.85343" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2029.233, -4379.827, 100.9757" />
+        <FlyToAction Dismount="True" Location="2033.453, -4379.648, 98.0403" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207686);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207686" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.ZoneId != currentZoneID" Timeout="20000" />
@@ -329,7 +329,7 @@
         <InteractionAction InteractType="GameObject" Entry="207695" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2039.67, -4356.288, 100.0043" />
+        <FlyToAction Dismount="True" Location="2037.961, -4360.66, 98.053" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207687);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207687" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -343,7 +343,7 @@
         <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2065.653, -4390.647, 100.0469" />
+        <FlyToAction Dismount="True" Location="2058.579, -4384.915, 98.90421" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207689);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207689" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -360,7 +360,7 @@
         <InteractionAction InteractType="GameObject" Entry="207691" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="2061.209, -4364.834, 98.61539" />
+        <FlyToAction Dismount="True" Location="2060.498, -4365.7, 98.55523" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207690);" Timeout="10000" />
         <InteractionAction InteractType="GameObject" Entry="207690" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -438,7 +438,7 @@
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5042" IgnoreCanRun="True">
       <CustomAction Code="LoadPorfileFromSubfolder(&quot;Deepholm&quot;);" />
     </If>
-    <!--Deepholm-->
+    <!--Vashj'ir-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 5145" IgnoreCanRun="True">
       <CustomAction Code="LoadPorfileFromSubfolder(&quot;Vashjir&quot;);" />
     </If>
@@ -466,7 +466,7 @@
       </While>
     </If>
     <If Condition="Me.IsHorde" IgnoreCanRun="True">
-      <FlyToAction Dismount="True" Location="1916.036, -4215.632, 36.71008" />
+      <FlyToAction Dismount="True" Location="1910.451, -4213.775, 36.9762" />
       <While Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
         <InteractionAction InteractType="NPC" Entry="3322" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
       </While>
