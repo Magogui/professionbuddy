@@ -25,6 +25,12 @@ namespace HighVoltz.Composites
             Materials,
         }
         [PbXmlAttribute]
+        public DepositWithdrawAmount Withdraw
+        {
+            get { return (DepositWithdrawAmount)Properties["Withdraw"].Value; }
+            set { Properties["Withdraw"].Value = value; }
+        }
+        [PbXmlAttribute]
         public BankType Bank
         {
             get { return (BankType)Properties["Bank"].Value; }
@@ -93,6 +99,7 @@ namespace HighVoltz.Composites
             Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
             Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool), new DisplayNameAttribute("Withdraw Additively"));
+            Properties["Withdraw"] = new MetaProp("Withdraw", typeof(DepositWithdrawAmount));
 
             Amount = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Amount");
@@ -105,15 +112,26 @@ namespace HighVoltz.Composites
             Location = _loc.ToInvariantString();
             NpcEntry = 0u;
             WithdrawAdditively = true;
+            Withdraw = DepositWithdrawAmount.All;
 
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
+            Properties["Amount"].Show = false;
+
             Properties["AutoFindBank"].PropertyChanged += AutoFindBankChanged;
             Properties["GetItemfromBankType"].PropertyChanged += GetItemfromBankActionPropertyChanged;
             Properties["Location"].PropertyChanged += LocationChanged;
+            Properties["Withdraw"].PropertyChanged += WithdrawChanged;
         }
 
         #region Callbacks
+
+        void WithdrawChanged(object sender, MetaPropArgs e)
+        {
+            Properties["Amount"].Show = Withdraw == DepositWithdrawAmount.Amount;
+            RefreshPropertyGrid();
+        }
+
         void LocationChanged(object sender, MetaPropArgs e)
         {
             _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
@@ -297,7 +315,8 @@ namespace HighVoltz.Composites
                         {
                             uint itemID;
                             uint.TryParse(entry.Trim(), out itemID);
-                            items.Add(itemID, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(itemID) : Amount == 0 ? int.MaxValue : Amount);
+                            items.Add(itemID, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(itemID) :
+                                Withdraw == DepositWithdrawAmount.All ? int.MaxValue : Amount);
                         }
                     }
                     else
@@ -462,7 +481,8 @@ namespace HighVoltz.Composites
                            NpcEntry = this.NpcEntry,
                            Location = this.Location,
                            MinFreeBagSlots = this.MinFreeBagSlots,
-                           WithdrawAdditively = this.WithdrawAdditively
+                           WithdrawAdditively = this.WithdrawAdditively,
+                           Withdraw = this.Withdraw
                        };
         }
     }

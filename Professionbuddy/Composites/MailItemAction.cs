@@ -23,6 +23,12 @@ namespace HighVoltz.Composites
     sealed class MailItemAction : PBAction
     {
         [PbXmlAttribute]
+        public DepositWithdrawAmount Mail
+        {
+            get { return (DepositWithdrawAmount)Properties["Mail"].Value; }
+            set { Properties["Mail"].Value = value; }
+        }
+        [PbXmlAttribute]
         public bool UseCategory
         {
             get { return (bool)Properties["UseCategory"].Value; }
@@ -87,6 +93,7 @@ namespace HighVoltz.Composites
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
             Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
                 new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
+            Properties["Mail"] = new MetaProp("Mail", typeof(DepositWithdrawAmount));
 
             ItemID = "";
             AutoFindMailBox = true;
@@ -97,6 +104,7 @@ namespace HighVoltz.Composites
             SubCategory = WoWItemTradeGoodsClass.None;
             Amount = new DynamicProperty<int>(this, "0");
             RegisterDynamicProperty("Amount");
+            Mail = DepositWithdrawAmount.All;
 
             Properties["Location"].Show = false;
             Properties["ItemID"].Show = false;
@@ -104,9 +112,15 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += LocationChanged;
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
+            Properties["Mail"].PropertyChanged += MailChanged;
         }
 
         #region Callbacks
+        void MailChanged(object sender, MetaPropArgs e)
+        {
+            Properties["Mail"].Show = Mail == DepositWithdrawAmount.Amount;
+            RefreshPropertyGrid();
+        }
         void LocationChanged(object sender, MetaPropArgs e)
         {
             _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
@@ -252,7 +266,8 @@ namespace HighVoltz.Composites
                     if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
                         SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
                     {
-                        itemList.Add(item.Entry, Amount > 0 ? Amount : Util.GetCarriedItemCount(item.Entry));
+                        itemList.Add(item.Entry, Mail == DepositWithdrawAmount.Amount ?
+                        Amount : Util.GetCarriedItemCount(item.Entry));
                     }
                 }
             else
@@ -264,7 +279,8 @@ namespace HighVoltz.Composites
                     {
                         uint itemID;
                         uint.TryParse(entry.Trim(), out itemID);
-                        itemList.Add(itemID, Amount > 0 ? Amount : Util.GetCarriedItemCount(itemID));
+                        itemList.Add(itemID, Mail == DepositWithdrawAmount.Amount ?
+                        Amount : Util.GetCarriedItemCount(itemID));
                     }
                 }
                 else
@@ -341,7 +357,7 @@ namespace HighVoltz.Composites
             "end " +
             "if bagged >= amount then return -1 end " +
             "mailItemI = mailItemI + 1 " +
-            "if mailItemI > ATTACHMENTS_MAX_SEND then " +
+            "if mailItemI >= ATTACHMENTS_MAX_SEND then " +
                 "return bagged " +
             "end " +
         "end " +
@@ -353,7 +369,7 @@ namespace HighVoltz.Composites
             "for i=1,ATTACHMENTS_MAX_SEND do " +
                 "if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end " +
             "end " +
-            "if cnt == ATTACHMENTS_MAX_SEND then " +
+            "if cnt >= ATTACHMENTS_MAX_SEND - 1 then " +
                 "SendMail (\"{0}\",\"{1}\",'') " +
                 "return 1 " +
             "end " +
@@ -405,7 +421,8 @@ namespace HighVoltz.Composites
                            UseCategory = this.UseCategory,
                            Category = this.Category,
                            SubCategory = this.SubCategory,
-                           Amount = this.Amount
+                           Amount = this.Amount,
+                           Mail =  this.Mail
                        };
         }
 

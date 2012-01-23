@@ -20,6 +20,12 @@ namespace HighVoltz.Composites
     sealed class SellItemAction : PBAction
     {
         [PbXmlAttribute]
+        public DepositWithdrawAmount Sell
+        {
+            get { return (DepositWithdrawAmount)Properties["Sell"].Value; }
+            set { Properties["Sell"].Value = value; }
+        }
+        [PbXmlAttribute]
         public uint NpcEntry
         {
             get { return (uint)Properties["NpcEntry"].Value; }
@@ -35,7 +41,6 @@ namespace HighVoltz.Composites
         public enum SellItemActionType
         {
             Specific,
-            List,
             Greys,
             Whites,
             Greens,
@@ -67,17 +72,26 @@ namespace HighVoltz.Composites
             Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
                 new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
             Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), new DisplayNameAttribute("Sell Item Type"));
+            Properties["Sell"] = new MetaProp("Sell", typeof(DepositWithdrawAmount));
 
             ItemID = "";
-            Count = new DynamicProperty<int>(this,"0");
+            Count = new DynamicProperty<int>(this, "0");
             RegisterDynamicProperty("Count");
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();
             NpcEntry = 0u;
+            Sell = DepositWithdrawAmount.All;
 
             Properties["Location"].PropertyChanged += LocationChanged;
             Properties["SellItemType"].Value = SellItemActionType.Specific;
             Properties["SellItemType"].PropertyChanged += SellItemActionPropertyChanged;
+            Properties["Sell"].PropertyChanged += SellChanged;
+        }
+
+        void SellChanged(object sender, MetaPropArgs e)
+        {
+            Properties["Sell"].Show = Sell == DepositWithdrawAmount.Amount;
+            RefreshPropertyGrid();
         }
         void LocationChanged(object sender, MetaPropArgs e)
         {
@@ -173,7 +187,7 @@ namespace HighVoltz.Composites
                             return RunStatus.Failure;
                         }
                         List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).
-                            Take((int)Count <= 0 ? int.MaxValue : Count).ToList();
+                            Take(Sell == DepositWithdrawAmount.All ? int.MaxValue : Count).ToList();
                         using (new FrameLock())
                         {
                             foreach (WoWItem item in itemList)
@@ -243,7 +257,15 @@ namespace HighVoltz.Composites
         }
         public override object Clone()
         {
-            return new SellItemAction { Count = this.Count, ItemID = this.ItemID, SellItemType = this.SellItemType, NpcEntry = this.NpcEntry, Location = this.Location };
+            return new SellItemAction
+            {
+                Count = this.Count,
+                ItemID = this.ItemID,
+                SellItemType = this.SellItemType,
+                NpcEntry = this.NpcEntry,
+                Location = this.Location,
+                Sell = this.Sell
+            };
         }
     }
     #endregion

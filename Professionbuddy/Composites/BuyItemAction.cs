@@ -50,7 +50,7 @@ namespace HighVoltz.Composites
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool),
                                                        new DisplayNameAttribute("Buy Additively"));
             ItemID = "";
-            Count = new DynamicProperty<int>(this, "0"); // dynamic expression
+            Count = new DynamicProperty<int>(this, "1"); // dynamic expression
             RegisterDynamicProperty("Count");
             BuyItemType = BuyItemActionType.Material;
             _loc = WoWPoint.Zero;
@@ -249,33 +249,63 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
+        // Credits to Inrego
+        // Index are {0}=ItemID, {1}=Amount
+        // returns 1 if item is found, otherwise -1
+        const string BuyItemFormat =
+            "local amount={1} " +
+            "local id={0} " + 
+            "local stackSize " +
+            "local index = -1 " +
+            "local quantity " +
+            "for i=1,GetMerchantNumItems() do " + 
+               "local link=GetMerchantItemLink(i) " + 
+               "if link then if link:find(id) then " + 
+                     "index=i " +
+                     "stackSize=GetMerchantItemMaxStack(i) " + 
+                  "end " + 
+               "end " + 
+            "end " +
+            "if index == -1 then return -1 end " +
+            "while amount>0 do " + 
+               "if amount>=stackSize then " + 
+                  "quantity=stackSize " + 
+               "else " + 
+                  "quantity=amount " + 
+               "end " +
+               "BuyMerchantItem(index, quantity) " +
+               "amount=amount-quantity " +  
+            "end " +
+            "return 1 ";
 
         public static void BuyItem(uint id, uint count)
         {
-            bool found = false;
-            foreach (MerchantItem mi in MerchantFrame.Instance.GetAllMerchantItems())
-            {
-                if (mi.ItemId == id)
-                {
-                    // since BuyItem can only by up to 20 items we need to run it multiple times when buying over 20 items
-                    var stacks = (int)(count / 20);
-                    var leftovers = (int)(count % 20);
-                    if (count >= 20)
-                    {
-                        //using (new FrameLock()) // framelock was causing DCs
-                        //{
-                        for (int i = 0; i < stacks; i++)
-                            MerchantFrame.Instance.BuyItem(mi.Index, 20);
-                        if (leftovers > 0)
-                            MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
-                        //}
-                    }
-                    else
-                        MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
-                    found = true;
-                    break;
-                }
-            }
+            //bool found = false;
+            //foreach (MerchantItem mi in MerchantFrame.Instance.GetAllMerchantItems())
+            //{
+            //    if (mi.ItemId == id)
+            //    {
+            //        // since BuyItem can only by up to 20 items we need to run it multiple times when buying over 20 items
+            //        var stacks = (int)(count / 20);
+            //        var leftovers = (int)(count % 20);
+            //        if (count >= 20)
+            //        {
+            //            //using (new FrameLock()) // framelock was causing DCs
+            //            //{
+            //            for (int i = 0; i < stacks; i++)
+            //                MerchantFrame.Instance.BuyItem(mi.Index, 20);
+            //            if (leftovers > 0)
+            //                MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
+            //            //}
+            //        }
+            //        else
+            //            MerchantFrame.Instance.BuyItem(mi.Index, leftovers);
+            //        found = true;
+            //        break;
+            //    }
+            //}
+            string lua = string.Format(BuyItemFormat, id, count);
+            bool found = Lua.GetReturnVal<int>(lua, 0) == 1;
             Professionbuddy.Log("item {0} {1}", id, found ? "bought " : "not found");
         }
 

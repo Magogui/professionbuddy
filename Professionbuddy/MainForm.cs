@@ -394,32 +394,6 @@ namespace HighVoltz
             }
         }
 
-        //private void toolStripSettings_Click(object sender, EventArgs e)
-        //{
-        //    Form settingWindow = new Form();
-        //    settingWindow.Height = 300;
-        //    settingWindow.Width = 300;
-        //    settingWindow.Text = "Profile Settings";
-        //    PropertyGrid pg = new PropertyGrid();
-        //    pg.Dock = DockStyle.Fill;
-        //    settingWindow.Controls.Add(pg);
-
-        //    ProfilePropertyBag = new PropertyBag();
-        //    foreach (var kv in PB.ProfileSettings.Settings)
-        //    {
-        //        string sum = PB.ProfileSettings.Summaries.ContainsKey(kv.Key) ?
-        //            PB.ProfileSettings.Summaries[kv.Key] : "";
-        //        ProfilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.GetType(),
-        //            new DescriptionAttribute(sum));
-        //        ProfilePropertyBag[kv.Key].Value = kv.Value;
-        //        ProfilePropertyBag[kv.Key].PropertyChanged += new EventHandler(MainForm_PropertyChanged);
-        //    }
-        //    pg.SelectedObject = ProfilePropertyBag;
-        //    toolStripSettings.Enabled = false;
-        //    settingWindow.Show();
-        //    settingWindow.Disposed += new EventHandler(settingWindow_Disposed);
-        //}
-
         private void ProfileWatcherChanged(object sender, FileSystemEventArgs e)
         {
             RefreshProfileList();

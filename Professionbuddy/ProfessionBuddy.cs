@@ -92,13 +92,14 @@ namespace HighVoltz
             // Initialize is called when bot is started.. we need to hook these events before that.
             if (!_ctorRunOnce)
             {
-                BotEvents.Profile.OnNewOuterProfileLoaded +=
-                    Profile_OnNewOuterProfileLoaded;
-                Profile.OnUnknownProfileElement +=
-                    Profile_OnUnknownProfileElement;
+                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                Profile.OnUnknownProfileElement += Profile_OnUnknownProfileElement;
+                //BotEvents.OnBotStart += args => _botIsStartingUp = true;
+                //BotEvents.OnBotStarted += args => _botIsStartingUp = false;
                 _ctorRunOnce = true;
             }
         }
+
         #endregion
 
         #region Overrides
@@ -354,11 +355,17 @@ namespace HighVoltz
         // Used as a fix when profile is loaded before Inititialize is called
         static private string _profileToLoad = "";
         static private string _lastProfilePath = "";
-        private static bool _lastProfileIsHBProfile = false;
+        internal static bool LastProfileIsHBProfile;
+
+        //private static bool _botIsStartingUp;
+
         static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
             {
+                // prevents HB from reloading current profile when bot is started.
+                if (!Instance.IsRunning && ProfileManager.XmlLocation == Instance.CurrentProfile.XmlPath)
+                    return;
                 if (_init)
                 {
                     if (_isChangingBot)
@@ -398,7 +405,7 @@ namespace HighVoltz
                                 MainForm.Instance.RemoveProfileSettingsTab();
                         }
                     }
-                    _lastProfileIsHBProfile = false;
+                    LastProfileIsHBProfile = false;
                 }
                 else
                 {
@@ -407,7 +414,7 @@ namespace HighVoltz
             }
             else if (args.NewProfile.XmlElement.Name == "HBProfile")
             {
-                _lastProfileIsHBProfile = true;
+                LastProfileIsHBProfile = true;
                 _lastProfilePath = ProfileManager.XmlLocation;
             }
         }
@@ -488,9 +495,9 @@ namespace HighVoltz
                             else
                             {
                                 LoadPBProfile(_profileToLoad);
-                                _lastProfileIsHBProfile = false;
+                                LastProfileIsHBProfile = false;
                             }
-                             
+
                         }
                         catch (Exception ex) { Err(ex.ToString()); }
                     }
@@ -580,7 +587,7 @@ namespace HighVoltz
             catch (Exception ex)
             { Err(ex.ToString()); }
         }
-        
+
         public static void LoadPBProfile(string path)
         {
             bool preloadedHBProfile = false;
@@ -613,10 +620,10 @@ namespace HighVoltz
                 MainForm.Instance.UpdateControls();
             if (!preloadedHBProfile)
             {
-                if (_lastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
+                if (LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
                     ProfileManager.LoadNew(_lastProfilePath);
                 else
-                    ProfileManager.LoadEmpty(); 
+                    ProfileManager.LoadEmpty();
             }
             Instance.MySettings.Save();
         }

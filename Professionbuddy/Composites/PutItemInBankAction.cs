@@ -80,6 +80,13 @@ namespace HighVoltz.Composites
                 return !(a == b);
             }
         }
+
+        [PbXmlAttribute]
+        public DepositWithdrawAmount Deposit
+        {
+            get { return (DepositWithdrawAmount)Properties["Deposit"].Value; }
+            set { Properties["Deposit"].Value = value; }
+        }
         [PbXmlAttribute]
         public bool UseCategory
         {
@@ -164,6 +171,7 @@ namespace HighVoltz.Composites
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
             Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
+            Properties["Deposit"] = new MetaProp("Deposit", typeof(DepositWithdrawAmount));
 
             Amount = new DynamicProperty<int>(this, "0");
             RegisterDynamicProperty("Amount");
@@ -177,20 +185,29 @@ namespace HighVoltz.Composites
             UseCategory = true;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
+            Deposit = DepositWithdrawAmount.All;
 
             Properties["ItemID"].Show = false;
             Properties["Location"].Show = false;
             Properties["NpcEntry"].Show = false;
             Properties["GuildTab"].Show = false;
+            Properties["Amount"].Show = false;
 
             Properties["AutoFindBank"].PropertyChanged += AutoFindBankChanged;
             Properties["Bank"].PropertyChanged += PutItemInBankActionPropertyChanged;
             Properties["Location"].PropertyChanged += LocationChanged;
             Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
+            Properties["Deposit"].PropertyChanged += DepositChanged;
         }
 
         #region Callbacks
+
+        void DepositChanged(object sender, MetaPropArgs e)
+        {
+            Properties["Deposit"].Show = Deposit == DepositWithdrawAmount.Amount;
+            RefreshPropertyGrid();
+        }
         void LocationChanged(object sender, MetaPropArgs e)
         {
             _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
@@ -247,6 +264,7 @@ namespace HighVoltz.Composites
         }
 
         #endregion
+
         Dictionary<uint, int> _itemList;
         //bool _switchingTabs = false;
         readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
@@ -357,7 +375,8 @@ namespace HighVoltz.Composites
                     if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
                         SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
                     {
-                        itemList.Add(item.Entry, Amount > 0 ? Amount : Util.GetCarriedItemCount(item.Entry));
+                        itemList.Add(item.Entry, Deposit == DepositWithdrawAmount.Amount ?
+                                    Amount : Util.GetCarriedItemCount(item.Entry));
                     }
                 }
             else
@@ -369,7 +388,8 @@ namespace HighVoltz.Composites
                     {
                         uint itemID;
                         uint.TryParse(entry.Trim(), out itemID);
-                        itemList.Add(itemID, Amount > 0 ? Amount : Util.GetCarriedItemCount(itemID));
+                        itemList.Add(itemID, Deposit == DepositWithdrawAmount.Amount ?
+                                        Amount : Util.GetCarriedItemCount(itemID));
                     }
                 }
                 else
@@ -492,11 +512,11 @@ namespace HighVoltz.Composites
                                 itemToDeposit.BagIndex + 1, itemToDeposit.BagSlot + 1, depositAmount, _bankSlots[bSlotIndex].Bag, _bankSlots[bSlotIndex].Slot);
                         }
                         return depositAmount;
-                        
+
                     }
                     if (tab > 0 || currentTab == tabCnt)
                     {
-                        Professionbuddy.Log("Guild Tab: {0} is full",tab);
+                        Professionbuddy.Log("Guild Tab: {0} is full", tab);
                         return -1;
                     }
                     if (tab == 0 && currentTab < tabCnt)
@@ -547,7 +567,7 @@ namespace HighVoltz.Composites
 
         #endregion
         // indexes are {0} = ItemID, {1} = amount to deposit.
-        const string DepositItemInPersonalBankLuaFormat = 
+        const string DepositItemInPersonalBankLuaFormat =
                 "local bagged = 0 " +
                 "local bagInfo = {{0}} " +
                 "local bag = -1 " +
@@ -597,7 +617,7 @@ namespace HighVoltz.Composites
                    "end " +
                 "end return ";
 
-        
+
         private bool PutItemInBank(uint id, int amount)
         {
             string lua = string.Format(DepositItemInPersonalBankLuaFormat, id, amount <= 0 ? int.MaxValue : amount);
@@ -618,7 +638,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will deposit the specified item/s into your personal or guild bank. Set Amount to 0 if you want to deposit all items that match Entry or Category. Set GuildTab to 0 to deposit in whichever tab has room";
+                return "This action will deposit the specified item/s into your personal or guild bank. Set GuildTab to 0 to deposit in whichever tab has room";
             }
         }
         public override void Reset()
@@ -645,6 +665,7 @@ namespace HighVoltz.Composites
                            UseCategory = this.UseCategory,
                            Category = this.Category,
                            SubCategory = this.SubCategory,
+                           Deposit = this.Deposit
                        };
         }
 
@@ -655,7 +676,7 @@ namespace HighVoltz.Composites
             var subCatTypeAttr = element.Attribute("SubCategoryType");
             if (cat != null)
             {
-                Category = (WoWItemClass) Enum.Parse(typeof (WoWItemClass), cat.Value);
+                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), cat.Value);
                 cat.Remove();
             }
             if (subCatAttr != null && subCatTypeAttr != null)

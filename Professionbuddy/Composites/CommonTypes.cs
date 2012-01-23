@@ -5,6 +5,7 @@ namespace HighVoltz.Composites
 {
     public enum SubCategoryType { None }; // use as a placeholder for item categories with no sub categories defined in HB
     public enum BankType { Personal, Guild }
+    public enum  DepositWithdrawAmount {All,Amount}
     static class Callbacks
     {
         /// <summary>
