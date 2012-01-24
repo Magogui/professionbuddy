@@ -630,7 +630,6 @@ namespace HighVoltz.Composites
                         Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) ==
                         1)
                     {
-                        _queueTimer.Stop();
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
                         string lua = string.Format(ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id,

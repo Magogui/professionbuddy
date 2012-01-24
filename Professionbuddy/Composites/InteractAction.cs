@@ -119,10 +119,7 @@ namespace HighVoltz.Composites
                         else
                         {
                             _interactSw.Reset();
-                            if (InteractType == InteractActionType.NPC)
-                                Lua.DoString("InteractUnit({0})", obj.Entry);
-                            else
-                                obj.Interact();
+                            obj.Interact();
                             IsDone = true;
                         }
                     }

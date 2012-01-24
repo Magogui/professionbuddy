@@ -217,10 +217,13 @@ namespace HighVoltz.Composites
                                 _gbankItemThrottleSW.Start();
                             if (_gbankItemThrottleSW.ElapsedMilliseconds < GbankItemThrottle)
                                 return RunStatus.Success;
-                            _gbankItemThrottleSW.Reset();
-                            _gbankItemThrottleSW.Start();
-                            int ret = GetItemFromGBank(itemID, _itemList[itemID]);
 
+                            int ret = GetItemFromGBank(itemID, _itemList[itemID]);
+                            if (ret != -1)
+                            {
+                                _gbankItemThrottleSW.Reset();
+                                _gbankItemThrottleSW.Start();
+                            }
                             _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
                             done = _itemList[itemID] <= 0;
                         }
