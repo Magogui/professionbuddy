@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using Styx;
+using Styx.Logic.Pathing;
 using TreeSharp;
 using Styx.Helpers;
 using Styx.WoWInternals;

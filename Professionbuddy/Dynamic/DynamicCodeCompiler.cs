@@ -184,6 +184,11 @@ namespace HighVoltz.Dynamic
             int MailCount { get{ return MailFrame.Instance.MailCount;}}
             bool HasItem (uint id) {return InbagCount(id) > 0; }
             int InbagCount (uint id) {return Helpers.InbagCount(id); }
+            int InBankCount (uint id) {return Util.GetBankItemCount(id); }
+            int InGBankCount(int itemId) {return Helpers.InGBankCount(itemId);}
+            int InGBankCount(string character, int itemId) {return Helpers.InGBankCount(character,itemId);}
+            int OnAhCount(int itemId) {return Helpers.OnAhCount(itemId);}
+            int OnAhCount(string character, int itemId) {return Helpers.OnAhCount(character,itemId);}
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
             void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
@@ -200,6 +205,7 @@ namespace HighVoltz.Dynamic
             void SwitchToBot(string botName) {try{Professionbuddy.ChangeSecondaryBot(botName);}catch{}}
             void SwitchCharacter(string character,string server,string botName){Helpers.SwitchCharacter(character,server,botName);}
             BotBase SecondaryBot {get{return Professionbuddy.Instance.SecondaryBot;}}
+            bool HasDataStoreAddon {get{return DataStore.HasDataStoreAddon;}}
         }";
         #endregion
         static public StringBuilder CsharpStringBuilder { get; private set; }

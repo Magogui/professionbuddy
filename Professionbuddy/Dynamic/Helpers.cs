@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Styx.WoWInternals;
@@ -35,11 +36,11 @@ namespace HighVoltz.Dynamic
         }
         public static void Log(System.Drawing.Color c, string f, params object[] args)
         {
-            Logging.Write(c, f, args);  
+            Logging.Write(c, f, args);
         }
         public static int InbagCount(uint id)
         {
-            return (int) Ingredient.GetInBagItemCount(id);
+            return (int)Ingredient.GetInBagItemCount(id);
         }
         public static float DistanceTo(double x, double y, double z)
         {
@@ -145,6 +146,107 @@ namespace HighVoltz.Dynamic
                     Professionbuddy.Instance.IsRunning = true;
                 }) { IsBackground = true }.Start();
             }));
+        }
+        // Format index: {0}=GuildName, {1}=ItemId
+        // returns item count
+        private const string InGbankCountFormat =
+            "local itemCount = 0 " +
+            "for k,v in pairs(DataStore_ContainersDB.global.Guilds) do " +
+               "if string.find(k,\"{0}\") and v.Tabs then " +
+                  "for k2,v2 in ipairs(v.Tabs) do " +
+                     "if v2 and v2.ids then " +
+                        "for k3,v3 in pairs(v2.ids) do " +
+                           "if v3 == {1} then " +
+                              "itemCount = itemCount + (v2.counts[k3] or 1) " +
+                           "end " +
+                        "end " +
+                     "end " +
+                  "end " +
+               "end " +
+            "end " +
+            "return itemCount";
+
+        public static int InGBankCount(int itemId)
+        {
+            return InGBankCount(null, itemId);
+        }
+
+        public static int InGBankCount(string character, int itemId)
+        {
+            int ret = 0;
+            using (new FrameLock())
+            {
+                bool hasDataStore = Lua.GetReturnVal<bool>("if DataStoreDB and DataStore_ContainersDB then return 1 else return 0 end", 0);
+                if (hasDataStore)
+                {
+                    if (string.IsNullOrEmpty(character))
+                        character = Lua.GetReturnVal<string>("return UnitName('player')", 0);
+                    string server = Lua.GetReturnVal<string>("return GetRealmName()", 0);
+                    string guildName = null, lua;
+                    List<string> profiles = Lua.GetReturnValues("local t={} for k,v in pairs(DataStoreDB.global.Characters) do table.insert(t,k) end return unpack(t)");
+                    foreach (string profile in profiles)
+                    {
+                        string[] elements = profile.Split('.');
+                        if (elements[1].Equals(server, StringComparison.InvariantCultureIgnoreCase) &&
+                            elements[2].Equals(character, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            lua = string.Format("local val = DataStoreDB.global.Characters[\"{0}\"] if val and val.guildName then return val.guildName end return '' ", profile);
+                            guildName = Lua.GetReturnVal<string>(lua, 0);
+                            if (string.IsNullOrEmpty(guildName))
+                                return 0;
+                            break;
+                        }
+                    }
+                    lua = string.Format(InGbankCountFormat, guildName,itemId);
+                    ret = Lua.GetReturnVal<int>(lua, 0);
+                }
+            }
+            return ret;
+        }
+
+        public static int OnAhCount(int itemId)
+        {
+            return OnAhCount(null, itemId);
+        }
+
+        public static int OnAhCount(string character, int itemId)
+        {
+            int ret = 0;
+            using (new FrameLock())
+            {
+                var hasDataStore = Lua.GetReturnVal<bool>("if DataStoreDB and DataStore_AuctionsDB then return 1 else return 0 end", 0);
+                if (hasDataStore)
+                {
+                    if (string.IsNullOrEmpty(character))
+                        character = Lua.GetReturnVal<string>("return UnitName('player')", 0);
+                    var server = Lua.GetReturnVal<string>("return GetRealmName()", 0);
+                    var profiles = Lua.GetReturnValues("local t={} for k,v in pairs(DataStoreDB.global.Characters) do table.insert(t,k) end return unpack(t)");
+                    string profile = (from p in profiles
+                                      let elements = p.Split('.')
+                                      where elements[1].Equals(server, StringComparison.InvariantCultureIgnoreCase) && 
+                                      elements[2].Equals(character, StringComparison.InvariantCultureIgnoreCase)
+                                      select p).FirstOrDefault();
+                    if (string.IsNullOrEmpty(profile))
+                        return 0;
+                    string lua = string.Format(
+                        "local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char and char.Auctions then return #char.Auctions end return 0 ",
+                        profile);
+                    var tableSize = Lua.GetReturnVal<int>( lua,0);
+                    for (int i = 1; i <= tableSize; i++)
+                    {
+                        lua = string.Format("local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char then return char.Auctions[{1}] end return '' ", profile, i);
+                        string aucStr = Lua.GetReturnVal<string>(lua, 0);
+                        string[] strs = aucStr.Split('|');
+                        int id = int.Parse(strs[1]);
+                        if (id == itemId)
+                        {
+                            int cnt = int.Parse(strs[2]);
+                            ret += cnt;
+                        }
+                    }
+                }
+            }
+            return ret;
         }
 
         public class TradeskillHelper

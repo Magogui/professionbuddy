@@ -235,7 +235,7 @@ namespace HighVoltz.Composites
                     _itemSplitSW.Start();
                     return RunStatus.Success;
                 }
-                _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
+                _itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
 
                 bool done = _itemList[itemID] <= 0;
                 if (done)

@@ -308,7 +308,7 @@ namespace HighVoltz.Composites
                             _gbankItemThrottleSW.Reset();
                             _gbankItemThrottleSW.Start();
                             int ret = PutItemInGBank(itemID, _itemList[itemID], GuildTab);
-                            _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
+                            _itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
                             done = _itemList[itemID] <= 0;
                         }
                         if (done)

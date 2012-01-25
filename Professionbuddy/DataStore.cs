@@ -33,7 +33,7 @@ namespace HighVoltz
                "local guilds = {} " +
                "local storeItem = function (id,cnt) id=tonumber(id) cnt=tonumber(cnt) if items[id]  then items[id] = items[id] + cnt else items[id] = cnt end end " +
                "for k,v in pairs(DataStoreDB.global.Characters) do " +
-                  @"local r = string.match(k,'%a+\.(%a+ ?%a+ ?%a+)') " +
+                  @"local r = string.match(k,'[^%.]+%.([^%.]+)%.[^%.]+') " +
                   "if r and r == realm and v and v.faction == faction then " +
                      "table.insert (profiles,k) " +
                      "if v.guildName then " +

@@ -219,12 +219,12 @@ namespace HighVoltz.Composites
                                 return RunStatus.Success;
 
                             int ret = GetItemFromGBank(itemID, _itemList[itemID]);
-                            if (ret != -1)
+                            if (ret >= 0)
                             {
                                 _gbankItemThrottleSW.Reset();
                                 _gbankItemThrottleSW.Start();
                             }
-                            _itemList[itemID] = ret == -1 ? 0 : _itemList[itemID] - ret;
+                            _itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
                             done = _itemList[itemID] <= 0;
                         }
                         if (done)
@@ -318,8 +318,10 @@ namespace HighVoltz.Composites
                         {
                             uint itemID;
                             uint.TryParse(entry.Trim(), out itemID);
-                            items.Add(itemID, !WithdrawAdditively ? Amount - Util.GetCarriedItemCount(itemID) :
-                                Withdraw == DepositWithdrawAmount.All ? int.MaxValue : Amount);
+                            if (WithdrawAdditively)
+                                items.Add(itemID, Withdraw == DepositWithdrawAmount.All ? int.MaxValue : Amount);
+                            else
+                                items.Add(itemID, Amount - Util.GetCarriedItemCount(itemID));
                         }
                     }
                     else
@@ -356,11 +358,11 @@ namespace HighVoltz.Composites
                                   "return c " +
                                "else " +
                                   "local itemf  = GetItemFamily(id) " +
-                                  "for bag =4 ,0 ,-1 do " +
+                                  "for bag =0 ,NUM_BAG_SLOTS do " +
                                      "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
                                      "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
                                         "local freeSlots = GetContainerFreeSlots(bag) " +
-                                        "SplitGuildBankItem(tab, slot, amount-c) " +
+                                        "SplitGuildBankItem(tab, slot, amount) " +
                                         "PickupContainerItem(bag, freeSlots[1]) " +
                                         "return amount-c " +
                                      "end " +
