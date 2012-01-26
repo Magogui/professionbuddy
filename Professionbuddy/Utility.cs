@@ -131,6 +131,17 @@ namespace HighVoltz
             IsBankFrameOpen = false;
         }
 
+        public static bool IsGBankFrameOpen { get; private set; }
+
+        static internal void OnGBankFrameOpened(object obj, LuaEventArgs args)
+        {
+            IsGBankFrameOpen = true;
+        }
+
+        static internal void OnGBankFrameClosed(object obj, LuaEventArgs args)
+        {
+            IsGBankFrameOpen = false;
+        }
 
         static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
         static readonly Stopwatch PingSW = new Stopwatch();

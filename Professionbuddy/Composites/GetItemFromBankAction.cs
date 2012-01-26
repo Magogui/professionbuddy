@@ -177,7 +177,6 @@ namespace HighVoltz.Composites
 
         // key = itemID; value amount to withdrawl
         Dictionary<uint, int> _itemList;
-        static bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch _itemsSW;
         readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
         const long GbankItemThrottle = 1000;
@@ -185,7 +184,7 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if ((Bank == BankType.Guild && !IsGbankFrameVisible) ||
+                if ((Bank == BankType.Guild && !Util.IsGBankFrameOpen) ||
                     (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
                     MoveToBanker();

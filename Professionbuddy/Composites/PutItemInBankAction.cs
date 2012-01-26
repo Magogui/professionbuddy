@@ -273,7 +273,7 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if ((Bank == BankType.Guild && !IsGbankFrameVisible) ||
+                if ((Bank == BankType.Guild && !Util.IsGBankFrameOpen) ||
                                  (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
                     MoveToBanker();
@@ -459,7 +459,6 @@ namespace HighVoltz.Composites
         }
 
         #region GuildBank
-        bool IsGbankFrameVisible { get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; } }
         Stopwatch _queueServerSW;
         Stopwatch _itemsSW;
         List<BankSlotInfo> _bankSlots;

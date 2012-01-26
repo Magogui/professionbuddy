@@ -116,6 +116,22 @@ namespace HighVoltz
         {
             Debug("Start Called");
             IsRunning = true;
+            // reattach lua events on bot start in case it they get destroyed from loging out of game
+            Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
+            Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
+            Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
+            Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
+            Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+            Lua.Events.DetachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameClosed);
+            Lua.Events.DetachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
+
+            Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
+            Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
+            Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
+            Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
+            Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+            Lua.Events.AttachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
+            Lua.Events.AttachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
 
             if (!_isChangingBot)
             {
@@ -460,11 +476,6 @@ namespace HighVoltz
             {
                 if (!_init)
                 {
-                    Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
-                    Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-                    Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
-                    Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
-                    Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
                     Debug("Initializing ...");
                     if (!Directory.Exists(BotPath))
                         Directory.CreateDirectory(BotPath);
