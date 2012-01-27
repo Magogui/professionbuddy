@@ -107,6 +107,12 @@ namespace HighVoltz.Composites
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
+        [PbXmlAttribute]
+        public uint IgnoreStackSizeBelow
+        {
+            get { return (uint)Properties["IgnoreStackSizeBelow"].Value; }
+            set { Properties["IgnoreStackSizeBelow"].Value = value; }
+        }
 
         public CancelAuctionAction()
         {
@@ -118,6 +124,8 @@ namespace HighVoltz.Composites
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
             Properties["MinBuyout"] = new MetaProp("MinBuyout", typeof(PropertyBag.GoldEditor),
                 new DisplayNameAttribute("Min Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
+            Properties["IgnoreStackSizeBelow"] = new MetaProp("IgnoreStackSizeBelow", typeof(uint),
+                                                  new DisplayNameAttribute("Ignore StackSize Below"));
 
             ItemID = "0";
             AutoFindAh = true;
@@ -127,6 +135,7 @@ namespace HighVoltz.Composites
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
             MinBuyout = new PropertyBag.GoldEditor("0g0s0c");
+            IgnoreStackSizeBelow = 1u;
 
             Properties["AutoFindAh"].PropertyChanged += AutoFindAHChanged;
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -261,7 +270,8 @@ namespace HighVoltz.Composites
                     {
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(SellItemOnAhAction.ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, 1,int.MaxValue);
+                        string lua = string.Format(SellItemOnAhAction.ScanAHFormatLua,
+                            ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow, int.MaxValue);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
                         uint.TryParse(retVals[1], out ae.MyAuctions);
@@ -455,6 +465,7 @@ namespace HighVoltz.Composites
                            UseCategory = this.UseCategory,
                            Category = this.Category,
                            SubCategory = this.SubCategory,
+                           IgnoreStackSizeBelow = this.IgnoreStackSizeBelow
                        };
         }
     }
