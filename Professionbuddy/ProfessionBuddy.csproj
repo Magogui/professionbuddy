@@ -56,6 +56,7 @@
   <ItemGroup>
     <Reference Include="Honorbuddy">
       <HintPath>..\..\Honorbuddy\Honorbuddy.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -74,6 +75,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Tripper.Tools">
       <HintPath>..\..\Honorbuddy\Tripper.Tools.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -171,14 +173,23 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-if $(ConfigurationName) == Debug xcopy "$(ProjectDir)*.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+    <PostBuildEvent>xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /EXCLUDE:"/JbDecompilerCache"
+xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
+xcopy "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 
-</PostBuildEvent>
+rmdir /S "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)"
+del  "$(ProjectDir)Temp\$(TargetName).zip" 
+xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y /EXCLUDE:"/JbDecompilerCache"
+xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\Profiles\" /I /S /Y
+xcopy "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
+xcopy "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\*.*"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName).zip" /I /S /Y
+"C:\Program Files (x86)\7-Zip\7z" a -r -tzip  "$(ProjectDir)Temp\$(TargetName).zip" "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\*.*"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs</PreBuildEvent>
