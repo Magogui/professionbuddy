@@ -2,45 +2,74 @@
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
+using Styx.Helpers;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Trainer;
 using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using Styx.Helpers;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
+
     #region TrainSkillAction
 
-    sealed class TrainSkillAction : PBAction
+    internal sealed class TrainSkillAction : PBAction
     {
-        [PbXmlAttribute]
-        public uint NpcEntry
-        {
-            get { return (uint)Properties["NpcEntry"].Value; }
-            set { Properties["NpcEntry"].Value = value; }
-        }
-        WoWPoint _loc;
-        [PbXmlAttribute]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
+        private readonly Stopwatch _concludingStopWatch = new Stopwatch();
+        private readonly Stopwatch _waitBeforeTrainingStopWatch = new Stopwatch();
+        private WoWPoint _loc;
+
         public TrainSkillAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
+                                                                      typeof(UITypeEditor)));
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
+                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
+                                                                      typeof(UITypeEditor)));
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();
             NpcEntry = 0u;
 
             Properties["Location"].PropertyChanged += LocationChanged;
         }
-        void LocationChanged(object sender, MetaPropArgs e)
+
+        [PbXmlAttribute]
+        public uint NpcEntry
+        {
+            get { return (uint)Properties["NpcEntry"].Value; }
+            set { Properties["NpcEntry"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string)Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return string.Format("Train Skill"); }
+        }
+
+        public override string Title
+        {
+            get { return string.Format("{0}: {1}", Name, NpcEntry); }
+        }
+
+        public override string Help
+        {
+            get
+            {
+                return
+                    "This action will go to the trainer and train all available spells. Location can be left blank if the NPC is in the database.";
+            }
+        }
+
+        private void LocationChanged(object sender, MetaPropArgs e)
         {
             _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
@@ -48,7 +77,7 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
-        Stopwatch _concludingStopWatch = new Stopwatch();
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -88,13 +117,20 @@ namespace HighVoltz.Composites
                     }
                     return RunStatus.Success;
                 }
+                // wait 2 seconds before training
+                if (!_waitBeforeTrainingStopWatch.IsRunning)
+                    _waitBeforeTrainingStopWatch.Start();
+                if (_waitBeforeTrainingStopWatch.ElapsedMilliseconds < 2000)
+                    return RunStatus.Success;
                 if (!_concludingStopWatch.IsRunning)
                 {
                     Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
                     _concludingStopWatch.Start();
-                }
+                } 
+                // wait 3 seconds after training.
                 else if (_concludingStopWatch.ElapsedMilliseconds >= 3000)
                 {
+                    _waitBeforeTrainingStopWatch.Reset();
                     _concludingStopWatch.Reset();
                     Professionbuddy.Log("Training Completed ");
                     IsDone = true;
@@ -102,25 +138,12 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
-        public override string Name
-        {
-            get { return string.Format("Train Skill"); }
-        }
-        public override string Title
-        {
-            get { return string.Format("{0}: {1}", Name, NpcEntry); }
-        }
-        public override string Help
-        {
-            get
-            {
-                return "This action will go to the trainer and train all available spells. Location can be left blank if the NPC is in the database.";
-            }
-        }
+
         public override object Clone()
         {
-            return new TrainSkillAction { NpcEntry = this.NpcEntry, _loc = this._loc, Location = this.Location };
+            return new TrainSkillAction { NpcEntry = NpcEntry, _loc = _loc, Location = Location };
         }
     }
+
     #endregion
 }
