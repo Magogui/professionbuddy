@@ -34,6 +34,9 @@ namespace HighVoltz
 
         [Setting, DefaultValue("")]
         public string LastBotBase { get; set; }
+
+        [Setting, DefaultValue(0)]
+        public int CurrentRevision { get; set; }
     }
 
     public class PbProfileSettingEntry

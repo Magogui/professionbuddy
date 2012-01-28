@@ -145,6 +145,7 @@
     <Compile Include="TradeSkillListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Updater.cs" />
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -173,23 +174,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /EXCLUDE:"/JbDecompilerCache"
+    <PostBuildEvent>xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y 
 xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-
-rmdir /S "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)"
-del  "$(ProjectDir)Temp\$(TargetName).zip" 
-xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y /EXCLUDE:"/JbDecompilerCache"
-xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\*.*"  "$(ProjectDir)..\$(TargetName)Zips\$(TargetName).zip" /I /S /Y
-"C:\Program Files (x86)\7-Zip\7z" a -r -tzip  "$(ProjectDir)Temp\$(TargetName).zip" "$(ProjectDir)..\$(TargetName)Zips\$(TargetName)\*.*"</PostBuildEvent>
+xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs</PreBuildEvent>

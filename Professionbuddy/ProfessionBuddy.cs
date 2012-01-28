@@ -1,5 +1,4 @@
 ﻿//!CompilerOption:Optimize:On
-//!CompilerOption:AddRef:WindowsBase.dll
 // Professionbuddy botbase by HighVoltz
 
 using System;
@@ -44,13 +43,14 @@ namespace HighVoltz
         private const string _name = "ProfessionBuddy";
         // ReSharper restore InconsistentNaming
         public static readonly string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
+        const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
 
         public readonly string ProfilePath = Environment.UserName == "highvoltz" ?
                         @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles" : Path.Combine(BotPath, "Profiles");
 
         public event EventHandler OnTradeSkillsLoaded;
         static readonly LocalPlayer Me = ObjectManager.Me;
-        readonly Svn _svn = new Svn();
+        public static readonly Svn Svn = new Svn();
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
         public bool HasDataStoreAddon { get { return DataStore != null && DataStore.HasDataStoreAddon; } }
         // profile Settings.
@@ -63,7 +63,7 @@ namespace HighVoltz
         public bool IsRunning;
         // static instance
         public static Professionbuddy Instance { get; private set; }
-        private Version Version { get { return new Version(1, _svn.Revision); } }
+        private Version Version { get { return new Version(1, Svn.Revision); } }
         // test some culture specific stuff.
         private readonly bool _ctorRunOnce;
         public Professionbuddy()
@@ -122,16 +122,12 @@ namespace HighVoltz
             Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
             Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
             Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
-            Lua.Events.DetachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameClosed);
-            Lua.Events.DetachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
 
             Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
             Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
             Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
             Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
-            Lua.Events.AttachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
-            Lua.Events.AttachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
 
             if (!_isChangingBot)
             {
@@ -509,13 +505,14 @@ namespace HighVoltz
                                 LoadPBProfile(_profileToLoad);
                                 LastProfileIsHBProfile = false;
                             }
-
                         }
                         catch (Exception ex) { Err(ex.ToString()); }
                     }
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
+                    // check for Professionbuddy updates
+                    new Thread(Updater.CheckForUpdate) {IsBackground = true}.Start();
                     _init = true;
                 }
             }

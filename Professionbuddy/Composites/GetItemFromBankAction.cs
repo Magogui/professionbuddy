@@ -184,7 +184,7 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if ((Bank == BankType.Guild && !Util.IsGBankFrameOpen) ||
+                if ((Bank == BankType.Guild && !Util.IsGbankFrameVisible) ||
                     (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
                     MoveToBanker();

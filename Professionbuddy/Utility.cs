@@ -119,7 +119,7 @@ namespace HighVoltz
                     select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Concat(new[] { int.MaxValue }).Min();
         }
 
-        public static bool IsBankFrameOpen { get; private set; }
+        public static bool IsBankFrameOpen { get; internal set; }
 
         static internal void OnBankFrameOpened(object obj, LuaEventArgs args)
         {
@@ -131,16 +131,9 @@ namespace HighVoltz
             IsBankFrameOpen = false;
         }
 
-        public static bool IsGBankFrameOpen { get; private set; }
-
-        static internal void OnGBankFrameOpened(object obj, LuaEventArgs args)
+        public static bool IsGbankFrameVisible
         {
-            IsGBankFrameOpen = true;
-        }
-
-        static internal void OnGBankFrameClosed(object obj, LuaEventArgs args)
-        {
-            IsGBankFrameOpen = false;
+            get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; }
         }
 
         static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
