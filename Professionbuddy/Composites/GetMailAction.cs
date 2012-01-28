@@ -125,7 +125,7 @@ namespace HighVoltz.Composites
                 "end " +
                 "if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then " +
                     "for i=1,ATTACHMENTS_MAX_RECEIVE do " +
-                        "if gold and gold > 0 then TakeInboxMoney(index) end " +
+                        "if gold and gold > 0 then TakeInboxMoney(index) foundMail = 1 break end " +
                         "if GetInboxItem(index,i) ~= nil then " +
                             "TakeInboxItem (index,i) " +
                             "foundMail = 1 " +
