@@ -38,11 +38,11 @@
     <Settings DefaultValue="100" Type="Int32" Name="Max Stack Number" Summary="Max number of stacks to post on the AH" Category="Auction House" Global="False" Hidden="False" />
   </SubRoutine>
   <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GatheringProfiles\Uldum\Alliance\(GB2)(Uldum.Nuetral)Mines&amp;Herbs.xml" />
-  <CallSubRoutine SubRoutineName="Init" />
-  <CallSubRoutine SubRoutineName="LoadProfile" />
-  <If Condition="Me.Name.Equals((string)Settings[&quot;BankerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
+  <If Condition="!Me.Name.Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
     <CustomAction Code="MessageBox.Show(&quot;Switch to your farmer before starting this multiprofile. Must restart HB&quot;);TreeRoot.Stop();" />
   </If>
+  <CallSubRoutine SubRoutineName="Init" />
+  <CallSubRoutine SubRoutineName="LoadProfile" />
   <!--Check if GB is current bot and only when farmer is logged on.-->
   <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
     <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
