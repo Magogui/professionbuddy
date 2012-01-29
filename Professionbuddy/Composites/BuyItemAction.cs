@@ -224,7 +224,11 @@ namespace HighVoltz.Composites
                                 return RunStatus.Failure;
                             }
                             foreach (uint id in idList)
-                                BuyItem(id, (uint)(!BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count));
+                            {
+                                int count = !BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count;
+                                if (count > 0)
+                                    BuyItem(id,(uint)count);
+                            }
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
                         {
