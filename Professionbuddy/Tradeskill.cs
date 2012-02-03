@@ -127,19 +127,19 @@ namespace HighVoltz
         {
             ProcessModule mod = ObjectManager.WoWProcess.MainModule;
             var baseAddress = (uint)mod.BaseAddress;
-            if (ProfessionBuddySettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
-                ProfessionBuddySettings.Instance.TradeskillFrameOffset == 0)
+            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
+                GlobalPBSettings.Instance.TradeskillFrameOffset == 0)
             {
                 Professionbuddy.Log("A new wow version has been detected\nScanning for new TradeskillFrame offset");
                 try
                 {
                     uint pointer = Util.FindPattern("89 0D 00 00 00 00 8B 50 04 8B 45 0C 53 33 DB 89 15 00 00 00 00 89 1D 00 00 00 00 8B 08 89 0D 00 00 00 00 8B 50 04 89 15",
                         "xx????xxxxxxxxxxx????xx????xxxx????xxxxx") + 2;
-                    ProfessionBuddySettings.Instance.TradeskillFrameOffset = ObjectManager.Wow.Read<uint>(baseAddress + pointer) - baseAddress;
-                    ProfessionBuddySettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
+                    GlobalPBSettings.Instance.TradeskillFrameOffset = ObjectManager.Wow.Read<uint>(baseAddress + pointer) - baseAddress;
+                    GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
                     Professionbuddy.Log("Found TradeskillFrame offset for WoW Version {0} at offset 0x{1:X}",
-                        mod.FileVersionInfo.FileVersion, ProfessionBuddySettings.Instance.TradeskillFrameOffset);
-                    ProfessionBuddySettings.Instance.Save();
+                        mod.FileVersionInfo.FileVersion, GlobalPBSettings.Instance.TradeskillFrameOffset);
+                    GlobalPBSettings.Instance.Save();
                 }
                 catch (InvalidDataException)
                 {
@@ -147,7 +147,7 @@ namespace HighVoltz
                         mod.FileVersionInfo.FileVersion);
                 }
             }
-            BaseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + ProfessionBuddySettings.Instance.TradeskillFrameOffset;
+            BaseAddress = (uint)ObjectManager.WoWProcess.MainModule.BaseAddress + GlobalPBSettings.Instance.TradeskillFrameOffset;
         }
 
         public TradeSkillFrame()

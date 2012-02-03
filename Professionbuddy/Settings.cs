@@ -23,20 +23,8 @@ namespace HighVoltz
         [Setting, DefaultValue("")]
         public string LastProfile { get; set; }
 
-        [Setting, DefaultValue(null)]
-        public string DataStoreTable { get; set; }
-
-        [Setting, DefaultValue("")]
-        public string WowVersion { get; set; }
-
-        [Setting, DefaultValue(0u)]
-        public uint TradeskillFrameOffset { get; set; }
-
         [Setting, DefaultValue("")]
         public string LastBotBase { get; set; }
-
-        [Setting, DefaultValue(0)]
-        public int CurrentRevision { get; set; }
     }
 
     public class PbProfileSettingEntry

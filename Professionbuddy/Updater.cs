@@ -14,6 +14,7 @@ namespace HighVoltz
     static public class Updater
     {
         const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
+        private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r=";
 
         public static void CheckForUpdate()
         {
@@ -21,15 +22,18 @@ namespace HighVoltz
             {
                 Professionbuddy.Log("Checking for new version");
                 int remoteRev = GetRevision();
-                if (Professionbuddy.Instance.MySettings.CurrentRevision < remoteRev && 
+                if (GlobalPBSettings.Instance.CurrentRevision < remoteRev &&
                     Professionbuddy.Svn.Revision < remoteRev)
                 {
                     Professionbuddy.Log("A new version was found.Downloading Update");
                     DownloadFilesFromSvn(new WebClient(), PbSvnUrl);
                     Professionbuddy.Log("Download complete.");
-                    Professionbuddy.Instance.MySettings.CurrentRevision = remoteRev;
-                    Professionbuddy.Instance.MySettings.Save();
-                    Logging.Write(Color.Red,"A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
+                    GlobalPBSettings.Instance.CurrentRevision = remoteRev;
+                    GlobalPBSettings.Instance.Save();
+                    Professionbuddy.Log("************* Change Log ****************");
+                    Professionbuddy.Log(GetChangeLog(remoteRev));
+                    Professionbuddy.Log("*****************************************");
+                    Logging.Write(Color.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
                 }
                 else
                 {
@@ -84,7 +88,7 @@ namespace HighVoltz
                         dirPath = Environment.CurrentDirectory;
                         filePath = Path.Combine(Professionbuddy.BotPath, file);
                     }
-                    Professionbuddy.Log("Downloading {0}", file);
+                    Professionbuddy.Debug("Downloading {0}", file);
                     if (!Directory.Exists(dirPath))
                         Directory.CreateDirectory(dirPath);
                     client.DownloadFile(newUrl, filePath);
@@ -94,6 +98,17 @@ namespace HighVoltz
         static string RemoveXmlEscapes(string xml)
         {
             return xml.Replace("&amp;", "&").Replace("&lt;", "<").Replace("&gt;", ">").Replace("&quot;", "\"").Replace("&apos;", "'");
+        }
+
+        static Regex _changelogPattern = new Regex("<h4 style=\"margin-top:0\">Log message</h4>\r?\n?<pre class=\"wrap\" style=\"margin-left:1em\">(?<log>.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?)</pre>", RegexOptions.CultureInvariant);
+        static string GetChangeLog(int revision)
+        {
+            var client = new WebClient();
+            string html = client.DownloadString(PbChangeLogUrl + revision);
+            Match match = _changelogPattern.Match(html);
+            if (match.Success && match.Groups["log"].Success)
+                return RemoveXmlEscapes(match.Groups["log"].Value);
+            return null;
         }
     }
 }

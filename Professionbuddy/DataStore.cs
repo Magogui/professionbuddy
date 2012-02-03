@@ -10,7 +10,7 @@ namespace HighVoltz
     public class DataStore : Dictionary<uint, int>
     {
         Professionbuddy _pb = Professionbuddy.Instance;
-        readonly ProfessionBuddySettings _settings = Professionbuddy.Instance.MySettings;
+        readonly GlobalPBSettings _settings = Professionbuddy.Instance.GlobalSettings;
         public bool HasDataStoreAddon { get; private set; }
 
         public DataStore()

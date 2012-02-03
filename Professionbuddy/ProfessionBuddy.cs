@@ -30,7 +30,9 @@ namespace HighVoltz
     public class Professionbuddy : BotBase
     {
         #region Declarations
-        public ProfessionBuddySettings MySettings;
+
+        public ProfessionBuddySettings MySettings { get; private set; }
+        public GlobalPBSettings GlobalSettings { get; private set; }
         public List<TradeSkill> TradeSkillList { get; private set; }
         // <itemId,count>
         public DataStore DataStore { get; private set; }
@@ -483,6 +485,8 @@ namespace HighVoltz
                         Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
                         Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)))
                     );
+                    GlobalSettings = new GlobalPBSettings(
+                        Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}.xml", Name)));
 
                     IsTradeSkillsLoaded = false;
                     MaterialList = new Dictionary<uint, int>();
@@ -512,7 +516,7 @@ namespace HighVoltz
                     if (bot != null)
                         _root.SecondaryBot = bot;
                     // check for Professionbuddy updates
-                    new Thread(Updater.CheckForUpdate) {IsBackground = true}.Start();
+                    new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
                     _init = true;
                 }
             }
