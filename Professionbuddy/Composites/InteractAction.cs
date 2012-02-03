@@ -4,6 +4,7 @@ using System.Linq;
 using Styx;
 using Styx.Helpers;
 using Styx.Logic.Combat;
+using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
@@ -107,8 +108,9 @@ namespace HighVoltz.Composites
                                                                        u.SpellFocus == SpellFocus))));
                 if (obj != null)
                 {
-                    if (!obj.WithinInteractRange)
-                        Util.MoveTo(WoWMathHelper.CalculatePointFrom(Me.Location, obj.Location, 3));
+                    WoWPoint moveToLoc = WoWMathHelper.CalculatePointFrom(Me.Location, obj.Location, 3);
+                    if (moveToLoc.Distance(Me.Location) > Navigator.PathPrecision)
+                        Util.MoveTo(moveToLoc);
                     else
                     {
                         if (InteractDelay > 0 &&
@@ -126,6 +128,8 @@ namespace HighVoltz.Composites
                 }
                 if (!IsDone)
                     return RunStatus.Success;
+                else
+                    Professionbuddy.Log("InteractAction complete");
             }
             return RunStatus.Failure;
         }
