@@ -128,8 +128,7 @@ namespace HighVoltz.Composites
                 }
                 if (!IsDone)
                     return RunStatus.Success;
-                else
-                    Professionbuddy.Log("InteractAction complete");
+                Professionbuddy.Log("InteractAction complete");
             }
             return RunStatus.Failure;
         }
