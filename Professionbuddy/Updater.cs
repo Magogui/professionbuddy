@@ -31,7 +31,7 @@ namespace HighVoltz
                     GlobalPBSettings.Instance.CurrentRevision = remoteRev;
                     GlobalPBSettings.Instance.Save();
                     Professionbuddy.Log("************* Change Log ****************");
-                    Professionbuddy.Log(GetChangeLog(remoteRev));
+                    Professionbuddy.Log(Color.Red,"SVN:",Color.Transparent,GetChangeLog(remoteRev));
                     Professionbuddy.Log("*****************************************");
                     Logging.Write(Color.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
                 }
