@@ -109,7 +109,7 @@ namespace HighVoltz.Composites
                 if (obj != null)
                 {
                     WoWPoint moveToLoc = WoWMathHelper.CalculatePointFrom(Me.Location, obj.Location, 3);
-                    if (moveToLoc.Distance(Me.Location) > Navigator.PathPrecision)
+                    if (moveToLoc.Distance(Me.Location) > 4)
                         Util.MoveTo(moveToLoc);
                     else
                     {

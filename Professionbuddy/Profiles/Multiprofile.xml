@@ -207,7 +207,7 @@
   <SubRoutine SubRoutineName="WithdrawItemsInGbank">
     <CallSubRoutine SubRoutineName="MoveToGbank" />
     <CustomAction Code="MyLog(&quot;Getting items from GBank&quot;);" />
-    <GetItemfromBankAction Withdraw="All" Bank="Guild" MinFreeBagSlots="0" GetItemfromBankType="SpecificItem" ItemID="67282,52325,52326,52327,52328,52329,52190,52177,52191,52178,52195,52179,52180,52194,52192,52182,52193,52181,52985,52983,52986,52984,52987,52988,52183,52185,53038" NpcEntry="0" Amount="0" AutoFindBank="True" WithdrawAdditively="True" Location="0, 0, 0" />
+    <GetItemfromBankAction Withdraw="All" Bank="Guild" MinFreeBagSlots="0" GetItemfromBankType="SpecificItem" ItemID="" NpcEntry="0" Amount="0" AutoFindBank="True" WithdrawAdditively="True" Location="0, 0, 0" />
   </SubRoutine>
   <SubRoutine SubRoutineName="SellOnAH">
     <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Amount" ItemID="0" MinBuyout="0g10s0c" MaxBuyout="12g0s0c" StackSize="20" IgnoreStackSizeBelow="5" Amount="(int)Settings[&quot;Max Stack Number&quot;]" BidPrecent="95" UndercutPrecent="0.0001" AutoFindAh="True" PostIfBelowMinBuyout="False" Location="0, 0, 0" />

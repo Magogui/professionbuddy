@@ -227,17 +227,18 @@ namespace HighVoltz.Composites
                             done = _itemList[itemID] <= 0;
                         }
                         if (done)
+                        {
+                            if (itemID == 0)
+                                Professionbuddy.Log("Done withdrawing all items from {0} Bank",Bank);
+                            else
+                                Professionbuddy.Log("Done withdrawing itemID:{0} from {1} Bank",itemID, Bank);
                             _itemList.Remove(itemID);
+                        }
                     }
                     _itemsSW.Reset();
                     _itemsSW.Start();
                 }
-                if (IsDone)
-                {
-                    Professionbuddy.Log("Removed Item:[{0}] from {1} Bank", ItemID, Bank);
-                }
-                else
-                    return RunStatus.Success;
+                return RunStatus.Success;
             }
             return RunStatus.Failure;
         }
@@ -323,11 +324,6 @@ namespace HighVoltz.Composites
                                 items.Add(itemID, Amount - Util.GetCarriedItemCount(itemID));
                         }
                     }
-                    else
-                    {
-                        Professionbuddy.Err("No ItemIDs are specified");
-                        IsDone = true;
-                    }
                     break;
                 case BankWithdrawlItemType.Materials:
                     foreach (var kv in Pb.MaterialList)
@@ -337,20 +333,21 @@ namespace HighVoltz.Composites
             return items;
         }
 
-        // indexes are {0} = ItemID, {1} = amount to deposit.
+        // indexes are {0} = ItemID, {1} = amount to deposit
         const string WithdrawItemFromGBankLuaFormat =
               "local tabnum = GetNumGuildBankTabs() " +
                 "local bagged = 0 " +
+                "local itemID = {0} " +
                 "local  sawItem = 0  " +
                 "local amount = {1} " +
                    "for tab = 1,tabnum do " +
-                      "local _,_,iv,_,_, rw = GetGuildBankTabInfo(tab) " +
-                      "if iv then " +
+                      "local _,_,iv,_,nw, rw = GetGuildBankTabInfo(tab)  " +
+                      "if iv and (nw > 0 or nw == -1) and (rw == -1 or rw > 0) then " +
                          "SetCurrentGuildBankTab(tab) " +
                          "for slot = 1, 98 do " +
                             "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
                             "local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)')) " +
-                            "if l == nil and id == {0} then " +
+                            "if l == nil and c > 0 and (id == itemID or itemID == 0) then " +
                                "sawItem = 1 " +
                                "if c  <= amount then " +
                                   "AutoStoreGuildBankItem(tab, slot) " +
@@ -404,12 +401,13 @@ namespace HighVoltz.Composites
             }
             return retVal;
         }
-        // indexes are {0} = ItemID, {1} = amount to deposit.
+        // indexes are {0} = ItemID, {1} = amount to deposit
         const string WithdrawItemFromPersonalBankLuaFormat =
                 "local numSlots = GetNumBankSlots() " +
                 "local splitUsed = 0 " +
                 "local bagged = 0 " +
                 "local amount = {1} " +
+                "local itemID = {0} " +
                 "local bag1 = numSlots + 4  " +
                 "while bag1 >= -1 do " +
                    "if bag1 == 4 then " +
@@ -418,7 +416,7 @@ namespace HighVoltz.Composites
                    "for slot1 = 1, GetContainerNumSlots(bag1) do " +
                       "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
                       "local id = GetContainerItemID(bag1,slot1) " +
-                      "if l ~= 1 and  id == {0} then " +
+                      "if l ~= 1 and c > 0 and (id == itemID or itemID == 0) then " +
                          "if c + bagged <= amount  then " +
                             "UseContainerItem(bag1,slot1) " +
                             "bagged = bagged + c " +
@@ -469,7 +467,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will withdraw the specified item from your personal or guild bank, it can also withdraw items needed for your recipes in the action tree.WithdrawAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
+                return "This action will withdraw the specified item from your personal or guild bank, it can also withdraw items needed for your recipes in the action tree.WithdrawAdditively if set to true will buy axact amount of items regardless of item count player has in bags.All items will be withdrawn if ItemID is left blank";
             }
         }
         public override object Clone()
