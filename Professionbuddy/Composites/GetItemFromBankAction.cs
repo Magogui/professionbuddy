@@ -15,7 +15,6 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    #region GetItemfromBankAction
     public sealed class GetItemfromBankAction : PBAction
     {
         // number of times the recipe will be crafted
@@ -229,9 +228,9 @@ namespace HighVoltz.Composites
                         if (done)
                         {
                             if (itemID == 0)
-                                Professionbuddy.Log("Done withdrawing all items from {0} Bank",Bank);
+                                Professionbuddy.Log("Done withdrawing all items from {0} Bank", Bank);
                             else
-                                Professionbuddy.Log("Done withdrawing itemID:{0} from {1} Bank",itemID, Bank);
+                                Professionbuddy.Log("Done withdrawing itemID:{0} from {1} Bank", itemID, Bank);
                             _itemList.Remove(itemID);
                         }
                     }
@@ -416,7 +415,7 @@ namespace HighVoltz.Composites
                    "for slot1 = 1, GetContainerNumSlots(bag1) do " +
                       "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
                       "local id = GetContainerItemID(bag1,slot1) " +
-                      "if l ~= 1 and c > 0 and (id == itemID or itemID == 0) then " +
+                      "if l ~= 1 and c and c > 0 and (id == itemID or itemID == 0) then " +
                          "if c + bagged <= amount  then " +
                             "UseContainerItem(bag1,slot1) " +
                             "bagged = bagged + c " +
@@ -488,6 +487,4 @@ namespace HighVoltz.Composites
                        };
         }
     }
-    #endregion
-
 }

@@ -36,6 +36,7 @@
     <Settings DefaultValue="100" Type="Int32" Name="FarmersGold" Summary="Amount of gold on farmer" Category="Auction House" Global="False" Hidden="True" />
     <Settings DefaultValue="true" Type="Boolean" Name="CancelAuctions" Summary="Set to true to cancel auctions before posting on AH" Category="Auction House" Global="False" Hidden="False" />
     <Settings DefaultValue="100" Type="Int32" Name="Max Stack Number" Summary="Max number of stacks to post on the AH" Category="Auction House" Global="False" Hidden="False" />
+    <Settings DefaultValue="true" Type="Boolean" Name="Repair In Cty" Summary="Set to true if you want farmer to repair in the city" Category="Farmer" Global="False" Hidden="False" />
   </SubRoutine>
   <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GatheringProfiles\Uldum\Alliance\(GB2)(Uldum.Nuetral)Mines&amp;Herbs.xml" />
   <If Condition="!Me.Name.Equals((string)Settings[&quot;FarmerName&quot;],StringComparison.InvariantCultureIgnoreCase) " IgnoreCanRun="True">
@@ -136,7 +137,9 @@
           <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
         </If>
         <!--Repair and sell junk-->
-        <CallSubRoutine SubRoutineName="Repair" />
+        <If Condition="(bool)Settings[&quot;Repair In Cty&quot;]" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="Repair" />
+        </If>
         <!--Change FarmedZone to the next zone-->
         <If Condition="!(bool)Settings[&quot;RandomZones&quot;]" IgnoreCanRun="True">
           <CustomAction Code="uint a = FarmZoneIDs.FirstOrDefault(zone =&gt; zone &gt; (uint)Settings[&quot;FarmedZone&quot;]);&#xD;&#xA;Settings[&quot;FarmedZone&quot;] = a &gt; 0u? a: FarmZoneIDs[0];" />
