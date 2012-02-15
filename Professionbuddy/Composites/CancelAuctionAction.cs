@@ -465,7 +465,8 @@ namespace HighVoltz.Composites
                            UseCategory = this.UseCategory,
                            Category = this.Category,
                            SubCategory = this.SubCategory,
-                           IgnoreStackSizeBelow = this.IgnoreStackSizeBelow
+                           IgnoreStackSizeBelow = this.IgnoreStackSizeBelow,
+                           MinBuyout = this.MinBuyout
                        };
         }
     }
