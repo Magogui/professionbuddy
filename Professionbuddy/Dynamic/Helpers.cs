@@ -9,6 +9,7 @@ using Styx.Logic;
 using Styx.Logic.Pathing;
 using Styx.Helpers;
 
+
 namespace HighVoltz.Dynamic
 {
     public class Helpers
@@ -166,12 +167,12 @@ namespace HighVoltz.Dynamic
             "end " +
             "return itemCount";
 
-        public static int InGBankCount(int itemId)
+        public static int InGBankCount(uint itemId)
         {
             return InGBankCount(null, itemId);
         }
 
-        public static int InGBankCount(string character, int itemId)
+        public static int InGBankCount(string character, uint itemId)
         {
             int ret = 0;
             using (new FrameLock())
@@ -197,19 +198,19 @@ namespace HighVoltz.Dynamic
                             break;
                         }
                     }
-                    lua = string.Format(InGbankCountFormat, guildName,itemId);
+                    lua = string.Format(InGbankCountFormat, guildName, itemId);
                     ret = Lua.GetReturnVal<int>(lua, 0);
                 }
             }
             return ret;
         }
 
-        public static int OnAhCount(int itemId)
+        public static int OnAhCount(uint itemId)
         {
             return OnAhCount(null, itemId);
         }
 
-        public static int OnAhCount(string character, int itemId)
+        public static int OnAhCount(string character, uint itemId)
         {
             int ret = 0;
             using (new FrameLock())
@@ -223,7 +224,7 @@ namespace HighVoltz.Dynamic
                     var profiles = Lua.GetReturnValues("local t={} for k,v in pairs(DataStoreDB.global.Characters) do table.insert(t,k) end return unpack(t)");
                     string profile = (from p in profiles
                                       let elements = p.Split('.')
-                                      where elements[1].Equals(server, StringComparison.InvariantCultureIgnoreCase) && 
+                                      where elements[1].Equals(server, StringComparison.InvariantCultureIgnoreCase) &&
                                       elements[2].Equals(character, StringComparison.InvariantCultureIgnoreCase)
                                       select p).FirstOrDefault();
                     if (string.IsNullOrEmpty(profile))
@@ -231,7 +232,7 @@ namespace HighVoltz.Dynamic
                     string lua = string.Format(
                         "local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char and char.Auctions then return #char.Auctions end return 0 ",
                         profile);
-                    var tableSize = Lua.GetReturnVal<int>( lua,0);
+                    var tableSize = Lua.GetReturnVal<int>(lua, 0);
                     for (int i = 1; i <= tableSize; i++)
                     {
                         lua = string.Format("local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char then return char.Auctions[{1}] end return '' ", profile, i);

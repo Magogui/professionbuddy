@@ -185,10 +185,10 @@ namespace HighVoltz.Dynamic
             bool HasItem (uint id) {return InbagCount(id) > 0; }
             int InbagCount (uint id) {return Helpers.InbagCount(id); }
             int InBankCount (uint id) {return Util.GetBankItemCount(id); }
-            int InGBankCount(int itemId) {return Helpers.InGBankCount(itemId);}
-            int InGBankCount(string character, int itemId) {return Helpers.InGBankCount(character,itemId);}
-            int OnAhCount(int itemId) {return Helpers.OnAhCount(itemId);}
-            int OnAhCount(string character, int itemId) {return Helpers.OnAhCount(character,itemId);}
+            int InGBankCount(uint itemId) {return Helpers.InGBankCount(itemId);}
+            int InGBankCount(string character, uint itemId) {return Helpers.InGBankCount(character,itemId);}
+            int OnAhCount(uint itemId) {return Helpers.OnAhCount(itemId);}
+            int OnAhCount(string character, uint itemId) {return Helpers.OnAhCount(character,itemId);}
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
             void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
@@ -278,7 +278,8 @@ namespace HighVoltz.Dynamic
                             Professionbuddy.Err("Unable to link action that produced Error: {0}", error.ErrorText);
                         }
                     }
-                    MainForm.Instance.RefreshActionTree(typeof(ICSharpCode));
+                    if (MainForm.IsValid)
+                        MainForm.Instance.RefreshActionTree(typeof(ICSharpCode));
                 }
                 return null;
             }

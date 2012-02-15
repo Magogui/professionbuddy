@@ -136,6 +136,11 @@
         <If Condition="HasNewMail" IgnoreCanRun="True">
           <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
         </If>
+        <!--Wait for Flying mount info to refresh-->
+        <If Condition="MountHelper.FlyingMounts.Count == 0" IgnoreCanRun="True">
+          <CustomAction Code="Err(&quot;Waiting for MountHelper to refresh !!&quot;);" />
+          <WaitAction Condition="MountHelper.FlyingMounts.Count &gt; 0" Timeout="300000" />
+        </If>
         <!--Repair and sell junk-->
         <If Condition="(bool)Settings[&quot;Repair In Cty&quot;]" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="Repair" />
@@ -471,10 +476,6 @@
     <WaitAction Condition="false" Timeout="2000" />
   </SubRoutine>
   <SubRoutine SubRoutineName="Repair">
-    <If Condition="MountHelper.FlyingMounts.Count == 0" IgnoreCanRun="True">
-      <CustomAction Code="Err(&quot;Waiting for MountHelper to refresh !!&quot;);" />
-      <WaitAction Condition="MountHelper.FlyingMounts.Count &gt; 0" Timeout="300000" />
-    </If>
     <CustomAction Code="MyLog(&quot;Repairing&quot;);" />
     <If Condition="Me.IsAlliance" IgnoreCanRun="True">
       <FlyToAction Dismount="False" Location="-8430.486, 623.2193, 95.50689" />
