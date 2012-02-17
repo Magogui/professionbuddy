@@ -206,6 +206,7 @@ namespace HighVoltz.Dynamic
             void SwitchCharacter(string character,string server,string botName){Helpers.SwitchCharacter(character,server,botName);}
             BotBase SecondaryBot {get{return Professionbuddy.Instance.SecondaryBot;}}
             bool HasDataStoreAddon {get{return DataStore.HasDataStoreAddon;}}
+            HBRelogApi HBRelog {get{return Helpers.HBRelog;}}
         }";
         #endregion
         static public StringBuilder CsharpStringBuilder { get; private set; }

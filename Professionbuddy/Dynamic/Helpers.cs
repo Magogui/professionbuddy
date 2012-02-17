@@ -31,6 +31,9 @@ namespace HighVoltz.Dynamic
             Mining = new TradeskillHelper(SkillLine.Mining);
             Tailoring = new TradeskillHelper(SkillLine.Tailoring);
         }
+        static HBRelogApi _hbRelog;
+        // lazy load the HBRelogApi class.
+        public static HBRelogApi HBRelog { get { return _hbRelog ?? (_hbRelog = new HBRelogApi()); } }
         public static void Log(string f, params object[] args)
         {
             Logging.Write(f, args);

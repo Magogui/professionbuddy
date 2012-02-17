@@ -85,6 +85,7 @@
     <Compile Include="Composites\PbRootComposite.cs" />
     <Compile Include="DataStore.cs" />
     <Compile Include="Dynamic\DynamicProperty.cs" />
+    <Compile Include="Dynamic\HBRelogApi.cs" />
     <Compile Include="Dynamic\Helpers.cs" />
     <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="GlobalPBSettings.cs" />
