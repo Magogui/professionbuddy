@@ -490,7 +490,7 @@
       </While>
     </If>
     <WaitAction Condition="false" Timeout="2000" />
-    <CustomAction Code="MerchantFrame.Instance.RepairAllItems();" />
+    <CustomAction Code="Lua.DoString(&quot;RepairAllItems()&quot;);" />
     <SellItemAction Sell="All" NpcEntry="0" Location="0, 0, 0" SellItemType="Greys" ItemID="0" Count="0" />
     <SellItemAction Sell="All" NpcEntry="0" Location="0, 0, 0" SellItemType="Specific" ItemID="63122" Count="0" />
   </SubRoutine>
