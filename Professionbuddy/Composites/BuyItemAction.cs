@@ -119,7 +119,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"),
-                                     Name, ItemID, Count, BuyItemType);
+                                   Name, ItemID, Count, BuyItemType);
             }
         }
 
@@ -227,7 +227,7 @@ namespace HighVoltz.Composites
                             {
                                 int count = !BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count;
                                 if (count > 0)
-                                    BuyItem(id,(uint)count);
+                                    BuyItem(id, (uint)count);
                             }
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
@@ -258,27 +258,27 @@ namespace HighVoltz.Composites
         // returns 1 if item is found, otherwise -1
         const string BuyItemFormat =
             "local amount={1} " +
-            "local id={0} " + 
+            "local id={0} " +
             "local stackSize " +
             "local index = -1 " +
             "local quantity " +
-            "for i=1,GetMerchantNumItems() do " + 
-               "local link=GetMerchantItemLink(i) " + 
-               "if link then if link:find(id) then " + 
+            "for i=1,GetMerchantNumItems() do " +
+               "local link=GetMerchantItemLink(i) " +
+               "if link then if link:find(id) then " +
                      "index=i " +
-                     "stackSize=GetMerchantItemMaxStack(i) " + 
-                  "end " + 
-               "end " + 
+                     "stackSize=GetMerchantItemMaxStack(i) " +
+                  "end " +
+               "end " +
             "end " +
             "if index == -1 then return -1 end " +
-            "while amount>0 do " + 
-               "if amount>=stackSize then " + 
-                  "quantity=stackSize " + 
-               "else " + 
-                  "quantity=amount " + 
+            "while amount>0 do " +
+               "if amount>=stackSize then " +
+                  "quantity=stackSize " +
+               "else " +
+                  "quantity=amount " +
                "end " +
                "BuyMerchantItem(index, quantity) " +
-               "amount=amount-quantity " +  
+               "amount=amount-quantity " +
             "end " +
             "return 1 ";
 

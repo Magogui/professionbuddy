@@ -158,7 +158,9 @@
           <CustomAction Code="MyLog(&quot;I will spend {0} minutes in this zone&quot;,TimeToSpendInZone);" />
           <CustomAction Code="ZoneStartTime = DateTime.Now;" />
         </If>
-        <CallSubRoutine SubRoutineName="Use Portal" />
+        <While Condition="Me.ZoneId == CityZoneID" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="Use Portal" />
+        </While>
       </If>
       <!--On Banker-->
     </If>
