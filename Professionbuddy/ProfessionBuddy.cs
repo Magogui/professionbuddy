@@ -495,23 +495,20 @@ namespace HighVoltz
                     LoadTradeSkills();
                     DataStore = new DataStore();
                     DataStore.ImportDataStore();
-
-                    if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                    try
                     {
-                        try
+                        if (!string.IsNullOrEmpty(_profileToLoad))
                         {
-                            if (string.IsNullOrEmpty(_profileToLoad))
-                            {
-                                LoadPBProfile(MySettings.LastProfile);
-                            }
-                            else
-                            {
-                                LoadPBProfile(_profileToLoad);
-                                LastProfileIsHBProfile = false;
-                            }
+                            LoadPBProfile(_profileToLoad);
+                            LastProfileIsHBProfile = false;
                         }
-                        catch (Exception ex) { Err(ex.ToString()); }
+                        else if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                        {
+                            LoadPBProfile(MySettings.LastProfile);
+                        }
                     }
+                    catch (Exception ex) { Err(ex.ToString()); }
+
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
