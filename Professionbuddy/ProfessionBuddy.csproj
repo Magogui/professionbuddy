@@ -174,6 +174,11 @@
     <EmbeddedResource Include="Icons\paste_32x32.png" />
     <EmbeddedResource Include="Icons\SaveHL.bmp" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Localization\Strings.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y 
@@ -181,6 +186,7 @@ xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /
 xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
+xcopy "$(ProjectDir)Localization\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y
 xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
 </PostBuildEvent>
   </PropertyGroup>

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Localization>
+  <UI_FileOpen>Open</UI_FileOpen>
+  <UI_FileSave>Save</UI_FileSave>
+  <UI_Help>Help</UI_Help>
+  <UI_Copy>Copy</UI_Copy>
+  <UI_Cut>Cut</UI_Cut>
+  <UI_Paste>Paste</UI_Paste>
+  <UI_Delete>Delete</UI_Delete>
+  <UI_Settings>Settings</UI_Settings>
+  <UI_Profile>Profile</UI_Profile>
+  <UI_Profiles>Profiles</UI_Profiles>
+  <UI_Tradeskill>Tradeskill</UI_Tradeskill>
+  <UI_Ingredients>Ingredients</UI_Ingredients>
+  <UI_Need>Need</UI_Need>
+  <UI_Bags>Bags</UI_Bags>
+  <UI_Bank>Bank</UI_Bank>
+  <UI_Actions>Actions</UI_Actions>
+  <UI_Add>Add</UI_Add>
+  <UI_Reload>Reload</UI_Reload>
+  <UI_ProfileSettings>Profile Settings</UI_ProfileSettings>
+  <UI_LoadProfile>Load Profile</UI_LoadProfile>
+  <UI_Name>Name</UI_Name>
+	
+  <Action_Common_Location>Location</Action_Common_Location>
+  <Action_Common_NpcEntry>Npc Entry</Action_Common_NpcEntry>
+  <Action_Common_ItemEntries>Item Entries</Action_Common_ItemEntries>
+  <Action_Common_Buy>Buy</Action_Common_Buy>
+  <Action_Common_Count>Count</Action_Common_Count>
+  <Action_Common_BuyAdditively>Buy Additively</Action_Common_BuyAdditively>
+  <Action_Common_Material>Material</Action_Common_Material>
+  
+  <!-- BuyItemAction-->
+  <Action_BuyItemAction_Help>This action will buy items from a merchant, either a specific item or any materials the merchant has that are needed for recipes in the action tree. If 'Buy Additively' is set to true this will buy the axact amount of items regardless of the item count player has in bags</Action_BuyItemAction_Help>
+  <Action_BuyItemAction_Name>Buy Item</Action_BuyItemAction_Name>
+  <Action_BuyItemAction_Material>Material</Action_BuyItemAction_Material>
+</Localization>

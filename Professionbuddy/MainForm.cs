@@ -477,8 +477,28 @@ namespace HighVoltz
                 Instance = this;
                 _pb = Professionbuddy.Instance;
                 InitializeComponent();
-                saveFileDialog.InitialDirectory = _pb.ProfilePath;
+                // assign the localized strings
+                toolStripOpen.Text = _pb.Strings["UI_FileOpen"];
+                toolStripSave.Text = _pb.Strings["UI_FileSave"];
+                toolStripHelp.Text = _pb.Strings["UI_Help"];
+                toolStripCopy.Text = _pb.Strings["UI_Copy"];
+                toolStripCut.Text = _pb.Strings["UI_Cut"];
+                toolStripPaste.Text = _pb.Strings["UI_Paste"];
+                toolStripDelete.Text = _pb.Strings["UI_Delete"];
+                toolStripBotConfigButton.Text = _pb.Strings["UI_Settings"];
+                ProfileTab.Text = _pb.Strings["UI_Profiles"];
+                ActionsColumn.HeaderText = ActionsTab.Text = _pb.Strings["UI_Actions"];
+                TradeSkillTab.Text = _pb.Strings["UI_Tradeskill"];
+                TabPageProfile.Text = _pb.Strings["UI_Profile"];
+                IngredientsColumn.HeaderText = _pb.Strings["UI_Ingredients"];
+                NeedColumn.HeaderText = _pb.Strings["UI_Need"];
+                BagsColumn.HeaderText = _pb.Strings["UI_Bags"];
+                BankColumn.HeaderText = _pb.Strings["UI_Bank"];
+                toolStripAddBtn.Text = _pb.Strings["UI_Add"];
+                toolStripReloadBtn.Text = _pb.Strings["UI_Reload"];
+                LoadProfileButton.Text = _pb.Strings["UI_LoadProfile"];
 
+                saveFileDialog.InitialDirectory = _pb.ProfilePath;
                 _profileWatcher = new FileSystemWatcher(_pb.ProfilePath) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
                 _profileWatcher.Changed += ProfileWatcherChanged;
                 _profileWatcher.Created += ProfileWatcherChanged;
@@ -686,7 +706,7 @@ namespace HighVoltz
             {
                 RightSideTab.TabPages.RemoveByKey("ProfileSettings");
             }
-            RightSideTab.TabPages.Add("ProfileSettings", "Profile Settings");
+            RightSideTab.TabPages.Add("ProfileSettings", _pb.Strings["UI_ProfileSettings"]);
 
             _settingsPropertyGrid = new PropertyGrid { Dock = DockStyle.Fill };
             RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);

@@ -177,7 +177,7 @@
       <Declaration Code="bool StopGettingMail;" />
       <CustomAction Code=" StopGettingMail = false;" />
       <While Condition="(HasNewMail || MailCount&gt; 0) &amp;&amp; ! StopGettingMail" IgnoreCanRun="True">
-        <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
+        <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="0" AutoFindMailBox="True" Location="0, 0, 0" />
         <CallSubRoutine SubRoutineName="SellOnAH" />
         <CustomAction Code="if (Me.NormalBagsFull)  StopGettingMail = true;" />
       </While>

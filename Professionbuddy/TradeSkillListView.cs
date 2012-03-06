@@ -42,7 +42,7 @@ namespace HighVoltz
             NameColumn = new DataGridViewTextBoxColumn();
             CraftableColumn = new DataGridViewTextBoxColumn();
             DifficultyColumn = new DataGridViewTextBoxColumn();
-            NameColumn.HeaderText = "Name";
+            NameColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Name"];
             CraftableColumn.HeaderText = "#";
             NameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             CraftableColumn.MinimumWidth = 25;

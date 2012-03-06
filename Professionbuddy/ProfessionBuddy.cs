@@ -34,6 +34,8 @@ namespace HighVoltz
         public ProfessionBuddySettings MySettings { get; private set; }
         public GlobalPBSettings GlobalSettings { get; private set; }
         public List<TradeSkill> TradeSkillList { get; private set; }
+        public Dictionary<string, string> Strings { get; private set; }
+
         // <itemId,count>
         public DataStore DataStore { get; private set; }
         // dictionary that keeps track of material list using item ID for key and number required as value
@@ -495,6 +497,8 @@ namespace HighVoltz
                     LoadTradeSkills();
                     DataStore = new DataStore();
                     DataStore.ImportDataStore();
+                    // load localized strings
+                    LoadStrings();
                     try
                     {
                         if (!string.IsNullOrEmpty(_profileToLoad))
@@ -518,6 +522,37 @@ namespace HighVoltz
                 }
             }
             catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
+        }
+
+        private void LoadStrings()
+        {
+            Strings = new Dictionary<string, string>();
+            string directory = Path.Combine(BotPath, "Localization");
+            string defaultStringsPath = Path.Combine(directory, "Strings.xml");
+            LoadStringsFromXml(defaultStringsPath);
+            // file that includes language and country/region
+            string langAndCountryFile = Path.Combine(directory,"Strings."+Thread.CurrentThread.CurrentUICulture.Name+".xml");
+            // file that includes language only;
+            string langOnlyFile = Path.Combine(directory,"Strings."+Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName+".xml");
+            if (File.Exists(langAndCountryFile))
+            {
+                Log("Loading strings for language {0}",Thread.CurrentThread.CurrentUICulture.Name);
+                LoadStringsFromXml(langAndCountryFile);
+            }
+            else if (File.Exists(langOnlyFile))
+            {
+                Log("Loading strings for language {0}",Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName);
+                LoadStringsFromXml(langOnlyFile);
+            }
+        }
+
+        private void LoadStringsFromXml(string path)
+        {
+            XElement root = XElement.Load(path);
+            foreach (var element in root.Elements())
+            {
+                Strings[element.Name.ToString()] = element.Value;
+            }
         }
 
         WoWSkill[] SupportedTradeSkills

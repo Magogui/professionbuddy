@@ -14,9 +14,6 @@ using TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region BuyItemAction
-
     internal sealed class BuyItemAction : PBAction
     {
         #region BuyItemActionType enum
@@ -38,13 +35,14 @@ namespace HighVoltz.Composites
         {
             Properties["Location"] = new MetaProp("Location", typeof(string),
                                                   new EditorAttribute(typeof(PropertyBag.LocationEditor),
-                                                                      typeof(UITypeEditor)));
+                                                                      typeof(UITypeEditor)),new DisplayNameAttribute("Location"));
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
                                                   new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                      typeof(UITypeEditor)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
+                                                                      typeof(UITypeEditor)), new DisplayNameAttribute("Npc Entry"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),new DisplayNameAttribute("Item Entries"));
             Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
-                                               new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
+                                               new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                                                       new DisplayNameAttribute("Count"));
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType),
                                                      new DisplayNameAttribute("Buy"));
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool),
@@ -128,7 +126,7 @@ namespace HighVoltz.Composites
             get
             {
                 return
-                    "This action will buy items from a merchant frame, either a specific item or any materials the NPC has that are needed for recipes in the action tree. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
+                    "This action will buy items from a merchant, either a specific item or any materials the NPC has that are needed for recipes in the action tree. If 'Buy Additively' is set to true this will buy the axact amount of items regardless of the item count player has in bags";
             }
         }
 
@@ -332,6 +330,4 @@ namespace HighVoltz.Composites
                        };
         }
     }
-
-    #endregion
 }
