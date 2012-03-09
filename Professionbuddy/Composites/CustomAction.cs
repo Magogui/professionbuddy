@@ -28,7 +28,8 @@ namespace HighVoltz.Composites
         {
             this.Action = c => { ;};
             Properties["Code"] = new MetaProp("Code", typeof(string),
-                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute("Action_Common_Code"));
             Code = "";
             Properties["Code"].PropertyChanged += CustomAction_PropertyChanged;
         }
@@ -51,7 +52,7 @@ namespace HighVoltz.Composites
                     catch (Exception ex)
                     {
                         if (ex.GetType() != typeof(ThreadAbortException))
-                            Professionbuddy.Err("Custom:({0})\n{1}", Code, ex);
+                            Professionbuddy.Err("{0}:({1})\n{1}", Pb.Strings["Action_CustomAction_Name"], Code, ex);
                     }
                     IsDone = true;
                 }
@@ -64,19 +65,19 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
-        public override string Name { get { return "Custom Action"; } }
+        public override string Name { get { return Pb.Strings["Action_CustomAction_Name"]; } }
         public override string Title
         {
             get
             {
-                return string.Format("CustomAction:({0})",Code );
+                return string.Format("{0}:({1})", Pb.Strings["Action_CustomAction_Name"], Code);
             }
         }
         public override string Help
         {
             get
             {
-                return "This action will execute a valid C# code once before moving to next action.";
+                return Pb.Strings["Action_CustomAction_Help"];
             }
         }
         public override object Clone()

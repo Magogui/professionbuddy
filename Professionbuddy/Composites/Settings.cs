@@ -51,18 +51,31 @@ namespace HighVoltz.Composites
 
         public Settings()
         {
-            Properties["DefaultValue"] = new MetaProp("DefaultValue", typeof(string), new DisplayNameAttribute("Default Value"));
-            Properties["Type"] = new MetaProp("Type", typeof(TypeCode));
-            Properties["Name"] = new MetaProp("Name", typeof(string));
-            Properties["Summary"] = new MetaProp("Summary", typeof(string));
-            Properties["Category"] = new MetaProp("Category", typeof(string));
-            Properties["Global"] = new MetaProp("Global", typeof(bool));
-            Properties["Hidden"] = new MetaProp("Hidden", typeof(bool));
+            Properties["DefaultValue"] = new MetaProp("DefaultValue", typeof(string), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_DefaultValue"]));
+
+            Properties["Type"] = new MetaProp("Type", typeof(TypeCode),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Type"]));
+
+            Properties["Name"] = new MetaProp("Name", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Name"]));
+
+            Properties["Summary"] = new MetaProp("Summary", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Summary"]));
+
+            Properties["Category"] = new MetaProp("Category", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Category"]));
+
+            Properties["Global"] = new MetaProp("Global", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Global"]));
+
+            Properties["Hidden"] = new MetaProp("Hidden", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Hidden"]));
 
             DefaultValue = "true";
             Type = TypeCode.Boolean;
-            SettingName = "SettingName";
-            Summary = "This is a summary of what this setting does";
+            SettingName = Pb.Strings["Action_Common_SettingName"];
+            Summary = Pb.Strings["Action_Common_SummaryExample"];
             Category = "Misc";
             Global = false;
             Hidden = false;
@@ -84,14 +97,14 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action adds a user customizable setting to Professionbuddy profiles";
+                return Pb.Strings["Action_Settings_Help"];
             }
         }
         public override string Name
         {
             get
             {
-                return "Settings";
+                return Pb.Strings["Action_Settings_Name"];
             }
         }
         public override string Title

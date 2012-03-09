@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using TreeSharp;
+using System.ComponentModel;
 
 
 namespace HighVoltz.Composites
@@ -19,7 +20,8 @@ namespace HighVoltz.Composites
 
         public CallSubRoutine()
         {
-            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string));
+            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_CallSubRoutine_SubRoutineName"]));
             SubRoutineName = "";
         }
 
@@ -32,7 +34,7 @@ namespace HighVoltz.Composites
                 {
                     if (!GetSubRoutine())
                     {
-                        Professionbuddy.Err("Unable to find Subroutine with name: {0}.", SubRoutineName);
+                        Professionbuddy.Err("{0}: {1}.",Pb.Strings["Error_SubroutineNotFound"],SubRoutineName);
                         IsDone = true;
                     }
                 }
@@ -90,13 +92,14 @@ namespace HighVoltz.Composites
             return null;
         }
 
-        public override string Name { get { return "Call SubRoutine"; } }
+        public override string Name { get { return Pb.Strings["Action_CallSubRoutine_Name"]; } }
+
         public override string Title { get { return string.Format("{0}: {1}()", Name, SubRoutineName); } }
         public override string Help
         {
             get
             {
-                return "This action will execute a SubRoutine";
+                return Pb.Strings["Action_CallSubRoutine_Help"];
             }
         }
         public override object Clone()

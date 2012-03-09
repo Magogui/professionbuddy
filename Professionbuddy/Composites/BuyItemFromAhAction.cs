@@ -86,17 +86,27 @@ namespace HighVoltz.Composites
 
         public BuyItemFromAhAction()
         {
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["MaxBuyout"] = new MetaProp("MaxBuyout", typeof(PropertyBag.GoldEditor),
-                new DisplayNameAttribute("Max Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
-            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["ItemListType"] = new MetaProp("ItemListType", typeof(ItemType), new DisplayNameAttribute("Buy ..."));
-            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
-            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute("Buy Additively"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
-            Properties["BidOnItem"] = new MetaProp("BidOnItem", typeof(bool), new DisplayNameAttribute("Bid on Item"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
+            Properties["MaxBuyout"] = new MetaProp("MaxBuyout", typeof(PropertyBag.GoldEditor),
+                new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_MaxBuyout"]));
+
+            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+
+            Properties["ItemListType"] = new MetaProp("ItemListType", typeof(ItemType), new DisplayNameAttribute(Pb.Strings["Action_Common_Buy"]));
+
+            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
+
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool), new DisplayNameAttribute(Pb.Strings["Action_Common_BuyAdditively"]));
+
+            Properties["BidOnItem"] = new MetaProp("BidOnItem", typeof(bool), new DisplayNameAttribute(Pb.Strings["Action_BuyItemFromAhAction_BidOnItem"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor),
+                                                        typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             ItemID = "";
             Amount = new DynamicProperty<int>(this, "1");
@@ -293,7 +303,7 @@ namespace HighVoltz.Composites
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
             {
-                Logging.Write("Unable to location Auctioneer, Maybe he's dead?");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindAuctioneer"]);
             }
             if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
             {
@@ -327,7 +337,7 @@ namespace HighVoltz.Composites
             }
             else
             {
-                Professionbuddy.Err("No ItemIDs are specified");
+                Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                 IsDone = true;
             }
 
@@ -367,7 +377,7 @@ namespace HighVoltz.Composites
         }
         public override string Name
         {
-            get { return "Buy Item From AH"; }
+            get { return Pb.Strings["Action_BuyItemFromAhAction_Name"]; }
         }
 
         public override string Title
@@ -375,14 +385,14 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: {1} " + (ItemListType != ItemType.MaterialList ? "x" + Amount : ""), Name,
-                    ItemListType != ItemType.MaterialList ? ItemID : "Material List");
+                    ItemListType != ItemType.MaterialList ? ItemID : Pb.Strings["Action_Common_Material"]);
             }
         }
         public override string Help
         {
             get
             {
-                return "This action will buy a either a specified item, ingredients that a recipe requires or whatevers in the material list from the Auction house if item is below specified maximum price. The ItemID is the id of the item or the recipe Id if buying materials for a recipe.'Bid On Item', if set to true will bid on an item if buyout price > maxBuyout and minBid <= maxBuyout. ItemID accepts a comma separated list of Item IDs. BuyAdditively if set to true will buy axact amount of items regardless of item count player has in bags";
+                return Pb.Strings["Action_BuyItemFromAhAction_Help"];
             }
         }
 

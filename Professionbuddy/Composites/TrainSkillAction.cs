@@ -24,11 +24,13 @@ namespace HighVoltz.Composites
         public TrainSkillAction()
         {
             Properties["Location"] = new MetaProp("Location", typeof(string),
-                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
-                                                                      typeof(UITypeEditor)));
+                new EditorAttribute(typeof(PropertyBag.LocationEditor),typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
-                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                      typeof(UITypeEditor)));
+                new EditorAttribute(typeof(PropertyBag.EntryEditor),typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();
             NpcEntry = 0u;
@@ -52,7 +54,7 @@ namespace HighVoltz.Composites
 
         public override string Name
         {
-            get { return string.Format("Train Skill"); }
+            get { return Pb.Strings["Action_TrainSkillAction_Name"] ; }
         }
 
         public override string Title
@@ -64,8 +66,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return
-                    "This action will go to the trainer and train all available spells. Location can be left blank if the NPC is in the database.";
+                return Pb.Strings["Action_TrainSkillAction_Help"];
             }
         }
 

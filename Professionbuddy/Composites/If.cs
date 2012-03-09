@@ -48,16 +48,22 @@ namespace HighVoltz.Composites
         {
             // ReSharper disable DoNotCallOverridableMethodsInConstructor
             Properties = new PropertyBag();
-            Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool), new DisplayNameAttribute("Ignore Condition until done"));
-            Properties["Condition"] = new MetaProp("Condition", typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
-            Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
+            Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool),
+                new DisplayNameAttribute(Professionbuddy.Instance.Strings["FlowControl_If_IgnoreCanRun"]));
+
+            Properties["Condition"] = new MetaProp("Condition",
+                typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Professionbuddy.Instance.Strings["FlowControl_If_Condition"]));
+
+            Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true),
+                new DisplayNameAttribute(Professionbuddy.Instance.Strings["Action_CSharpAction_CompileError"]));
 
             CanRunDelegate = c => false;
             Condition = "";
             CompileError = "";
             Properties["CompileError"].Show = false;
 
-            Properties["Condition"].PropertyChanged +=Condition_PropertyChanged;
+            Properties["Condition"].PropertyChanged += Condition_PropertyChanged;
             Properties["CompileError"].PropertyChanged += CompileErrorPropertyChanged;
             IgnoreCanRun = true;
             // ReSharper restore DoNotCallOverridableMethodsInConstructor
@@ -87,14 +93,14 @@ namespace HighVoltz.Composites
             catch (Exception ex)
             {
                 if (ex.GetType() != typeof(ThreadAbortException))
-                    Professionbuddy.Err("If Condition: {0} ,Err:{1}", Condition, ex);
+                    Professionbuddy.Err("{0}: {1}\nErr:{2}", Professionbuddy.Instance.Strings["FlowControl_If_LongName"], Condition, ex);
                 return false;
             }
         }
 
-// ReSharper disable InconsistentNaming
+        // ReSharper disable InconsistentNaming
         protected bool _isRunning = false;
-// ReSharper restore InconsistentNaming
+        // ReSharper restore InconsistentNaming
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (!IsDone && ((_isRunning && IgnoreCanRun) || CanRun(context)))
@@ -173,13 +179,14 @@ namespace HighVoltz.Composites
             get { return string.IsNullOrEmpty(CompileError) ? System.Drawing.Color.Blue : System.Drawing.Color.Red; }
         }
 
-        virtual public string Name { get { return "If Condition"; } }
+        virtual public string Name { get { return Professionbuddy.Instance.Strings["FlowControl_If_LongName"]; } }
         virtual public string Title
         {
             get
             {
-                return string.Format("If {0}",
-                    string.IsNullOrEmpty(Condition) ? "Condition" : "(" + Condition + ")");
+                return string.IsNullOrEmpty(Condition) ?
+                    Professionbuddy.Instance.Strings["FlowControl_If_LongName"]:
+                    (Professionbuddy.Instance.Strings["FlowControl_If_Name"] + " (" + Condition + ")");
             }
         }
 
@@ -188,14 +195,14 @@ namespace HighVoltz.Composites
         {
             var pd = new If
                          {
-                CanRunDelegate = this.CanRunDelegate,
-                Condition = this.Condition,
-                IgnoreCanRun = this.IgnoreCanRun
-            };
+                             CanRunDelegate = this.CanRunDelegate,
+                             Condition = this.Condition,
+                             IgnoreCanRun = this.IgnoreCanRun
+                         };
             return pd;
         }
 
-        virtual public string Help { get { return "'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'"; } }
+        virtual public string Help { get { return Professionbuddy.Instance.Strings["FlowControl_If_Help"]; } }
 
         public void OnProfileLoad(System.Xml.Linq.XElement element) { }
 

@@ -10,7 +10,6 @@ using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {
-    #region WaitAction
     public sealed class WaitAction : CsharpAction
     {
         public CanRunDecoratorDelegate CanRunDelegate { get; set; }
@@ -29,9 +28,12 @@ namespace HighVoltz.Composites
         public WaitAction()
             : base(CsharpCodeType.BoolExpression)
         {
-            Properties["Timeout"] = new MetaProp("Timeout", typeof(int));
-            Properties["Condition"] = new MetaProp("Condition", typeof(string), new DisplayNameAttribute("Until Condition"), 
-                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
+            Properties["Timeout"] = new MetaProp("Timeout", typeof(int),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Timeout"]));
+
+            Properties["Condition"] = new MetaProp("Condition", typeof(string), 
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
+                 new DisplayNameAttribute(Pb.Strings["Action_WaitAction_Condition"]));
 
             Timeout = 2000;
             Condition = "false";
@@ -60,24 +62,26 @@ namespace HighVoltz.Composites
                 catch (Exception ex)
                 {
                     if (ex.GetType() != typeof(ThreadAbortException))
-                        Professionbuddy.Err("Wait:({0})\n{1}", Condition, ex);
+                        Professionbuddy.Err("{0}:({1})\n{2}", Pb.Strings["Action_WaitAction_Name"], Condition, ex);
                 }
             }
             return RunStatus.Failure;
         }
-        public override string Name { get { return "Wait until Condition"; } }
+        public override string Name { get { return Pb.Strings["Action_WaitAction_LongName"]; } }
+
         public override string Title
         {
             get
             {
-                return string.Format("Wait ({0}) timeout:{1}", Condition, Timeout);
+                return string.Format("{0} ({1}) {2}:{3}",
+                    Pb.Strings["Action_WaitAction_Name"], Condition, Pb.Strings["Action_Common_Timeout"], Timeout);
             }
         }
         public override string Help
         {
             get
             {
-                return "This action will wait for an amount of time or until condition becomes true before moving to next action. Timeout is in milliseconds";
+                return Pb.Strings["Action_WaitAction_Help"];
             }
         }
         public override object Clone()
@@ -104,5 +108,4 @@ namespace HighVoltz.Composites
             }
         }
     }
-    #endregion
 }

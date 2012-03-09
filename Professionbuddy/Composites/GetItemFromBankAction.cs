@@ -88,17 +88,38 @@ namespace HighVoltz.Composites
         public GetItemfromBankAction()
         {
             Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
 
-            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint), new DisplayNameAttribute("Min Free Bagslots"));
-            Properties["GetItemfromBankType"] = new MetaProp("GetItemfromBankType", typeof(BankWithdrawlItemType), new DisplayNameAttribute("Items to Withdraw"));
-            Properties["Bank"] = new MetaProp("Bank", typeof(BankType));
-            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool), new DisplayNameAttribute("Auto find Bank"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool), new DisplayNameAttribute("Withdraw Additively"));
-            Properties["Withdraw"] = new MetaProp("Withdraw", typeof(DepositWithdrawAmount));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_MinFreeBagSlots"]));
+
+            Properties["GetItemfromBankType"] = new MetaProp("GetItemfromBankType",
+                typeof(BankWithdrawlItemType),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemsToWithdraw"]));
+
+            Properties["Bank"] = new MetaProp("Bank", typeof(BankType),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Bank"]));
+
+            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindBank"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["NpcEntry"] = new MetaProp("NpcEntry",
+                typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+
+            Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_WithdrawAdditively"]));
+
+            Properties["Withdraw"] = new MetaProp("Withdraw", typeof(DepositWithdrawAmount),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Withdraw"]));
 
             Amount = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Amount");
@@ -285,7 +306,7 @@ namespace HighVoltz.Composites
             if (movetoPoint == WoWPoint.Zero)
             {
                 IsDone = true;
-                Professionbuddy.Err("Unable to find bank");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindBank"]);
             }
             if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
             {
@@ -299,7 +320,7 @@ namespace HighVoltz.Composites
             else
             {
                 IsDone = true;
-                Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindBank"]);
             }
         }
 
@@ -453,7 +474,7 @@ namespace HighVoltz.Composites
             _itemsSW = null;
         }
 
-        public override string Name { get { return "Withdraw Item From Bank"; } }
+        public override string Name { get { return Pb.Strings["Action_GetItemFromBankAction_Name"]; } }
         public override string Title
         {
             get
@@ -466,7 +487,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will withdraw the specified item from your personal or guild bank, it can also withdraw items needed for your recipes in the action tree.WithdrawAdditively if set to true will buy axact amount of items regardless of item count player has in bags.All items will be withdrawn if ItemID is left blank";
+                return Pb.Strings["Action_GetItemFromBankAction_Help"];
             }
         }
         public override object Clone()

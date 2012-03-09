@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TreeSharp;
+using System.ComponentModel;
 
 namespace HighVoltz.Composites
 {
@@ -15,12 +16,13 @@ namespace HighVoltz.Composites
         public SubRoutine()
         {
             Properties = new PropertyBag();
-            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string));
+            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string),
+                new DisplayNameAttribute(Professionbuddy.Instance.Strings["Action_SubRoutine_SubroutineName"]));
             SubRoutineName = "";
         }
 
         public System.Drawing.Color Color { get { return System.Drawing.Color.Blue; } }
-        public string Name { get { return "SubRoutine"; } }
+        public string Name { get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Name"]; } }
         public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
 
         public PropertyBag Properties { get; private set; }
@@ -72,9 +74,7 @@ namespace HighVoltz.Composites
             return pd;
         }
 
-        public string Help { get { return "SubRoutine can contain multiple actions which which you can execute using the 'Call SubRoutine' action"; } }
-
-
+        public string Help { get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Help"]; } }
 
         public void OnProfileLoad(System.Xml.Linq.XElement element) { }
 

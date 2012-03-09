@@ -85,15 +85,31 @@ namespace HighVoltz.Composites
         }
         public MailItemAction()
         {
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), new DisplayNameAttribute("Automatically find Mailbox"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
-            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
-            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindMailbox"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string), 
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
+
+            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
+
+            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+
             Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["Mail"] = new MetaProp("Mail", typeof(DepositWithdrawAmount));
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+
+            Properties["Mail"] = new MetaProp("Mail", typeof(DepositWithdrawAmount),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Mail"]));
 
             ItemID = "";
             AutoFindMailBox = true;
@@ -187,12 +203,13 @@ namespace HighVoltz.Composites
                     }
                     if (_mailbox != null)
                         movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, _mailbox.Location, 3);
+
                     if (movetoPoint == WoWPoint.Zero)
                     {
-                        Professionbuddy.Err("Unable To find Mailbox");
-                        IsDone = true;
+                        Professionbuddy.Err(Pb.Strings["Error_UnableToFindMailbox"]);
                         return RunStatus.Failure;
                     }
+
                     if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
                     else if (_mailbox != null)
@@ -392,7 +409,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "Mail Item";
+                return Pb.Strings["Action_MailItemAction_Name"];
             }
         }
         public override string Title
@@ -403,13 +420,15 @@ namespace HighVoltz.Composites
                     UseCategory ? string.Format("{0} {1}", Category, SubCategory) : ItemID);
             }
         }
+
         public override string Help
         {
             get
             {
-                return "This action will mail either all items that match Item ID or by item category.Setting Amount to 0 will mail all items that match Entry. Note: Amount = axact number, not stacks. This mails items to the 'Mail Recipient' from Honorbuddy settings. ";
+                return Pb.Strings["Action_MailItemAction_Help"];
             }
         }
+
         public override object Clone()
         {
             return new MailItemAction

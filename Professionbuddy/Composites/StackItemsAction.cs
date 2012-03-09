@@ -51,7 +51,7 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
-        public override string Name { get { return "Stack Items"; } }
+        public override string Name { get { return Pb.Strings["Action_StackItemsAction_Name"]; } }
         public override string Title
         {
             get
@@ -63,7 +63,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will stack up items in player's bags. Use this before Disenchanting/Milling/Prospecting";
+                return Pb.Strings["Action_StackItemsAction_Help"];
             }
         }
         public override object Clone()

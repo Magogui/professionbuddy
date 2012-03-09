@@ -51,38 +51,57 @@ namespace HighVoltz.Composites
 
         public SellItemOnAhAction()
         {
-            Properties["ItemID"] = new MetaProp("ItemID", typeof (string), new DisplayNameAttribute("Item ID List"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
             Properties["RunTime"] = new MetaProp("RunTime", typeof (RunTimeType),
-                                                 new DisplayNameAttribute("Auction Duration"));
+                                                 new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_AuctionDuration"]));
+
             Properties["MinBuyout"] = new MetaProp("MinBuyout", typeof (PropertyBag.GoldEditor),
-                                                   new DisplayNameAttribute("Min Buyout"),
-                                                   new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)));
+                                                   new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)),
+                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_MinBuyout"]));
+
             Properties["MaxBuyout"] = new MetaProp("MaxBuyout", typeof (PropertyBag.GoldEditor),
-                                                   new DisplayNameAttribute("Max Buyout"),
-                                                   new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)));
+                                                   new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)),
+                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_MaxBuyout"]));
+
             Properties["Amount"] = new MetaProp("Amount", typeof (DynamicProperty<int>),
-                                                new TypeConverterAttribute(
-                                                    typeof (DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["StackSize"] = new MetaProp("StackSize", typeof (uint));
+                new TypeConverterAttribute(typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+
+            Properties["StackSize"] = new MetaProp("StackSize", typeof (uint),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_StackSize"]));
+
             Properties["IgnoreStackSizeBelow"] = new MetaProp("IgnoreStackSizeBelow", typeof (uint),
-                                                              new DisplayNameAttribute("Ignore StackSize Below"));
+                                                              new DisplayNameAttribute(Pb.Strings["Action_Common_IgnoreStackSizeBelow"]));
+
             Properties["AmountType"] = new MetaProp("AmountType", typeof (AmountBasedType),
-                                                    new DisplayNameAttribute("Sell"));
+                                                    new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
+
             Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof (bool),
-                                                    new DisplayNameAttribute("Auto find AH"));
+                                                    new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
+
             Properties["Location"] = new MetaProp("Location", typeof (string),
-                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
-                                                                      typeof (UITypeEditor)));
-            Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof (float));
-            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof (double));
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof (float),
+                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_BidPercent"]));
+
+            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof (double),
+                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_UndercutPercent"]));
+
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof (bool),
-                                                     new DisplayNameAttribute("Use Category"));
+                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
+
             Properties["Category"] = new MetaProp("Category", typeof (WoWItemClass),
-                                                  new DisplayNameAttribute("Item Category"));
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
+
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof (WoWItemTradeGoodsClass),
-                                                     new DisplayNameAttribute("Item SubCategory"));
+                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+
             Properties["PostIfBelowMinBuyout"] = new MetaProp("PostIfBelowMinBuyout", typeof (bool),
-                                                              new DisplayNameAttribute("Post if Below MinBuyout"));
+                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_PostIfBelowMinBuyout"]));
 
             ItemID = "";
             MinBuyout = new PropertyBag.GoldEditor("0g10s0c");
@@ -285,7 +304,7 @@ namespace HighVoltz.Composites
 
         public override string Name
         {
-            get { return "Sell Item To AH"; }
+            get { return Pb.Strings["Action_SellItemOnAhAction_Name"]; }
         }
 
         public override string Title
@@ -308,8 +327,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return
-                    "This action will sell a specific item that matches ID or all items that belong to a category and optionally sub catagory to the Auction house. If Cheapest item on AH is below minimum buyout then the item is listed at min buyout, else if the cheapest item is higher then the max buyout then the item is listed at max buyout, otherwise it's listed at lowest buyout minus undercut precent.ItemID takes a comma separated list of item IDs. All stacks of items below the IgnoreStackSizeBelow are ignored when undercutting auctions";
+                return Pb.Strings["Action_SellItemOnAhAction_Help"];
             }
         }
 
@@ -414,7 +432,7 @@ namespace HighVoltz.Composites
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
             {
-                Logging.Write("Unable to location Auctioneer, Maybe he's dead?");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindAuctioneer"]);
             }
             if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
             {
@@ -462,7 +480,7 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    Professionbuddy.Err("No ItemIDs are specified");
+                    Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                     IsDone = true;
                 }
             }

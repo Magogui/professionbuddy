@@ -15,7 +15,9 @@ namespace HighVoltz.Composites
         {
             // ReSharper disable DoNotCallOverridableMethodsInConstructor
             CodeType = t;
-            Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true));
+            Properties["CompileError"] = new MetaProp("CompileError", typeof(string), 
+                new ReadOnlyAttribute(true),
+                new DisplayNameAttribute(Pb.Strings["Action_CSharpAction_CompileError"]));
             CompileError = "";
             Properties["CompileError"].Show = false;
             Properties["CompileError"].PropertyChanged += CompileErrorPropertyChanged;

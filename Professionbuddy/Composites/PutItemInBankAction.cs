@@ -161,17 +161,40 @@ namespace HighVoltz.Composites
         public PutItemInBankAction()
         {
             Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["Bank"] = new MetaProp("Bank", typeof(BankType));
-            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool), new DisplayNameAttribute("Auto find Bank"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["GuildTab"] = new MetaProp("GuildTab", typeof(uint));
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
-            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
-            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
-            Properties["Deposit"] = new MetaProp("Deposit", typeof(DepositWithdrawAmount));
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["Bank"] = new MetaProp("Bank", typeof(BankType),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Bank"]));
+
+            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindBank"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), 
+                new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+
+            Properties["GuildTab"] = new MetaProp("GuildTab", typeof(uint),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_GuildTab"]));
+
+            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
+
+            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
+
+            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+
+            Properties["Deposit"] = new MetaProp("Deposit", typeof(DepositWithdrawAmount),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Deposit"]));
 
             Amount = new DynamicProperty<int>(this, "0");
             RegisterDynamicProperty("Amount");
@@ -359,7 +382,7 @@ namespace HighVoltz.Composites
             else
             {
                 IsDone = true;
-                Logging.Write(System.Drawing.Color.Red, "Unable to find a banker at location. aborting");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindBank"]);
             }
         }
 
@@ -394,7 +417,7 @@ namespace HighVoltz.Composites
                 }
                 else
                 {
-                    Professionbuddy.Err("No ItemIDs are specified");
+                    Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                     IsDone = true;
                 }
             }
@@ -623,7 +646,7 @@ namespace HighVoltz.Composites
             Lua.DoString(lua);
             return true;
         }
-        public override string Name { get { return "Deposit Item in Bank"; } }
+        public override string Name { get { return Pb.Strings["Action_PutItemInBankAction_Name"]; } }
         public override string Title
         {
             get
@@ -637,7 +660,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will deposit the specified item/s into your personal or guild bank. Set GuildTab to 0 to deposit in whichever tab has room";
+                return Pb.Strings["Action_PutItemInBankAction_Help"];
             }
         }
         public override void Reset()

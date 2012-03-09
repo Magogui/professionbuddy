@@ -9,7 +9,6 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    #region FlyToAction
     public sealed class FlyToAction : PBAction
     {
         [PbXmlAttribute]
@@ -27,8 +26,12 @@ namespace HighVoltz.Composites
         }
         public FlyToAction()
         {
-            Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), new DisplayNameAttribute("Dismount on Arrival"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
+            Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), 
+                new DisplayNameAttribute(Pb.Strings["Action_FlyToAction_Dismount"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string), 
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             Location = _loc.ToInvariantString();
             Dismount = true;
@@ -67,7 +70,7 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override string Name { get { return "Fly To"; } }
+        public override string Name { get { return Pb.Strings["Action_FlyToAction_Name"]; } }
         public override string Title
         {
             get
@@ -79,7 +82,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action relies on Flightor, the 3d navigator used by Gatherbuddy2. This action will fly your character to the selected location and dismount on arrival if Dismount is set to true.Be sure to make the target location outdoors and not underneath any obsticles.";
+                return Pb.Strings["Action_FlyToAction_Help"];
             }
         }
         public override object Clone()
@@ -87,5 +90,4 @@ namespace HighVoltz.Composites
             return new FlyToAction { Location = this.Location, Dismount = this.Dismount };
         }
     }
-    #endregion
 }

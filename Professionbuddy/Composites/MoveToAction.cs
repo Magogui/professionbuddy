@@ -59,10 +59,19 @@ namespace HighVoltz.Composites
 
         public MoveToAction()
         {
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["MoveType"] = new MetaProp("MoveType", typeof(MoveToType), new DisplayNameAttribute("MoveTo Type"));
-            Properties["Pathing"] = new MetaProp("Pathing", typeof(NavigationType), new DisplayNameAttribute("Use"));
+            Properties["Entry"] = new MetaProp("Entry", typeof(uint), 
+                new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
+
+            Properties["Location"] = new MetaProp("Location", 
+                typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["MoveType"] = new MetaProp("MoveType", typeof(MoveToType), 
+                new DisplayNameAttribute(Pb.Strings["Action_MoveToAction_MoveToType"]));
+
+            Properties["Pathing"] = new MetaProp("Pathing", typeof(NavigationType), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Use"]));
 
             Entry = 0u;
             _loc = WoWPoint.Zero;
@@ -127,7 +136,7 @@ namespace HighVoltz.Composites
                     }
                     if (_loc == WoWPoint.Zero)
                     {
-                        Professionbuddy.Err("MoveToAction Failed.. Unable to find location from Database");
+                        Professionbuddy.Err(Pb.Strings["Error_UnableToFindLocationFromDB"]);
                         IsDone = true;
                         return RunStatus.Failure;
                     }
@@ -268,7 +277,7 @@ namespace HighVoltz.Composites
                 return npcResults.Location;
             return WoWPoint.Zero;
         }
-        public override string Name { get { return "Move To"; } }
+        public override string Name { get { return Pb.Strings["Action_MoveToAction_Name"]; } }
         public override string Title
         {
             get
@@ -281,7 +290,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will move your character to the selected location or if set to go to NearestXXX it will search the object manager and NPC database for the specific unit/object and move to it. It will also target NPCs so the interact action can be used right after this action finishes without having to specify an Npc Entry in it.";
+                return Pb.Strings["Action_MoveToAction_Help"];
             }
         }
         public override object Clone()

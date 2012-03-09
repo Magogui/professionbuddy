@@ -25,7 +25,8 @@ namespace HighVoltz.Composites
         }
         public Comment()
         {
-            Properties["Text"] = new MetaProp("Text", typeof(string), new DisplayNameAttribute("Comment"));
+            Properties["Text"] = new MetaProp("Text", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Comment_Name"]));
         }
         public Comment(string comment) : this()
         {
@@ -40,14 +41,14 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This does nothing but add a comment";
+                return Pb.Strings["Action_Comment_Help"];
             }
         }
         public override string Name
         {
             get
             {
-                return "Comment";
+                return Pb.Strings["Action_Comment_Name"];
             }
         }
         public override string Title

@@ -15,8 +15,6 @@ using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    #region SellItemAction
-
     sealed class SellItemAction : PBAction
     {
         [PbXmlAttribute]
@@ -66,13 +64,26 @@ namespace HighVoltz.Composites
         }
         public SellItemAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
+            Properties["Location"] = new MetaProp("Location", 
+                typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), 
+                new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
+
             Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), new DisplayNameAttribute("Sell Item Type"));
-            Properties["Sell"] = new MetaProp("Sell", typeof(DepositWithdrawAmount));
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
+
+            Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), 
+                new DisplayNameAttribute(Pb.Strings["Action_SellItemAction_SellItemType"]));
+
+            Properties["Sell"] = new MetaProp("Sell", typeof(DepositWithdrawAmount),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
 
             ItemID = "";
             Count = new DynamicProperty<int>(this, "0");
@@ -182,7 +193,7 @@ namespace HighVoltz.Composites
                         }
                         else
                         {
-                            Professionbuddy.Err("No ItemIDs are specified");
+                            Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                             IsDone = true;
                             return RunStatus.Failure;
                         }
@@ -238,7 +249,7 @@ namespace HighVoltz.Composites
         }
         public override string Name
         {
-            get { return "Sell Item"; }
+            get { return Pb.Strings["Action_SellItemAction_Name"]; }
         }
         public override string Title
         {
@@ -252,7 +263,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will sell items to a merchant. It will either sell a specified item x Count stacks, or sell all grey/white/green quality items. This action will find the closest vendor if NpcEntry is set to 0. ItemID can be a comma separated list of Items IDs";
+                return Pb.Strings["Action_SellItemAction_Help"];
             }
         }
         public override object Clone()
@@ -268,5 +279,4 @@ namespace HighVoltz.Composites
             };
         }
     }
-    #endregion
 }

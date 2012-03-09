@@ -14,7 +14,8 @@ namespace HighVoltz.Composites
 
         public ChangeBotAction()
         {
-            Properties["BotName"] = new MetaProp("BotName", typeof(string), new DisplayNameAttribute("Bot Name"));
+            Properties["BotName"] = new MetaProp("BotName", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_ChangeBotAction_BotName"]));
             BotName = "";
         }
 
@@ -34,19 +35,19 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override string Name { get { return "Change Bot"; } }
+        public override string Name { get { return Pb.Strings["Action_ChangeBotAction_Name"]; } }
         public override string Title
         {
             get
             {
-                return string.Format("{0} to :{1}", Name, BotName);
+                return string.Format("{0}: {1}", Name, BotName);
             }
         }
         public override string Help
         {
             get
             {
-                return "This action will change to the bot specified with 'Bot Name' Property. 'Bot Name' can be a partial match";
+                return Pb.Strings["Action_ChangeBotAction_Help"];
             }
         }
         public override object Clone()

@@ -63,15 +63,20 @@ namespace HighVoltz.Composites
         public InteractionAction()
         {
             Properties["Entry"] = new MetaProp("Entry", typeof(uint),
-                                               new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                   typeof(UITypeEditor)));
-            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof(uint));
+                new EditorAttribute(typeof(PropertyBag.EntryEditor),typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
+
+            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof(uint),
+                new DisplayNameAttribute(Pb.Strings["Action_InteractAction_InteractDelay"]));
+
             Properties["InteractType"] = new MetaProp("InteractType", typeof(InteractActionType),
-                                                      new DisplayNameAttribute("Interact Type"));
+                                                      new DisplayNameAttribute(Pb.Strings["Action_InteractAction_InteractType"]));
+
             Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof(WoWGameObjectType),
-                                                        new DisplayNameAttribute("GameObject Type"));
+                                                        new DisplayNameAttribute(Pb.Strings["Action_InteractAction_GameobjectType"]));
+            
             Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof(WoWSpellFocus),
-                                                    new DisplayNameAttribute("SpellFocus"));
+                                                    new DisplayNameAttribute(Pb.Strings["Action_InteractAction_SpellFocus"]));
 
             InteractDelay = Entry = 0u;
             InteractType = InteractActionType.GameObject;
@@ -161,7 +166,7 @@ namespace HighVoltz.Composites
 
         public override string Name
         {
-            get { return "Interact"; }
+            get { return Pb.Strings["Action_InteractAction_Name"]; }
         }
 
         public override string Title
@@ -177,8 +182,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return
-                    "This action will cause your character to interact with a specific target. InteractDelay is a time in milliseconds to way before interacting with target.This can be also used to goto objects like forge/anvil or NPCs that are within 100 feet";
+                return Pb.Strings["Action_InteractAction_Help"];
             }
         }
 

@@ -91,19 +91,34 @@ namespace HighVoltz.Composites
         {
             _spamControl = new Stopwatch();
             QueueIsRunning = false;
-            Properties["Casted"] = new MetaProp("Casted", typeof(int), new ReadOnlyAttribute(true));
-            Properties["SpellName"] = new MetaProp("SpellName", typeof(string), new ReadOnlyAttribute(true));
-            Properties["Repeat"] = new MetaProp("Repeat", typeof(DynamicProperty<int>), 
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)));
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint));
-            Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof(bool), new DisplayNameAttribute("Cast on Item"));
-            Properties["ItemType"] = new MetaProp("ItemType", typeof(InventoryType), new DisplayNameAttribute("Item Type"));
-            Properties["ItemId"] = new MetaProp("ItemId", typeof(uint));
-            Properties["RepeatType"] = new MetaProp("RepeatType", typeof(RepeatCalculationType), new DisplayNameAttribute("Repeat Type"));
+            Properties["Casted"] = new MetaProp("Casted", typeof(int), new ReadOnlyAttribute(true),
+                new DisplayNameAttribute(Pb.Strings["Action_CastSpellAction_CastOnItem"]));
+
+            Properties["SpellName"] = new MetaProp("SpellName", typeof(string), new ReadOnlyAttribute(true),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_SpellName"]));
+
+            Properties["Repeat"] = new MetaProp("Repeat", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Repeat"]));
+
+            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_SpellEntry"]));
+
+            Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_CastSpellAction_CastOnItem"]));
+
+            Properties["ItemType"] = new MetaProp("ItemType", typeof(InventoryType),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemType"]));
+
+            Properties["ItemId"] = new MetaProp("ItemId", typeof(uint),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
+
+            Properties["RepeatType"] = new MetaProp("RepeatType", typeof(RepeatCalculationType),
+                new DisplayNameAttribute(Pb.Strings["Action_CastSpellAction_RepeatType"]));
             // Properties["Recipe"] = new MetaProp("Recipe", typeof(Recipe), new TypeConverterAttribute(typeof(RecipeConverter)));
 
             Casted = 0;
-            Repeat = new DynamicProperty<int>(this,"1");
+            Repeat = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Repeat");
             Entry = 0u;
             RepeatType = RepeatCalculationType.Craftable;
@@ -152,7 +167,7 @@ namespace HighVoltz.Composites
             : this()
         {
             Recipe = recipe;
-            Repeat = new DynamicProperty<int>(this,repeat.ToString(CultureInfo.InvariantCulture));
+            Repeat = new DynamicProperty<int>(this, repeat.ToString(CultureInfo.InvariantCulture));
             Entry = recipe.ID;
             RepeatType = repeatType;
             //Properties["Recipe"].Show = true;
@@ -169,7 +184,7 @@ namespace HighVoltz.Composites
                     case RepeatCalculationType.Specific:
                         return Repeat;
                     case RepeatCalculationType.Craftable:
-                        return IsRecipe ? (int) Recipe.CanRepeatNum2 : Repeat;
+                        return IsRecipe ? (int)Recipe.CanRepeatNum2 : Repeat;
                     case RepeatCalculationType.Banker:
                         if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
                             return Repeat - Pb.DataStore[Recipe.CraftedItemID];
@@ -232,8 +247,8 @@ namespace HighVoltz.Composites
                         WoWSpell spell = WoWSpell.FromId((int)Entry);
                         if (spell == null)
                         {
-                            Professionbuddy.Err("Unable to find a spell with ID {0}",Entry);
-                            return RunStatus.Failure; 
+                            Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindSpellWithEntry"], Entry);
+                            return RunStatus.Failure;
                         }
                         _recastTime = spell.CastTime;
                         Professionbuddy.Debug("Casting {0}, recast :{1}", spell.Name, _recastTime);
@@ -244,7 +259,8 @@ namespace HighVoltz.Composites
                                 spell.CastOnItem(item);
                             else
                             {
-                                Professionbuddy.Log("No item found to cast spell {0} on",
+                                Professionbuddy.Err("{0}: {1}",
+                                    Pb.Strings["Error_UnableToFindItemToCastOn"],
                                     IsRecipe ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture));
                                 IsDone = true;
                             }
@@ -329,28 +345,26 @@ namespace HighVoltz.Composites
         }
 
         public override System.Drawing.Color Color { get { return IsRecipe ? System.Drawing.Color.DarkRed : System.Drawing.Color.Black; } }
-        public override string Name { get { return IsRecipe ? "R" : "Cast Spell"; } }
+        public override string Name { get { return Pb.Strings["Action_CastSpellAction_Name"]; } }
         public override string Title { get { return string.Format("{0}: {1} x{2} ({3})", Name, SpellName, CalculatedRepeat, CalculatedRepeat - Casted); } }
         public override string Help
         {
             get
             {
-                return "This action will cast the specified spell. This should only be used for recipes. To cast other spell use a Custom Action and SpellManager.Cast(). Repeat is the amount of times it will be casted depending on the repeat type used. if Repeat type is set to Specific it will Cast the spell Repeat times." +
-                "Craftable means it will automatically set Repeat based on the number of times the recipe can be repeated with current materials in bags. Banker type uses the info from DataStore and will repeat the spell based on how many of the crafted items you have on yourself or on your alts/bank/gbank." +
-                " So if for example you try to keep a stock 20 of each glyph on your bankers, your banker has 15 Glyph of Arcane Blast and you set repeat to 20, it will make 5 glyphs, The DataStore addon is required to used this mode.";
+                return Pb.Strings["Action_CastSpellAction_Help"];
             }
         }
         public override object Clone()
         {
             return new CastSpellAction
                        {
-                Entry = this.Entry,
-                Repeat = this.Repeat,
-                ItemType = this.ItemType,
-                RepeatType = this.RepeatType,
-                ItemId = this.ItemId,
-                CastOnItem = this.CastOnItem
-            };
+                           Entry = this.Entry,
+                           Repeat = this.Repeat,
+                           ItemType = this.ItemType,
+                           RepeatType = this.RepeatType,
+                           ItemId = this.ItemId,
+                           CastOnItem = this.CastOnItem
+                       };
         }
 
 

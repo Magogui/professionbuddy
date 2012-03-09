@@ -25,11 +25,17 @@ namespace HighVoltz.Composites
 
         public LoadProfileAction()
         {
-            Properties["Path"] = new MetaProp("Path", typeof(string), new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)));
-            Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType));
+            Properties["Path"] = new MetaProp("Path", typeof(string),
+                new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Path"]));
+
+            Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType),
+                new DisplayNameAttribute("Action_LoadProfileAction_ProfileType"));
+
             Path = "";
             ProfileType = LoadProfileType.Honorbuddy;
         }
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -58,7 +64,7 @@ namespace HighVoltz.Composites
                     }
                     else
                     {
-                        Professionbuddy.Err("Unable to load profile {0}", Path);
+                        Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindProfile"],Path);
                     }
                 }
                 catch
@@ -67,7 +73,7 @@ namespace HighVoltz.Composites
             }
         }
 
-        public override string Name { get { return "Load profile"; } }
+        public override string Name { get { return Pb.Strings["Action_LoadProfileAction_Name"]; } }
         public override string Title
         {
             get
@@ -79,7 +85,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will load a profile, which can be either an Honorbuddy or Professionbuddy profile. Path needs to be relative to the currently loaded Professionbuddy profile and either in same folder or in a subfolder. If Path is empty and the profile type is Honorbuddy then an empty profile will be loaded.";
+                return Pb.Strings["Action_LoadProfileAction_Help"];
             }
         }
         public override object Clone()

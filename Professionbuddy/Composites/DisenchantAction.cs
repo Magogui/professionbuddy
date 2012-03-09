@@ -47,12 +47,16 @@ namespace HighVoltz.Composites
         public DisenchantAction()
         {
             Properties["ActionType"] = new MetaProp("ActionType", typeof(DeActionType),
-                new DisplayNameAttribute("Action Type"));
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ActionType"]));
+
             Properties["ItemTarget"] = new MetaProp("ItemTarget", typeof(ItemTargetType),
-                new DisplayNameAttribute("Item Target"));
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemTarget"]));
+
             Properties["ItemQuality"] = new MetaProp("ItemQuality", typeof(DeItemQualites),
-                new DisplayNameAttribute("Item Quality"));
-            Properties["ItemId"] = new MetaProp("ItemId", typeof(int));
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemQuality"]));
+
+            Properties["ItemId"] = new MetaProp("ItemId", typeof(int),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
 
             ActionType = DeActionType.Disenchant;
             ItemTarget = ItemTargetType.All;
@@ -120,7 +124,7 @@ namespace HighVoltz.Composites
                             {
                                 if (++_tries >= 3)
                                 {
-                                    Professionbuddy.Log("Unable to {0} {1}, BlackListing", Name, itemList[index].Name);
+                                    Professionbuddy.Log("Unable to {0} {1}, BlackListing", ActionType, itemList[index].Name);
                                     if (!_blacklistedItems.Contains(_lastItemGuid))
                                         _blacklistedItems.Add(_lastItemGuid);
                                     return RunStatus.Success;
@@ -133,7 +137,7 @@ namespace HighVoltz.Composites
                             WoWSpell spell = WoWSpell.FromId(SpellId);
                             if (spell != null)
                             {
-                                TreeRoot.GoalText = string.Format("{0}ing {1}", ActionType, itemList[index].Name);
+                                TreeRoot.GoalText = string.Format("{0}: {1}", ActionType, itemList[index].Name);
                                 Professionbuddy.Log(TreeRoot.GoalText);
                                 //Lua.DoString("CastSpellByID({0}) UseContainerItem({1}, {2})",
                                 //    spellId, ItemList[index].BagIndex + 1, ItemList[index].BagSlot + 1);
@@ -221,12 +225,13 @@ namespace HighVoltz.Composites
                 Professionbuddy.Log("Item {0} matches the ItemQuality check", item.Name);
             return returnVal;
         }
-        public override string Name { get { return ActionType.ToString(); } }
+        public override string Name { get { return Pb.Strings["Action_DisenchantAction_Name"]; } }
         public override string Title
         {
             get
             {
-                return string.Format("{0}: {1} {2}", Name, ItemTarget == ItemTargetType.Specific ? ItemId.ToString(CultureInfo.InvariantCulture) : "All"
+                return string.Format("{0}: {1} {2}", ActionType,
+                    ItemTarget == ItemTargetType.Specific ? ItemId.ToString(CultureInfo.InvariantCulture) : Pb.Strings["Action_Common_All"]
                     , ItemTarget == ItemTargetType.All && ActionType == DeActionType.Disenchant ? ItemQuality.ToString() : "");
             }
         }
@@ -234,7 +239,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will Disenchant,Mill or Prospect items in the player's bags";
+                return Pb.Strings["Action_DisenchantAction_Help"];
             }
         }
         public override object Clone()

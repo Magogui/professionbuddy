@@ -35,18 +35,23 @@ namespace HighVoltz.Composites
         {
             Properties["Location"] = new MetaProp("Location", typeof(string),
                                                   new EditorAttribute(typeof(PropertyBag.LocationEditor),
-                                                                      typeof(UITypeEditor)),new DisplayNameAttribute("Location"));
+                                                                      typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            
             Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
                                                   new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                      typeof(UITypeEditor)), new DisplayNameAttribute("Npc Entry"));
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),new DisplayNameAttribute("Item Entries"));
+                                                                      typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+           
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+            
             Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
                                                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
-                                                       new DisplayNameAttribute("Count"));
+                                                       new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
+            
             Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType),
-                                                     new DisplayNameAttribute("Buy"));
+                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_Buy"]));
+            
             Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool),
-                                                       new DisplayNameAttribute("Buy Additively"));
+                                                       new DisplayNameAttribute(Pb.Strings["Action_Common_BuyAdditively"]));
             ItemID = "";
             Count = new DynamicProperty<int>(this, "1"); // dynamic expression
             RegisterDynamicProperty("Count");
@@ -109,7 +114,7 @@ namespace HighVoltz.Composites
 
         public override string Name
         {
-            get { return "Buy Item"; }
+            get { return Pb.Strings["Action_BuyItemAction_Name"]; }
         }
 
         public override string Title
@@ -117,7 +122,7 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"),
-                                   Name, ItemID, Count, BuyItemType);
+                                   Name, ItemID, Count, Pb.Strings["Action_Common_Material"]);
             }
         }
 
@@ -125,8 +130,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return
-                    "This action will buy items from a merchant, either a specific item or any materials the NPC has that are needed for recipes in the action tree. If 'Buy Additively' is set to true this will buy the axact amount of items regardless of the item count player has in bags";
+                return Pb.Strings["Action_BuyItemAction_Help"];
             }
         }
 
@@ -217,7 +221,7 @@ namespace HighVoltz.Composites
                             }
                             else
                             {
-                                Professionbuddy.Err("No ItemIDs are specified");
+                                Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                                 IsDone = true;
                                 return RunStatus.Failure;
                             }
@@ -242,7 +246,7 @@ namespace HighVoltz.Composites
                     }
                     if (_concludingSw.ElapsedMilliseconds >= 2000)
                     {
-                        Professionbuddy.Log("BuyItemAction Completed ");
+                        Professionbuddy.Log("BuyItemAction Completed");
                         IsDone = true;
                     }
                 }

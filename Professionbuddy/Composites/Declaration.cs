@@ -21,7 +21,10 @@ namespace HighVoltz.Composites
         public Declaration()
             : base(CsharpCodeType.Declaration)
         {
-            Properties["Code"] = new MetaProp("Code", typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)));
+            Properties["Code"] = new MetaProp("Code", typeof(string), 
+                new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Code"]));
+
             Code = "";
             Properties["Code"].PropertyChanged += Code_PropertyChanged;
         }
@@ -36,7 +39,7 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override string Name { get { return "Declaration"; } }
+        public override string Name { get { return Pb.Strings["Action_Declaration_Name"]; } }
         public override string Title
         {
             get
@@ -48,7 +51,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This is useful to declare fields, properties, methods, classes or any other types.";
+                return Pb.Strings["Action_Declaration_Help"];
             }
         }
         public override object Clone()

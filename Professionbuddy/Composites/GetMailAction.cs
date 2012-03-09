@@ -65,12 +65,24 @@ namespace HighVoltz.Composites
         public GetMailAction()
         {
             //CheckNewMail
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string));
-            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(int), new DisplayNameAttribute("Min Free Bagslots"));
-            Properties["CheckNewMail"] = new MetaProp("CheckNewMail", typeof(bool), new DisplayNameAttribute("Check for New Mail"));
-            Properties["GetMailType"] = new MetaProp("GetMailType", typeof(GetMailActionType), new DisplayNameAttribute("Get Mail"));
-            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), new DisplayNameAttribute("Auto find Mailbox"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(int),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_MinFreeBagSlots"]));
+
+            Properties["CheckNewMail"] = new MetaProp("CheckNewMail", typeof(bool), 
+                new DisplayNameAttribute(Pb.Strings["Action_GetMailAction_CheckNewMail"]));
+
+            Properties["GetMailType"] = new MetaProp("GetMailType", typeof(GetMailActionType),
+                new DisplayNameAttribute(Pb.Strings["Action_GetMailAction_Name"]));
+
+            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindMailbox"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             ItemID = "";
             CheckNewMail = true;
@@ -188,7 +200,11 @@ namespace HighVoltz.Composites
                     if (_mailbox != null)
                         movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, _mailbox.Location, 3);
                     if (movetoPoint == WoWPoint.Zero)
+                    {
+                        Professionbuddy.Err(Pb.Strings["Error_UnableToFindMailbox"]);
                         return RunStatus.Failure;
+                    }
+
                     if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
                     else if (_mailbox != null)
@@ -272,7 +288,7 @@ namespace HighVoltz.Composites
             }
             else
             {
-                Professionbuddy.Err("No ItemIDs are specified");
+                Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                 IsDone = true;
             }
             return list;
@@ -291,7 +307,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "Get Mail";
+                return Pb.Strings["Action_GetMailAction_Name"];
             }
         }
         public override string Title
@@ -306,7 +322,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action retrieves all mail in the mailbox, or only items that match the ID.Since mailboxes are not in the NPC database you need to be within 100 yards of a mailbox to 'autofind' it";
+                return Pb.Strings["Action_GetMailAction_Help"];
             }
         }
         public override object Clone()

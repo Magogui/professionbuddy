@@ -45,16 +45,18 @@ namespace HighVoltz.Composites
             yield return RunStatus.Failure;
         }
 
-        override public string Name { get { return "While Condition"; } }
+        override public string Name { get { return Professionbuddy.Instance.Strings["FlowControl_While_LongName"]; } }
+
         override public string Title
         {
             get
             {
-                return string.Format("While {0}",
-                    string.IsNullOrEmpty(Condition) ? "Condition" : "(" + Condition + ")");
+                return string.IsNullOrEmpty(Condition) ?
+                    Professionbuddy.Instance.Strings["FlowControl_While_LongName"] :
+                    (Professionbuddy.Instance.Strings["FlowControl_While_Name"] + " (" + Condition + ")");
             }
         }
-        override public string Help { get { return "'While Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running. The difference between this and the 'If Condition' is that this will auto reset all actions within it and all nested 'If/While' Conditions"; } }
+        override public string Help { get { return Professionbuddy.Instance.Strings["FlowControl_While_Help"]; } }
         public override object Clone()
         {
             var w = new While

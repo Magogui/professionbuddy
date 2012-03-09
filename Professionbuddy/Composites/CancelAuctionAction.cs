@@ -116,16 +116,30 @@ namespace HighVoltz.Composites
 
         public CancelAuctionAction()
         {
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute("Item ID List"));
-            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute("Auto find AH"));
-            Properties["Location"] = new MetaProp("Location", typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)));
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute("Use Category"));
-            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute("Item Category"));
-            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute("Item SubCategory"));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
+
+            Properties["Location"] = new MetaProp("Location", typeof(string), 
+                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
+
+            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
+
+            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass),
+                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+
             Properties["MinBuyout"] = new MetaProp("MinBuyout", typeof(PropertyBag.GoldEditor),
-                new DisplayNameAttribute("Min Buyout"), new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)));
+                new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)), 
+                new DisplayNameAttribute(Pb.Strings["Action_Common_MinBuyout"]));
+
             Properties["IgnoreStackSizeBelow"] = new MetaProp("IgnoreStackSizeBelow", typeof(uint),
-                                                  new DisplayNameAttribute("Ignore StackSize Below"));
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_IgnoreStackSizeBelow"]));
 
             ItemID = "0";
             AutoFindAh = true;
@@ -361,7 +375,7 @@ namespace HighVoltz.Composites
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
             {
-                Professionbuddy.Err("Unable to location Auctioneer, Maybe he's dead?");
+                Professionbuddy.Err(Pb.Strings["Error_UnableToFindAuctioneer"]);
             }
             if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
             {
@@ -436,7 +450,7 @@ namespace HighVoltz.Composites
         }
         public override string Name
         {
-            get { return "Cancel Auction"; }
+            get { return Pb.Strings["Action_CancelAuctionAction_Name"]; }
         }
         public override string Title
         {
@@ -452,7 +466,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return "This action will cancel a specific auction that matches ID or all auctions that belong to a category and optionally sub category if they have been undercut. ItemID takes a comma separated list of item IDs. Set 'Use Category' to false and leave ItemId blank to cancel all undercut auctions. If the competition is at or below 'MinBuyout' than that auction is skipped. ";
+                return Pb.Strings["Action_CancelAuctionAction_Help"];
             }
         }
         public override object Clone()
