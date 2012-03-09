@@ -310,6 +310,7 @@
           <CallSubRoutine SubRoutineName="TrainInOrg" />
         </If>
         <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Stopping HB since We are 525 herb/mining&quot;);" />
+        <CustomAction Code="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;&#xD;&#xA;Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;&#xD;&#xA;&#xD;&#xA;" />
         <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
       </If>
       <If Condition="Me.MapId == 1 &amp;&amp; DistanceTo(1804.349, -4346.937, -10.66582) &lt; 70" IgnoreCanRun="True">
@@ -364,8 +365,8 @@
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="EmptyBagsInStormwind">
@@ -378,8 +379,8 @@
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInStormwind">
@@ -409,8 +410,8 @@
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <MoveToAction Location="1560.8, 355.098, -62.16309" MoveType="Location" Pathing="Navigator" Entry="0" />
-      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInUndercity">
@@ -436,8 +437,8 @@
       <MoveToAction Location="2012.031, -4690.59, 28.64125" MoveType="Location" Pathing="Navigator" Entry="0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="TrainInOrg">
@@ -474,8 +475,8 @@
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
     </If>
     <If Condition="!(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
-      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
-      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
+      <MailItemAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Mail="All" UseCategory="True" ItemID="0" Amount="0" AutoFindMailBox="True" Location="0, 0, 0" />
     </If>
     <MoveToAction Location="5901.044, 724.9983, 639.8762" MoveType="Location" Pathing="Navigator" Entry="0" />
   </SubRoutine>
