@@ -51,7 +51,7 @@ namespace HighVoltz.Dynamic
             return Code;
         }
 
-        public CsharpCodeType CodeType { get { return CsharpCodeType.Expression; } }
+        public HighVoltz.Dynamic.CsharpCodeType CodeType { get { return HighVoltz.Dynamic.CsharpCodeType.Expression; } }
 
         public virtual Delegate CompiledMethod
         {

@@ -19,7 +19,7 @@ namespace HighVoltz.Composites
         }
 
         public Declaration()
-            : base(CsharpCodeType.Declaration)
+            : base(HighVoltz.Dynamic.CsharpCodeType.Declaration)
         {
             Properties["Code"] = new MetaProp("Code", typeof(string), 
                 new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),

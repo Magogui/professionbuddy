@@ -26,7 +26,7 @@ namespace HighVoltz.Composites
             set { Properties["Timeout"].Value = value; }
         }
         public WaitAction()
-            : base(CsharpCodeType.BoolExpression)
+            : base(HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
         {
             Properties["Timeout"] = new MetaProp("Timeout", typeof(int),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_Timeout"]));

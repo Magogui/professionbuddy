@@ -13,8 +13,8 @@
   <Declaration Code="int MiningLevel,MiningMaxLevel,HerbLevel,HerbMaxLevel, LowestMinLevel;" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining: {0}&quot;,Settings[&quot;Mining&quot;]);" />
-  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;UseFakeSkills: {0}&quot;,Settings[&quot;UseFakeSkills&quot;]);" />
+  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.Level: {0}&quot;,Mining.Level);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.MaxLevel: {0}&quot;,Mining.MaxLevel);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herbalism.Level: {0}&quot;,Herbalism.Level);" />
@@ -63,7 +63,7 @@
       </If>
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <If Condition="Me.MapId != 0" IgnoreCanRun="True">
-          <CustomAction Code="MessageBox.Show(&quot;Please switch to Kalimdor continent&quot;);" />
+          <CustomAction Code="MessageBox.Show(&quot;Please switch to Eastern Kingdoms continent&quot;);" />
           <CustomAction Code="TreeRoot.Stop();" />
         </If>
         <If Condition=" LowestMinLevel ==75" IgnoreCanRun="True">

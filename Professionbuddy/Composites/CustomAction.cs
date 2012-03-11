@@ -24,7 +24,7 @@ namespace HighVoltz.Composites
         }
 
         public CustomAction()
-            : base(CsharpCodeType.Statements)
+            : base(HighVoltz.Dynamic.CsharpCodeType.Statements)
         {
             this.Action = c => { ;};
             Properties["Code"] = new MetaProp("Code", typeof(string),

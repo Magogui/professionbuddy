@@ -152,7 +152,7 @@ namespace HighVoltz.Composites
             set { Properties["CompileError"].Value = value; }
         }
 
-        public CsharpCodeType CodeType { get { return CsharpCodeType.BoolExpression; } }
+        public HighVoltz.Dynamic.CsharpCodeType CodeType { get { return HighVoltz.Dynamic.CsharpCodeType.BoolExpression; } }
 
         virtual public void Reset()
         {

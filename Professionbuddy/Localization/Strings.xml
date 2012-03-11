@@ -82,7 +82,7 @@
 	<Action_Common_StackSize>Stack Size</Action_Common_StackSize>
 	<Action_Common_Summary>Summary</Action_Common_Summary>
 	<Action_Common_Timeout>Timeout</Action_Common_Timeout>
-  	<Action_Common_Type>Type</Action_Common_Type>
+  <Action_Common_Type>Type</Action_Common_Type>
 	<Action_Common_Uncommon>Uncommon</Action_Common_Uncommon>
 	<Action_Common_Use>Use</Action_Common_Use>
 	<Action_Common_UseCategory>Use Category</Action_Common_UseCategory> 

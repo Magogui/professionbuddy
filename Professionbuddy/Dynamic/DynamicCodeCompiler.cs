@@ -15,10 +15,10 @@ namespace HighVoltz.Dynamic
     {
         static readonly Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
         static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> Declarations = from dec in CsharpCodeDict
-                                                                                      where dec.Value.CodeType == CsharpCodeType.Declaration
+                                                                                      where dec.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Declaration
                                                                                       select dec;
         static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> NoneDeclarations = from dec in CsharpCodeDict
-                                                                                          where dec.Value.CodeType != CsharpCodeType.Declaration
+                                                                                          where dec.Value.CodeType != HighVoltz.Dynamic.CsharpCodeType.Declaration
                                                                                           select dec;
         static object _codeDriverInstance;
         public static bool CodeWasModified = true;
@@ -74,11 +74,11 @@ namespace HighVoltz.Dynamic
                 {
                     if (CsharpCodeDict.ContainsKey(method.Name))
                     {
-                        if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.BoolExpression)
+                        if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
                             CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), _codeDriverInstance, method.Name);
-                        else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
+                        else if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.Statements)
                             CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(typeof(Action<object>), _codeDriverInstance, method.Name);
-                        else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Expression)
+                        else if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.Expression)
                         {
                             Type gType = typeof(Func<,>).MakeGenericType(new[] { typeof(object), ((IDynamicProperty)CsharpCodeDict[method.Name]).ReturnType });
                             CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(gType, _codeDriverInstance, method.Name);
@@ -245,11 +245,11 @@ namespace HighVoltz.Dynamic
                 }
                 foreach (var met in NoneDeclarations)
                 {
-                    if (met.Value.CodeType == CsharpCodeType.BoolExpression)
+                    if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
                         CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
-                    else if (met.Value.CodeType == CsharpCodeType.Statements)
+                    else if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Statements)
                         CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
-                    else if (met.Value.CodeType == CsharpCodeType.Expression)
+                    else if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Expression)
                     {
                         Type retType = ((IDynamicProperty)met.Value).ReturnType;
                         CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return {2};}}\n",

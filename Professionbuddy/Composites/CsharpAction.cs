@@ -9,9 +9,9 @@ namespace HighVoltz.Composites
     public abstract class CsharpAction : PBAction, ICSharpCode
     {
         protected CsharpAction()
-            : this(CsharpCodeType.Statements) { }
+            : this(HighVoltz.Dynamic.CsharpCodeType.Statements) { }
 
-        protected CsharpAction(CsharpCodeType t)
+        protected CsharpAction(HighVoltz.Dynamic.CsharpCodeType t)
         {
             // ReSharper disable DoNotCallOverridableMethodsInConstructor
             CodeType = t;
@@ -46,7 +46,7 @@ namespace HighVoltz.Composites
             set { Properties["CompileError"].Value = value; }
         }
 
-        public CsharpCodeType CodeType { get; protected set; }
+        public HighVoltz.Dynamic.CsharpCodeType CodeType { get; protected set; }
 
         virtual public string Code { get; set; }
         public override System.Drawing.Color Color
