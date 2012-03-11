@@ -101,8 +101,6 @@ namespace HighVoltz
             {
                 BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                 Profile.OnUnknownProfileElement += Profile_OnUnknownProfileElement;
-                //BotEvents.OnBotStart += args => _botIsStartingUp = true;
-                //BotEvents.OnBotStarted += args => _botIsStartingUp = false;
                 _ctorRunOnce = true;
             }
         }
@@ -167,17 +165,10 @@ namespace HighVoltz
 
         public override void Stop()
         {
-            //Styx.BotEvents.Profile.OnNewOuterProfileLoaded -= new BotEvents.Profile.NewProfileLoadedDelegate(Profile_OnNewOuterProfileLoaded);
-            //Styx.Logic.Profiles.Profile.OnUnknownProfileElement -= new EventHandler<UnknownProfileElementEventArgs>(Profile_OnUnknownProfileElement);
             IsRunning = false;
             Debug("Stop Called");
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
-            //Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
-            //Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-            //Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
-            //Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
-            //Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
             if (SecondaryBot != null)
                 SecondaryBot.Stop();
         }

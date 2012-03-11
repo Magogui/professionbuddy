@@ -140,10 +140,5 @@ namespace HighVoltz
             get { return ContainsKey(index) ? base[index] : 0; }
             set { base[index] = value; }
         }
-        //new public int this[int index]
-        //{
-        //    get { return ContainsKey((uint)index) ? base[index] : 0; }
-        //    set { base[index] = value; }
-        //}
     }
 }
