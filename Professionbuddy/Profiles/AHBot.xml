@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
-  <ChangeBotAction BotName="Custom Bot" />
+  <ChangeBotAction BotName="Combat Bot" />
   <Settings DefaultValue="false" Type="Boolean" Name="Cancel Undercut Auctions" Summary="if set to true if you want to cancel all auctions that are undercutted" Category="Misc" Global="False" Hidden="False" />
   <CustomAction Code="var1 = true;" />
   <CustomAction Code="var2 = DateTime.Now;" />

@@ -1,4 +1,6 @@
 ﻿//!CompilerOption:Optimize:On
+// QmUgY29vbCBhbmQganVzdCBidXkgdGhlIGJvdA==
+//!CompilerOption:AddRef:Remoting.dll
 // Professionbuddy botbase by HighVoltz
 
 using System;
