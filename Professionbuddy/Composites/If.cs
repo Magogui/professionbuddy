@@ -15,7 +15,7 @@ using HighVoltz.Dynamic;
 namespace HighVoltz.Composites
 {
 
-    public class If : GroupComposite, ICSharpCode, IPBComposite
+    public class If : GroupComposite, HighVoltz.Dynamic.ICSharpCode, IPBComposite
     {
         #region Properties
         [XmlIgnore]

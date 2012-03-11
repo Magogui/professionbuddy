@@ -1,8 +1,8 @@
 ﻿//!CompilerOption:Optimize:On
 // QmUgY29vbCBhbmQganVzdCBidXkgdGhlIGJvdA==
-//!CompilerOption:AddRef:Remoting.dll
+//\u0021\u0043\u006F\u006D\u0070\u0069\u006C\u0065\u0072\u004F\u0070\u0074\u0069\u006F\u006E\u003A\u0041\u0064\u0064\u0052\u0065\u0066\u003A\u0052\u0065\u006D\u006F\u0074\u0069\u006E\u0067\u002E\u0064\u006C\u006C
 // Professionbuddy botbase by HighVoltz
-
+ 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
