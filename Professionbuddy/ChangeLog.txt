@@ -1,3 +1,8 @@
+Professionbuddy 1.400
+* Fishing1-525 works once again.
+* [ProfessionSkill].Level nolonger includes skill bonus amount
+* Added [ProfessionSkill].Bonus. This returns the amount of skill points added to a skill level via items or buffs
+
 Professionbuddy 1.240
 * All 'Count' 'Amount' or 'Repeat' properties now accept any C# expression that returns the correct data type (System.Int32). This includes variables,function calls and more.
 * Multiprofile - the banker will mail the farmer gold if farmer has less than 200g

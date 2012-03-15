@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
@@ -24,6 +25,7 @@ namespace HighVoltz.Composites
             // ReSharper restore DoNotCallOverridableMethodsInConstructor
         }
 
+        
         string _lastError = "";
         void CompileErrorPropertyChanged(object sender, MetaPropArgs e)
         {

@@ -267,7 +267,7 @@ namespace HighVoltz.Dynamic
                 get
                 {
                     _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
-                    return (uint)_wowSkill.CurrentValue + _wowSkill.Bonus;
+                    return (uint)_wowSkill.CurrentValue;
                 }
             }
             public uint MaxLevel
@@ -276,6 +276,14 @@ namespace HighVoltz.Dynamic
                 {
                     _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
                     return (uint)_wowSkill.MaxValue;
+                }
+            }
+            public uint Bonus
+            {
+                get
+                {
+                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    return (uint)_wowSkill.Bonus;
                 }
             }
             static public uint CanRepeatNum(uint recipeID)

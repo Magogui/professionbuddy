@@ -54,7 +54,7 @@ namespace HighVoltz
             if (BotPoi.Current.Type != PoiType.None)
                 BotPoi.Clear();
             if (!ObjectManager.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
-                Mount.MountUp();
+                Mount.MountUp(()=> point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
             Navigator.MoveTo(point);

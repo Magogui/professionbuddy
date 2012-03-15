@@ -743,8 +743,18 @@ namespace HighVoltz
             return list;
         }
 
+        bool IsFacing(float dirInRadians)
+        {
+            var facePoint = WoWPoint.RayCast(StyxWoW.Me.Location, dirInRadians, 1f);
+            return WoWMathHelper.IsFacing(Me.Location, Me.RenderFacing, facePoint,0.5f);
+        }
+
         void LoadProtectedItems()
         {
+            //WoWMathHelper.IsFacing(Me.Location,Me.RenderFacing,)
+            WoWMovement.Move(WoWMovement.MovementDirection.Descend);
+            WoWMovement.MoveStop(WoWMovement.MovementDirection.JumpAscend);
+            WoWMovement.ClickToMove(0, WoWPoint.RayCast(Me.Location, 4.738818f, 1f), WoWMovement.ClickToMoveType.Face);
             List<uint> tempList = null;
             string path = Path.Combine(BotPath, "Protected Items.xml");
             if (File.Exists(path))
