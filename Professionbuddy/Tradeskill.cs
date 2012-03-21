@@ -24,8 +24,6 @@ namespace HighVoltz
     {
         // needs to be moved to offsets enum
 
-        //private static uint TradeskillOffset = 0xA92550; // wow 4.1
-        //static uint TradeskillOffset = 0xB0D5E8; // wow 4.2
         internal struct SkillOffset
         {
             public const uint Guid = 0; // guid of player who's tradeskill is shown, could be someone besides localplayer.
@@ -57,29 +55,6 @@ namespace HighVoltz
             public const uint IsLinked = 0x58; // 0x0001 = any linked profession, 0x0010 = guild profession, though this is bugged on live and not working
             public const uint LoadedSkill = 0x5C; // skill id, presists after tradeskill frame is closed
 
-            //public const uint NewUnknown1 = 0x60;      // (Added WoW 4.2) hmm what could this be? cba to check 
-            //public const uint NewUnknown2 = 0x64;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown3 = 0x68;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown4 = 0x6C;      // (Added WoW 4.2) hmm what could this be? cba to check
-
-            //public const uint NewUnknown5 = 0x70;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown6 = 0x74;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown7 = 0x78;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown8 = 0x7C;      // (Added WoW 4.2) hmm what could this be? cba to check
-
-            //public const uint NewUnknown9 = 0x80;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown10 = 0x84;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown11 = 0x88;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown12 = 0x8C;      // (Added WoW 4.2) hmm what could this be? cba to check
-
-            //public const uint NewUnknown13 = 0x90;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown14 = 0x94;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown15 = 0x98;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown16 = 0x9C;      // (Added WoW 4.2) hmm what could this be? cba to check
-
-            //public const uint NewUnknown17 = 0xA0;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown18 = 0xA4;      // (Added WoW 4.2) hmm what could this be? cba to check
-            //public const uint NewUnknown19 = 0xA8;      // (Added WoW 4.2) hmm what could this be? cba to check
             public const uint Unknown3 = 0xAC; // related to recipeArraySize, often same number
 
             public const uint RecipeArraySize = 0xB0; // use TotalRecipeCount instead since there can be linkering recipes from a previously loaded tradeskill
