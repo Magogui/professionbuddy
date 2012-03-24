@@ -4,16 +4,10 @@
   <Settings DefaultValue="true" Type="Boolean" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." Category="Profile" Global="False" Hidden="False" />
   <Settings DefaultValue="true" Type="Boolean" Name="Herb" Summary="Set to true if you want to level herbalism" Category="Profile" Global="False" Hidden="False" />
   <Settings DefaultValue="true" Type="Boolean" Name="Mining" Summary="Set to true if you want to level Mining" Category="Profile" Global="False" Hidden="False" />
-  <Settings DefaultValue="false" Type="Boolean" Name="UseFakeSkills" Summary="used for debuging only.." Category="Debug" Global="False" Hidden="False" />
-  <Settings DefaultValue="0" Type="Int32" Name="Fake Herbalism Level" Summary="used for debuging only.." Category="Debug" Global="False" Hidden="False" />
-  <Settings DefaultValue="0" Type="Int32" Name="Fake Herbalism MaxLevel" Summary="used for debuging only.." Category="Debug" Global="False" Hidden="False" />
-  <Settings DefaultValue="0" Type="Int32" Name="Fake Mining Level" Summary="used for debuging only.." Category="Debug" Global="False" Hidden="False" />
-  <Settings DefaultValue="0" Type="Int32" Name="Fake Mining MaxLevel" Summary="used for debuging only.." Category="Debug" Global="False" Hidden="False" />
   <Declaration Code="bool mining,herb;" />
   <Declaration Code="int MiningLevel,MiningMaxLevel,HerbLevel,HerbMaxLevel, LowestMinLevel;" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Made by HighVoltz&quot;);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining: {0}&quot;,Settings[&quot;Mining&quot;]);" />
-  <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;UseFakeSkills: {0}&quot;,Settings[&quot;UseFakeSkills&quot;]);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.Level: {0}&quot;,Mining.Level);" />
   <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Mining.MaxLevel: {0}&quot;,Mining.MaxLevel);" />
@@ -38,10 +32,10 @@
     <ChangeBotAction BotName="Gatherbuddy2" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
-    <CustomAction Code="MiningLevel = (bool)Settings[&quot;UseFakeSkills&quot;] ? (int)Settings[&quot;Fake Mining Level&quot;] : (int)Mining.Level;" />
-    <CustomAction Code="MiningMaxLevel = (bool)Settings[&quot;UseFakeSkills&quot;] ? (int)Settings[&quot;Fake Mining MaxLevel&quot;] : (int)Mining.MaxLevel;" />
-    <CustomAction Code="HerbLevel = (bool)Settings[&quot;UseFakeSkills&quot;] ? (int)Settings[&quot;Fake Herbalism Level&quot;] :(int)Herbalism.Level;" />
-    <CustomAction Code="HerbMaxLevel = (bool)Settings[&quot;UseFakeSkills&quot;] ? (int)Settings[&quot;Fake Herbalism MaxLevel&quot;] : (int)Herbalism.MaxLevel;" />
+    <CustomAction Code="MiningLevel = (int)Mining.Level;" />
+    <CustomAction Code="MiningMaxLevel = (int)Mining.MaxLevel;" />
+    <CustomAction Code="HerbLevel = (int)Herbalism.Level;" />
+    <CustomAction Code="HerbMaxLevel =  (int)Herbalism.MaxLevel;" />
     <!--disable gathering of mines-->
     <CustomAction Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp;&#xD;&#xA;   (MiningLevel == MiningMaxLevel || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; MiningMaxLevel &gt; HerbMaxLevel ))) ||&#xD;&#xA; !(bool)Settings[&quot;Mining&quot;])&#xD;&#xA;{&#xD;&#xA;    mining = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;&#xD;&#xA;}" />
     <!--enable gathering of mines-->
