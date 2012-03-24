@@ -340,7 +340,7 @@ namespace HighVoltz
                 Debug("Pulsing Tradeskills from OnSpellsChanged");
                 foreach (TradeSkill ts in TradeSkillList)
                 {
-                    TradeSkillFrame.Instance.UpdateTradeSkill(ts, true);
+                    ts.Update();
                 }
                 if (MainForm.IsValid)
                 {
@@ -522,17 +522,17 @@ namespace HighVoltz
             string defaultStringsPath = Path.Combine(directory, "Strings.xml");
             LoadStringsFromXml(defaultStringsPath);
             // file that includes language and country/region
-            string langAndCountryFile = Path.Combine(directory,"Strings."+Thread.CurrentThread.CurrentUICulture.Name+".xml");
+            string langAndCountryFile = Path.Combine(directory, "Strings." + Thread.CurrentThread.CurrentUICulture.Name + ".xml");
             // file that includes language only;
-            string langOnlyFile = Path.Combine(directory,"Strings."+Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName+".xml");
+            string langOnlyFile = Path.Combine(directory, "Strings." + Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName + ".xml");
             if (File.Exists(langAndCountryFile))
             {
-                Log("Loading strings for language {0}",Thread.CurrentThread.CurrentUICulture.Name);
+                Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.Name);
                 LoadStringsFromXml(langAndCountryFile);
             }
             else if (File.Exists(langOnlyFile))
             {
-                Log("Loading strings for language {0}",Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName);
+                Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName);
                 LoadStringsFromXml(langOnlyFile);
             }
         }
@@ -550,7 +550,7 @@ namespace HighVoltz
         {
             get
             {
-                IEnumerable<WoWSkill> skillList = from skill in TradeSkillFrame.SupportedSkills
+                IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
                                                   where skill != SkillLine.Archaeology && Me.GetSkill(skill).MaxValue > 0
                                                   select Me.GetSkill(skill);
                 return skillList.ToArray();
@@ -559,35 +559,56 @@ namespace HighVoltz
 
         public void LoadTradeSkills()
         {
-            try
+            new System.Threading.Timer(state =>
             {
-                lock (TradeSkillList)
+                try
                 {
-                    TradeSkillList.Clear();
-                    foreach (WoWSkill skill in SupportedTradeSkills)
+                    lock (TradeSkillList)
                     {
-                        Log("Adding TradeSkill {0}", skill.Name);
-                        TradeSkill ts = TradeSkillFrame.Instance.GetTradeSkill((SkillLine)skill.Id, true);
-                        if (ts != null)
+                        TradeSkillList.Clear();
+                        //IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
+                        //                                  select Me.GetSkill(skill);
+
+                        //foreach (WoWSkill skill in skillList)
+                        //{
+                        //    Log("Adding TradeSkill {0}", skill.Name);
+                        //    TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
+                        //    if (ts != null)
+                        //    {
+                        //        TradeSkillList.Add(ts);
+                        //    }
+                        //    else
+                        //    {
+                        //        IsTradeSkillsLoaded = false;
+                        //        Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
+                        //        return;
+                        //    }
+                        //}
+                        foreach (WoWSkill skill in SupportedTradeSkills)
                         {
-                            TradeSkillList.Add(ts);
-                        }
-                        else
-                        {
-                            IsTradeSkillsLoaded = false;
-                            Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
-                            return;
+                            Log("Adding TradeSkill {0}", skill.Name);
+                            TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
+                            if (ts != null)
+                            {
+                                TradeSkillList.Add(ts);
+                            }
+                            else
+                            {
+                                IsTradeSkillsLoaded = false;
+                                Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
+                                return;
+                            }
                         }
                     }
+                    Log("Done Loading Tradeskills.");
+                    IsTradeSkillsLoaded = true;
+                    if (OnTradeSkillsLoaded != null)
+                    {
+                        OnTradeSkillsLoaded(this, null);
+                    }
                 }
-                Log("Done Loading Tradeskills.");
-                IsTradeSkillsLoaded = true;
-                if (OnTradeSkillsLoaded != null)
-                {
-                    OnTradeSkillsLoaded(this, null);
-                }
-            }
-            catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
+                catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
+            }, null, 0, System.Threading.Timeout.Infinite);
         }
 
         public void UpdateMaterials()
@@ -825,7 +846,9 @@ namespace HighVoltz
                 Logging.Write("PB: " + format, args);
             }
         }
-
+        public static string R = @"
+//!CompilerOption:AddRef:Remoting.dll
+";
         #endregion
 
     }

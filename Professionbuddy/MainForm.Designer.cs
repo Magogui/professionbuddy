@@ -45,6 +45,7 @@
             this.ActionsTab = new System.Windows.Forms.TabPage();
             this.tableLayoutActionList = new System.Windows.Forms.TableLayoutPanel();
             this.ActionGridView = new System.Windows.Forms.DataGridView();
+            this.ActionsColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.HelpTextBox = new System.Windows.Forms.RichTextBox();
             this.TradeSkillTab = new System.Windows.Forms.TabPage();
             this.tableLayoutPanelTradeSkil = new System.Windows.Forms.TableLayoutPanel();
@@ -74,7 +75,6 @@
             this.NeedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BagsColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BankColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActionsColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MainSplitContainer.Panel1.SuspendLayout();
             this.MainSplitContainer.Panel2.SuspendLayout();
             this.MainSplitContainer.SuspendLayout();
@@ -219,7 +219,7 @@
             // 
             this.ProfileTab.Controls.Add(this.tableLayoutPanelProfiles);
             this.ProfileTab.Location = new System.Drawing.Point(4, 25);
-            this.ProfileTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ProfileTab.Margin = new System.Windows.Forms.Padding(4);
             this.ProfileTab.Name = "ProfileTab";
             this.ProfileTab.Size = new System.Drawing.Size(348, 618);
             this.ProfileTab.TabIndex = 2;
@@ -234,7 +234,7 @@
             this.tableLayoutPanelProfiles.Controls.Add(this.LoadProfileButton, 0, 1);
             this.tableLayoutPanelProfiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelProfiles.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanelProfiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanelProfiles.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanelProfiles.Name = "tableLayoutPanelProfiles";
             this.tableLayoutPanelProfiles.RowCount = 2;
             this.tableLayoutPanelProfiles.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -248,7 +248,7 @@
             this.ProfileListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ProfileListView.HideSelection = false;
             this.ProfileListView.Location = new System.Drawing.Point(4, 4);
-            this.ProfileListView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ProfileListView.Margin = new System.Windows.Forms.Padding(4);
             this.ProfileListView.MultiSelect = false;
             this.ProfileListView.Name = "ProfileListView";
             this.ProfileListView.ShowGroups = false;
@@ -262,7 +262,7 @@
             // 
             this.LoadProfileButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LoadProfileButton.Location = new System.Drawing.Point(4, 585);
-            this.LoadProfileButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.LoadProfileButton.Margin = new System.Windows.Forms.Padding(4);
             this.LoadProfileButton.Name = "LoadProfileButton";
             this.LoadProfileButton.Size = new System.Drawing.Size(340, 29);
             this.LoadProfileButton.TabIndex = 25;
@@ -292,7 +292,7 @@
             this.tableLayoutActionList.Controls.Add(this.HelpTextBox, 0, 1);
             this.tableLayoutActionList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutActionList.Location = new System.Drawing.Point(0, 4);
-            this.tableLayoutActionList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutActionList.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutActionList.Name = "tableLayoutActionList";
             this.tableLayoutActionList.RowCount = 2;
             this.tableLayoutActionList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 74.08907F));
@@ -313,7 +313,7 @@
             this.ActionGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActionGridView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.ActionGridView.Location = new System.Drawing.Point(4, 4);
-            this.ActionGridView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ActionGridView.Margin = new System.Windows.Forms.Padding(4);
             this.ActionGridView.MultiSelect = false;
             this.ActionGridView.Name = "ActionGridView";
             this.ActionGridView.RowHeadersVisible = false;
@@ -326,12 +326,18 @@
             this.ActionGridView.SelectionChanged += new System.EventHandler(this.ActionGridViewSelectionChanged);
             this.ActionGridView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ActionGridViewMouseMove);
             // 
+            // ActionsColumn
+            // 
+            this.ActionsColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ActionsColumn.HeaderText = "Actions";
+            this.ActionsColumn.Name = "ActionsColumn";
+            // 
             // HelpTextBox
             // 
             this.HelpTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.HelpTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.HelpTextBox.Location = new System.Drawing.Point(4, 455);
-            this.HelpTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.HelpTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.HelpTextBox.Name = "HelpTextBox";
             this.HelpTextBox.ReadOnly = true;
             this.HelpTextBox.Size = new System.Drawing.Size(336, 151);
@@ -360,7 +366,7 @@
             this.tableLayoutPanelTradeSkil.Controls.Add(this.IngredientsView, 0, 2);
             this.tableLayoutPanelTradeSkil.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanelTradeSkil.Location = new System.Drawing.Point(1, 1);
-            this.tableLayoutPanelTradeSkil.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanelTradeSkil.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanelTradeSkil.Name = "tableLayoutPanelTradeSkil";
             this.tableLayoutPanelTradeSkil.RowCount = 3;
             this.tableLayoutPanelTradeSkil.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -427,7 +433,7 @@
             // 
             this.TradeSkillTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TradeSkillTabControl.Location = new System.Drawing.Point(4, 4);
-            this.TradeSkillTabControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.TradeSkillTabControl.Margin = new System.Windows.Forms.Padding(4);
             this.TradeSkillTabControl.Multiline = true;
             this.TradeSkillTabControl.Name = "TradeSkillTabControl";
             this.TradeSkillTabControl.Padding = new System.Drawing.Point(0, 0);
@@ -452,7 +458,7 @@
             this.IngredientsView.Dock = System.Windows.Forms.DockStyle.Top;
             this.IngredientsView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.IngredientsView.Location = new System.Drawing.Point(4, 446);
-            this.IngredientsView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.IngredientsView.Margin = new System.Windows.Forms.Padding(4);
             this.IngredientsView.MultiSelect = false;
             this.IngredientsView.Name = "IngredientsView";
             this.IngredientsView.ReadOnly = true;
@@ -494,9 +500,9 @@
             // 
             this.TabPageProfile.Controls.Add(this.ActionSplitContainer);
             this.TabPageProfile.Location = new System.Drawing.Point(4, 25);
-            this.TabPageProfile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.TabPageProfile.Margin = new System.Windows.Forms.Padding(4);
             this.TabPageProfile.Name = "TabPageProfile";
-            this.TabPageProfile.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.TabPageProfile.Padding = new System.Windows.Forms.Padding(4);
             this.TabPageProfile.Size = new System.Drawing.Size(482, 618);
             this.TabPageProfile.TabIndex = 0;
             this.TabPageProfile.Text = "Profile";
@@ -506,7 +512,7 @@
             // 
             this.ActionSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActionSplitContainer.Location = new System.Drawing.Point(4, 4);
-            this.ActionSplitContainer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ActionSplitContainer.Margin = new System.Windows.Forms.Padding(4);
             this.ActionSplitContainer.Name = "ActionSplitContainer";
             this.ActionSplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -543,7 +549,7 @@
             this.ActionGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ActionGrid.HelpVisible = false;
             this.ActionGrid.Location = new System.Drawing.Point(0, 0);
-            this.ActionGrid.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ActionGrid.Margin = new System.Windows.Forms.Padding(4);
             this.ActionGrid.Name = "ActionGrid";
             this.ActionGrid.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
             this.ActionGrid.Size = new System.Drawing.Size(474, 160);
@@ -642,34 +648,28 @@
             // 
             this.NeedColumn.FillWeight = 35F;
             this.NeedColumn.HeaderText = "Need";
-            this.NeedColumn.MinimumWidth = 35;
+            this.NeedColumn.MinimumWidth = 50;
             this.NeedColumn.Name = "NeedColumn";
             this.NeedColumn.ReadOnly = true;
-            this.NeedColumn.Width = 35;
+            this.NeedColumn.Width = 50;
             // 
             // BagsColumn
             // 
             this.BagsColumn.FillWeight = 35F;
             this.BagsColumn.HeaderText = "Bags";
-            this.BagsColumn.MinimumWidth = 35;
+            this.BagsColumn.MinimumWidth = 50;
             this.BagsColumn.Name = "BagsColumn";
             this.BagsColumn.ReadOnly = true;
-            this.BagsColumn.Width = 35;
+            this.BagsColumn.Width = 50;
             // 
             // BankColumn
             // 
             this.BankColumn.FillWeight = 35F;
             this.BankColumn.HeaderText = "Bank";
-            this.BankColumn.MinimumWidth = 35;
+            this.BankColumn.MinimumWidth = 50;
             this.BankColumn.Name = "BankColumn";
             this.BankColumn.ReadOnly = true;
-            this.BankColumn.Width = 35;
-            // 
-            // ActionsColumn
-            // 
-            this.ActionsColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.ActionsColumn.HeaderText = "Actions";
-            this.ActionsColumn.Name = "ActionsColumn";
+            this.BankColumn.Width = 50;
             // 
             // MainForm
             // 
@@ -679,10 +679,10 @@
             this.ClientSize = new System.Drawing.Size(859, 692);
             this.Controls.Add(this.MainSplitContainer);
             this.DoubleBuffered = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(874, 728);
             this.Name = "MainForm";
-            this.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Padding = new System.Windows.Forms.Padding(4);
             this.Text = "Profession Buddy";
             this.Load += new System.EventHandler(this.MainFormLoad);
             this.ResizeBegin += new System.EventHandler(this.MainFormResizeBegin);
@@ -762,11 +762,11 @@
         private System.Windows.Forms.ToolStripButton toolStripAddBtn;
         private System.Windows.Forms.ToolStripButton toolStripReloadBtn;
         private System.Windows.Forms.ToolStripButton toolStripMaterials;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ActionsColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IngredientsColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn NeedColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn BagsColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn BankColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ActionsColumn;
     }
 }
 

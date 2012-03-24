@@ -82,7 +82,7 @@ namespace HighVoltz
             // populate the controls with data
             CategoryCombo.Items.Add(""); // blank line will show all headers...
 
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].Recipes)
+            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
             {
                 if (!CategoryCombo.Items.Contains(kv.Value.Header))
                 {
@@ -120,7 +120,7 @@ namespace HighVoltz
                 if (TradeDataView.SelectedRows.Count > 0)
                 {
                     TradeSkillRecipeCell cell = (TradeSkillRecipeCell)TradeDataView.SelectedRows[0].Cells[0].Value;
-                    Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].Recipes[cell.RecipeID];
+                    Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].KnownRecipes[cell.RecipeID];
                     DataGridViewRow row = new DataGridViewRow();
                     foreach (Ingredient ingred in _recipe.Ingredients)
                     {
@@ -156,7 +156,7 @@ namespace HighVoltz
             string filter = FilterText.Text.ToUpper();
             bool noFilter = string.IsNullOrEmpty(FilterText.Text);
             bool showAllCategories = string.IsNullOrEmpty(CategoryCombo.Text);
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].Recipes)
+            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
             {
                 if ((noFilter || kv.Value.Name.ToUpper().Contains(filter)) &&
                     (showAllCategories || kv.Value.Header == CategoryCombo.Text))
@@ -180,14 +180,14 @@ namespace HighVoltz
 
         public string RecipeName
         {
-            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].Recipes[RecipeID].Name; }
+            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].KnownRecipes[RecipeID].Name; }
         }
 
         public uint RecipeID { get; private set; }
 
         public Recipe Recipe
         {
-            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].Recipes[RecipeID]; }
+            get { return Professionbuddy.Instance.TradeSkillList[TradeSkillIndex].KnownRecipes[RecipeID]; }
         }
 
         public int TradeSkillIndex { get; private set; }

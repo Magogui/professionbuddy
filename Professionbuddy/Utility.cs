@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Styx;
 using Styx.Logic;
 using Styx.Logic.Pathing;
 using Styx.Logic.POI;
 using System.Linq;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
 using System.Globalization;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
@@ -45,6 +47,18 @@ namespace HighVoltz
                 }
                 return sb.ToString();
             }
+        }
+        /// <summary>
+        /// Returns the localized name of an item that is cached
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static string GetItemCacheName(uint id)
+        {
+            var cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
+            if (cache != null)
+                return ObjectManager.Wow.Read<string>(cache.ItemSparse.Name);
+            return null;
         }
 
         static WoWPoint _lastPoint = WoWPoint.Zero;

@@ -272,7 +272,7 @@ namespace HighVoltz
                     foreach (DataGridViewRow row in rowCollection)
                     {
                         var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
-                        Recipe recipe = _pb.TradeSkillList[tv.TradeIndex].Recipes[cell.RecipeID];
+                        Recipe recipe = _pb.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
                         int repeat;
                         int.TryParse(toolStripAddNum.Text, out repeat);
                         CastSpellAction.RepeatCalculationType repeatType = CastSpellAction.RepeatCalculationType.Specific;
@@ -818,6 +818,8 @@ namespace HighVoltz
             IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
                                         where (typeof(IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
                                         select t;
+
+                
             foreach (Type type in pbTypes)
             {
                 var pa = (IPBComposite)Activator.CreateInstance(type);
@@ -1067,6 +1069,5 @@ namespace HighVoltz
 
         #endregion
     }
-
         #endregion
 }

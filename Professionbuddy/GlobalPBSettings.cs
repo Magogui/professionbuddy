@@ -19,9 +19,8 @@ namespace HighVoltz
         [Setting, DefaultValue(0)]
         public int CurrentRevision { get; set; }
 
-
         [Setting, DefaultValue(0u)]
-        public uint TradeskillFrameOffset { get; set; }
+        public uint KnownSpellsPtr { get; set; }
 
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }

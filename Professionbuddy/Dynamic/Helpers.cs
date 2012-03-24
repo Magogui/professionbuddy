@@ -288,14 +288,14 @@ namespace HighVoltz.Dynamic
             }
             static public uint CanRepeatNum(uint recipeID)
             {
-                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(recipeID) select ts.Recipes[recipeID].CanRepeatNum).FirstOrDefault();
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.KnownRecipes.ContainsKey(recipeID) select ts.KnownRecipes[recipeID].CanRepeatNum).FirstOrDefault();
             }
 
             static public bool CanCraft(uint recipeID)
             {
                 return (from ts in Professionbuddy.Instance.TradeSkillList
-                        where ts.Recipes.ContainsKey(recipeID)
-                        select (ts.Recipes[recipeID].Tools.Count(t => t.HasTool) == ts.Recipes[recipeID].Tools.Count) && ts.Recipes[recipeID].CanRepeatNum > 0).FirstOrDefault();
+                        where ts.KnownRecipes.ContainsKey(recipeID)
+                        select (ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count) && ts.KnownRecipes[recipeID].CanRepeatNum > 0).FirstOrDefault();
             }
 
             static public bool HasMats(uint recipeID)
@@ -304,12 +304,12 @@ namespace HighVoltz.Dynamic
             }
             static public bool HasRecipe(uint recipeID)
             {
-                return Professionbuddy.Instance.TradeSkillList.Any(ts => ts.Recipes.ContainsKey(recipeID));
+                return Professionbuddy.Instance.TradeSkillList.Any(ts => ts.KnownRecipes.ContainsKey(recipeID));
             }
 
             static public bool HasTools(uint recipeID)
             {
-                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.Recipes.ContainsKey(recipeID) select ts.Recipes[recipeID].Tools.Count(t => t.HasTool) == ts.Recipes[recipeID].Tools.Count).FirstOrDefault();
+                return (from ts in Professionbuddy.Instance.TradeSkillList where ts.KnownRecipes.ContainsKey(recipeID) select ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count).FirstOrDefault();
             }
         }
         public static TradeskillHelper Alchemy { get; private set; }
