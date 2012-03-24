@@ -633,7 +633,7 @@ namespace HighVoltz
                     {
                         foreach (CastSpellAction ca in castSpellList)
                         {
-                            if (ca.IsRecipe)
+                            if (ca.IsRecipe && ca.RepeatType != CastSpellAction.RepeatCalculationType.Craftable)
                             {
                                 foreach (var ingred in ca.Recipe.Ingredients)
                                 {
