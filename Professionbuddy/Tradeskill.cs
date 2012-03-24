@@ -310,8 +310,6 @@ namespace HighVoltz
                     }
                     //Logging.Write(entry.ToString());
                 }
-                tradeSkill.InitIngredientList();
-                tradeSkill.InitToolList();
             }
             //Logging.Write("it took {0} ms to load {1}", sw.ElapsedMilliseconds, skillLine);
             return tradeSkill;
