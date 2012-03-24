@@ -127,11 +127,12 @@ namespace HighVoltz
 
         void AddRecipe(Recipe recipe)
         {
-            if (KnownRecipes.ContainsKey(recipe.SpellId))
-                return;
-            Recipes.Add(recipe.SpellId, recipe);
-            recipe.InitIngredients();
-            recipe.InitTools();
+            if (!Recipes.ContainsKey(recipe.SpellId))
+            {
+                Recipes.Add(recipe.SpellId, recipe);
+                recipe.InitIngredients();
+                recipe.InitTools();
+            }
         }
         /// <summary>
         /// Amount of Bonus the player has to the Tradeskill 
@@ -294,7 +295,7 @@ namespace HighVoltz
             using (new FrameLock())
             {
                 WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
-               // sw.Start();
+                // sw.Start();
                 tradeSkill = new TradeSkill(wowSkill);
 
                 var entries = tradeSkill.GetSkillLineAbilityEntries();
@@ -536,7 +537,7 @@ namespace HighVoltz
                             {
                                 stringPtr = dbRow.GetField<uint>(11);
                                 if (stringPtr != 0)
-                                    _header  = ObjectManager.Wow.Read<string>(stringPtr);
+                                    _header = ObjectManager.Wow.Read<string>(stringPtr);
                             }
                             break;
                         }
