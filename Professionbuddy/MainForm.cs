@@ -415,8 +415,9 @@ namespace HighVoltz
 
         private void ToolStripReloadBtnClick(object sender, EventArgs e)
         {
+            _pb.OnTradeSkillsLoaded += _pb.Professionbuddy_OnTradeSkillsLoaded;
             _pb.LoadTradeSkills();
-            Instance.InitTradeSkillTab();
+
         }
 
         private void ToolStripBotComboSelectedIndexChanged(object sender, EventArgs e)

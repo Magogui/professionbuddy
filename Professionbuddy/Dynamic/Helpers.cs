@@ -140,12 +140,8 @@ namespace HighVoltz.Dynamic
                         Thread.Sleep(2000);
                     }
                     TreeRoot.Start();
+                    Professionbuddy.Instance.OnTradeSkillsLoaded += Professionbuddy.Instance.Professionbuddy_OnTradeSkillsLoaded;
                     Professionbuddy.Instance.LoadTradeSkills();
-                    if (MainForm.IsValid)
-                    {
-                        MainForm.Instance.InitTradeSkillTab();
-                        MainForm.Instance.InitTradeSkillTab();
-                    }
                     _isSwitchingToons = false;
                     Professionbuddy.Instance.IsRunning = true;
                 }) { IsBackground = true }.Start();

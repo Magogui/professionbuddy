@@ -291,25 +291,32 @@ namespace HighVoltz
             if (!TreeRoot.IsRunning)
                 ObjectManager.Update();
             //Stopwatch sw = new Stopwatch();
-            TradeSkill tradeSkill;
-            using (new FrameLock())
+            TradeSkill tradeSkill = null;
+            try
             {
-                WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
-                // sw.Start();
-                tradeSkill = new TradeSkill(wowSkill);
+                //using (new FrameLock())
+                //{
+                    WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
+                    // sw.Start();
+                    tradeSkill = new TradeSkill(wowSkill);
 
-                var entries = tradeSkill.GetSkillLineAbilityEntries();
-                foreach (var entry in entries)
-                {
-                    // check if the entry is a recipe
-                    if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0)
+                    var entries = tradeSkill.GetSkillLineAbilityEntries();
+                    foreach (var entry in entries)
                     {
-                        var recipe = new Recipe(tradeSkill, entry);
-                        recipe.UpdateHeader();
-                        tradeSkill.AddRecipe(recipe);
+                        // check if the entry is a recipe
+                        if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0)
+                        {
+                            var recipe = new Recipe(tradeSkill, entry);
+                            recipe.UpdateHeader();
+                            tradeSkill.AddRecipe(recipe);
+                        }
+                        //Logging.Write(entry.ToString());
                     }
-                    //Logging.Write(entry.ToString());
-                }
+                //}
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteException(ex);
             }
             //Logging.Write("it took {0} ms to load {1}", sw.ElapsedMilliseconds, skillLine);
             return tradeSkill;

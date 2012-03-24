@@ -296,9 +296,8 @@ namespace HighVoltz
                 if (changed)
                 {
                     Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
+                    OnTradeSkillsLoaded += Professionbuddy_OnTradeSkillsLoaded;
                     LoadTradeSkills();
-                    if (MainForm.IsValid)
-                        MainForm.Instance.InitTradeSkillTab();
                 }
                 else
                 {
@@ -317,7 +316,15 @@ namespace HighVoltz
             catch (Exception ex) { Err(ex.ToString()); }
         }
 
+        public void Professionbuddy_OnTradeSkillsLoaded(object sender, System.EventArgs e)
+        {
+            if (MainForm.IsValid)
+                MainForm.Instance.InitTradeSkillTab();
+            OnTradeSkillsLoaded -= Professionbuddy_OnTradeSkillsLoaded;
+        }
         #endregion
+
+        
 
         #region OnSpellsChanged
 
