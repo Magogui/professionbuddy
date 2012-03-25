@@ -258,13 +258,13 @@ namespace HighVoltz
                 ObjectManager.Update();
 
             WoWSkill = ObjectManager.Me.GetSkill(SkillLine);
-            var oldList = Recipes;
+            var oldList = KnownRecipes;
             // cycle through entire recipe list and check update the 'HasRecipe' property
-            foreach (var knownRecipe in KnownRecipes)
+            foreach (var recipe in Recipes)
             {
-                knownRecipe.Value.Update();
+                recipe.Value.Update();
             }
-            var newRecipies = Recipes.Except(oldList);
+            var newRecipies = KnownRecipes.Except(oldList);
             foreach (var kv in newRecipies)
             {
                 Professionbuddy.Log("Leaned a new recipe {0}", kv.Value.Name);

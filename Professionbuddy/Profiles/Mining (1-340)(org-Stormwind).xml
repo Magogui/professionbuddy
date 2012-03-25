@@ -10,7 +10,7 @@
         <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.1" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.1" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0,0,0" />
+        <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="MetalStone" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.1" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       </If>
     </If>
     <If Condition="Mining.MaxLevel == 0" IgnoreCanRun="False">
@@ -21,6 +21,7 @@
         <TrainSkillAction NpcEntry="3357" Location="0, 0, 0" />
       </If>
     </If>
+    <!--Copper-->
     <If Condition="Mining.Level &lt; 50" IgnoreCanRun="False">
       <If Condition="CanCraft(2657)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -38,7 +39,8 @@
         <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 50 &amp;&amp; Mining.Level &lt; 115" IgnoreCanRun="False">
+    <!--Bronze-->
+    <If Condition="Mining.Level &gt;= 50 &amp;&amp; Mining.Level &lt; 90" IgnoreCanRun="False">
       <If Condition="!HasRecipe(2659) || !HasRecipe(3304)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -70,7 +72,8 @@
         </If>
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 115 &amp;&amp; Mining.Level &lt; 125" IgnoreCanRun="False">
+    <!--Silver-->
+    <If Condition="Mining.Level &gt;= 90 &amp;&amp; Mining.Level &lt; 100" IgnoreCanRun="False">
       <If Condition="!HasRecipe(2658)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -95,7 +98,8 @@
         <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 125 &amp;&amp; Mining.Level &lt; 155" IgnoreCanRun="False">
+    <!--Iron-->
+    <If Condition="Mining.Level &gt;= 100 &amp;&amp; Mining.Level &lt; 140" IgnoreCanRun="False">
       <If Condition="!HasRecipe(3307)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -120,7 +124,8 @@
         <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 155 &amp;&amp; Mining.Level &lt; 175" IgnoreCanRun="False">
+    <!--Gold-->
+    <If Condition="Mining.Level &gt;= 140 &amp;&amp; Mining.Level &lt; 150" IgnoreCanRun="False">
       <If Condition="!HasRecipe(3308)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -145,7 +150,8 @@
         <BuyItemFromAhAction ItemListType="Item" ItemID="2776" MaxBuyout="10g0s0c" Amount="10" BuyAdditively="True" AutoFindAh="True" BidOnItem="False" Location="0, 0, 0" />
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 175 &amp;&amp; Mining.Level &lt; 230" IgnoreCanRun="False">
+    <!--Mithril-->
+    <If Condition="Mining.Level &gt;= 150 &amp;&amp; Mining.Level &lt; 200" IgnoreCanRun="False">
       <If Condition="!HasRecipe(10097)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -178,7 +184,8 @@
         <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
       </If>
     </If>
-    <If Condition="Mining.Level &gt;= 230 &amp;&amp; Mining.Level &lt; 275" IgnoreCanRun="False">
+    <!--Thorium-->
+    <If Condition="Mining.Level &gt;= 200 &amp;&amp; Mining.Level &lt; 275" IgnoreCanRun="False">
       <If Condition="!HasRecipe(16153)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <TrainSkillAction NpcEntry="5513" Location="0, 0, 0" />
@@ -203,6 +210,7 @@
         <BuyItemFromAhAction ItemListType="Item" ItemID="10620" MaxBuyout="7g0s0c" Amount="20" BuyAdditively="True" AutoFindAh="True" BidOnItem="False" Location="0, 0, 0" />
       </If>
     </If>
+    <!--Fel Iron-->
     <If Condition="Mining.Level &gt;= 275 &amp;&amp; Mining.Level &lt; 325" IgnoreCanRun="False">
       <If Condition="!HasRecipe(29356)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -228,6 +236,7 @@
         <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
       </If>
     </If>
+    <!--Adamtite-->
     <If Condition="Mining.Level &gt;= 325 &amp;&amp; Mining.Level &lt; 340" IgnoreCanRun="False">
       <If Condition="!HasRecipe(29358)" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">

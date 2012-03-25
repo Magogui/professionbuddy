@@ -347,7 +347,7 @@ namespace HighVoltz
                 Debug("Pulsing Tradeskills from OnSpellsChanged");
                 foreach (TradeSkill ts in TradeSkillList)
                 {
-                    ts.Update();
+                    ts.PulseSkill();
                 }
                 if (MainForm.IsValid)
                 {

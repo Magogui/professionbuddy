@@ -187,7 +187,11 @@ namespace HighVoltz.Composites
                         return IsRecipe ? (int)Recipe.CanRepeatNum2 : Repeat;
                     case RepeatCalculationType.Banker:
                         if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
-                            return Repeat - Pb.DataStore[Recipe.CraftedItemID];
+                        {
+                            return Repeat > Pb.DataStore[Recipe.CraftedItemID]
+                                       ? Repeat - Pb.DataStore[Recipe.CraftedItemID]
+                                       : 0;
+                        }
                         return Repeat;
                 }
                 return Repeat;
