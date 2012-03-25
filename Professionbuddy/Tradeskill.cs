@@ -333,8 +333,9 @@ namespace HighVoltz
         {
             if (spellId <= StyxWoW.Db[ClientDb.Spell].MaxIndex)
             {
-                if (_knownSpellsPtr == 0) // save a call to ProcessReadMemory on subsequent calls
-                    _knownSpellsPtr = ObjectManager.Wow.Read<uint>(0xB31E94 + ObjectManager.Wow.ImageBase);
+                // GlobalPBSettings.Instance.KnownSpellsPtr is 0xB31E94 in WOW 4.3.3
+                if (_knownSpellsPtr == 0)  
+                    _knownSpellsPtr = ObjectManager.Wow.Read<uint>(GlobalPBSettings.Instance.KnownSpellsPtr + ObjectManager.Wow.ImageBase);
                 var value = ObjectManager.Wow.Read<uint>(_knownSpellsPtr + (spellId >> 5) * 4);
                 return (value & (1 << ((int)spellId & 0x1F))) != 0;
             }
@@ -347,12 +348,6 @@ namespace HighVoltz
     public class Recipe
     {
         private readonly TradeSkill _parent;
-
-        internal struct RecipeIndex
-        {
-            public const uint SubClass1 = 2;
-            public const uint SubClass2 = 3;
-        }
         enum SpellDB
         {
             NamePtr = 21,
