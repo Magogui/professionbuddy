@@ -221,8 +221,6 @@ namespace HighVoltz.Composites
             if (ItemQuality == DeItemQualites.Epic && (item.Quality == WoWItemQuality.Uncommon ||
                 item.Quality == WoWItemQuality.Rare || item.Quality == WoWItemQuality.Epic))
                 returnVal = true;
-            if (returnVal)
-                Professionbuddy.Log("Item {0} matches the ItemQuality check", item.Name);
             return returnVal;
         }
         public override string Name { get { return Pb.Strings["Action_DisenchantAction_Name"]; } }
