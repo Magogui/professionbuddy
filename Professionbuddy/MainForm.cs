@@ -215,7 +215,7 @@ namespace HighVoltz
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                ProfileManager.LoadNew(openFileDialog.FileName);
+                ProfileManager.LoadNew(openFileDialog.FileName,true);
                 if (_pb.ProfileSettings.Settings.Count > 0)
                     AddProfileSettingsTab();
                 else
@@ -404,7 +404,7 @@ namespace HighVoltz
             if (ProfileListView.SelectedItems.Count > 0)
             {
                 // Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
-                ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name));
+                ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name),true);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
                 if (_pb.ProfileSettings.Settings.Count > 0)
                     AddProfileSettingsTab();

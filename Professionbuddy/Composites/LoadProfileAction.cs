@@ -60,7 +60,7 @@ namespace HighVoltz.Composites
                     }
                     else if (System.IO.File.Exists(absPath))
                     {
-                        ProfileManager.LoadNew(absPath);
+                        ProfileManager.LoadNew(absPath,true);
                     }
                     else
                     {

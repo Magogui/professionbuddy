@@ -125,14 +125,15 @@ namespace HighVoltz.Composites
                     return RunStatus.Success;
                 if (!_concludingStopWatch.IsRunning)
                 {
-                    Lua.DoString("SetTrainerServiceTypeFilter('available', 1) BuyTrainerService(0) ");
+                    Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
                     _concludingStopWatch.Start();
                 } 
                 // wait 3 seconds after training.
-                else if (_concludingStopWatch.ElapsedMilliseconds >= 3000)
+                else if (_concludingStopWatch.ElapsedMilliseconds >= 2000)
                 {
                     _waitBeforeTrainingStopWatch.Reset();
                     _concludingStopWatch.Reset();
+                    Lua.DoString("BuyTrainerService(0) ");
                     Professionbuddy.Log("Training Completed ");
                     IsDone = true;
                 }

@@ -60,22 +60,29 @@
           <MoveToAction Location="-4432.943, 3813.333, -93.07119" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4444.569, 3805.804, -94.12316" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4439.158, 3793.521, -82.68282" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <If Condition="Me.Class == WoWClass.Druid" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="UseNormalMountAsDruid" />
+          </If>
           <FlyToAction Dismount="False" Location="-4429.622, 3818.259, 9.793991" />
         </If>
         <!--Horde-->
         <If Condition="DistanceTo(-4610.313, 3976.323, -76.19572) &lt;=20" IgnoreCanRun="True">
           <MoveToAction Location="-4610.633, 3974.902, -76.31163" MoveType="Location" Pathing="ClickToMove" Entry="0" />
           <MoveToAction Location="-4601.422, 3960.537, -73.73101" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <If Condition="Me.Class == WoWClass.Druid" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="UseNormalMountAsDruid" />
+          </If>
           <FlyToAction Dismount="False" Location="-4592.624, 3963.549, 31.30406" />
         </If>
         <!--Smuggler's Scar-->
         <If Condition="DistanceTo(-4561.357, 3469.509, -101.5874) &lt;=40" IgnoreCanRun="True">
           <MoveToAction Location="-4592.855, 3496.947, -107.3743" MoveType="Location" Pathing="ClickToMove" Entry="0" />
+          <CallSubRoutine SubRoutineName="UseNormalMountAsDruid" />
           <FlyToAction Dismount="False" Location="-4670.989, 3569.49, -119.4255" />
           <FlyToAction Dismount="False" Location="-4669.584, 3576.44, 24.28553" />
         </If>
-        <CustomAction Code="Lua.DoString(&quot;Dismount() CancelShapeshiftForm()&quot;);" />
         <FlyToAction Dismount="False" Location="-6406.231, 6427.917, 32.64967" />
+        <CustomAction Code="Lua.DoString(&quot;Dismount() CancelShapeshiftForm()&quot;);" />
         <WaitAction Condition="false" Timeout="5000" />
       </If>
       <!--Vashjir-->
@@ -495,6 +502,12 @@
     <CustomAction Code="Lua.DoString(&quot;RepairAllItems()&quot;);" />
     <SellItemAction Sell="All" NpcEntry="0" Location="0, 0, 0" SellItemType="Greys" ItemID="0" Count="0" />
     <SellItemAction Sell="All" NpcEntry="0" Location="0, 0, 0" SellItemType="Specific" ItemID="63122" Count="0" />
+  </SubRoutine>
+  <SubRoutine SubRoutineName="UseNormalMountAsDruid">
+    <While Condition="!Me.Mounted" IgnoreCanRun="True">
+      <CustomAction Code="if (Me.IsMoving)&#xD;&#xA;   WoWMovement.MoveStop();&#xD;&#xA;if (MountHelper.FlyingMounts.Count &gt; 0)&#xD;&#xA;{&#xD;&#xA;  SpellManager.Cast(MountHelper.FlyingMounts.First().CreatureSpell);&#xD;&#xA;}&#xD;&#xA;else&#xD;&#xA;{&#xD;&#xA;   Err(&quot;You need to go learn a normal flying mount or do most quests here in Vashjir&quot;);&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;" />
+      <WaitAction Condition="Me.Mounted" Timeout="4000" />
+    </While>
   </SubRoutine>
   <Declaration Code="void MyLog(string format,params object[] args)&#xD;&#xA;        {&#xD;&#xA;            Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,format,args);&#xD;&#xA;        }&#xD;&#xA;" />
   <Declaration Code="void Err(string format,params object[] args)&#xD;&#xA;        {&#xD;&#xA;            Log(Color.Green,&quot;Multiprofile: &quot;,Color.Red,format,args);&#xD;&#xA;        }&#xD;&#xA;" />

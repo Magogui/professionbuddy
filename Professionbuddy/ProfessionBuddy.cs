@@ -683,7 +683,7 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
             if (!preloadedHBProfile && LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
-                ProfileManager.LoadNew(_lastProfilePath);
+                ProfileManager.LoadNew(_lastProfilePath,true);
             Instance.MySettings.Save();
         }
 
@@ -742,7 +742,7 @@ namespace HighVoltz
                             Log("Preloading profile {0}", kv.Key);
                             // unhook event to prevent recursive loop
                             BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                            ProfileManager.LoadNew(kv.Key);
+                            ProfileManager.LoadNew(kv.Key,true);
                             BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                             return true;
                         }
