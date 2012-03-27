@@ -16,6 +16,7 @@ namespace HighVoltz.Composites
             get { return (LoadProfileType)Properties["ProfileType"].Value; }
             set { Properties["ProfileType"].Value = value; }
         }
+
         [PbXmlAttribute]
         public string Path
         {

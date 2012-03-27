@@ -1,39 +1,12 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Forms;
-using Styx;
 using System.IO;
-using TreeSharp;
-using Styx.Helpers;
-using Styx.WoWInternals;
-using Styx.Logic;
-using Styx.Logic.Combat;
-using System.Diagnostics;
-using Styx.Patchables;
-using Styx.Plugins;
-using Styx.Plugins.PluginClass;
 using Styx.Logic.Pathing;
 using Styx.Logic.BehaviorTree;
-using Styx.WoWInternals.WoWObjects;
-using CommonBehaviors.Actions;
-using Styx.Database;
-using Styx.Logic.Inventory.Frames.Merchant;
-using Styx.Logic.Inventory.Frames.Gossip;
-using Styx.Logic.Inventory.Frames.MailBox;
-using Styx.Logic.Inventory.Frames.Trainer;
-using Styx.WoWInternals.WoWCache;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
-using System.Xml;
-using System.Text.RegularExpressions;
-using System.Windows.Forms.Design;
 using System.Drawing.Design;
 
 namespace HighVoltz
@@ -83,6 +56,131 @@ namespace HighVoltz
                 else metaPropList[key] = value;
             }
         }
+
+        public T GetValue<T>(string name)
+        {
+            return (T) this[name].Value;
+        }
+
+        public class PropertyBagDescriptor : PropertyDescriptor
+        {
+            private readonly Type type;
+            public PropertyBagDescriptor(string name, Type type, Attribute[] attributes)
+                : base(name, attributes)
+            {
+                this.type = type;
+            }
+            public override Type PropertyType { get { return type; } }
+            public override object GetValue(object component)
+            {
+                return ((PropertyBag)component)[Name].Value;
+            }
+
+            public override void SetValue(object component, object value)
+            {
+                ((PropertyBag)component)[Name].Value = value;
+            }
+            public override bool ShouldSerializeValue(object component) { return GetValue(component) != null; }
+            public override bool CanResetValue(object component) { return true; }
+            public override void ResetValue(object component) { SetValue(component, null); }
+            public override bool IsReadOnly
+            {
+                get
+                {
+                    foreach (Attribute att in this.Attributes)
+                    {
+                        if (att is ReadOnlyAttribute)
+                        {
+                            ReadOnlyAttribute ro = att as ReadOnlyAttribute;
+                            return ro.IsReadOnly;
+                        }
+                    }
+                    return false;
+                }
+            }
+            public override Type ComponentType { get { return typeof(PropertyBag); } }
+            public override bool SupportsChangeEvents { get { return true; } }
+            public override TypeConverter Converter
+            {
+                get
+                {
+                    foreach (Attribute att in this.Attributes)
+                    {
+                        if (att is TypeConverterAttribute)
+                        {
+                            TypeConverterAttribute tc = att as TypeConverterAttribute;
+                            return (TypeConverter)Activator.CreateInstance(Type.GetType(tc.ConverterTypeName));
+                        }
+                    }
+                    return base.Converter;
+                }
+            }
+        }
+
+        #region ICustomTypeDescriptor definitions
+        AttributeCollection ICustomTypeDescriptor.GetAttributes()
+        {
+            return TypeDescriptor.GetAttributes(this, true);
+        }
+
+        string ICustomTypeDescriptor.GetClassName()
+        {
+            return TypeDescriptor.GetClassName(this, true);
+        }
+
+        string ICustomTypeDescriptor.GetComponentName()
+        {
+            return TypeDescriptor.GetComponentName(this, true);
+        }
+
+        TypeConverter ICustomTypeDescriptor.GetConverter()
+        {
+            return TypeDescriptor.GetConverter(this, true);
+        }
+
+        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+        {
+            return TypeDescriptor.GetDefaultEvent(this, true);
+        }
+
+        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+        {
+            return null;
+        }
+
+        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+        {
+            return TypeDescriptor.GetEditor(this, editorBaseType, true);
+        }
+
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
+        {
+            return TypeDescriptor.GetEvents(this, true);
+        }
+
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+        {
+            return TypeDescriptor.GetEvents(this, attributes, true);
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+        {
+            return ((ICustomTypeDescriptor)this).GetProperties(new Attribute[0]);
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        {
+            PropertyDescriptor[] metaProps = (from prop in metaPropList.Values
+                                              where prop.Show
+                                              select new PropertyBagDescriptor(prop.Name, prop.Type, prop.Attributes)).ToArray();
+            return new PropertyDescriptorCollection(metaProps);
+        }
+
+        object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+        {
+            return this;
+        }
+        #endregion
 
         #region UITypeEditors and Type Converters
         public class FileLocationEditor : UITypeEditor
@@ -285,127 +383,6 @@ namespace HighVoltz
         }
         #endregion
         #endregion
-
-        #region ICustomTypeDescriptor definitions
-        AttributeCollection ICustomTypeDescriptor.GetAttributes()
-        {
-            return TypeDescriptor.GetAttributes(this, true);
-        }
-
-        string ICustomTypeDescriptor.GetClassName()
-        {
-            return TypeDescriptor.GetClassName(this, true);
-        }
-
-        string ICustomTypeDescriptor.GetComponentName()
-        {
-            return TypeDescriptor.GetComponentName(this, true);
-        }
-
-        TypeConverter ICustomTypeDescriptor.GetConverter()
-        {
-            return TypeDescriptor.GetConverter(this, true);
-        }
-
-        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
-        {
-            return TypeDescriptor.GetDefaultEvent(this, true);
-        }
-
-        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
-        {
-            return null;
-        }
-
-        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
-        {
-            return TypeDescriptor.GetEditor(this, editorBaseType, true);
-        }
-
-        EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
-        {
-            return TypeDescriptor.GetEvents(this, true);
-        }
-
-        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
-        {
-            return TypeDescriptor.GetEvents(this, attributes, true);
-        }
-
-        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
-        {
-            return ((ICustomTypeDescriptor)this).GetProperties(new Attribute[0]);
-        }
-
-        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
-        {
-            PropertyDescriptor[] metaProps = (from prop in metaPropList.Values
-                                              where prop.Show
-                                              select new PropertyBagDescriptor(prop.Name, prop.Type, prop.Attributes)).ToArray();
-            return new PropertyDescriptorCollection(metaProps);
-        }
-
-        object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
-        {
-            return this;
-        }
-        #endregion
-
-        public class PropertyBagDescriptor : PropertyDescriptor
-        {
-            private readonly Type type;
-            public PropertyBagDescriptor(string name, Type type, Attribute[] attributes)
-                : base(name, attributes)
-            {
-                this.type = type;
-            }
-            public override Type PropertyType { get { return type; } }
-            public override object GetValue(object component)
-            {
-                return ((PropertyBag)component)[Name].Value;
-            }
-
-            public override void SetValue(object component, object value)
-            {
-                ((PropertyBag)component)[Name].Value = value;
-            }
-            public override bool ShouldSerializeValue(object component) { return GetValue(component) != null; }
-            public override bool CanResetValue(object component) { return true; }
-            public override void ResetValue(object component) { SetValue(component, null); }
-            public override bool IsReadOnly
-            {
-                get
-                {
-                    foreach (Attribute att in this.Attributes)
-                    {
-                        if (att is ReadOnlyAttribute)
-                        {
-                            ReadOnlyAttribute ro = att as ReadOnlyAttribute;
-                            return ro.IsReadOnly;
-                        }
-                    }
-                    return false;
-                }
-            }
-            public override Type ComponentType { get { return typeof(PropertyBag); } }
-            public override bool SupportsChangeEvents { get { return true; } }
-            public override TypeConverter Converter
-            {
-                get
-                {
-                    foreach (Attribute att in this.Attributes)
-                    {
-                        if (att is TypeConverterAttribute)
-                        {
-                            TypeConverterAttribute tc = att as TypeConverterAttribute;
-                            return (TypeConverter)Activator.CreateInstance(Type.GetType(tc.ConverterTypeName));
-                        }
-                    }
-                    return base.Converter;
-                }
-            }
-        }
     }
-
     #endregion
 }

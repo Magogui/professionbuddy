@@ -83,6 +83,7 @@ namespace HighVoltz.Composites
             get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
+
         public MailItemAction()
         {
             Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
