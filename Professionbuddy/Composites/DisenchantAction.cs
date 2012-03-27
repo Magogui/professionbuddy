@@ -391,7 +391,6 @@ namespace HighVoltz.Composites
 
         public static bool CanDisenchant(this WoWItem item,int skillLevel)
         {
-            SpellManager.Cast(MountHelper.FlyingMounts.First().CreatureSpell);
             if (item.ItemInfo.StatsCount == 0 && item.ItemInfo.RandomPropertiesId == 0)
             {
                 //Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
