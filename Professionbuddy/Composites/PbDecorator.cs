@@ -30,7 +30,7 @@ namespace HighVoltz.Composites
 
         public static bool EndOfWhileLoopReturn;
         protected override IEnumerable<RunStatus> Execute(object context)
-        {
+        {  
             if (CanRun)
             {
                 bool shouldBreak = false;
