@@ -11,6 +11,7 @@ using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
+using Styx.Logic.Profiles;
 
 namespace HighVoltz.Composites
 {
@@ -33,6 +34,7 @@ namespace HighVoltz.Composites
 
         public BuyItemAction()
         {
+            var a = ProfileManager.CurrentProfile.MinFreeBagSlots;
             Properties["Location"] = new MetaProp("Location", typeof(string),
                                                   new EditorAttribute(typeof(PropertyBag.LocationEditor),
                                                                       typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));

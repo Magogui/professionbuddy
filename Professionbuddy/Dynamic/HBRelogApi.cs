@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace HighVoltz.Dynamic
+namespace HighVoltz.Dynamic 
 {
     public enum ProfileStatus
     {
@@ -13,7 +13,7 @@ namespace HighVoltz.Dynamic
         Running,
         Stopped
     }
-
+    
     public class HBRelogApi
     {
         Assembly _hbRelogHelperAsm;

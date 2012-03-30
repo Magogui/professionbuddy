@@ -89,16 +89,7 @@
     <Compile Include="Dynamic\Helpers.cs" />
     <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="GlobalPBSettings.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="SvnBase.cs" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <None Include="SVN.template" />
     <Compile Include="Composites\BuyItemAction.cs" />
     <Compile Include="Composites\BuyItemFromAhAction.cs" />
@@ -181,13 +172,28 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y 
-xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
-xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)Localization\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y
-xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y
+    <PostBuildEvent>IF %25username%25==Highvoltz-VM (
+echo Copying to Honobuddy/Bots/Professionbuddy
+xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)Icons\*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Icons\" /I /S /Y /D
+xcopy "$(ProjectDir)Icons\*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Icons\" /I /S /Y /D
+xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y /D
+xcopy "$(ProjectDir)Localization\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
+xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+
+IF EXIST \\HIGHVOLTZ-VM\Buddy\Honorbuddy\Honorbuddy.exe (
+echo Copying files to VM
+xcopy "$(ProjectDir)*.cs"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y  /D
+xcopy "$(ProjectDir)Icons\*.png"  "Z:\Honorbuddy\Bots\$(TargetName)\Icons\" /I /S /Y /D
+xcopy "$(ProjectDir)Icons\*.bmp"  "Z:\Honorbuddy\Bots\$(TargetName)\Icons\" /I /S /Y /D
+xcopy "$(ProjectDir)Guide.rtf"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)Profiles\*.xml"  "Z:\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y /D
+xcopy "$(ProjectDir)Localization\*.xml"  "Z:\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
+xcopy  "$(ProjectDir)ChangeLog.txt"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+)
+)
+
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

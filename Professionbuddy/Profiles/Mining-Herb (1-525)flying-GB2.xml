@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
   <CustomAction Code="CharacterSettings.Instance.LootMobs = false;" />
   <Settings DefaultValue="true" Type="Boolean" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." Category="Profile" Global="False" Hidden="False" />
@@ -47,7 +47,7 @@
     <CustomAction Code="LowestMinLevel = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? (MiningMaxLevel &lt; HerbMaxLevel ? MiningMaxLevel : HerbMaxLevel):(bool)Settings[&quot;Mining&quot;] ? MiningMaxLevel :HerbMaxLevel;" />
     <!--Herb/Mining 1-300-->
     <If Condition=" LowestMinLevel &lt;=300" IgnoreCanRun="True">
-      <If Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <If Condition="BagHelper.EmptyHerbSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots &amp;&amp; &#xD;&#xA;BagHelper.EmptyMineSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
         </If>
@@ -145,7 +145,7 @@
     <!--Herb/Mining 300-350-->
     <If Condition=" LowestMinLevel ==375" IgnoreCanRun="True">
       <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-300)Herb&amp;Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" />
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <While Condition="BagHelper.EmptyHerbSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots &amp;&amp; &#xD;&#xA;BagHelper.EmptyMineSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.MapId == 530" IgnoreCanRun="True">
           <FlyToAction Dismount="False" Location="-252.0331, 965.9687, 90.23502" />
@@ -203,7 +203,7 @@
     </If>
     <!--Herb/Mining 350-450-->
     <If Condition=" LowestMinLevel == 450" IgnoreCanRun="True">
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <While Condition="BagHelper.EmptyHerbSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots &amp;&amp; &#xD;&#xA;BagHelper.EmptyMineSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots" IgnoreCanRun="True">
         <If Condition="Me.MapId == 571" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
         </If>
@@ -269,7 +269,7 @@
     </If>
     <!--Herb/Mining 450-525-->
     <If Condition=" LowestMinLevel == 525" IgnoreCanRun="True">
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <While Condition="BagHelper.EmptyHerbSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots &amp;&amp; &#xD;&#xA;BagHelper.EmptyMineSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <FlyToAction Dismount="False" Location="-3994.829, -4719.628, 4.139777" />
