@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+ <?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
   <!--ATTENTION: READ BELOW BEFORE YOU START-->
   <!--Set Hearth to Dwarf area in Stormwind if Alliance or Org if horde-->
@@ -103,7 +103,7 @@
         </If>
       </If>
       <CustomAction Code="if ((bool)Settings[&quot;EnableZoneTimer&quot;]  &amp;&amp; (ChatThrottleSW.ElapsedMilliseconds &gt;= 60000 || !ChatThrottleSW.IsRunning))&#xD;&#xA;{&#xD;&#xA;    TreeRoot.GoalText = string.Format(&quot;Switching zone in {0} minutes&quot;,&#xD;&#xA;         (int)(TimeToSpendInZone - DateTime.Now.Subtract(ZoneStartTime).TotalMinutes));&#xD;&#xA;   ChatThrottleSW.Reset();&#xD;&#xA;  ChatThrottleSW.Start();&#xD;&#xA;}" />
-      <If Condition="BagHelper.EmptyHerbSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots &amp;&amp; &#xD;&#xA;BagHelper.EmptyMineSlots &lt;= ProfileManager.CurrentProfile.MinFreeBagSlots" IgnoreCanRun="False">
+      <If Condition="Me.FreeNormalBagSlots &lt;=4 &amp;&amp; Me.ZoneId != CityZoneID" IgnoreCanRun="False">
         <CustomAction Code="MyLog(&quot;Hearthing because I have only {0} free bags slots&quot;,Me.FreeNormalBagSlots);" />
         <CallSubRoutine SubRoutineName="Hearth" />
       </If>
