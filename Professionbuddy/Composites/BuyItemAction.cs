@@ -30,9 +30,9 @@ namespace HighVoltz.Composites
         private Stopwatch _concludingSw = new Stopwatch();
         // add pause at the end to give objectmanager a chance to update.
 
-        private WoWPoint _loc;
+        private WoWPoint _loc; 
 
-        public BuyItemAction()
+        public BuyItemAction()  
         {
             var a = ProfileManager.CurrentProfile.MinFreeBagSlots;
             Properties["Location"] = new MetaProp("Location", typeof(string),
