@@ -16,7 +16,7 @@ namespace HighVoltz.Dynamic
     
     public class HBRelogApi
     {
-        Assembly _hbRelogHelperAsm;
+        Assembly _hbRelogHelperAsm; 
 
         public HBRelogApi()
         {
