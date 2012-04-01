@@ -1,4 +1,4 @@
- <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
   <CustomAction Code="CharacterSettings.Instance.LootMobs = false;" />
   <Settings DefaultValue="true" Type="Boolean" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." Category="Profile" Global="False" Hidden="False" />

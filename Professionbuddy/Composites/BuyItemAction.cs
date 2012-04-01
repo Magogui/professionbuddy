@@ -11,7 +11,6 @@ using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using Styx.Logic.Profiles;
 
 namespace HighVoltz.Composites
 {
@@ -30,11 +29,10 @@ namespace HighVoltz.Composites
         private Stopwatch _concludingSw = new Stopwatch();
         // add pause at the end to give objectmanager a chance to update.
 
-        private WoWPoint _loc; 
+        private WoWPoint _loc;
 
-        public BuyItemAction()  
+        public BuyItemAction()
         {
-            var a = ProfileManager.CurrentProfile.MinFreeBagSlots;
             Properties["Location"] = new MetaProp("Location", typeof(string),
                                                   new EditorAttribute(typeof(PropertyBag.LocationEditor),
                                                                       typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));

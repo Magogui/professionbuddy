@@ -11,7 +11,7 @@ using TreeSharp;
 
 namespace HighVoltz.Dynamic
 {
-    public class DynamicCodeCompiler 
+    public class DynamicCodeCompiler
     {
         static readonly Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
         static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> Declarations = from dec in CsharpCodeDict
@@ -210,7 +210,6 @@ namespace HighVoltz.Dynamic
             HBRelogApi HBRelog {get{return Helpers.HBRelog;}}
         }";
         #endregion
-        
         static public StringBuilder CsharpStringBuilder { get; private set; }
 
         static public Type CompileAndLoad()
