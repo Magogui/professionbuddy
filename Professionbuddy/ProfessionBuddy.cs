@@ -143,21 +143,28 @@ namespace HighVoltz
 
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
+
             try
             {
-                try
+                if (!string.IsNullOrEmpty(_profileToLoad))
                 {
-                    if (SecondaryBot != null)
-                        SecondaryBot.Start();
+                    LoadPBProfile(_profileToLoad);
+                    LastProfileIsHBProfile = false;
                 }
-                catch (Exception ex)
+                else if (!string.IsNullOrEmpty(MySettings.LastProfile))
                 {
-                    Logging.WriteDebug(ex.ToString());
+                    LoadPBProfile(MySettings.LastProfile);
                 }
+            }
+            catch (Exception ex) { Err(ex.ToString()); }
+            try
+            {
+                if (SecondaryBot != null)
+                    SecondaryBot.Start();
             }
             catch (Exception ex)
             {
-                if (SecondaryBot != null) Err("{0} {1}", SecondaryBot.Name, ex);
+                Logging.WriteDebug(ex.ToString());
             }
         }
 
@@ -324,7 +331,7 @@ namespace HighVoltz
         }
         #endregion
 
-        
+
 
         #region OnSpellsChanged
 
@@ -497,20 +504,6 @@ namespace HighVoltz
                     DataStore.ImportDataStore();
                     // load localized strings
                     LoadStrings();
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(_profileToLoad))
-                        {
-                            LoadPBProfile(_profileToLoad);
-                            LastProfileIsHBProfile = false;
-                        }
-                        else if (!string.IsNullOrEmpty(MySettings.LastProfile))
-                        {
-                            LoadPBProfile(MySettings.LastProfile);
-                        }
-                    }
-                    catch (Exception ex) { Err(ex.ToString()); }
-
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
@@ -683,7 +676,7 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
             if (!preloadedHBProfile && LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
-                ProfileManager.LoadNew(_lastProfilePath,true);
+                ProfileManager.LoadNew(_lastProfilePath, true);
             Instance.MySettings.Save();
         }
 
@@ -742,7 +735,7 @@ namespace HighVoltz
                             Log("Preloading profile {0}", kv.Key);
                             // unhook event to prevent recursive loop
                             BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                            ProfileManager.LoadNew(kv.Key,true);
+                            ProfileManager.LoadNew(kv.Key, true);
                             BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
                             return true;
                         }
