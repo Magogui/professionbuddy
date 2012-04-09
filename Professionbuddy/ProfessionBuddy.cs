@@ -113,7 +113,7 @@ namespace HighVoltz
 
         public override PulseFlags PulseFlags { get { return PulseFlags.All; } }
 
-
+        bool _firstStartDone = false;
         public override void Start()
         {
             Debug("Start Called");
@@ -144,19 +144,24 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
 
-            try
+            if (!_firstStartDone)
             {
-                if (!string.IsNullOrEmpty(_profileToLoad))
+                try
                 {
-                    LoadPBProfile(_profileToLoad);
-                    LastProfileIsHBProfile = false;
+                    if (!string.IsNullOrEmpty(_profileToLoad))
+                    {
+                        LoadPBProfile(_profileToLoad);
+                        LastProfileIsHBProfile = false;
+                    }
+                    else if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                    {
+                        LoadPBProfile(MySettings.LastProfile);
+                    }
+
                 }
-                else if (!string.IsNullOrEmpty(MySettings.LastProfile))
-                {
-                    LoadPBProfile(MySettings.LastProfile);
-                }
+                catch (Exception ex) { Err(ex.ToString()); }
+                _firstStartDone = true;
             }
-            catch (Exception ex) { Err(ex.ToString()); }
             try
             {
                 if (SecondaryBot != null)
