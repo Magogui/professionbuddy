@@ -29,7 +29,7 @@ namespace HighVoltz.Composites
             this.Action = c => { ;};
             Properties["Code"] = new MetaProp("Code", typeof(string),
                 new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute("Action_Common_Code"));
+                new DisplayNameAttribute(Pb.Strings["Action_Common_Code"]));
             Code = "";
             Properties["Code"].PropertyChanged += CustomAction_PropertyChanged;
         }
