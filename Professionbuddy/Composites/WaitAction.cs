@@ -20,22 +20,25 @@ namespace HighVoltz.Composites
             set { Properties["Condition"].Value = value; }
         }
         [PbXmlAttribute]
-        public int Timeout
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Timeout
         {
-            get { return (int)Properties["Timeout"].Value; }
+            get { return (DynamicProperty<int>)Properties["Timeout"].Value; }
             set { Properties["Timeout"].Value = value; }
         }
         public WaitAction()
             : base(HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
         {
-            Properties["Timeout"] = new MetaProp("Timeout", typeof(int),
+            Properties["Timeout"] = new MetaProp("Timeout", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_Timeout"]));
 
             Properties["Condition"] = new MetaProp("Condition", typeof(string), 
                 new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
                  new DisplayNameAttribute(Pb.Strings["Action_WaitAction_Condition"]));
 
-            Timeout = 2000;
+            Timeout = new DynamicProperty<int>(this, "2000");
+
             Condition = "false";
             CanRunDelegate = u => false;
         }
