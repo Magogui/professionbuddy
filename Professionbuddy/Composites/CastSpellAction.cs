@@ -50,9 +50,9 @@ namespace HighVoltz.Composites
         }
         // number of times repeated.
         [PbXmlAttribute]
-        public uint Entry
+        public DynamicProperty<int> Entry
         {
-            get { return (uint)Properties["Entry"].Value; }
+            get { return (DynamicProperty<int>)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
         public Recipe Recipe { get; private set; }
@@ -77,7 +77,7 @@ namespace HighVoltz.Composites
         }
         public string SpellName
         {
-            get { return Recipe != null ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture); }
+            get { return Recipe != null ? Recipe.Name : Entry.Value.ToString(); }
         }
         public bool IsRecipe { get { return Recipe != null; } }
         // used to confim if a spell finished. set in the lua OnCastSucceeded callback.
@@ -101,7 +101,8 @@ namespace HighVoltz.Composites
                 new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_Repeat"]));
 
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
+            Properties["Entry"] = new MetaProp("Entry", typeof(DynamicProperty<int>),
+                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_SpellEntry"]));
 
             Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof(bool),
@@ -120,7 +121,7 @@ namespace HighVoltz.Composites
             Casted = 0;
             Repeat = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Repeat");
-            Entry = 0u;
+            Entry =  new DynamicProperty<int>(this, "0");
             RepeatType = RepeatCalculationType.Craftable;
             Recipe = null;
             CastOnItem = false;
@@ -168,7 +169,7 @@ namespace HighVoltz.Composites
         {
             Recipe = recipe;
             Repeat = new DynamicProperty<int>(this, repeat.ToString(CultureInfo.InvariantCulture));
-            Entry = recipe.SpellId;
+            Entry = new DynamicProperty<int>(this,recipe.SpellId.ToString());
             RepeatType = repeatType;
             //Properties["Recipe"].Show = true;
             Properties["SpellName"].Value = SpellName;
@@ -246,7 +247,7 @@ namespace HighVoltz.Composites
                         {
                             Lua.Events.AttachEvent("UNIT_SPELLCAST_SUCCEEDED", OnUnitSpellCastSucceeded);
                             QueueIsRunning = true;
-                            TreeRoot.StatusText = string.Format("Casting: {0}", IsRecipe ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture));
+                            TreeRoot.StatusText = string.Format("Casting: {0}", IsRecipe ? Recipe.Name : Entry.Value.ToString());
                         }
                         WoWSpell spell = WoWSpell.FromId((int)Entry);
                         if (spell == null)
@@ -265,7 +266,7 @@ namespace HighVoltz.Composites
                             {
                                 Professionbuddy.Err("{0}: {1}",
                                     Pb.Strings["Error_UnableToFindItemToCastOn"],
-                                    IsRecipe ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture));
+                                    IsRecipe ? Recipe.Name : Entry.Value.ToString());
                                 IsDone = true;
                             }
                         }
@@ -312,7 +313,7 @@ namespace HighVoltz.Composites
         {
             if (Pb.IsTradeSkillsLoaded)
             {
-                Recipe = Pb.TradeSkillList.Where(t => t.KnownRecipes.ContainsKey(Entry)).Select(t => t.KnownRecipes[Entry]).FirstOrDefault();
+                Recipe = Pb.TradeSkillList.Where(t => t.KnownRecipes.ContainsKey((uint)Entry.Value)).Select(t => t.KnownRecipes[(uint)Entry.Value]).FirstOrDefault();
                 if (IsRecipe)
                 {
                     //Properties["Recipe"].Show = true;
