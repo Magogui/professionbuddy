@@ -133,8 +133,9 @@ namespace HighVoltz.Composites
                 {
                     _waitBeforeTrainingStopWatch.Reset();
                     _concludingStopWatch.Reset();
-                    //Lua.DoString("BuyTrainerService(0) ");
-                    Lua.DoString("for i=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(i)) == 'available' then BuyTrainerService(i) end end");
+                    for (int n = 0; n < 20; n++) // spam! 
+                        Lua.DoString("BuyTrainerService(0) ");
+                    //Lua.DoString("for i=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(i)) == 'available' then BuyTrainerService(i) end end");
                     Professionbuddy.Log("Training Completed ");
                     IsDone = true;
                 }
