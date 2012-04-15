@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
+using Styx;
 using Styx.Helpers;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Trainer;
@@ -133,8 +134,11 @@ namespace HighVoltz.Composites
                 {
                     _waitBeforeTrainingStopWatch.Reset();
                     _concludingStopWatch.Reset();
-                    for (int n = 0; n < 20; n++) // spam! 
-                        Lua.DoString("BuyTrainerService(0) ");
+                    using (new FrameLock())
+                    {
+                        for (int n = 0; n < 20; n++) // spam! 
+                            Lua.DoString("BuyTrainerService(0) ");
+                    }
                     //Lua.DoString("for i=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(i)) == 'available' then BuyTrainerService(i) end end");
                     Professionbuddy.Log("Training Completed ");
                     IsDone = true;
