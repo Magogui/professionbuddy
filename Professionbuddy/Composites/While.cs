@@ -1,14 +1,33 @@
 ﻿//!CompilerOption:AddRef:System.Design.dll
+
 using System.Collections.Generic;
 using System.Linq;
 using TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    class While : If
+    internal class While : If
     {
-     
+        public override string Name
+        {
+            get { return Professionbuddy.Instance.Strings["FlowControl_While_LongName"]; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.IsNullOrEmpty(Condition)
+                           ? Professionbuddy.Instance.Strings["FlowControl_While_LongName"]
+                           : (Professionbuddy.Instance.Strings["FlowControl_While_Name"] + " (" + Condition + ")");
+            }
+        }
+
+        public override string Help
+        {
+            get { return Professionbuddy.Instance.Strings["FlowControl_While_Help"]; }
+        }
+
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if ((_isRunning && IgnoreCanRun) || CanRun(context))
@@ -45,26 +64,14 @@ namespace HighVoltz.Composites
             yield return RunStatus.Failure;
         }
 
-        override public string Name { get { return Professionbuddy.Instance.Strings["FlowControl_While_LongName"]; } }
-
-        override public string Title
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Condition) ?
-                    Professionbuddy.Instance.Strings["FlowControl_While_LongName"] :
-                    (Professionbuddy.Instance.Strings["FlowControl_While_Name"] + " (" + Condition + ")");
-            }
-        }
-        override public string Help { get { return Professionbuddy.Instance.Strings["FlowControl_While_Help"]; } }
         public override object Clone()
         {
             var w = new While
                         {
-                CanRunDelegate = this.CanRunDelegate,
-                Condition = this.Condition,
-                IgnoreCanRun = this.IgnoreCanRun
-            };
+                            CanRunDelegate = CanRunDelegate,
+                            Condition = Condition,
+                            IgnoreCanRun = IgnoreCanRun
+                        };
             return w;
         }
     }

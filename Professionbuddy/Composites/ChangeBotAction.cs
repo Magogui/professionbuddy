@@ -5,18 +5,33 @@ namespace HighVoltz.Composites
 {
     public sealed class ChangeBotAction : PBAction
     {
+        public ChangeBotAction()
+        {
+            Properties["BotName"] = new MetaProp("BotName", typeof (string),
+                                                 new DisplayNameAttribute(Pb.Strings["Action_ChangeBotAction_BotName"]));
+            BotName = "";
+        }
+
         [PbXmlAttribute]
         public string BotName
         {
-            get { return (string)Properties["BotName"].Value; }
+            get { return (string) Properties["BotName"].Value; }
             set { Properties["BotName"].Value = value; }
         }
 
-        public ChangeBotAction()
+        public override string Name
         {
-            Properties["BotName"] = new MetaProp("BotName", typeof(string),
-                new DisplayNameAttribute(Pb.Strings["Action_ChangeBotAction_BotName"]));
-            BotName = "";
+            get { return Pb.Strings["Action_ChangeBotAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get { return string.Format("{0}: {1}", Name, BotName); }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_ChangeBotAction_Help"]; }
         }
 
         protected override RunStatus Run(object context)
@@ -25,7 +40,7 @@ namespace HighVoltz.Composites
             {
                 try
                 {
-                    Professionbuddy.ChangeSecondaryBot(BotName) ;
+                    Professionbuddy.ChangeSecondaryBot(BotName);
                 }
                 finally
                 {
@@ -35,24 +50,9 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override string Name { get { return Pb.Strings["Action_ChangeBotAction_Name"]; } }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: {1}", Name, BotName);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_ChangeBotAction_Help"];
-            }
-        }
         public override object Clone()
         {
-            return new ChangeBotAction { BotName = this.BotName };
+            return new ChangeBotAction {BotName = BotName};
         }
     }
 }

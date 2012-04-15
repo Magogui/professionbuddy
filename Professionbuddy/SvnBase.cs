@@ -6,9 +6,13 @@ namespace HighVoltz
 {
     public class SvnBase
     {
-        int _rev = -1;
+        private int _rev = -1;
 
-        protected virtual string RevString { get { return "0"; } }
+        protected virtual string RevString
+        {
+            get { return "0"; }
+        }
+
         public int Revision
         {
             get
@@ -22,7 +26,5 @@ namespace HighVoltz
 
     public partial class Svn : SvnBase
     {
-
     }
-   
 }

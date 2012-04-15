@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Styx.Helpers;
+﻿using Styx.Helpers;
 
 namespace HighVoltz
 {
     public class GlobalPBSettings : Settings
     {
-        public static GlobalPBSettings Instance { get; private set; }
         public GlobalPBSettings(string settingsPath)
             : base(settingsPath)
         {
             Instance = this;
             Load();
         }
-       
+
+        public static GlobalPBSettings Instance { get; private set; }
+
         [Setting, DefaultValue(0)]
         public int CurrentRevision { get; set; }
 
@@ -27,6 +24,5 @@ namespace HighVoltz
 
         [Setting, DefaultValue("")]
         public string WowVersion { get; set; }
-
     }
 }

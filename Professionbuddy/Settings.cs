@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using Styx.WoWInternals;
-using System.Xml;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Xml;
 using Styx.Helpers;
+using Styx.WoWInternals;
 using TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 
@@ -13,13 +13,15 @@ namespace HighVoltz
 {
     public class ProfessionBuddySettings : Settings
     {
-        public static ProfessionBuddySettings Instance { get; private set; }
         public ProfessionBuddySettings(string settingsPath)
             : base(settingsPath)
         {
             Instance = this;
             Load();
         }
+
+        public static ProfessionBuddySettings Instance { get; private set; }
+
         [Setting, DefaultValue("")]
         public string LastProfile { get; set; }
 
@@ -38,18 +40,16 @@ namespace HighVoltz
 
     public class PbProfileSettings
     {
-        public Dictionary<string, PbProfileSettingEntry> Settings { get; private set; }
-
         public PbProfileSettings()
         {
             Settings = new Dictionary<string, PbProfileSettingEntry>();
         }
+
+        public Dictionary<string, PbProfileSettingEntry> Settings { get; private set; }
+
         public object this[string name]
         {
-            get
-            {
-                return Settings.ContainsKey(name) ? Settings[name].Value : null;
-            }
+            get { return Settings.ContainsKey(name) ? Settings[name].Value : null; }
             set
             {
                 Settings[name].Value = value;
@@ -61,30 +61,34 @@ namespace HighVoltz
                 }
             }
         }
-        string ProfileName
+
+        private string ProfileName
         {
             get
             {
-                return Professionbuddy.Instance.CurrentProfile != null ?
-                    Path.GetFileNameWithoutExtension(Professionbuddy.Instance.CurrentProfile.XmlPath) : "";
-            }
-        }
-        string CharacterSettingsPath
-        {
-            get
-            {
-                return Path.Combine(Logging.ApplicationPath,
-                    string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
-                    ObjectManager.Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)));
+                return Professionbuddy.Instance.CurrentProfile != null
+                           ? Path.GetFileNameWithoutExtension(Professionbuddy.Instance.CurrentProfile.XmlPath)
+                           : "";
             }
         }
 
-        string GlobalSettingsPath
+        private string CharacterSettingsPath
         {
             get
             {
                 return Path.Combine(Logging.ApplicationPath,
-                    string.Format("Settings\\ProfessionBuddy\\{0}.xml", ProfileName));
+                                    string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
+                                                  ObjectManager.Me.Name,
+                                                  Lua.GetReturnVal<string>("return GetRealmName()", 0)));
+            }
+        }
+
+        private string GlobalSettingsPath
+        {
+            get
+            {
+                return Path.Combine(Logging.ApplicationPath,
+                                    string.Format("Settings\\ProfessionBuddy\\{0}.xml", ProfileName));
             }
         }
 
@@ -101,24 +105,26 @@ namespace HighVoltz
             }
         }
 
-        void SaveCharacterSettings()
+        private void SaveCharacterSettings()
         {
-            var settings = new XmlWriterSettings { Indent = true };
+            var settings = new XmlWriterSettings {Indent = true};
             using (XmlWriter writer = XmlWriter.Create(CharacterSettingsPath, settings))
             {
-                var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                Dictionary<string, object> temp = Settings.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                Dictionary<string, object> temp =
+                    Settings.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
 
-        void SaveGlobalSettings()
+        private void SaveGlobalSettings()
         {
-            var settings = new XmlWriterSettings { Indent = true };
+            var settings = new XmlWriterSettings {Indent = true};
             using (XmlWriter writer = XmlWriter.Create(GlobalSettingsPath, settings))
             {
-                var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                Dictionary<string, object> temp = Settings.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                Dictionary<string, object> temp =
+                    Settings.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
@@ -134,7 +140,7 @@ namespace HighVoltz
             }
         }
 
-        void LoadCharacterSettings()
+        private void LoadCharacterSettings()
         {
             if (File.Exists(CharacterSettingsPath))
             {
@@ -142,13 +148,13 @@ namespace HighVoltz
                 {
                     try
                     {
-                        var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                        var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
+                        var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
                         if (temp != null)
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                                Settings[kv.Key] = new PbProfileSettingEntry {Value = kv.Value};
                             }
                         }
                     }
@@ -160,7 +166,7 @@ namespace HighVoltz
             }
         }
 
-        void LoadGlobalSettings()
+        private void LoadGlobalSettings()
         {
             if (File.Exists(GlobalSettingsPath))
             {
@@ -168,13 +174,13 @@ namespace HighVoltz
                 {
                     try
                     {
-                        var serializer = new DataContractSerializer(typeof(Dictionary<string, object>));
-                        var temp = (Dictionary<string, object>)serializer.ReadObject(reader);
+                        var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
                         if (temp != null)
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                                Settings[kv.Key] = new PbProfileSettingEntry {Value = kv.Value};
                             }
                         }
                     }
@@ -189,20 +195,22 @@ namespace HighVoltz
         public void LoadDefaultValues()
         {
             List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.PbBehavior);
-            foreach (var setting in settingsList)
+            foreach (Composites.Settings setting in settingsList)
             {
                 if (!Settings.ContainsKey(setting.SettingName))
-                    Settings[setting.SettingName] = new PbProfileSettingEntry { Value = GetValue(setting.Type, setting.DefaultValue) };
+                    Settings[setting.SettingName] = new PbProfileSettingEntry
+                                                        {Value = GetValue(setting.Type, setting.DefaultValue)};
                 Settings[setting.SettingName].Summary = setting.Summary;
                 Settings[setting.SettingName].Category = setting.Category;
                 Settings[setting.SettingName].Global = setting.Global;
                 Settings[setting.SettingName].Hidden = setting.Hidden;
             }
             // remove unused settings..
-            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
+            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
+                                                                                                         kv => kv.Value);
         }
 
-        object GetValue(TypeCode code, string value)
+        private object GetValue(TypeCode code, string value)
         {
             try
             {
@@ -242,7 +250,11 @@ namespace HighVoltz
                         return new object();
                 }
             }
-            catch (Exception ex) { Logging.WriteException(ex); return null; }
+            catch (Exception ex)
+            {
+                Logging.WriteException(ex);
+                return null;
+            }
         }
 
         public List<Composites.Settings> GetDefaultSettings(Composite comp)
@@ -251,14 +263,15 @@ namespace HighVoltz
             GetProfileSettings(comp, ref list);
             return list;
         }
+
         // recursively get all profile settings
-        void GetProfileSettings(Composite comp, ref List<Composites.Settings> list)
+        private void GetProfileSettings(Composite comp, ref List<Composites.Settings> list)
         {
             if (comp is Composites.Settings)
                 list.Add(comp as Composites.Settings);
             if (comp is GroupComposite)
             {
-                foreach (var child in ((GroupComposite)comp).Children)
+                foreach (Composite child in ((GroupComposite) comp).Children)
                     GetProfileSettings(child, ref list);
             }
         }

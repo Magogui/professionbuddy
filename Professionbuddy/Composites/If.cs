@@ -1,26 +1,33 @@
 ﻿//!CompilerOption:AddRef:System.Design.dll
-using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Xml.Serialization;
-using TreeSharp;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Threading;
-using System.ComponentModel.Design;
-using System.Drawing.Design;
-using HighVoltz.Dynamic;
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Drawing;
+using System.Drawing.Design;
+using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+using HighVoltz.Dynamic;
+using TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    public class If : GroupComposite, HighVoltz.Dynamic.ICSharpCode, IPBComposite
+    public class If : GroupComposite, ICSharpCode, IPBComposite
     {
         #region Properties
+
+        protected PropertyGrid PropertyGrid
+        {
+            get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; }
+        }
+
         [XmlIgnore]
-        virtual public PropertyBag Properties { get; private set; }
-        protected PropertyGrid PropertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
+        public virtual PropertyBag Properties { get; private set; }
+
         protected void RefreshPropertyGrid()
         {
             if (PropertyGrid != null)
@@ -28,35 +35,33 @@ namespace HighVoltz.Composites
                 PropertyGrid.Refresh();
             }
         }
+
         #endregion
-        protected readonly static object LockObject = new object();
-        virtual public CanRunDecoratorDelegate CanRunDelegate { get; set; }
-        [PbXmlAttribute]
-        virtual public string Condition
-        {
-            get { return (string)Properties["Condition"].Value; }
-            set { Properties["Condition"].Value = value; }
-        }
-        [PbXmlAttribute]
-        virtual public bool IgnoreCanRun
-        {
-            get { return (bool)Properties["IgnoreCanRun"].Value; }
-            set { Properties["IgnoreCanRun"].Value = value; }
-        }
+
+        protected static readonly object LockObject = new object();
+        protected bool _isRunning;
+        private string _lastError = "";
 
         public If()
         {
             // ReSharper disable DoNotCallOverridableMethodsInConstructor
             Properties = new PropertyBag();
-            Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof(bool),
-                new DisplayNameAttribute(Professionbuddy.Instance.Strings["FlowControl_If_IgnoreCanRun"]));
+            Properties["IgnoreCanRun"] = new MetaProp("IgnoreCanRun", typeof (bool),
+                                                      new DisplayNameAttribute(
+                                                          Professionbuddy.Instance.Strings["FlowControl_If_IgnoreCanRun"
+                                                              ]));
 
             Properties["Condition"] = new MetaProp("Condition",
-                typeof(string), new EditorAttribute(typeof(MultilineStringEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Professionbuddy.Instance.Strings["FlowControl_If_Condition"]));
+                                                   typeof (string),
+                                                   new EditorAttribute(typeof (MultilineStringEditor),
+                                                                       typeof (UITypeEditor)),
+                                                   new DisplayNameAttribute(
+                                                       Professionbuddy.Instance.Strings["FlowControl_If_Condition"]));
 
-            Properties["CompileError"] = new MetaProp("CompileError", typeof(string), new ReadOnlyAttribute(true),
-                new DisplayNameAttribute(Professionbuddy.Instance.Strings["Action_CSharpAction_CompileError"]));
+            Properties["CompileError"] = new MetaProp("CompileError", typeof (string), new ReadOnlyAttribute(true),
+                                                      new DisplayNameAttribute(
+                                                          Professionbuddy.Instance.Strings[
+                                                              "Action_CSharpAction_CompileError"]));
 
             CanRunDelegate = c => false;
             Condition = "";
@@ -69,13 +74,123 @@ namespace HighVoltz.Composites
             // ReSharper restore DoNotCallOverridableMethodsInConstructor
         }
 
-        void Condition_PropertyChanged(object sender, EventArgs e)
+        public virtual CanRunDecoratorDelegate CanRunDelegate { get; set; }
+
+        [PbXmlAttribute]
+        public virtual string Condition
+        {
+            get { return (string) Properties["Condition"].Value; }
+            set { Properties["Condition"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public virtual bool IgnoreCanRun
+        {
+            get { return (bool) Properties["IgnoreCanRun"].Value; }
+            set { Properties["IgnoreCanRun"].Value = value; }
+        }
+
+        #region ICSharpCode Members
+
+        public virtual Delegate CompiledMethod
+        {
+            get { return CanRunDelegate; }
+            set { CanRunDelegate = (CanRunDecoratorDelegate) value; }
+        }
+
+        public virtual string Code
+        {
+            get { return Condition; }
+            set { Condition = value; }
+        }
+
+        public int CodeLineNumber { get; set; }
+
+        public string CompileError
+        {
+            get { return (string) Properties["CompileError"].Value; }
+            set { Properties["CompileError"].Value = value; }
+        }
+
+        public CsharpCodeType CodeType
+        {
+            get { return CsharpCodeType.BoolExpression; }
+        }
+
+        public IPBComposite AttachedComposite
+        {
+            get { return this; }
+        }
+
+        #endregion
+
+        #region IPBComposite Members
+
+        public virtual void Reset()
+        {
+            _isRunning = IsDone = false;
+            Selection = null;
+            recursiveReset(this);
+        }
+
+        /// <summary>
+        /// Returns true if the If Condition is finished executing its children or condition isn't met.
+        /// </summary>
+        public virtual bool IsDone { get; set; }
+
+        public virtual Color Color
+        {
+            get { return string.IsNullOrEmpty(CompileError) ? Color.Blue : Color.Red; }
+        }
+
+        public virtual string Name
+        {
+            get { return Professionbuddy.Instance.Strings["FlowControl_If_LongName"]; }
+        }
+
+        public virtual string Title
+        {
+            get
+            {
+                return string.IsNullOrEmpty(Condition)
+                           ? Professionbuddy.Instance.Strings["FlowControl_If_LongName"]
+                           : (Professionbuddy.Instance.Strings["FlowControl_If_Name"] + " (" + Condition + ")");
+            }
+        }
+
+
+        public virtual object Clone()
+        {
+            var pd = new If
+                         {
+                             CanRunDelegate = CanRunDelegate,
+                             Condition = Condition,
+                             IgnoreCanRun = IgnoreCanRun
+                         };
+            return pd;
+        }
+
+        public virtual string Help
+        {
+            get { return Professionbuddy.Instance.Strings["FlowControl_If_Help"]; }
+        }
+
+        public void OnProfileLoad(XElement element)
+        {
+        }
+
+        public void OnProfileSave(XElement element)
+        {
+        }
+
+        #endregion
+
+        private void Condition_PropertyChanged(object sender, EventArgs e)
         {
             DynamicCodeCompiler.CodeWasModified = true;
         }
 
-        string _lastError = "";
-        void CompileErrorPropertyChanged(object sender, EventArgs e)
+        private void CompileErrorPropertyChanged(object sender, EventArgs e)
         {
             if (CompileError != "" || (CompileError == "" && _lastError != ""))
                 MainForm.Instance.RefreshActionTree(this);
@@ -92,15 +207,13 @@ namespace HighVoltz.Composites
             }
             catch (Exception ex)
             {
-                if (ex.GetType() != typeof(ThreadAbortException))
-                    Professionbuddy.Err("{0}: {1}\nErr:{2}", Professionbuddy.Instance.Strings["FlowControl_If_LongName"], Condition, ex);
+                if (ex.GetType() != typeof (ThreadAbortException))
+                    Professionbuddy.Err("{0}: {1}\nErr:{2}", Professionbuddy.Instance.Strings["FlowControl_If_LongName"],
+                                        Condition, ex);
                 return false;
             }
         }
 
-        // ReSharper disable InconsistentNaming
-        protected bool _isRunning = false;
-        // ReSharper restore InconsistentNaming
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (!IsDone && ((_isRunning && IgnoreCanRun) || CanRun(context)))
@@ -132,35 +245,7 @@ namespace HighVoltz.Composites
             yield return RunStatus.Failure;
         }
 
-        public virtual Delegate CompiledMethod
-        {
-            get { return CanRunDelegate; }
-            set { CanRunDelegate = (CanRunDecoratorDelegate)value; }
-        }
-
-        public virtual string Code
-        {
-            get { return Condition; }
-            set { Condition = value; }
-        }
-
-        public int CodeLineNumber { get; set; }
-
-        public string CompileError
-        {
-            get { return (string)Properties["CompileError"].Value; }
-            set { Properties["CompileError"].Value = value; }
-        }
-
-        public HighVoltz.Dynamic.CsharpCodeType CodeType { get { return HighVoltz.Dynamic.CsharpCodeType.BoolExpression; } }
-
-        virtual public void Reset()
-        {
-            _isRunning = IsDone = false;
-            Selection = null;
-            recursiveReset(this);
-        }
-        void recursiveReset(If gc)
+        private void recursiveReset(If gc)
         {
             foreach (IPBComposite comp in gc.Children)
             {
@@ -169,45 +254,5 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as If);
             }
         }
-        /// <summary>
-        /// Returns true if the If Condition is finished executing its children or condition isn't met.
-        /// </summary>
-        virtual public bool IsDone { get; set; }
-
-        virtual public System.Drawing.Color Color
-        {
-            get { return string.IsNullOrEmpty(CompileError) ? System.Drawing.Color.Blue : System.Drawing.Color.Red; }
-        }
-
-        virtual public string Name { get { return Professionbuddy.Instance.Strings["FlowControl_If_LongName"]; } }
-        virtual public string Title
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Condition) ?
-                    Professionbuddy.Instance.Strings["FlowControl_If_LongName"]:
-                    (Professionbuddy.Instance.Strings["FlowControl_If_Name"] + " (" + Condition + ")");
-            }
-        }
-
-
-        public virtual object Clone()
-        {
-            var pd = new If
-                         {
-                             CanRunDelegate = this.CanRunDelegate,
-                             Condition = this.Condition,
-                             IgnoreCanRun = this.IgnoreCanRun
-                         };
-            return pd;
-        }
-
-        virtual public string Help { get { return Professionbuddy.Instance.Strings["FlowControl_If_Help"]; } }
-
-        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
-
-        public void OnProfileSave(System.Xml.Linq.XElement element) { }
-
-        public IPBComposite AttachedComposite { get { return this; } }
     }
 }

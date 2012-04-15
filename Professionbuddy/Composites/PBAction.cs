@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.Drawing;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using System.Xml.Serialization;
+using HighVoltz.Dynamic;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Action = TreeSharp.Action;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Collections.Specialized;
-using HighVoltz.Dynamic;
 
 namespace HighVoltz.Composites
 {
@@ -14,19 +16,22 @@ namespace HighVoltz.Composites
         PropertyBag Properties { get; }
         string Name { get; }
         string Title { get; }
-        System.Drawing.Color Color { get; }
+        Color Color { get; }
         string Help { get; }
-        void Reset();
         bool IsDone { get; }
-        void OnProfileLoad(System.Xml.Linq.XElement element);
-        void OnProfileSave(System.Xml.Linq.XElement element);
+        void Reset();
+        void OnProfileLoad(XElement element);
+        void OnProfileSave(XElement element);
     }
 
     #region PBAction
+
     public abstract class PBAction : Action, IPBComposite
     {
-        protected Professionbuddy Pb;
         protected LocalPlayer Me = ObjectManager.Me;
+        protected Professionbuddy Pb;
+        [XmlIgnore] private Color _color = Color.Black;
+
         protected PBAction()
         {
             HasRunOnce = false;
@@ -36,37 +41,41 @@ namespace HighVoltz.Composites
 // ReSharper restore DoNotCallOverridableMethodsInConstructor
             Expressions = new ListDictionary();
         }
-        virtual public string Help { get { return ""; } }
-        virtual public string Name { get { return "PBAction"; } }
-        virtual public string Title { get { return string.Format("({0})", Name); } }
-        virtual public ListDictionary Expressions { get; private set; }
-        [XmlIgnore]
-        System.Drawing.Color _color = System.Drawing.Color.Black;
-        virtual public System.Drawing.Color Color {
+
+        public virtual ListDictionary Expressions { get; private set; }
+
+        protected PropertyGrid PropertyGrid
+        {
+            get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; }
+        }
+
+        protected bool HasRunOnce { get; set; }
+
+        #region IPBComposite Members
+
+        public virtual string Help
+        {
+            get { return ""; }
+        }
+
+        public virtual string Name
+        {
+            get { return "PBAction"; }
+        }
+
+        public virtual string Title
+        {
+            get { return string.Format("({0})", Name); }
+        }
+
+        public virtual Color Color
+        {
             get { return _color; }
             set { _color = value; }
         }
-        protected PropertyGrid PropertyGrid { get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; } }
-        protected void RefreshPropertyGrid()
-        {
-            if (PropertyGrid != null)
-            {
-                PropertyGrid.Refresh();
-            }
-        }
-        protected void RegisterDynamicProperty(string propName)
-        {
-            Properties[propName].PropertyChanged += DynamicPropertyChanged;
-        }
+
         public virtual bool IsDone { get; protected set; }
-        protected bool HasRunOnce { get; set; }
-        /// <summary>
-        /// If overriding this method call base method or set HasRunOnce to false.
-        /// </summary>
-        protected virtual void RunOnce()
-        {
-            HasRunOnce = true;
-        }
+
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()
@@ -80,15 +89,43 @@ namespace HighVoltz.Composites
             HasRunOnce = false;
         }
 
-        public virtual void OnProfileLoad(System.Xml.Linq.XElement element) { }
-
-        public virtual void OnProfileSave(System.Xml.Linq.XElement element) { }
-
-        void DynamicPropertyChanged(object sender, MetaPropArgs e)
+        public virtual void OnProfileLoad(XElement element)
         {
-            ((IDynamicProperty)e.Value).AttachedComposite = this;
+        }
+
+        public virtual void OnProfileSave(XElement element)
+        {
+        }
+
+        #endregion
+
+        protected void RefreshPropertyGrid()
+        {
+            if (PropertyGrid != null)
+            {
+                PropertyGrid.Refresh();
+            }
+        }
+
+        protected void RegisterDynamicProperty(string propName)
+        {
+            Properties[propName].PropertyChanged += DynamicPropertyChanged;
+        }
+
+        /// <summary>
+        /// If overriding this method call base method or set HasRunOnce to false.
+        /// </summary>
+        protected virtual void RunOnce()
+        {
+            HasRunOnce = true;
+        }
+
+        private void DynamicPropertyChanged(object sender, MetaPropArgs e)
+        {
+            ((IDynamicProperty) e.Value).AttachedComposite = this;
             DynamicCodeCompiler.CodeWasModified = true;
         }
     }
+
     #endregion
 }

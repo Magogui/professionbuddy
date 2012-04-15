@@ -2,36 +2,26 @@
 using System.Drawing.Design;
 using System.Globalization;
 using Styx.Logic;
-using Styx.Logic.Pathing;
-using TreeSharp;
 using Styx.Logic.BehaviorTree;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
+using Styx.Logic.Pathing;
+using Styx.WoWInternals;
+using TreeSharp;
 
 namespace HighVoltz.Composites
 {
     public sealed class FlyToAction : PBAction
     {
-        [PbXmlAttribute]
-        public bool Dismount
-        {
-            get { return (bool)Properties["Dismount"].Value; }
-            set { Properties["Dismount"].Value = value; }
-        }
-        WoWPoint _loc;
-        [PbXmlAttribute]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
+        private WoWPoint _loc;
+
         public FlyToAction()
         {
-            Properties["Dismount"] = new MetaProp("Dismount", typeof(bool), 
-                new DisplayNameAttribute(Pb.Strings["Action_FlyToAction_Dismount"]));
+            Properties["Dismount"] = new MetaProp("Dismount", typeof (bool),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_FlyToAction_Dismount"]));
 
-            Properties["Location"] = new MetaProp("Location", typeof(string), 
-                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            Properties["Location"] = new MetaProp("Location", typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             Location = _loc.ToInvariantString();
             Dismount = true;
@@ -39,11 +29,41 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += LocationChanged;
         }
 
-        void LocationChanged(object sender, MetaPropArgs e)
+        [PbXmlAttribute]
+        public bool Dismount
         {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            get { return (bool) Properties["Dismount"].Value; }
+            set { Properties["Dismount"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string) Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return Pb.Strings["Action_FlyToAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get { return string.Format("{0}: {1} ", Name, Location); }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_FlyToAction_Help"]; }
+        }
+
+        private void LocationChanged(object sender, MetaPropArgs e)
+        {
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
-            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y,
+                                                         _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
@@ -70,24 +90,9 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        public override string Name { get { return Pb.Strings["Action_FlyToAction_Name"]; } }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: {1} ", Name, Location);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_FlyToAction_Help"];
-            }
-        }
         public override object Clone()
         {
-            return new FlyToAction { Location = this.Location, Dismount = this.Dismount };
+            return new FlyToAction {Location = Location, Dismount = Dismount};
         }
     }
 }

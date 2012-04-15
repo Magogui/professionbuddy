@@ -1,41 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing.Design;
 using System.Globalization;
 using System.Linq;
 using HighVoltz.Dynamic;
-using Styx.Logic.Pathing;
 using Styx;
 using Styx.Database;
-using System.ComponentModel;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Merchant;
+using Styx.Logic.Pathing;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
-    sealed class SellItemAction : PBAction
+    internal sealed class SellItemAction : PBAction
     {
-        [PbXmlAttribute]
-        public DepositWithdrawAmount Sell
-        {
-            get { return (DepositWithdrawAmount)Properties["Sell"].Value; }
-            set { Properties["Sell"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public uint NpcEntry
-        {
-            get { return (uint)Properties["NpcEntry"].Value; }
-            set { Properties["NpcEntry"].Value = value; }
-        }
-        WoWPoint _loc;
-        [PbXmlAttribute]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
+        #region SellItemActionType enum
+
         public enum SellItemActionType
         {
             Specific,
@@ -43,47 +26,39 @@ namespace HighVoltz.Composites
             Whites,
             Greens,
         }
-        [PbXmlAttribute]
-        public SellItemActionType SellItemType
-        {
-            get { return (SellItemActionType)Properties["SellItemType"].Value; }
-            set { Properties["SellItemType"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public string ItemID
-        {
-            get { return (string)Properties["ItemID"].Value; }
-            set { Properties["ItemID"].Value = value; }
-        }
-        [PbXmlAttribute]
-        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
-        public DynamicProperty<int> Count
-        {
-            get { return (DynamicProperty<int>)Properties["Count"].Value; }
-            set { Properties["Count"].Value = value; }
-        }
+
+        #endregion
+
+        private uint _entry;
+        private WoWPoint _loc;
+
         public SellItemAction()
         {
-            Properties["Location"] = new MetaProp("Location", 
-                typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            Properties["Location"] = new MetaProp("Location",
+                                                  typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint), 
-                new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
+                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
 
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
 
-            Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
+            Properties["Count"] = new MetaProp("Count", typeof (DynamicProperty<int>),
+                                               new TypeConverterAttribute(
+                                                   typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
 
-            Properties["SellItemType"] = new MetaProp("SellItemType", typeof(SellItemActionType), 
-                new DisplayNameAttribute(Pb.Strings["Action_SellItemAction_SellItemType"]));
+            Properties["SellItemType"] = new MetaProp("SellItemType", typeof (SellItemActionType),
+                                                      new DisplayNameAttribute(
+                                                          Pb.Strings["Action_SellItemAction_SellItemType"]));
 
-            Properties["Sell"] = new MetaProp("Sell", typeof(DepositWithdrawAmount),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
+            Properties["Sell"] = new MetaProp("Sell", typeof (DepositWithdrawAmount),
+                                              new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
 
             ItemID = "";
             Count = new DynamicProperty<int>(this, "0");
@@ -99,21 +74,86 @@ namespace HighVoltz.Composites
             Properties["Sell"].PropertyChanged += SellChanged;
         }
 
-        void SellChanged(object sender, MetaPropArgs e)
+        [PbXmlAttribute]
+        public DepositWithdrawAmount Sell
+        {
+            get { return (DepositWithdrawAmount) Properties["Sell"].Value; }
+            set { Properties["Sell"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint NpcEntry
+        {
+            get { return (uint) Properties["NpcEntry"].Value; }
+            set { Properties["NpcEntry"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string) Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public SellItemActionType SellItemType
+        {
+            get { return (SellItemActionType) Properties["SellItemType"].Value; }
+            set { Properties["SellItemType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string ItemID
+        {
+            get { return (string) Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Count
+        {
+            get { return (DynamicProperty<int>) Properties["Count"].Value; }
+            set { Properties["Count"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return Pb.Strings["Action_SellItemAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.Format("({0}) " +
+                                     (SellItemType == SellItemActionType.Specific
+                                          ? ItemID.ToString(CultureInfo.InvariantCulture) + " x{1} "
+                                          : SellItemType.ToString()), Name, Count);
+            }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_SellItemAction_Help"]; }
+        }
+
+        private void SellChanged(object sender, MetaPropArgs e)
         {
             Properties["Sell"].Show = Sell == DepositWithdrawAmount.Amount;
             RefreshPropertyGrid();
         }
-        void LocationChanged(object sender, MetaPropArgs e)
+
+        private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
-        void SellItemActionPropertyChanged(object sender, MetaPropArgs e)
+        private void SellItemActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (SellItemType)
             {
@@ -129,7 +169,6 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        uint _entry;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -142,9 +181,10 @@ namespace HighVoltz.Composites
                     if (_entry == 0)
                     {
                         MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestVendor, 0);
-                        var npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                ObjectManager.Me.Location, UnitNPCFlags.Vendor);
-                        _entry = (uint)npcResults.Entry;
+                        NpcResult npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate,
+                                                                        ObjectManager.Me.MapId,
+                                                                        ObjectManager.Me.Location, UnitNPCFlags.Vendor);
+                        _entry = (uint) npcResults.Entry;
                         movetoPoint = npcResults.Location;
                     }
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == _entry).
@@ -184,7 +224,7 @@ namespace HighVoltz.Composites
                         string[] entries = ItemID.Split(',');
                         if (entries.Length > 0)
                         {
-                            foreach (var entry in entries)
+                            foreach (string entry in entries)
                             {
                                 uint temp;
                                 uint.TryParse(entry.Trim(), out temp);
@@ -247,36 +287,18 @@ namespace HighVoltz.Composites
             base.Reset();
             _entry = 0;
         }
-        public override string Name
-        {
-            get { return Pb.Strings["Action_SellItemAction_Name"]; }
-        }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("({0}) " +
-                  (SellItemType == SellItemActionType.Specific ? ItemID.ToString(CultureInfo.InvariantCulture) + " x{1} " : SellItemType.ToString()), Name, Count);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_SellItemAction_Help"];
-            }
-        }
+
         public override object Clone()
         {
             return new SellItemAction
-            {
-                Count = this.Count,
-                ItemID = this.ItemID,
-                SellItemType = this.SellItemType,
-                NpcEntry = this.NpcEntry,
-                Location = this.Location,
-                Sell = this.Sell
-            };
+                       {
+                           Count = Count,
+                           ItemID = ItemID,
+                           SellItemType = SellItemType,
+                           NpcEntry = NpcEntry,
+                           Location = Location,
+                           Sell = Sell
+                       };
         }
     }
 }

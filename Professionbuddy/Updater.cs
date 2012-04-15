@@ -4,17 +4,23 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows;
 using Styx.Helpers;
 
 namespace HighVoltz
 {
-    static public class Updater
+    public static class Updater
     {
-        const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
+        private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r=";
+
+        private static readonly Regex _linkPattern = new Regex(@"<li><a href="".+"">(?<ln>.+(?:..))</a></li>",
+                                                               RegexOptions.CultureInvariant);
+
+        private static readonly Regex _changelogPattern =
+            new Regex(
+                "<h4 style=\"margin-top:0\">Log message</h4>\r?\n?<pre class=\"wrap\" style=\"margin-left:1em\">(?<log>.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?)</pre>",
+                RegexOptions.CultureInvariant);
 
         public static void CheckForUpdate()
         {
@@ -31,8 +37,8 @@ namespace HighVoltz
                     GlobalPBSettings.Instance.CurrentRevision = remoteRev;
                     GlobalPBSettings.Instance.Save();
                     Logging.Write(Color.DodgerBlue, "************* Change Log ****************");
-                    Logging.Write(Color.SkyBlue,GetChangeLog(remoteRev));
-                    Logging.Write(Color.DodgerBlue,"*****************************************");
+                    Logging.Write(Color.SkyBlue, GetChangeLog(remoteRev));
+                    Logging.Write(Color.DodgerBlue, "*****************************************");
                     Logging.Write(Color.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
                 }
                 else
@@ -46,7 +52,7 @@ namespace HighVoltz
             }
         }
 
-        static int GetRevision()
+        private static int GetRevision()
         {
             var client = new WebClient();
             string html = client.DownloadString(PbSvnUrl);
@@ -57,11 +63,10 @@ namespace HighVoltz
             throw new Exception("Unable to retreive revision");
         }
 
-        static Regex _linkPattern = new Regex(@"<li><a href="".+"">(?<ln>.+(?:..))</a></li>", RegexOptions.CultureInvariant);
-        static void DownloadFilesFromSvn(WebClient client, string url)
+        private static void DownloadFilesFromSvn(WebClient client, string url)
         {
             string html = client.DownloadString(url);
-            var results = _linkPattern.Matches(html);
+            MatchCollection results = _linkPattern.Matches(html);
 
             IEnumerable<Match> matches = from match in results.OfType<Match>()
                                          where match.Success && match.Groups["ln"].Success
@@ -95,13 +100,15 @@ namespace HighVoltz
                 }
             }
         }
-        static string RemoveXmlEscapes(string xml)
+
+        private static string RemoveXmlEscapes(string xml)
         {
-            return xml.Replace("&amp;", "&").Replace("&lt;", "<").Replace("&gt;", ">").Replace("&quot;", "\"").Replace("&apos;", "'");
+            return
+                xml.Replace("&amp;", "&").Replace("&lt;", "<").Replace("&gt;", ">").Replace("&quot;", "\"").Replace(
+                    "&apos;", "'");
         }
 
-        static Regex _changelogPattern = new Regex("<h4 style=\"margin-top:0\">Log message</h4>\r?\n?<pre class=\"wrap\" style=\"margin-left:1em\">(?<log>.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?)</pre>", RegexOptions.CultureInvariant);
-        static string GetChangeLog(int revision)
+        private static string GetChangeLog(int revision)
         {
             var client = new WebClient();
             string html = client.DownloadString(PbChangeLogUrl + revision);

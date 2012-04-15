@@ -1,35 +1,86 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using TreeSharp;
 using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Xml.Linq;
+using TreeSharp;
 
 namespace HighVoltz.Composites
 {
-    sealed class SubRoutine : GroupComposite, IPBComposite
+    internal sealed class SubRoutine : GroupComposite, IPBComposite
     {
-        [PbXmlAttribute]
-        public string SubRoutineName
-        {
-            get { return (string)Properties["SubRoutineName"].Value; }
-            set { Properties["SubRoutineName"].Value = value; }
-        }
         public SubRoutine()
         {
             Properties = new PropertyBag();
-            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof(string),
-                new DisplayNameAttribute(Professionbuddy.Instance.Strings["Action_SubRoutine_SubroutineName"]));
+            Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof (string),
+                                                        new DisplayNameAttribute(
+                                                            Professionbuddy.Instance.Strings[
+                                                                "Action_SubRoutine_SubroutineName"]));
             SubRoutineName = "";
         }
 
-        public System.Drawing.Color Color { get { return System.Drawing.Color.Blue; } }
-        public string Name { get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Name"]; } }
-        public string Title { get { return string.Format("Sub {0}", SubRoutineName); } }
+        [PbXmlAttribute]
+        public string SubRoutineName
+        {
+            get { return (string) Properties["SubRoutineName"].Value; }
+            set { Properties["SubRoutineName"].Value = value; }
+        }
+
+        #region IPBComposite Members
+
+        public Color Color
+        {
+            get { return Color.Blue; }
+        }
+
+        public string Name
+        {
+            get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Name"]; }
+        }
+
+        public string Title
+        {
+            get { return string.Format("Sub {0}", SubRoutineName); }
+        }
 
         public PropertyBag Properties { get; private set; }
 
+        public void Reset()
+        {
+            Selection = null;
+            IsDone = false;
+            recursiveReset(this);
+        }
+
+        public bool IsDone { get; set; }
+
+        public object Clone()
+        {
+            var pd = new SubRoutine
+                         {
+                             SubRoutineName = SubRoutineName,
+                         };
+            return pd;
+        }
+
+        public string Help
+        {
+            get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Help"]; }
+        }
+
+        public void OnProfileLoad(XElement element)
+        {
+        }
+
+        public void OnProfileSave(XElement element)
+        {
+        }
+
+        #endregion
+
         protected override IEnumerable<RunStatus> Execute(object context)
         {
-            if (context == null || !(context is string) || (string)context != SubRoutineName)
+            if (context == null || !(context is string) || (string) context != SubRoutineName)
                 yield return RunStatus.Failure;
             foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
             {
@@ -47,13 +98,7 @@ namespace HighVoltz.Composites
             yield return RunStatus.Failure;
         }
 
-        public void Reset()
-        {
-            Selection = null;
-            IsDone = false;
-            recursiveReset(this);
-        }
-        void recursiveReset(GroupComposite gc)
+        private void recursiveReset(GroupComposite gc)
         {
             foreach (IPBComposite comp in gc.Children)
             {
@@ -62,22 +107,5 @@ namespace HighVoltz.Composites
                     recursiveReset(comp as GroupComposite);
             }
         }
-
-        public bool IsDone { get; set; }
-
-        public object Clone()
-        {
-            var pd = new SubRoutine
-                         {
-                             SubRoutineName = this.SubRoutineName,
-                         };
-            return pd;
-        }
-
-        public string Help { get { return Professionbuddy.Instance.Strings["Action_SubRoutine_Help"]; } }
-
-        public void OnProfileLoad(System.Xml.Linq.XElement element) { }
-
-        public void OnProfileSave(System.Xml.Linq.XElement element) { }
     }
 }

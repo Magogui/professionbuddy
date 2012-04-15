@@ -3,33 +3,87 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using System.Threading;
-using System.IO;
-using Styx;
-using Styx.Logic.Pathing;
-using TreeSharp;
-using Styx.Helpers;
-using Styx.WoWInternals;
-using Styx.Logic;
 using System.Diagnostics;
-using Styx.Logic.BehaviorTree;
-using Styx.WoWInternals.WoWObjects;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Windows.Documents;
+using System.Windows.Forms;
+using System.Windows.Media;
 using System.Xml.Linq;
 using HighVoltz.Composites;
-using Styx.Logic.Profiles;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Security.Cryptography;
-using System.Windows.Documents;
 using HighVoltz.Dynamic;
+using Styx;
+using Styx.Helpers;
+using Styx.Logic;
+using Styx.Logic.BehaviorTree;
+using Styx.Logic.Profiles;
+using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
+using TreeSharp;
+using Tripper.Tools.Math;
+using Action = System.Action;
+using Application = System.Windows.Application;
+using Color = System.Drawing.Color;
+using RichTextBox = System.Windows.Controls.RichTextBox;
+using Timer = System.Threading.Timer;
 
 namespace HighVoltz
 {
     public class Professionbuddy : BotBase
     {
         #region Declarations
+
+        private const string _name = "ProfessionBuddy";
+        private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
+        public static readonly string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
+        private static readonly LocalPlayer Me = ObjectManager.Me;
+        public static readonly Svn Svn = new Svn();
+
+        public readonly string ProfilePath = Environment.UserName == "highvoltz"
+                                                 ? @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles"
+                                                 : Path.Combine(BotPath, "Profiles");
+
+        private readonly bool _ctorRunOnce;
+        private readonly PbProfileSettings _profileSettings = new PbProfileSettings();
+        public bool IsRunning;
+
+        public Professionbuddy()
+        {
+            Instance = this;
+            new Thread((ThreadStart) delegate
+                                         {
+                                             try
+                                             {
+                                                 ProcessModule mod = Process.GetCurrentProcess().MainModule;
+                                                 using (HashAlgorithm hashAlg = new SHA1Managed())
+                                                 {
+                                                     using (
+                                                         Stream file = new FileStream(mod.FileName, FileMode.Open,
+                                                                                      FileAccess.Read))
+                                                     {
+                                                         byte[] hash = hashAlg.ComputeHash(file);
+                                                         Logging.WriteDebug("H: {0}", BitConverter.ToString(hash));
+                                                     }
+                                                 }
+                                                 FileVersionInfo vInfo = mod.FileVersionInfo;
+                                                 Logging.WriteDebug("V: {0}", vInfo.FileVersion);
+                                             }
+                                             catch (Exception ex)
+                                             {
+                                                 Err(ex.ToString());
+                                             }
+                                         }).Start();
+            // Initialize is called when bot is started.. we need to hook these events before that.
+            if (!_ctorRunOnce)
+            {
+                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                Profile.OnUnknownProfileElement += Profile_OnUnknownProfileElement;
+                _ctorRunOnce = true;
+            }
+        }
 
         public ProfessionBuddySettings MySettings { get; private set; }
         public GlobalPBSettings GlobalSettings { get; private set; }
@@ -44,76 +98,58 @@ namespace HighVoltz
         public bool IsTradeSkillsLoaded { get; private set; }
 
         // ReSharper disable InconsistentNaming
-        private const string _name = "ProfessionBuddy";
-        // ReSharper restore InconsistentNaming
-        public static readonly string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
-        const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
-
-        public readonly string ProfilePath = Environment.UserName == "highvoltz" ?
-                        @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles" : Path.Combine(BotPath, "Profiles");
-
-        public event EventHandler OnTradeSkillsLoaded;
-        static readonly LocalPlayer Me = ObjectManager.Me;
-        public static readonly Svn Svn = new Svn();
         // DataStore is an addon for WOW thats stores bag/ah/mail item info and more.
-        public bool HasDataStoreAddon { get { return DataStore != null && DataStore.HasDataStoreAddon; } }
+        public bool HasDataStoreAddon
+        {
+            get { return DataStore != null && DataStore.HasDataStoreAddon; }
+        }
+
         // profile Settings.
-        readonly PbProfileSettings _profileSettings = new PbProfileSettings();
+
         public PbProfileSettings ProfileSettings
         {
             get { return _profileSettings; }
         }
 
-        public bool IsRunning;
         // static instance
         public static Professionbuddy Instance { get; private set; }
-        private Version Version { get { return new Version(1, Svn.Revision); } }
-        // test some culture specific stuff.
-        private readonly bool _ctorRunOnce;
-        public Professionbuddy()
+
+        private Version Version
         {
-            Instance = this;
-            new Thread((ThreadStart)delegate
-                {
-                    try
-                    {
-                        var mod = Process.GetCurrentProcess().MainModule;
-                        using (HashAlgorithm hashAlg = new SHA1Managed())
-                        {
-                            using (Stream file = new FileStream(mod.FileName, FileMode.Open, FileAccess.Read))
-                            {
-                                byte[] hash = hashAlg.ComputeHash(file);
-                                Logging.WriteDebug("H: {0}", BitConverter.ToString(hash));
-                            }
-                        }
-                        var vInfo = mod.FileVersionInfo;
-                        Logging.WriteDebug("V: {0}", vInfo.FileVersion);
-                    }
-                    catch (Exception ex)
-                    {
-                        Err(ex.ToString());
-                    }
-                }).Start();
-            // Initialize is called when bot is started.. we need to hook these events before that.
-            if (!_ctorRunOnce)
-            {
-                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
-                Profile.OnUnknownProfileElement += Profile_OnUnknownProfileElement;
-                _ctorRunOnce = true;
-            }
+            get { return new Version(1, Svn.Revision); }
         }
+
+        public event EventHandler OnTradeSkillsLoaded;
+
+        // test some culture specific stuff.
 
         #endregion
 
         #region Overrides
+
+        private bool _firstStartDone;
+        private InvisiForm _ivisibleForm;
+
         public override string Name
         {
             get { return _name; }
         }
 
-        public override PulseFlags PulseFlags { get { return PulseFlags.All; } }
+        public override PulseFlags PulseFlags
+        {
+            get { return PulseFlags.All; }
+        }
 
-        bool _firstStartDone = false;
+        public override Form ConfigurationForm
+        {
+            get
+            {
+                if (!_init)
+                    Init();
+                return _ivisibleForm ?? (_ivisibleForm = new InvisiForm());
+            }
+        }
+
         public override void Start()
         {
             Debug("Start Called");
@@ -157,9 +193,11 @@ namespace HighVoltz
                     {
                         LoadPBProfile(MySettings.LastProfile);
                     }
-
                 }
-                catch (Exception ex) { Err(ex.ToString()); }
+                catch (Exception ex)
+                {
+                    Err(ex.ToString());
+                }
                 _firstStartDone = true;
             }
             try
@@ -184,34 +222,6 @@ namespace HighVoltz
         }
 
         // used as a hack to get a modeless form for pb's GUI window. 
-        InvisiForm _ivisibleForm;
-        public override Form ConfigurationForm
-        {
-            get
-            {
-                if (!_init)
-                    Init();
-                return _ivisibleForm ?? (_ivisibleForm = new InvisiForm());
-            }
-        }
-
-        class InvisiForm : Form
-        {
-            public InvisiForm()
-            {
-                Size = new Size(0, 0);
-            }
-            protected override void OnLoad(EventArgs e)
-            {
-                if (!MainForm.IsValid)
-                {
-                    new MainForm { TopLevel = true }.Show();
-                    MainForm.Instance.TopLevel = true;
-                }
-                DialogResult = DialogResult.OK;
-                MainForm.Instance.Activate();
-            }
-        }
 
         public override void Pulse()
         {
@@ -242,13 +252,32 @@ namespace HighVoltz
             Init();
         }
 
+        private class InvisiForm : Form
+        {
+            public InvisiForm()
+            {
+                Size = new Size(0, 0);
+            }
+
+            protected override void OnLoad(EventArgs e)
+            {
+                if (!MainForm.IsValid)
+                {
+                    new MainForm {TopLevel = true}.Show();
+                    MainForm.Instance.TopLevel = true;
+                }
+                DialogResult = DialogResult.OK;
+                MainForm.Instance.Activate();
+            }
+        }
+
         #endregion
 
         #region Callbacks
 
         #region OnBagUpdate
 
-        readonly Stopwatch _onBagUpdateSpamSW = new Stopwatch();
+        private readonly Stopwatch _onBagUpdateSpamSW = new Stopwatch();
 
         private void OnBagUpdate(object obj, LuaEventArgs args)
         {
@@ -259,7 +288,7 @@ namespace HighVoltz
             }
         }
 
-        void OnBagUpdateTimerCB()
+        private void OnBagUpdateTimerCB()
         {
             try
             {
@@ -272,16 +301,20 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.RefreshTradeSkillTabs();
-                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                    MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
                 }
             }
-            catch (Exception ex) { Err(ex.ToString()); }
+            catch (Exception ex)
+            {
+                Err(ex.ToString());
+            }
         }
+
         #endregion
 
         #region OnSkillUpdate
 
-        readonly Stopwatch _onSkillUpdateSpamSW = new Stopwatch();
+        private readonly Stopwatch _onSkillUpdateSpamSW = new Stopwatch();
 
         private void OnSkillUpdate(object obj, LuaEventArgs args)
         {
@@ -294,7 +327,7 @@ namespace HighVoltz
             }
         }
 
-        void OnSkillUpdateTimerCB()
+        private void OnSkillUpdateTimerCB()
         {
             Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             try
@@ -303,8 +336,9 @@ namespace HighVoltz
                 // check if there was any tradeskills added or removed.
                 WoWSkill[] skills = SupportedTradeSkills;
                 bool changed = skills.
-                    Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine)s.Id) == 1) != TradeSkillList.Count ||
-                    skills.Length != TradeSkillList.Count;
+                                   Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine) s.Id) == 1) !=
+                               TradeSkillList.Count ||
+                               skills.Length != TradeSkillList.Count;
                 if (changed)
                 {
                     Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
@@ -321,26 +355,28 @@ namespace HighVoltz
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                        MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
                     }
                 }
             }
-            catch (Exception ex) { Err(ex.ToString()); }
+            catch (Exception ex)
+            {
+                Err(ex.ToString());
+            }
         }
 
-        public void Professionbuddy_OnTradeSkillsLoaded(object sender, System.EventArgs e)
+        public void Professionbuddy_OnTradeSkillsLoaded(object sender, EventArgs e)
         {
             if (MainForm.IsValid)
                 MainForm.Instance.InitTradeSkillTab();
             OnTradeSkillsLoaded -= Professionbuddy_OnTradeSkillsLoaded;
         }
+
         #endregion
-
-
 
         #region OnSpellsChanged
 
-        readonly Stopwatch _onSpellsChangedSpamSw = new Stopwatch();
+        private readonly Stopwatch _onSpellsChangedSpamSw = new Stopwatch();
 
         private void OnSpellsChanged(object obj, LuaEventArgs args)
         {
@@ -364,29 +400,33 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.InitTradeSkillTab();
-                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                    MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
                 }
             }
             catch (Exception ex)
-            { Err(ex.ToString()); }
+            {
+                Err(ex.ToString());
+            }
         }
+
         #endregion
 
-        void Profile_OnUnknownProfileElement(object sender, UnknownProfileElementEventArgs e)
+        // Used as a fix when profile is loaded before Inititialize is called
+        private static string _profileToLoad = "";
+        private static string _lastProfilePath = "";
+        internal static bool LastProfileIsHBProfile;
+
+        private void Profile_OnUnknownProfileElement(object sender, UnknownProfileElementEventArgs e)
         {
             if (e.Element.Ancestors("Professionbuddy").Any())
             {
                 e.Handled = true;
             }
         }
-        // Used as a fix when profile is loaded before Inititialize is called
-        static private string _profileToLoad = "";
-        static private string _lastProfilePath = "";
-        internal static bool LastProfileIsHBProfile;
 
         //private static bool _botIsStartingUp;
 
-        static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
+        private static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
             {
@@ -401,20 +441,20 @@ namespace HighVoltz
                     {
                         try
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(
-                                new System.Action(() =>
-                                                      {
-                                                          TreeRoot.Stop();
-                                                          LoadPBProfile(ProfileManager.XmlLocation);
-                                                          if (MainForm.IsValid)
-                                                          {
-                                                              if (Instance.ProfileSettings.Settings.Count > 0)
-                                                                  MainForm.Instance.AddProfileSettingsTab();
-                                                              else
-                                                                  MainForm.Instance.RemoveProfileSettingsTab();
-                                                          }
-                                                          TreeRoot.Start();
-                                                      }
+                            Application.Current.Dispatcher.Invoke(
+                                new Action(() =>
+                                               {
+                                                   TreeRoot.Stop();
+                                                   LoadPBProfile(ProfileManager.XmlLocation);
+                                                   if (MainForm.IsValid)
+                                                   {
+                                                       if (Instance.ProfileSettings.Settings.Count > 0)
+                                                           MainForm.Instance.AddProfileSettingsTab();
+                                                       else
+                                                           MainForm.Instance.RemoveProfileSettingsTab();
+                                                   }
+                                                   TreeRoot.Start();
+                                               }
                                     ));
                         }
                         catch
@@ -450,15 +490,18 @@ namespace HighVoltz
 
         #region Behavior Tree
 
-        readonly PbProfile _currentProfile = new PbProfile();
-        public PbProfile CurrentProfile { get { return _currentProfile; } }
-        readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
-        override public Composite Root
+        private readonly PbProfile _currentProfile = new PbProfile();
+
+        private readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
+
+        public PbProfile CurrentProfile
         {
-            get
-            {
-                return _root;
-            }
+            get { return _currentProfile; }
+        }
+
+        public override Composite Root
+        {
+            get { return _root; }
         }
 
         public PbDecorator PbBehavior
@@ -478,7 +521,20 @@ namespace HighVoltz
 
         #region Misc
 
-        static bool _init;
+        private static bool _init;
+        private static bool _isChangingBot;
+
+        private WoWSkill[] SupportedTradeSkills
+        {
+            get
+            {
+                IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
+                                                  where
+                                                      skill != SkillLine.Archaeology && Me.GetSkill(skill).MaxValue > 0
+                                                  select Me.GetSkill(skill);
+                return skillList.ToArray();
+            }
+        }
 
         private void Init()
         {
@@ -491,12 +547,14 @@ namespace HighVoltz
                         Directory.CreateDirectory(BotPath);
                     DynamicCodeCompiler.WipeTempFolder();
                     // force Tripper.Tools.dll to load........
-                    new Tripper.Tools.Math.Vector3(0, 0, 0);
+                    new Vector3(0, 0, 0);
 
                     MySettings = new ProfessionBuddySettings(
                         Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
-                        Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0)))
-                    );
+                                                                            Name, Me.Name,
+                                                                            Lua.GetReturnVal<string>(
+                                                                                "return GetRealmName()", 0)))
+                        );
                     GlobalSettings = new GlobalPBSettings(
                         Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}.xml", Name)));
 
@@ -509,15 +567,21 @@ namespace HighVoltz
                     DataStore.ImportDataStore();
                     // load localized strings
                     LoadStrings();
-                    BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                    BotBase bot =
+                        BotManager.Instance.Bots.Values.FirstOrDefault(
+                            b =>
+                            b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
                     // check for Professionbuddy updates
-                    new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
+                    new Thread(Updater.CheckForUpdate) {IsBackground = true}.Start();
                     _init = true;
                 }
             }
-            catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
+            catch (Exception ex)
+            {
+                Logging.Write(Color.Red, ex.ToString());
+            }
         }
 
         private void LoadStrings()
@@ -527,9 +591,12 @@ namespace HighVoltz
             string defaultStringsPath = Path.Combine(directory, "Strings.xml");
             LoadStringsFromXml(defaultStringsPath);
             // file that includes language and country/region
-            string langAndCountryFile = Path.Combine(directory, "Strings." + Thread.CurrentThread.CurrentUICulture.Name + ".xml");
+            string langAndCountryFile = Path.Combine(directory,
+                                                     "Strings." + Thread.CurrentThread.CurrentUICulture.Name + ".xml");
             // file that includes language only;
-            string langOnlyFile = Path.Combine(directory, "Strings." + Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName + ".xml");
+            string langOnlyFile = Path.Combine(directory,
+                                               "Strings." +
+                                               Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName + ".xml");
             if (File.Exists(langAndCountryFile))
             {
                 Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.Name);
@@ -545,75 +612,67 @@ namespace HighVoltz
         private void LoadStringsFromXml(string path)
         {
             XElement root = XElement.Load(path);
-            foreach (var element in root.Elements())
+            foreach (XElement element in root.Elements())
             {
                 Strings[element.Name.ToString()] = element.Value;
             }
         }
 
-        WoWSkill[] SupportedTradeSkills
-        {
-            get
-            {
-                IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
-                                                  where skill != SkillLine.Archaeology && Me.GetSkill(skill).MaxValue > 0
-                                                  select Me.GetSkill(skill);
-                return skillList.ToArray();
-            }
-        }
-
         public void LoadTradeSkills()
         {
-            new System.Threading.Timer(state =>
-            {
-                try
-                {
-                    lock (TradeSkillList)
-                    {
-                        TradeSkillList.Clear();
-                        //IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
-                        //                                  select Me.GetSkill(skill);
+            new Timer(state =>
+                          {
+                              try
+                              {
+                                  lock (TradeSkillList)
+                                  {
+                                      TradeSkillList.Clear();
+                                      //IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
+                                      //                                  select Me.GetSkill(skill);
 
-                        //foreach (WoWSkill skill in skillList)
-                        //{
-                        //    Log("Adding TradeSkill {0}", skill.Name);
-                        //    TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
-                        //    if (ts != null)
-                        //    {
-                        //        TradeSkillList.Add(ts);
-                        //    }
-                        //    else
-                        //    {
-                        //        IsTradeSkillsLoaded = false;
-                        //        Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
-                        //        return;
-                        //    }
-                        //}
-                        foreach (WoWSkill skill in SupportedTradeSkills)
-                        {
-                            Log("Adding TradeSkill {0}", skill.Name);
-                            TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
-                            if (ts != null)
-                            {
-                                TradeSkillList.Add(ts);
-                            }
-                            else
-                            {
-                                IsTradeSkillsLoaded = false;
-                                Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
-                                return;
-                            }
-                        }
-                    }
-                    Log("Done Loading Tradeskills.");
-                    IsTradeSkillsLoaded = true;
-                    if (OnTradeSkillsLoaded != null)
-                    {
-                        OnTradeSkillsLoaded(this, null);
-                    }
-                }
-                catch (Exception ex) { Logging.Write(Color.Red, ex.ToString()); }
-            }, null, 0, System.Threading.Timeout.Infinite);
+                                      //foreach (WoWSkill skill in skillList)
+                                      //{
+                                      //    Log("Adding TradeSkill {0}", skill.Name);
+                                      //    TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
+                                      //    if (ts != null)
+                                      //    {
+                                      //        TradeSkillList.Add(ts);
+                                      //    }
+                                      //    else
+                                      //    {
+                                      //        IsTradeSkillsLoaded = false;
+                                      //        Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
+                                      //        return;
+                                      //    }
+                                      //}
+                                      foreach (WoWSkill skill in SupportedTradeSkills)
+                                      {
+                                          Log("Adding TradeSkill {0}", skill.Name);
+                                          TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine) skill.Id);
+                                          if (ts != null)
+                                          {
+                                              TradeSkillList.Add(ts);
+                                          }
+                                          else
+                                          {
+                                              IsTradeSkillsLoaded = false;
+                                              Log("Unable to load tradeskill {0}", (SkillLine) skill.Id);
+                                              return;
+                                          }
+                                      }
+                                  }
+                                  Log("Done Loading Tradeskills.");
+                                  IsTradeSkillsLoaded = true;
+                                  if (OnTradeSkillsLoaded != null)
+                                  {
+                                      OnTradeSkillsLoaded(this, null);
+                                  }
+                              }
+                              catch (Exception ex)
+                              {
+                                  Logging.Write(Color.Red, ex.ToString());
+                              }
+                          }, null, 0, Timeout.Infinite);
         }
 
         public void UpdateMaterials()
@@ -633,13 +692,18 @@ namespace HighVoltz
                         {
                             if (ca.IsRecipe && ca.RepeatType != CastSpellAction.RepeatCalculationType.Craftable)
                             {
-                                foreach (var ingred in ca.Recipe.Ingredients)
+                                foreach (Ingredient ingred in ca.Recipe.Ingredients)
                                 {
-                                    MaterialList[ingred.ID] = MaterialList.ContainsKey(ingred.ID) ?
-                                        MaterialList[ingred.ID] + (ca.CalculatedRepeat > 0 ?
-                                        (int)ingred.Required * (ca.CalculatedRepeat - ca.Casted) : 0) :
-
-                                        (ca.CalculatedRepeat > 0 ? (int)ingred.Required * (ca.CalculatedRepeat - ca.Casted) : 0);
+                                    MaterialList[ingred.ID] = MaterialList.ContainsKey(ingred.ID)
+                                                                  ? MaterialList[ingred.ID] +
+                                                                    (ca.CalculatedRepeat > 0
+                                                                         ? (int) ingred.Required*
+                                                                           (ca.CalculatedRepeat - ca.Casted)
+                                                                         : 0)
+                                                                  : (ca.CalculatedRepeat > 0
+                                                                         ? (int) ingred.Required*
+                                                                           (ca.CalculatedRepeat - ca.Casted)
+                                                                         : 0);
                                 }
                             }
                         }
@@ -647,7 +711,9 @@ namespace HighVoltz
                 }
             }
             catch (Exception ex)
-            { Err(ex.ToString()); }
+            {
+                Err(ex.ToString());
+            }
         }
 
         public static void LoadPBProfile(string path)
@@ -685,45 +751,48 @@ namespace HighVoltz
             Instance.MySettings.Save();
         }
 
-        private static bool _isChangingBot = false;
         public static void ChangeSecondaryBot(string botName)
         {
-            BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+            BotBase bot =
+                BotManager.Instance.Bots.Values.FirstOrDefault(
+                    b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
 
             if (bot != null)
             {
-                if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name || Instance.SecondaryBot == null)
+                if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name ||
+                    Instance.SecondaryBot == null)
                 {
                     Instance.IsRunning = false;
                     // execute from GUI thread since this thread will get aborted when switching bot
-                    System.Windows.Application.Current.Dispatcher.Invoke(
-                       new System.Action(() =>
-                                             {
-                                                 _isChangingBot = true;
-                                                 bool isRunning = TreeRoot.IsRunning;
-                                                 if (isRunning)
-                                                     TreeRoot.Stop();
-                                                 Instance.SecondaryBot = bot;
-                                                 if (!bot.Initialized)
-                                                     bot.Initialize();
-                                                 if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
-                                                 {
-                                                     ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
-                                                     ProfessionBuddySettings.Instance.Save();
-                                                 }
-                                                 if (MainForm.IsValid)
-                                                     MainForm.Instance.UpdateBotCombo();
-                                                 if (isRunning)
-                                                     TreeRoot.Start();
-                                                 _isChangingBot = false;
-                                             }
-                   ));
+                    Application.Current.Dispatcher.Invoke(
+                        new Action(() =>
+                                       {
+                                           _isChangingBot = true;
+                                           bool isRunning = TreeRoot.IsRunning;
+                                           if (isRunning)
+                                               TreeRoot.Stop();
+                                           Instance.SecondaryBot = bot;
+                                           if (!bot.Initialized)
+                                               bot.Initialize();
+                                           if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+                                           {
+                                               ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+                                               ProfessionBuddySettings.Instance.Save();
+                                           }
+                                           if (MainForm.IsValid)
+                                               MainForm.Instance.UpdateBotCombo();
+                                           if (isRunning)
+                                               TreeRoot.Start();
+                                           _isChangingBot = false;
+                                       }
+                            ));
                     Log("Changing SecondaryBot to {0}", botName);
                 }
             }
             else
                 Err("Bot with name: {0} was not found", botName);
         }
+
         // returns true if a profile was preloaded
         private static bool PreLoadHbProfile()
         {
@@ -750,13 +819,13 @@ namespace HighVoltz
             return false;
         }
 
-        static internal List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
+        internal static List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
         {
             if (list == null)
                 list = new List<T>();
-            if (comp.GetType() == typeof(T))
+            if (comp.GetType() == typeof (T))
             {
-                list.Add((T)comp);
+                list.Add((T) comp);
             }
             var groupComposite = comp as GroupComposite;
             if (groupComposite != null)
@@ -769,7 +838,7 @@ namespace HighVoltz
             return list;
         }
 
-        void LoadProtectedItems()
+        private void LoadProtectedItems()
         {
             List<uint> tempList = null;
             string path = Path.Combine(BotPath, "Protected Items.xml");
@@ -778,7 +847,7 @@ namespace HighVoltz
                 XElement xml = XElement.Load(path);
                 tempList = xml.Elements("Item").Select(x =>
                                                            {
-                                                               var xAttribute = x.Attribute("Entry");
+                                                               XAttribute xAttribute = x.Attribute("Entry");
                                                                return xAttribute != null ? xAttribute.Value.ToUint() : 0;
                                                            }).Distinct().ToList();
             }
@@ -788,17 +857,21 @@ namespace HighVoltz
         #endregion
 
         #region Utilies
+
+        private static string _logHeader;
+        private static RichTextBox _rtbLog;
+        public static string R = @"
+//!CompilerOption:AddRef:Remoting.dll
+";
+
+        private static string Header
+        {
+            get { return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version)); }
+        }
+
         public static void Err(string format, params object[] args)
         {
             Logging.Write(Color.Red, "Err: " + format, args);
-        }
-        static string _logHeader;
-        static string Header
-        {
-            get
-            {
-                return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version));
-            }
         }
 
         public static void Log(string format, params object[] args)
@@ -817,33 +890,37 @@ namespace HighVoltz
             Logging.WriteDebug(Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
-        static System.Windows.Controls.RichTextBox _rtbLog;
-        delegate void LogDelegate(Color headerColor, string header, Color msgColor, string format, params object[] args);
-
-        static void LogInvoker(Color headerColor, string header, Color msgColor, string format, params object[] args)
+        private static void LogInvoker(Color headerColor, string header, Color msgColor, string format,
+                                       params object[] args)
         {
-            if (System.Windows.Application.Current.Dispatcher.Thread == Thread.CurrentThread)
+            if (Application.Current.Dispatcher.Thread == Thread.CurrentThread)
                 LogInternal(headerColor, header, msgColor, format, args);
             else
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), headerColor, header, msgColor, format, args);
+                Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), headerColor, header, msgColor,
+                                                           format, args);
         }
 
-        static void LogInternal(Color headerColor, string header, Color msgColor, string format, params object[] args)
+        private static void LogInternal(Color headerColor, string header, Color msgColor, string format,
+                                        params object[] args)
         {
             try
             {
                 if (_rtbLog == null)
-                    _rtbLog = (System.Windows.Controls.RichTextBox)System.Windows.Application.Current.MainWindow.FindName("rtbLog");
-                System.Windows.Media.Color headerColorMedia = System.Windows.Media.Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B);
-                System.Windows.Media.Color msgColorMedia = System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B);
+                    _rtbLog = (RichTextBox) Application.Current.MainWindow.FindName("rtbLog");
+                System.Windows.Media.Color headerColorMedia = System.Windows.Media.Color.FromArgb(headerColor.A,
+                                                                                                  headerColor.R,
+                                                                                                  headerColor.G,
+                                                                                                  headerColor.B);
+                System.Windows.Media.Color msgColorMedia = System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R,
+                                                                                               msgColor.G, msgColor.B);
 
-                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
-                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(headerColorMedia));
+                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) {Text = header};
+                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColorMedia));
 
                 var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
                 string msg = String.Format(format, args);
                 messageTR.Text = msg + Environment.NewLine;
-                messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new System.Windows.Media.SolidColorBrush(msgColorMedia));
+                messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColorMedia));
                 Logging.WriteDebug(header + msg);
             }
             catch
@@ -851,10 +928,10 @@ namespace HighVoltz
                 Logging.Write("PB: " + format, args);
             }
         }
-        public static string R = @"
-//!CompilerOption:AddRef:Remoting.dll
-";
-        #endregion
 
+        private delegate void LogDelegate(
+            Color headerColor, string header, Color msgColor, string format, params object[] args);
+
+        #endregion
     }
 }

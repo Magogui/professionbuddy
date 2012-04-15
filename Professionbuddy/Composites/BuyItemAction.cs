@@ -26,6 +26,32 @@ namespace HighVoltz.Composites
 
         #endregion
 
+        private const string BuyItemFormat =
+            "local amount={1} " +
+            "local id={0} " +
+            "local stackSize " +
+            "local index = -1 " +
+            "local quantity " +
+            "for i=1,GetMerchantNumItems() do " +
+            "local link=GetMerchantItemLink(i) " +
+            "if link then if link:find(id) then " +
+            "index=i " +
+            "stackSize=GetMerchantItemMaxStack(i) " +
+            "end " +
+            "end " +
+            "end " +
+            "if index == -1 then return -1 end " +
+            "while amount>0 do " +
+            "if amount>=stackSize then " +
+            "quantity=stackSize " +
+            "else " +
+            "quantity=amount " +
+            "end " +
+            "BuyMerchantItem(index, quantity) " +
+            "amount=amount-quantity " +
+            "end " +
+            "return 1 ";
+
         private Stopwatch _concludingSw = new Stopwatch();
         // add pause at the end to give objectmanager a chance to update.
 
@@ -33,25 +59,30 @@ namespace HighVoltz.Composites
 
         public BuyItemAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof(string),
-                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
-                                                                      typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
-            
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
-                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                      typeof(UITypeEditor)), new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
-           
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
-            
-            Properties["Count"] = new MetaProp("Count", typeof(DynamicProperty<int>),
-                                               new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
-                                                       new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
-            
-            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof(BuyItemActionType),
+            Properties["Location"] = new MetaProp("Location", typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
+                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+
+            Properties["Count"] = new MetaProp("Count", typeof (DynamicProperty<int>),
+                                               new TypeConverterAttribute(
+                                                   typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Count"]));
+
+            Properties["BuyItemType"] = new MetaProp("BuyItemType", typeof (BuyItemActionType),
                                                      new DisplayNameAttribute(Pb.Strings["Action_Common_Buy"]));
-            
-            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof(bool),
-                                                       new DisplayNameAttribute(Pb.Strings["Action_Common_BuyAdditively"]));
+
+            Properties["BuyAdditively"] = new MetaProp("BuyAdditively", typeof (bool),
+                                                       new DisplayNameAttribute(
+                                                           Pb.Strings["Action_Common_BuyAdditively"]));
             ItemID = "";
             Count = new DynamicProperty<int>(this, "1"); // dynamic expression
             RegisterDynamicProperty("Count");
@@ -71,14 +102,14 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public uint NpcEntry
         {
-            get { return (uint)Properties["NpcEntry"].Value; }
+            get { return (uint) Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string)Properties["Location"].Value; }
+            get { return (string) Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
@@ -86,29 +117,29 @@ namespace HighVoltz.Composites
         [PbXmlAttribute("Entry")]
         public string ItemID
         {
-            get { return (string)Properties["ItemID"].Value; }
+            get { return (string) Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
 
         [PbXmlAttribute]
         public BuyItemActionType BuyItemType
         {
-            get { return (BuyItemActionType)Properties["BuyItemType"].Value; }
+            get { return (BuyItemActionType) Properties["BuyItemType"].Value; }
             set { Properties["BuyItemType"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
+        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Count
         {
-            get { return (DynamicProperty<int>)Properties["Count"].Value; }
+            get { return (DynamicProperty<int>) Properties["Count"].Value; }
             set { Properties["Count"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool BuyAdditively
         {
-            get { return (bool)Properties["BuyAdditively"].Value; }
+            get { return (bool) Properties["BuyAdditively"].Value; }
             set { Properties["BuyAdditively"].Value = value; }
         }
 
@@ -122,21 +153,18 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: " + (BuyItemType == BuyItemActionType.SpecificItem ? "{1} x{2}" : "{3}"),
-                                   Name, ItemID, Count, Pb.Strings["Action_Common_Material"]);
+                                     Name, ItemID, Count, Pb.Strings["Action_Common_Material"]);
             }
         }
 
         public override string Help
         {
-            get
-            {
-                return Pb.Strings["Action_BuyItemAction_Help"];
-            }
+            get { return Pb.Strings["Action_BuyItemAction_Help"]; }
         }
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -229,7 +257,7 @@ namespace HighVoltz.Composites
                             {
                                 int count = !BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count;
                                 if (count > 0)
-                                    BuyItem(id, (uint)count);
+                                    BuyItem(id, (uint) count);
                             }
                         }
                         else if (BuyItemType == BuyItemActionType.Material)
@@ -237,9 +265,9 @@ namespace HighVoltz.Composites
                             foreach (var kv in Pb.MaterialList)
                             {
                                 // only buy items if we don't have enough in bags...
-                                int amount = kv.Value - (int)Ingredient.GetInBagItemCount(kv.Key);
+                                int amount = kv.Value - (int) Ingredient.GetInBagItemCount(kv.Key);
                                 if (amount > 0)
-                                    BuyItem(kv.Key, (uint)amount);
+                                    BuyItem(kv.Key, (uint) amount);
                             }
                         }
                         _concludingSw.Start();
@@ -255,34 +283,10 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
+
         // Credits to Inrego
         // Index are {0}=ItemID, {1}=Amount
         // returns 1 if item is found, otherwise -1
-        const string BuyItemFormat =
-            "local amount={1} " +
-            "local id={0} " +
-            "local stackSize " +
-            "local index = -1 " +
-            "local quantity " +
-            "for i=1,GetMerchantNumItems() do " +
-               "local link=GetMerchantItemLink(i) " +
-               "if link then if link:find(id) then " +
-                     "index=i " +
-                     "stackSize=GetMerchantItemMaxStack(i) " +
-                  "end " +
-               "end " +
-            "end " +
-            "if index == -1 then return -1 end " +
-            "while amount>0 do " +
-               "if amount>=stackSize then " +
-                  "quantity=stackSize " +
-               "else " +
-                  "quantity=amount " +
-               "end " +
-               "BuyMerchantItem(index, quantity) " +
-               "amount=amount-quantity " +
-            "end " +
-            "return 1 ";
 
         public static void BuyItem(uint id, uint count)
         {

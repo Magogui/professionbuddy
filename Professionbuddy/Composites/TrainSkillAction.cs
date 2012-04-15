@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
-using Styx;
 using Styx.Helpers;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Trainer;
@@ -13,9 +12,6 @@ using TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region TrainSkillAction
-
     internal sealed class TrainSkillAction : PBAction
     {
         private readonly Stopwatch _concludingStopWatch = new Stopwatch();
@@ -24,13 +20,15 @@ namespace HighVoltz.Composites
 
         public TrainSkillAction()
         {
-            Properties["Location"] = new MetaProp("Location", typeof(string),
-                new EditorAttribute(typeof(PropertyBag.LocationEditor),typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            Properties["Location"] = new MetaProp("Location", typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
-                new EditorAttribute(typeof(PropertyBag.EntryEditor),typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
+                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
 
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();
@@ -42,20 +40,20 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public uint NpcEntry
         {
-            get { return (uint)Properties["NpcEntry"].Value; }
+            get { return (uint) Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string)Properties["Location"].Value; }
+            get { return (string) Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
         public override string Name
         {
-            get { return Pb.Strings["Action_TrainSkillAction_Name"] ; }
+            get { return Pb.Strings["Action_TrainSkillAction_Name"]; }
         }
 
         public override string Title
@@ -65,15 +63,12 @@ namespace HighVoltz.Composites
 
         public override string Help
         {
-            get
-            {
-                return Pb.Strings["Action_TrainSkillAction_Help"];
-            }
+            get { return Pb.Strings["Action_TrainSkillAction_Help"]; }
         }
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -128,17 +123,14 @@ namespace HighVoltz.Composites
                 {
                     Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
                     _concludingStopWatch.Start();
-                } 
-                // wait 3 seconds after training.
+                }
+                    // wait 3 seconds after training.
                 else if (_concludingStopWatch.ElapsedMilliseconds >= 2000)
                 {
                     _waitBeforeTrainingStopWatch.Reset();
                     _concludingStopWatch.Reset();
-                    using (new FrameLock())
-                    {
-                        for (int n = 0; n < 20; n++) // spam! 
-                            Lua.DoString("BuyTrainerService(0) ");
-                    }
+                    for (int n = 0; n < 10; n++) // spam! 
+                        Lua.DoString("BuyTrainerService(0) ");
                     //Lua.DoString("for i=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(i)) == 'available' then BuyTrainerService(i) end end");
                     Professionbuddy.Log("Training Completed ");
                     IsDone = true;
@@ -149,9 +141,7 @@ namespace HighVoltz.Composites
 
         public override object Clone()
         {
-            return new TrainSkillAction { NpcEntry = NpcEntry, _loc = _loc, Location = Location };
+            return new TrainSkillAction {NpcEntry = NpcEntry, _loc = _loc, Location = Location};
         }
     }
-
-    #endregion
 }

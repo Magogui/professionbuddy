@@ -1,40 +1,67 @@
-﻿using System;
-using System.ComponentModel;
-using TreeSharp;
-using Styx.Logic.Profiles;
+﻿using System.ComponentModel;
 using System.Drawing.Design;
+using System.IO;
+using Styx.Logic.Profiles;
+using TreeSharp;
 
 namespace HighVoltz.Composites
 {
+
     #region LoadProfileAction
+
     public sealed class LoadProfileAction : PBAction
     {
-        public enum LoadProfileType { Honorbuddy, Professionbuddy }
+        #region LoadProfileType enum
+
+        public enum LoadProfileType
+        {
+            Honorbuddy,
+            Professionbuddy
+        }
+
+        #endregion
+
+        public LoadProfileAction()
+        {
+            Properties["Path"] = new MetaProp("Path", typeof (string),
+                                              new EditorAttribute(typeof (PropertyBag.FileLocationEditor),
+                                                                  typeof (UITypeEditor)),
+                                              new DisplayNameAttribute(Pb.Strings["Action_Common_Path"]));
+
+            Properties["ProfileType"] = new MetaProp("ProfileType", typeof (LoadProfileType),
+                                                     new DisplayNameAttribute("Action_LoadProfileAction_ProfileType"));
+
+            Path = "";
+            ProfileType = LoadProfileType.Honorbuddy;
+        }
+
         [PbXmlAttribute]
         public LoadProfileType ProfileType
         {
-            get { return (LoadProfileType)Properties["ProfileType"].Value; }
+            get { return (LoadProfileType) Properties["ProfileType"].Value; }
             set { Properties["ProfileType"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Path
         {
-            get { return (string)Properties["Path"].Value; }
+            get { return (string) Properties["Path"].Value; }
             set { Properties["Path"].Value = value; }
         }
 
-        public LoadProfileAction()
+        public override string Name
         {
-            Properties["Path"] = new MetaProp("Path", typeof(string),
-                new EditorAttribute(typeof(PropertyBag.FileLocationEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Path"]));
+            get { return Pb.Strings["Action_LoadProfileAction_Name"]; }
+        }
 
-            Properties["ProfileType"] = new MetaProp("ProfileType", typeof(LoadProfileType),
-                new DisplayNameAttribute("Action_LoadProfileAction_ProfileType"));
+        public override string Title
+        {
+            get { return string.Format("{0}: {1}", Name, Path); }
+        }
 
-            Path = "";
-            ProfileType = LoadProfileType.Honorbuddy;
+        public override string Help
+        {
+            get { return Pb.Strings["Action_LoadProfileAction_Help"]; }
         }
 
         protected override RunStatus Run(object context)
@@ -54,18 +81,19 @@ namespace HighVoltz.Composites
             {
                 try
                 {
-                    Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath, ProfileManager.XmlLocation);
+                    Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath,
+                                          ProfileManager.XmlLocation);
                     if (string.IsNullOrEmpty(Path))
                     {
                         ProfileManager.LoadEmpty();
                     }
-                    else if (System.IO.File.Exists(absPath))
+                    else if (File.Exists(absPath))
                     {
-                        ProfileManager.LoadNew(absPath,true);
+                        ProfileManager.LoadNew(absPath, true);
                     }
                     else
                     {
-                        Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindProfile"],Path);
+                        Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindProfile"], Path);
                     }
                 }
                 catch
@@ -74,25 +102,11 @@ namespace HighVoltz.Composites
             }
         }
 
-        public override string Name { get { return Pb.Strings["Action_LoadProfileAction_Name"]; } }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: {1}", Name, Path);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_LoadProfileAction_Help"];
-            }
-        }
         public override object Clone()
         {
-            return new LoadProfileAction { Path = this.Path, ProfileType = this.ProfileType};
+            return new LoadProfileAction {Path = Path, ProfileType = ProfileType};
         }
     }
+
     #endregion
 }

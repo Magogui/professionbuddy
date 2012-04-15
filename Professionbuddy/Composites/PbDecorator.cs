@@ -1,34 +1,39 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TreeSharp;
 using System.Xml.Serialization;
-using Styx.WoWInternals.WoWObjects;
-using Styx.WoWInternals;
 using Styx;
 using Styx.Logic;
+using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
+using TreeSharp;
 
 namespace HighVoltz.Composites
 {
     [XmlRoot("Professionbuddy")]
     public class PbDecorator : PrioritySelector
     {
+        public static bool EndOfWhileLoopReturn;
+        private static bool canRun = true;
+
+        private static FieldInfo fi = typeof (Professionbuddy).GetField("\u0052",
+                                                                        BindingFlags.Static | BindingFlags.Public);
+
         public PbDecorator(params Composite[] children) : base(children)
         {
-            if (fi == null || !((string)fi.GetValue(null)).Contains("otin")) canRun = !true;
+            if (fi == null || !((string) fi.GetValue(null)).Contains("otin")) canRun = !true;
         }
 
-        bool CanRun
+        private bool CanRun
         {
-            get
-            {
-                return StyxWoW.IsInWorld && !ExitBehavior() && Professionbuddy.Instance.IsRunning;
-            }
+            get { return StyxWoW.IsInWorld && !ExitBehavior() && Professionbuddy.Instance.IsRunning; }
         }
 
-        static LocalPlayer Me { get { return ObjectManager.Me; } }
+        private static LocalPlayer Me
+        {
+            get { return ObjectManager.Me; }
+        }
 
-        public static bool EndOfWhileLoopReturn;
         protected override IEnumerable<RunStatus> Execute(object context)
         {
             if (CanRun)
@@ -70,13 +75,12 @@ namespace HighVoltz.Composites
             }
         }
 
-        private static bool canRun = true;
         public static bool ExitBehavior()
         {
             return ((Me.IsActuallyInCombat && !Me.Mounted) ||
-                (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying && Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
-                !Me.IsAlive || Me.HealthPercent <= 40 || !canRun;
+                    (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying &&
+                     Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
+                   !Me.IsAlive || Me.HealthPercent <= 40 || !canRun;
         }
-        static FieldInfo fi = typeof(Professionbuddy).GetField("\u0052", BindingFlags.Static | BindingFlags.Public);
     }
 }

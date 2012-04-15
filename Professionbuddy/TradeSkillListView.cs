@@ -1,33 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace HighVoltz
 {
     public class TradeSkillListView : TabPage
     {
-        public DataGridViewTextBoxColumn NameColumn { get; private set; }
-        public DataGridViewTextBoxColumn CraftableColumn { get; private set; }
-        public DataGridViewTextBoxColumn DifficultyColumn { get; private set; }
-        public DataGridView TradeDataView { get; private set; }
-        public TextBox FilterText { get; private set; }
-        public ComboBox CategoryCombo { get; private set; }
-        private TableLayoutPanel tabTableLayout;
+        private readonly int index; // index to Professionbuddy.Instance.TradeSkillList
+        private readonly TableLayoutPanel tabTableLayout;
 
         public TradeSkillListView()
             : this(0)
         {
         }
-
-        public int TradeIndex
-        {
-            get { return index; }
-        }
-
-        private int index; // index to Professionbuddy.Instance.TradeSkillList
 
         public TradeSkillListView(int index)
         {
@@ -77,34 +62,45 @@ namespace HighVoltz
             tabTableLayout.Dock = DockStyle.Fill;
             tabTableLayout.SetColumnSpan(TradeDataView, 2);
             // tab
-            this.Controls.Add(tabTableLayout);
-            this.Text = Professionbuddy.Instance.TradeSkillList[index].Name;
+            Controls.Add(tabTableLayout);
+            Text = Professionbuddy.Instance.TradeSkillList[index].Name;
             // populate the controls with data
             CategoryCombo.Items.Add(""); // blank line will show all headers...
 
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
+            foreach (var kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
             {
                 if (!CategoryCombo.Items.Contains(kv.Value.Header))
                 {
                     CategoryCombo.Items.Add(kv.Value.Header);
                 }
                 TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), Util.CalculateRecipeRepeat(kv.Value),
-                                       (int)kv.Value.Difficulty); // make color column sortable by dificulty..
+                                       (int) kv.Value.Difficulty); // make color column sortable by dificulty..
             }
             TradeDataView_SelectionChanged(null, null);
             // hook events
-            FilterText.TextChanged += new EventHandler(FilterText_TextChanged);
-            CategoryCombo.SelectedValueChanged += new EventHandler(SectionCombo_SelectedValueChanged);
-            TradeDataView.SelectionChanged += new EventHandler(TradeDataView_SelectionChanged);
-            TradeDataView.CellFormatting += new DataGridViewCellFormattingEventHandler(TradeDataView_CellFormatting);
+            FilterText.TextChanged += FilterText_TextChanged;
+            CategoryCombo.SelectedValueChanged += SectionCombo_SelectedValueChanged;
+            TradeDataView.SelectionChanged += TradeDataView_SelectionChanged;
+            TradeDataView.CellFormatting += TradeDataView_CellFormatting;
+        }
+
+        public DataGridViewTextBoxColumn NameColumn { get; private set; }
+        public DataGridViewTextBoxColumn CraftableColumn { get; private set; }
+        public DataGridViewTextBoxColumn DifficultyColumn { get; private set; }
+        public DataGridView TradeDataView { get; private set; }
+        public TextBox FilterText { get; private set; }
+        public ComboBox CategoryCombo { get; private set; }
+
+        public int TradeIndex
+        {
+            get { return index; }
         }
 
         private void TradeDataView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-
             if (TradeDataView.Columns[e.ColumnIndex].HeaderText == "")
             {
-                TradeSkillRecipeCell tsrc = TradeDataView.Rows[e.RowIndex].Cells[0].Value as TradeSkillRecipeCell;
+                var tsrc = TradeDataView.Rows[e.RowIndex].Cells[0].Value as TradeSkillRecipeCell;
                 e.CellStyle.ForeColor = tsrc.Recipe.Color;
                 e.CellStyle.BackColor = e.CellStyle.ForeColor;
                 e.CellStyle.SelectionBackColor = e.CellStyle.ForeColor;
@@ -119,9 +115,9 @@ namespace HighVoltz
                 MainForm.Instance.IngredientsView.Rows.Clear();
                 if (TradeDataView.SelectedRows.Count > 0)
                 {
-                    TradeSkillRecipeCell cell = (TradeSkillRecipeCell)TradeDataView.SelectedRows[0].Cells[0].Value;
+                    var cell = (TradeSkillRecipeCell) TradeDataView.SelectedRows[0].Cells[0].Value;
                     Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].KnownRecipes[cell.RecipeID];
-                    DataGridViewRow row = new DataGridViewRow();
+                    var row = new DataGridViewRow();
                     foreach (Ingredient ingred in _recipe.Ingredients)
                     {
                         uint inBags = ingred.InBagItemCount;
@@ -156,7 +152,7 @@ namespace HighVoltz
             string filter = FilterText.Text.ToUpper();
             bool noFilter = string.IsNullOrEmpty(FilterText.Text);
             bool showAllCategories = string.IsNullOrEmpty(CategoryCombo.Text);
-            foreach (KeyValuePair<uint, Recipe> kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
+            foreach (var kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
             {
                 if ((noFilter || kv.Value.Name.ToUpper().Contains(filter)) &&
                     (showAllCategories || kv.Value.Header == CategoryCombo.Text))

@@ -10,116 +10,146 @@ using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-
 
 namespace HighVoltz.Composites
 {
     public sealed class GetItemfromBankAction : PBAction
     {
         // number of times the recipe will be crafted
+
+        #region BankWithdrawlItemType enum
+
         public enum BankWithdrawlItemType
         {
             SpecificItem,
             Materials,
         }
-        [PbXmlAttribute]
-        public DepositWithdrawAmount Withdraw
-        {
-            get { return (DepositWithdrawAmount)Properties["Withdraw"].Value; }
-            set { Properties["Withdraw"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public BankType Bank
-        {
-            get { return (BankType)Properties["Bank"].Value; }
-            set { Properties["Bank"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public uint MinFreeBagSlots
-        {
-            get { return (uint)Properties["MinFreeBagSlots"].Value; }
-            set { Properties["MinFreeBagSlots"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public BankWithdrawlItemType GetItemfromBankType
-        {
-            get { return (BankWithdrawlItemType)Properties["GetItemfromBankType"].Value; }
-            set { Properties["GetItemfromBankType"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public string ItemID
-        {
-            get { return (string)Properties["ItemID"].Value; }
-            set { Properties["ItemID"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public uint NpcEntry
-        {
-            get { return (uint)Properties["NpcEntry"].Value; }
-            set { Properties["NpcEntry"].Value = value; }
-        }
-        [PbXmlAttribute]
-        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
-        public DynamicProperty<int> Amount
-        {
-            get { return (DynamicProperty<int>)Properties["Amount"].Value; }
-            set { Properties["Amount"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public bool AutoFindBank
-        {
-            get { return (bool)Properties["AutoFindBank"].Value; }
-            set { Properties["AutoFindBank"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public bool WithdrawAdditively
-        {
-            get { return (bool)Properties["WithdrawAdditively"].Value; }
-            set { Properties["WithdrawAdditively"].Value = value; }
-        }
-        WoWPoint _loc;
-        [PbXmlAttribute]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
+
+        #endregion
+
+        private const long GbankItemThrottle = 1000;
+
+        private const string WithdrawItemFromGBankLuaFormat =
+            "local tabnum = GetNumGuildBankTabs() " +
+            "local bagged = 0 " +
+            "local itemID = {0} " +
+            "local  sawItem = 0  " +
+            "local amount = {1} " +
+            "for tab = 1,tabnum do " +
+            "local _,_,iv,_,nw, rw = GetGuildBankTabInfo(tab)  " +
+            "if iv and (nw > 0 or nw == -1) and (rw == -1 or rw > 0) then " +
+            "SetCurrentGuildBankTab(tab) " +
+            "for slot = 1, 98 do " +
+            "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
+            "local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)')) " +
+            "if l == nil and c > 0 and (id == itemID or itemID == 0) then " +
+            "sawItem = 1 " +
+            "if c  <= amount then " +
+            "AutoStoreGuildBankItem(tab, slot) " +
+            "return c " +
+            "else " +
+            "local itemf  = GetItemFamily(id) " +
+            "for bag =0 ,NUM_BAG_SLOTS do " +
+            "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
+            "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
+            "local freeSlots = GetContainerFreeSlots(bag) " +
+            "SplitGuildBankItem(tab, slot, amount) " +
+            "PickupContainerItem(bag, freeSlots[1]) " +
+            "return amount-c " +
+            "end " +
+            "end " +
+            "end " +
+            "end " +
+            "end " +
+            "end " +
+            "end " +
+            "if sawItem == 0 then return -1 else return bagged end ";
+
+        private const string WithdrawItemFromPersonalBankLuaFormat =
+            "local numSlots = GetNumBankSlots() " +
+            "local splitUsed = 0 " +
+            "local bagged = 0 " +
+            "local amount = {1} " +
+            "local itemID = {0} " +
+            "local bag1 = numSlots + 4  " +
+            "while bag1 >= -1 do " +
+            "if bag1 == 4 then " +
+            "bag1 = -1 " +
+            "end " +
+            "for slot1 = 1, GetContainerNumSlots(bag1) do " +
+            "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
+            "local id = GetContainerItemID(bag1,slot1) " +
+            "if l ~= 1 and c and c > 0 and (id == itemID or itemID == 0) then " +
+            "if c + bagged <= amount  then " +
+            "UseContainerItem(bag1,slot1) " +
+            "bagged = bagged + c " +
+            "else " +
+            "local itemf  = GetItemFamily(id) " +
+            "for bag2 = 0,4 do " +
+            "local fs,bfamily = GetContainerNumFreeSlots(bag2) " +
+            "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
+            "local freeSlots = GetContainerFreeSlots(bag2) " +
+            "SplitContainerItem(bag1,slot1,amount - bagged) " +
+            "if bag2 == 0 then PutItemInBackpack() else PutItemInBag(bag2) end " +
+            "return " +
+            "end " +
+            "bag2 = bag2 -1 " +
+            "end " +
+            "end " +
+            "if bagged >= amount then return end " +
+            "end " +
+            "end " +
+            "bag1 = bag1 -1 " +
+            "end ";
+
+        private static Stopwatch _queueServerSW;
+        private readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
+        private Dictionary<uint, int> _itemList;
+        private Stopwatch _itemsSW;
+        private WoWPoint _loc;
+
         public GetItemfromBankAction()
         {
-            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+            Properties["Amount"] = new MetaProp("Amount", typeof (DynamicProperty<int>),
+                                                new TypeConverterAttribute(
+                                                    typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
 
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
-            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(uint),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_MinFreeBagSlots"]));
+            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof (uint),
+                                                         new DisplayNameAttribute(
+                                                             Pb.Strings["Action_Common_MinFreeBagSlots"]));
 
             Properties["GetItemfromBankType"] = new MetaProp("GetItemfromBankType",
-                typeof(BankWithdrawlItemType),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemsToWithdraw"]));
+                                                             typeof (BankWithdrawlItemType),
+                                                             new DisplayNameAttribute(
+                                                                 Pb.Strings["Action_Common_ItemsToWithdraw"]));
 
-            Properties["Bank"] = new MetaProp("Bank", typeof(BankType),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Bank"]));
+            Properties["Bank"] = new MetaProp("Bank", typeof (BankType),
+                                              new DisplayNameAttribute(Pb.Strings["Action_Common_Bank"]));
 
-            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindBank"]));
+            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof (bool),
+                                                      new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindBank"]));
 
-            Properties["Location"] = new MetaProp("Location", typeof(string),
-                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            Properties["Location"] = new MetaProp("Location", typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             Properties["NpcEntry"] = new MetaProp("NpcEntry",
-                typeof(uint), new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+                                                  typeof (uint),
+                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
 
-            Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof(bool),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_WithdrawAdditively"]));
+            Properties["WithdrawAdditively"] = new MetaProp("WithdrawAdditively", typeof (bool),
+                                                            new DisplayNameAttribute(
+                                                                Pb.Strings["Action_Common_WithdrawAdditively"]));
 
-            Properties["Withdraw"] = new MetaProp("Withdraw", typeof(DepositWithdrawAmount),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Withdraw"]));
+            Properties["Withdraw"] = new MetaProp("Withdraw", typeof (DepositWithdrawAmount),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Withdraw"]));
 
             Amount = new DynamicProperty<int>(this, "1");
             RegisterDynamicProperty("Amount");
@@ -146,22 +176,22 @@ namespace HighVoltz.Composites
 
         #region Callbacks
 
-        void WithdrawChanged(object sender, MetaPropArgs e)
+        private void WithdrawChanged(object sender, MetaPropArgs e)
         {
             Properties["Amount"].Show = Withdraw == DepositWithdrawAmount.Amount;
             RefreshPropertyGrid();
         }
 
-        void LocationChanged(object sender, MetaPropArgs e)
+        private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
 
-        void AutoFindBankChanged(object sender, MetaPropArgs e)
+        private void AutoFindBankChanged(object sender, MetaPropArgs e)
         {
             if (AutoFindBank)
             {
@@ -175,7 +205,8 @@ namespace HighVoltz.Composites
             }
             RefreshPropertyGrid();
         }
-        void GetItemfromBankActionPropertyChanged(object sender, MetaPropArgs e)
+
+        private void GetItemfromBankActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (GetItemfromBankType)
             {
@@ -195,11 +226,97 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        // key = itemID; value amount to withdrawl
-        Dictionary<uint, int> _itemList;
-        Stopwatch _itemsSW;
-        readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
-        const long GbankItemThrottle = 1000;
+        [PbXmlAttribute]
+        public DepositWithdrawAmount Withdraw
+        {
+            get { return (DepositWithdrawAmount) Properties["Withdraw"].Value; }
+            set { Properties["Withdraw"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public BankType Bank
+        {
+            get { return (BankType) Properties["Bank"].Value; }
+            set { Properties["Bank"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint MinFreeBagSlots
+        {
+            get { return (uint) Properties["MinFreeBagSlots"].Value; }
+            set { Properties["MinFreeBagSlots"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public BankWithdrawlItemType GetItemfromBankType
+        {
+            get { return (BankWithdrawlItemType) Properties["GetItemfromBankType"].Value; }
+            set { Properties["GetItemfromBankType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string ItemID
+        {
+            get { return (string) Properties["ItemID"].Value; }
+            set { Properties["ItemID"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint NpcEntry
+        {
+            get { return (uint) Properties["NpcEntry"].Value; }
+            set { Properties["NpcEntry"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        public DynamicProperty<int> Amount
+        {
+            get { return (DynamicProperty<int>) Properties["Amount"].Value; }
+            set { Properties["Amount"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public bool AutoFindBank
+        {
+            get { return (bool) Properties["AutoFindBank"].Value; }
+            set { Properties["AutoFindBank"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public bool WithdrawAdditively
+        {
+            get { return (bool) Properties["WithdrawAdditively"].Value; }
+            set { Properties["WithdrawAdditively"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string) Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return Pb.Strings["Action_GetItemFromBankAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.Format("{0}: " + (GetItemfromBankType == BankWithdrawlItemType.SpecificItem
+                                                    ? " {1} {2}"
+                                                    : ""), Name, ItemID, Amount);
+            }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_GetItemFromBankAction_Help"]; }
+        }
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -216,7 +333,7 @@ namespace HighVoltz.Composites
                         _itemsSW = new Stopwatch();
                         _itemsSW.Start();
                     }
-                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
+                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing*3)
                         return RunStatus.Success;
                     if (_itemList == null)
                         _itemList = BuildItemList();
@@ -263,21 +380,24 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        WoWObject GetLocalBanker()
+        private WoWObject GetLocalBanker()
         {
             WoWObject bank = null;
             List<WoWObject> bankers;
             if (Bank == BankType.Guild)
                 bankers = (from banker in ObjectManager.ObjectList
-                           where (banker is WoWGameObject && ((WoWGameObject)banker).SubType == WoWGameObjectType.GuildBank) ||
-                             (banker is WoWUnit && ((WoWUnit)banker).IsGuildBanker && ((WoWUnit)banker).IsAlive && ((WoWUnit)banker).CanSelect)
+                           where
+                               (banker is WoWGameObject &&
+                                ((WoWGameObject) banker).SubType == WoWGameObjectType.GuildBank) ||
+                               (banker is WoWUnit && ((WoWUnit) banker).IsGuildBanker && ((WoWUnit) banker).IsAlive &&
+                                ((WoWUnit) banker).CanSelect)
                            select banker).ToList();
             else
                 bankers = (from banker in ObjectManager.ObjectList
                            where (banker is WoWUnit &&
-                                ((WoWUnit)banker).IsBanker &&
-                                ((WoWUnit)banker).IsAlive &&
-                                ((WoWUnit)banker).CanSelect)
+                                  ((WoWUnit) banker).IsBanker &&
+                                  ((WoWUnit) banker).IsAlive &&
+                                  ((WoWUnit) banker).CanSelect)
                            select banker).ToList();
 
             if (!AutoFindBank && NpcEntry != 0)
@@ -292,16 +412,20 @@ namespace HighVoltz.Composites
             return bank;
         }
 
-        void MoveToBanker()
+        private void MoveToBanker()
         {
             WoWPoint movetoPoint = _loc;
             WoWObject bank = GetLocalBanker();
             if (bank != null)
                 movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, bank.Location, 3);
-            // search the database
+                // search the database
             else if (movetoPoint == WoWPoint.Zero)
             {
-                movetoPoint = MoveToAction.GetLocationFromDB(Bank == BankType.Personal ? MoveToAction.MoveToType.NearestBanker : MoveToAction.MoveToType.NearestGB, NpcEntry);
+                movetoPoint =
+                    MoveToAction.GetLocationFromDB(
+                        Bank == BankType.Personal
+                            ? MoveToAction.MoveToType.NearestBanker
+                            : MoveToAction.MoveToType.NearestGB, NpcEntry);
             }
             if (movetoPoint == WoWPoint.Zero)
             {
@@ -312,7 +436,7 @@ namespace HighVoltz.Composites
             {
                 Util.MoveTo(movetoPoint);
             }
-            // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
+                // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
             else if (bank != null)
             {
                 bank.Interact();
@@ -324,7 +448,7 @@ namespace HighVoltz.Composites
             }
         }
 
-        Dictionary<uint, int> BuildItemList()
+        private Dictionary<uint, int> BuildItemList()
         {
             var items = new Dictionary<uint, int>();
             switch (GetItemfromBankType)
@@ -334,7 +458,7 @@ namespace HighVoltz.Composites
                     string[] entries = ItemID.Split(',');
                     if (entries.Length > 0)
                     {
-                        foreach (var entry in entries)
+                        foreach (string entry in entries)
                         {
                             uint itemID;
                             uint.TryParse(entry.Trim(), out itemID);
@@ -354,44 +478,7 @@ namespace HighVoltz.Composites
         }
 
         // indexes are {0} = ItemID, {1} = amount to deposit
-        const string WithdrawItemFromGBankLuaFormat =
-              "local tabnum = GetNumGuildBankTabs() " +
-                "local bagged = 0 " +
-                "local itemID = {0} " +
-                "local  sawItem = 0  " +
-                "local amount = {1} " +
-                   "for tab = 1,tabnum do " +
-                      "local _,_,iv,_,nw, rw = GetGuildBankTabInfo(tab)  " +
-                      "if iv and (nw > 0 or nw == -1) and (rw == -1 or rw > 0) then " +
-                         "SetCurrentGuildBankTab(tab) " +
-                         "for slot = 1, 98 do " +
-                            "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
-                            "local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)')) " +
-                            "if l == nil and c > 0 and (id == itemID or itemID == 0) then " +
-                               "sawItem = 1 " +
-                               "if c  <= amount then " +
-                                  "AutoStoreGuildBankItem(tab, slot) " +
-                                  "return c " +
-                               "else " +
-                                  "local itemf  = GetItemFamily(id) " +
-                                  "for bag =0 ,NUM_BAG_SLOTS do " +
-                                     "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
-                                     "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-                                        "local freeSlots = GetContainerFreeSlots(bag) " +
-                                        "SplitGuildBankItem(tab, slot, amount) " +
-                                        "PickupContainerItem(bag, freeSlots[1]) " +
-                                        "return amount-c " +
-                                     "end " +
-                                  "end " +
-                               "end " +
-                            "end " +
-                         "end " +
-                      "end " +
-                   "end " +
-                   "if sawItem == 0 then return -1 else return bagged end ";
 
-        // returns true when done. supports pulsing.
-        static Stopwatch _queueServerSW;
         /// <summary>
         /// Withdraws items from gbank
         /// </summary>
@@ -421,43 +508,8 @@ namespace HighVoltz.Composites
             }
             return retVal;
         }
+
         // indexes are {0} = ItemID, {1} = amount to deposit
-        const string WithdrawItemFromPersonalBankLuaFormat =
-                "local numSlots = GetNumBankSlots() " +
-                "local splitUsed = 0 " +
-                "local bagged = 0 " +
-                "local amount = {1} " +
-                "local itemID = {0} " +
-                "local bag1 = numSlots + 4  " +
-                "while bag1 >= -1 do " +
-                   "if bag1 == 4 then " +
-                      "bag1 = -1 " +
-                   "end " +
-                   "for slot1 = 1, GetContainerNumSlots(bag1) do " +
-                      "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
-                      "local id = GetContainerItemID(bag1,slot1) " +
-                      "if l ~= 1 and c and c > 0 and (id == itemID or itemID == 0) then " +
-                         "if c + bagged <= amount  then " +
-                            "UseContainerItem(bag1,slot1) " +
-                            "bagged = bagged + c " +
-                         "else " +
-                            "local itemf  = GetItemFamily(id) " +
-                            "for bag2 = 0,4 do " +
-                               "local fs,bfamily = GetContainerNumFreeSlots(bag2) " +
-                               "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-                                  "local freeSlots = GetContainerFreeSlots(bag2) " +
-                                  "SplitContainerItem(bag1,slot1,amount - bagged) " +
-                                  "if bag2 == 0 then PutItemInBackpack() else PutItemInBag(bag2) end " +
-                                  "return " +
-                               "end " +
-                               "bag2 = bag2 -1 " +
-                            "end " +
-                         "end " +
-                         "if bagged >= amount then return end " +
-                      "end " +
-                   "end " +
-                   "bag1 = bag1 -1 " +
-                "end ";
 
         public bool GetItemFromBank(uint id, int amount)
         {
@@ -474,37 +526,21 @@ namespace HighVoltz.Composites
             _itemsSW = null;
         }
 
-        public override string Name { get { return Pb.Strings["Action_GetItemFromBankAction_Name"]; } }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: " + (GetItemfromBankType == BankWithdrawlItemType.SpecificItem ?
-                    " {1} {2}" : ""), Name, ItemID, Amount);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_GetItemFromBankAction_Help"];
-            }
-        }
         public override object Clone()
         {
             return new GetItemfromBankAction
                        {
-                           ItemID = this.ItemID,
-                           Amount = this.Amount,
-                           Bank = this.Bank,
-                           GetItemfromBankType = this.GetItemfromBankType,
-                           _loc = this._loc,
-                           AutoFindBank = this.AutoFindBank,
-                           NpcEntry = this.NpcEntry,
-                           Location = this.Location,
-                           MinFreeBagSlots = this.MinFreeBagSlots,
-                           WithdrawAdditively = this.WithdrawAdditively,
-                           Withdraw = this.Withdraw
+                           ItemID = ItemID,
+                           Amount = Amount,
+                           Bank = Bank,
+                           GetItemfromBankType = GetItemfromBankType,
+                           _loc = _loc,
+                           AutoFindBank = AutoFindBank,
+                           NpcEntry = NpcEntry,
+                           Location = Location,
+                           MinFreeBagSlots = MinFreeBagSlots,
+                           WithdrawAdditively = WithdrawAdditively,
+                           Withdraw = Withdraw
                        };
         }
     }

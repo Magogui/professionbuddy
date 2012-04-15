@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing.Design;
 using System.Globalization;
 using System.Linq;
 using Styx;
@@ -8,9 +10,6 @@ using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using System.Diagnostics;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Drawing.Design;
 
 namespace HighVoltz.Composites
 {
@@ -19,64 +18,40 @@ namespace HighVoltz.Composites
 
     internal sealed class InteractionAction : PBAction
     {
+        #region InteractActionType enum
+
         public enum InteractActionType
         {
             NPC,
             GameObject,
         }
 
-        [PbXmlAttribute]
-        public InteractActionType InteractType
-        {
-            get { return (InteractActionType)Properties["InteractType"].Value; }
-            set { Properties["InteractType"].Value = value; }
-        }
+        #endregion
 
-        [PbXmlAttribute]
-        public uint Entry
-        {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
-        }
-
-        [PbXmlAttribute]
-        public uint InteractDelay
-        {
-            get { return (uint)Properties["InteractDelay"].Value; }
-            set { Properties["InteractDelay"].Value = value; }
-        }
-
-        [PbXmlAttribute]
-        public WoWGameObjectType GameObjectType
-        {
-            get { return (WoWGameObjectType)Properties["GameObjectType"].Value; }
-            set { Properties["GameObjectType"].Value = value; }
-        }
-
-        [PbXmlAttribute]
-        public WoWSpellFocus SpellFocus
-        {
-            get { return (WoWSpellFocus)Properties["SpellFocus"].Value; }
-            set { Properties["SpellFocus"].Value = value; }
-        }
+        private readonly Stopwatch _interactSw = new Stopwatch();
 
         public InteractionAction()
         {
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
-                new EditorAttribute(typeof(PropertyBag.EntryEditor),typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
+            Properties["Entry"] = new MetaProp("Entry", typeof (uint),
+                                               new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                   typeof (UITypeEditor)),
+                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
 
-            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof(uint),
-                new DisplayNameAttribute(Pb.Strings["Action_InteractAction_InteractDelay"]));
+            Properties["InteractDelay"] = new MetaProp("InteractDelay", typeof (uint),
+                                                       new DisplayNameAttribute(
+                                                           Pb.Strings["Action_InteractAction_InteractDelay"]));
 
-            Properties["InteractType"] = new MetaProp("InteractType", typeof(InteractActionType),
-                                                      new DisplayNameAttribute(Pb.Strings["Action_InteractAction_InteractType"]));
+            Properties["InteractType"] = new MetaProp("InteractType", typeof (InteractActionType),
+                                                      new DisplayNameAttribute(
+                                                          Pb.Strings["Action_InteractAction_InteractType"]));
 
-            Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof(WoWGameObjectType),
-                                                        new DisplayNameAttribute(Pb.Strings["Action_InteractAction_GameobjectType"]));
-            
-            Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof(WoWSpellFocus),
-                                                    new DisplayNameAttribute(Pb.Strings["Action_InteractAction_SpellFocus"]));
+            Properties["GameObjectType"] = new MetaProp("GameObjectType", typeof (WoWGameObjectType),
+                                                        new DisplayNameAttribute(
+                                                            Pb.Strings["Action_InteractAction_GameobjectType"]));
+
+            Properties["SpellFocus"] = new MetaProp("SpellFocus", typeof (WoWSpellFocus),
+                                                    new DisplayNameAttribute(
+                                                        Pb.Strings["Action_InteractAction_SpellFocus"]));
 
             InteractDelay = Entry = 0u;
             InteractType = InteractActionType.GameObject;
@@ -88,7 +63,59 @@ namespace HighVoltz.Composites
             Properties["GameObjectType"].PropertyChanged += InteractionActionPropertyChanged;
         }
 
-        private readonly Stopwatch _interactSw = new Stopwatch();
+        [PbXmlAttribute]
+        public InteractActionType InteractType
+        {
+            get { return (InteractActionType) Properties["InteractType"].Value; }
+            set { Properties["InteractType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint Entry
+        {
+            get { return (uint) Properties["Entry"].Value; }
+            set { Properties["Entry"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint InteractDelay
+        {
+            get { return (uint) Properties["InteractDelay"].Value; }
+            set { Properties["InteractDelay"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public WoWGameObjectType GameObjectType
+        {
+            get { return (WoWGameObjectType) Properties["GameObjectType"].Value; }
+            set { Properties["GameObjectType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public WoWSpellFocus SpellFocus
+        {
+            get { return (WoWSpellFocus) Properties["SpellFocus"].Value; }
+            set { Properties["SpellFocus"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return Pb.Strings["Action_InteractAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.Format("{0}: {1} " + (Entry != 0 ? Entry.ToString(CultureInfo.InvariantCulture) : ""),
+                                     Name, InteractType);
+            }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_InteractAction_Help"]; }
+        }
 
         protected override RunStatus Run(object context)
         {
@@ -164,37 +191,15 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        public override string Name
-        {
-            get { return Pb.Strings["Action_InteractAction_Name"]; }
-        }
-
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: {1} " + (Entry != 0 ? Entry.ToString(CultureInfo.InvariantCulture) : ""),
-                                     Name, InteractType);
-            }
-        }
-
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_InteractAction_Help"];
-            }
-        }
-
         public override object Clone()
         {
             return new InteractionAction
                        {
-                           InteractType = this.InteractType,
-                           Entry = this.Entry,
-                           GameObjectType = this.GameObjectType,
-                           SpellFocus = this.SpellFocus,
-                           InteractDelay = this.InteractDelay,
+                           InteractType = InteractType,
+                           Entry = Entry,
+                           GameObjectType = GameObjectType,
+                           SpellFocus = SpellFocus,
+                           InteractDelay = InteractDelay,
                        };
         }
     }

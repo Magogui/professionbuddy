@@ -8,13 +8,16 @@ using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using TreeSharp;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz.Composites
 {
+
     #region MoveToAction
+
     public sealed class MoveToAction : PBAction
     {
+        #region MoveToType enum
+
         public enum MoveToType
         {
             Location,
@@ -28,50 +31,43 @@ namespace HighVoltz.Composites
             NearestGB,
             NpcByID
         }
-        public enum NavigationType { Navigator, ClickToMove };
 
-        WoWPoint _loc;
-        [PbXmlAttribute]
-        public string Location
+        #endregion
+
+        #region NavigationType enum
+
+        public enum NavigationType
         {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public MoveToType MoveType
-        {
-            get { return (MoveToType)Properties["MoveType"].Value; }
-            set { Properties["MoveType"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public NavigationType Pathing
-        {
-            get { return (NavigationType)Properties["Pathing"].Value; }
-            set { Properties["Pathing"].Value = value; }
-        }
-        [PbXmlAttribute]
-        public uint Entry
-        {
-            get { return (uint)Properties["Entry"].Value; }
-            set { Properties["Entry"].Value = value; }
-        }
+            Navigator,
+            ClickToMove
+        };
+
+        #endregion
+
+        private const float SpeedModifer = 1.8f;
+        private readonly Stopwatch _concludingSw = new Stopwatch();
+
+        private WoWPoint _loc;
         private WoWPoint _locationDb = WoWPoint.Zero;
 
         public MoveToAction()
         {
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint), 
-                new EditorAttribute(typeof(PropertyBag.EntryEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
+            Properties["Entry"] = new MetaProp("Entry", typeof (uint),
+                                               new EditorAttribute(typeof (PropertyBag.EntryEditor),
+                                                                   typeof (UITypeEditor)),
+                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Entry"]));
 
-            Properties["Location"] = new MetaProp("Location", 
-                typeof(string), new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+            Properties["Location"] = new MetaProp("Location",
+                                                  typeof (string),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["MoveType"] = new MetaProp("MoveType", typeof(MoveToType), 
-                new DisplayNameAttribute(Pb.Strings["Action_MoveToAction_MoveToType"]));
+            Properties["MoveType"] = new MetaProp("MoveType", typeof (MoveToType),
+                                                  new DisplayNameAttribute(Pb.Strings["Action_MoveToAction_MoveToType"]));
 
-            Properties["Pathing"] = new MetaProp("Pathing", typeof(NavigationType), 
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Use"]));
+            Properties["Pathing"] = new MetaProp("Pathing", typeof (NavigationType),
+                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_Use"]));
 
             Entry = 0u;
             _loc = WoWPoint.Zero;
@@ -84,7 +80,54 @@ namespace HighVoltz.Composites
             Properties["Location"].PropertyChanged += LocationChanged;
         }
 
-        void LocationChanged(object sender, MetaPropArgs e)
+        [PbXmlAttribute]
+        public string Location
+        {
+            get { return (string) Properties["Location"].Value; }
+            set { Properties["Location"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public MoveToType MoveType
+        {
+            get { return (MoveToType) Properties["MoveType"].Value; }
+            set { Properties["MoveType"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public NavigationType Pathing
+        {
+            get { return (NavigationType) Properties["Pathing"].Value; }
+            set { Properties["Pathing"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public uint Entry
+        {
+            get { return (uint) Properties["Entry"].Value; }
+            set { Properties["Entry"].Value = value; }
+        }
+
+        public override string Name
+        {
+            get { return Pb.Strings["Action_MoveToAction_Name"]; }
+        }
+
+        public override string Title
+        {
+            get
+            {
+                return string.Format("{0}: {1} " +
+                                     ((MoveType == MoveToType.Location) ? Location : ""), Name, MoveType);
+            }
+        }
+
+        public override string Help
+        {
+            get { return Pb.Strings["Action_MoveToAction_Help"]; }
+        }
+
+        private void LocationChanged(object sender, MetaPropArgs e)
         {
             _loc = Util.StringToWoWPoint(Location);
             Properties["Location"].PropertyChanged -= LocationChanged;
@@ -93,7 +136,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        void MoveToActionPropertyChanged(object sender, MetaPropArgs e)
+        private void MoveToActionPropertyChanged(object sender, MetaPropArgs e)
         {
             switch (MoveType)
             {
@@ -116,13 +159,10 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        readonly Stopwatch _concludingSw = new Stopwatch();
-        const float SpeedModifer = 1.8f;
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-
                 if (MoveType != MoveToType.Location)
                 {
                     _loc = GetLocationFromType(MoveType, Entry);
@@ -148,8 +188,8 @@ namespace HighVoltz.Composites
                         unit.Target();
                 }
                 float speed = ObjectManager.Me.MovementInfo.CurrentSpeed;
-                Navigator.PathPrecision = speed > 7 ? (SpeedModifer * speed) / 7f : SpeedModifer;
-                if (ObjectManager.Me.Location.Distance(_loc) >  4.5)
+                Navigator.PathPrecision = speed > 7 ? (SpeedModifer*speed)/7f : SpeedModifer;
+                if (ObjectManager.Me.Location.Distance(_loc) > 4.5)
                 {
                     if (Pathing == NavigationType.ClickToMove)
                         WoWMovement.ClickToMove(_loc);
@@ -174,7 +214,7 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
-        static public WoWPoint GetLocationFromType(MoveToType type, uint entry)
+        public static WoWPoint GetLocationFromType(MoveToType type, uint entry)
         {
             WoWObject obj = null;
             if (entry != 0)
@@ -186,42 +226,58 @@ namespace HighVoltz.Composites
                 switch (type)
                 {
                     case MoveToType.NearestAH:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsAuctioneer && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsAuctioneer && u.IsAlive).OrderBy(
+                                u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestBanker:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsBanker && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsBanker && u.IsAlive).OrderBy(
+                                u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestFlight:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsFlightMaster && u.IsFriendly && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(
+                                u => u.IsFlightMaster && u.IsFriendly && u.IsAlive).OrderBy(u => u.Distance).
+                                FirstOrDefault();
                         break;
                     case MoveToType.NearestGB:
-                        obj = ObjectManager.ObjectList.Where(u => {
-                            if (u is WoWUnit)
-                            {
-                                var un = (WoWUnit)u;
-                                if (un.IsGuildBanker)
-                                    return true;
-                            }
-                            else if (u is WoWGameObject)
-                            {
-                                var go = (WoWGameObject)u;
-                                if (go.SubType == WoWGameObjectType.GuildBank)
-                                    return true;
-                            }
-                            return false;
-                        }).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj = ObjectManager.ObjectList.Where(u =>
+                                                                 {
+                                                                     if (u is WoWUnit)
+                                                                     {
+                                                                         var un = (WoWUnit) u;
+                                                                         if (un.IsGuildBanker)
+                                                                             return true;
+                                                                     }
+                                                                     else if (u is WoWGameObject)
+                                                                     {
+                                                                         var go = (WoWGameObject) u;
+                                                                         if (go.SubType == WoWGameObjectType.GuildBank)
+                                                                             return true;
+                                                                     }
+                                                                     return false;
+                                                                 }).OrderBy(u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestMailbox:
-                        obj = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(u => u.SubType == WoWGameObjectType.Mailbox).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
+                                u => u.SubType == WoWGameObjectType.Mailbox).OrderBy(u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestReagentVendor:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsReagentVendor && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsReagentVendor && u.IsAlive).OrderBy
+                                (u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestRepair:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsRepairMerchant && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsRepairMerchant && u.IsAlive).
+                                OrderBy(u => u.Distance).FirstOrDefault();
                         break;
                     case MoveToType.NearestVendor:
-                        obj = ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsAnyVendor && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault();
+                        obj =
+                            ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsAnyVendor && u.IsAlive).OrderBy(
+                                u => u.Distance).FirstOrDefault();
                         break;
                 }
             }
@@ -229,45 +285,45 @@ namespace HighVoltz.Composites
             {
                 if (obj is WoWUnit && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget != obj))
                 {
-                    ((WoWUnit)obj).Target();
+                    ((WoWUnit) obj).Target();
                 }
                 return obj.Location;
             }
             return WoWPoint.Zero;
         }
 
-        static public WoWPoint GetLocationFromDB(MoveToType type, uint entry)
+        public static WoWPoint GetLocationFromDB(MoveToType type, uint entry)
         {
             NpcResult npcResults = null;
             switch (type)
             {
                 case MoveToType.NearestAH:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.Auctioneer);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.Auctioneer);
                     break;
                 case MoveToType.NearestBanker:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.Banker);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.Banker);
                     break;
                 case MoveToType.NearestFlight:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.Flightmaster);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.Flightmaster);
                     break;
                 case MoveToType.NearestGB:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.GuildBanker);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.GuildBanker);
                     break;
                 case MoveToType.NearestReagentVendor:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.ReagentVendor);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.ReagentVendor);
                     break;
                 case MoveToType.NearestRepair:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.Repair);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.Repair);
                     break;
                 case MoveToType.NearestVendor:
                     npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                 ObjectManager.Me.Location, UnitNPCFlags.Vendor);
+                                                          ObjectManager.Me.Location, UnitNPCFlags.Vendor);
                     break;
                 case MoveToType.NpcByID:
                     npcResults = NpcQueries.GetNpcById(entry);
@@ -277,26 +333,13 @@ namespace HighVoltz.Composites
                 return npcResults.Location;
             return WoWPoint.Zero;
         }
-        public override string Name { get { return Pb.Strings["Action_MoveToAction_Name"]; } }
-        public override string Title
-        {
-            get
-            {
-                return string.Format("{0}: {1} " +
-                    ((MoveType == MoveToType.Location) ? Location : ""), Name, MoveType);
-            }
-        }
-        public override string Help
-        {
-            get
-            {
-                return Pb.Strings["Action_MoveToAction_Help"];
-            }
-        }
+
         public override object Clone()
         {
-            return new MoveToAction { MoveType = this.MoveType, Entry = this.Entry, _loc = this._loc, Location = this.Location, Pathing = this.Pathing };
+            return new MoveToAction
+                       {MoveType = MoveType, Entry = Entry, _loc = _loc, Location = Location, Pathing = Pathing};
         }
     }
+
     #endregion
 }

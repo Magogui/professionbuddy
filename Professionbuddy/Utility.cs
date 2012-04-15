@@ -1,19 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Styx;
 using Styx.Logic;
-using Styx.Logic.Pathing;
 using Styx.Logic.POI;
-using System.Linq;
+using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
-using System.Globalization;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.IO;
 
 namespace HighVoltz
 {
@@ -22,14 +21,23 @@ namespace HighVoltz
     /// </summary>
     public static class Util
     {
-        static Util()
-        {
-            IsBankFrameOpen = false;
-        }
+        private const int CacheSize = 0x500;
+
         /// <summary>
         ///  Random Number Genorator
         /// </summary>
         public static Random Rng = new Random(Environment.TickCount);
+
+        private static WoWPoint _lastPoint = WoWPoint.Zero;
+        private static DateTime _lastMove = DateTime.Now;
+        private static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
+        private static readonly Stopwatch PingSW = new Stopwatch();
+
+        static Util()
+        {
+            IsBankFrameOpen = false;
+        }
+
         /// <summary>
         /// Creates a random upper/lowercase string
         /// </summary>
@@ -43,11 +51,43 @@ namespace HighVoltz
                 for (int i = 0; i < size; i++)
                 {
                     // random upper/lowercase character using ascii code
-                    sb.Append((char)(Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
+                    sb.Append((char) (Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
                 }
                 return sb.ToString();
             }
         }
+
+        public static bool IsBankFrameOpen { get; internal set; }
+
+        public static bool IsGbankFrameVisible
+        {
+            get
+            {
+                return
+                    Lua.GetReturnVal<int>(
+                        "if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1;
+            }
+        }
+
+        /// <summary>
+        /// Returns WoW's ping, refreshed every 30 seconds.
+        /// </summary>
+        public static uint WoWPing
+        {
+            get
+            {
+                if (!PingSW.IsRunning)
+                    PingSW.Start();
+                if (PingSW.ElapsedMilliseconds > 30000)
+                {
+                    _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
+                    PingSW.Reset();
+                    PingSW.Start();
+                }
+                return _ping;
+            }
+        }
+
         /// <summary>
         /// Returns the localized name of an item that is cached
         /// </summary>
@@ -55,20 +95,18 @@ namespace HighVoltz
         /// <returns></returns>
         public static string GetItemCacheName(uint id)
         {
-            var cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
+            WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
                 return ObjectManager.Wow.Read<string>(cache.ItemSparse.Name);
             return null;
         }
 
-        static WoWPoint _lastPoint = WoWPoint.Zero;
-        static DateTime _lastMove = DateTime.Now;
         public static void MoveTo(WoWPoint point)
         {
             if (BotPoi.Current.Type != PoiType.None)
                 BotPoi.Clear();
             if (!ObjectManager.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
-                Mount.MountUp(()=> point);
+                Mount.MountUp(() => point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
             Navigator.MoveTo(point);
@@ -86,7 +124,7 @@ namespace HighVoltz
         /// </summary>
         /// <param name="location"></param>
         /// <returns></returns>
-        static public WoWPoint StringToWoWPoint(string location)
+        public static WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
             var pattern = new Regex(@"-?\d+\.?(\d+)?", RegexOptions.CultureInvariant);
@@ -99,6 +137,7 @@ namespace HighVoltz
             }
             return loc;
         }
+
         /// <summary>
         ///  Returns number items with a matching id that player has in personal bank
         /// </summary>
@@ -108,11 +147,16 @@ namespace HighVoltz
         {
             try
             {
-                return (int)(ObjectManager.GetObjectsOfType<WoWItem>().
-                                  Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) - GetCarriedItemCount(itemID));
+                return (int) (ObjectManager.GetObjectsOfType<WoWItem>().
+                                  Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) -
+                              GetCarriedItemCount(itemID));
             }
-            catch { return 0; }
+            catch
+            {
+                return 0;
+            }
         }
+
         /// <summary>
         /// Returns number items with a matching id that player is carrying
         /// </summary>
@@ -120,75 +164,52 @@ namespace HighVoltz
         /// <returns>Number of items in player Inventory</returns>
         public static int GetCarriedItemCount(uint id)
         {
-            return (int)ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return
+                (int) ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
+
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
             return (from ingred in recipe.Ingredients
-                    let ingredCnt = (int)ingred.InBagItemCount -
-                                        (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ?
-                                                        Professionbuddy.Instance.MaterialList[ingred.ID] :
-                                                        0)
-                    select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Concat(new[] { int.MaxValue }).Min();
+                    let ingredCnt = (int) ingred.InBagItemCount -
+                                    (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
+                                         ? Professionbuddy.Instance.MaterialList[ingred.ID]
+                                         : 0)
+                    select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Concat(new[] {int.MaxValue}).Min();
         }
 
-        public static bool IsBankFrameOpen { get; internal set; }
-
-        static internal void OnBankFrameOpened(object obj, LuaEventArgs args)
+        internal static void OnBankFrameOpened(object obj, LuaEventArgs args)
         {
             IsBankFrameOpen = true;
         }
 
-        static internal void OnBankFrameClosed(object obj, LuaEventArgs args)
+        internal static void OnBankFrameClosed(object obj, LuaEventArgs args)
         {
             IsBankFrameOpen = false;
         }
 
-        public static bool IsGbankFrameVisible
-        {
-            get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; }
-        }
-
-        static uint _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
-        static readonly Stopwatch PingSW = new Stopwatch();
-        /// <summary>
-        /// Returns WoW's ping, refreshed every 30 seconds.
-        /// </summary>
-        static public uint WoWPing
-        {
-            get
-            {
-                if (!PingSW.IsRunning)
-                    PingSW.Start();
-                if (PingSW.ElapsedMilliseconds > 30000)
-                {
-                    _ping = Lua.GetReturnVal<uint>("return GetNetStats()", 3);
-                    PingSW.Reset();
-                    PingSW.Start();
-                }
-                return _ping;
-            }
-        }
-        const int CacheSize = 0x500;
         /// <summary>
         /// Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
         /// </summary>
         /// <param name="pattern">the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
         /// <param name="mask">the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored</param>
         /// <returns>The offset the first match of the pattern was found at.</returns>
-        static public uint FindPattern(string pattern, string mask)
+        public static uint FindPattern(string pattern, string mask)
         {
             byte[] patternArray = HexStringToByteArray(pattern);
             bool[] maskArray = MaskStringToBoolArray(mask);
             ProcessModule wowModule = ObjectManager.WoWProcess.MainModule;
-            var start = (uint)wowModule.BaseAddress.ToInt32();
+            var start = (uint) wowModule.BaseAddress.ToInt32();
             int size = wowModule.ModuleMemorySize;
-            var patternLength = mask.Length;
+            int patternLength = mask.Length;
 
-            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
+            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint) (CacheSize - patternLength))
             {
-                byte[] cache = ObjectManager.Wow.ReadBytes(start + cacheOffset, CacheSize > size - cacheOffset ? size - (int)cacheOffset : CacheSize);
+                byte[] cache = ObjectManager.Wow.ReadBytes(start + cacheOffset,
+                                                           CacheSize > size - cacheOffset
+                                                               ? size - (int) cacheOffset
+                                                               : CacheSize);
                 for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
                 {
                     if (DataCompare(cache, cacheIndex, patternArray, maskArray))
@@ -198,33 +219,42 @@ namespace HighVoltz
             throw new InvalidDataException("Pattern not found");
         }
 
-        static byte[] HexStringToByteArray(string hexString)
+        private static byte[] HexStringToByteArray(string hexString)
         {
             return hexString.Split(' ')
-                .Aggregate(new List<byte>(), (a, b) => { a.Add(byte.Parse(b, NumberStyles.HexNumber)); return a; })
+                .Aggregate(new List<byte>(), (a, b) =>
+                                                 {
+                                                     a.Add(byte.Parse(b, NumberStyles.HexNumber));
+                                                     return a;
+                                                 })
                 .ToArray();
         }
 
-        static bool[] MaskStringToBoolArray(string mask)
+        private static bool[] MaskStringToBoolArray(string mask)
         {
-            return mask.Aggregate(new List<bool>(), (a, b) => { a.Add(b != '?'); return a; }).ToArray();
+            return mask.Aggregate(new List<bool>(), (a, b) =>
+                                                        {
+                                                            a.Add(b != '?');
+                                                            return a;
+                                                        }).ToArray();
         }
 
-        static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, IEnumerable<bool> mask)
+        private static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, IEnumerable<bool> mask)
         {
             return !mask.Where((t, i) => t && pattern[i] != data[dataOffset + i]).Any();
         }
     }
-    static class Exts
+
+    internal static class Exts
     {
+        private static readonly Encoding EncodeUtf8 = Encoding.UTF8;
+
         public static uint ToUint(this string str)
         {
             uint val;
             uint.TryParse(str, out val);
             return val;
         }
-
-        static readonly Encoding EncodeUtf8 = Encoding.UTF8;
 
         /// <summary>
         /// Converts a string to a float using En-US based culture
@@ -235,7 +265,7 @@ namespace HighVoltz
         {
             float val;
             float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign
-            , CultureInfo.InvariantCulture, out val);
+                           , CultureInfo.InvariantCulture, out val);
             return val;
         }
 
@@ -254,6 +284,7 @@ namespace HighVoltz
             }
             return buffer.ToString();
         }
+
         /// <summary>
         /// This is a fix for WoWPoint.ToString using current cultures decimal separator.
         /// </summary>

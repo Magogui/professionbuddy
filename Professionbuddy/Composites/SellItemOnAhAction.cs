@@ -52,10 +52,11 @@ namespace HighVoltz.Composites
         public SellItemOnAhAction()
         {
             Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
             Properties["RunTime"] = new MetaProp("RunTime", typeof (RunTimeType),
-                                                 new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_AuctionDuration"]));
+                                                 new DisplayNameAttribute(
+                                                     Pb.Strings["Action_SellItemOnAhAction_AuctionDuration"]));
 
             Properties["MinBuyout"] = new MetaProp("MinBuyout", typeof (PropertyBag.GoldEditor),
                                                    new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)),
@@ -66,14 +67,16 @@ namespace HighVoltz.Composites
                                                    new DisplayNameAttribute(Pb.Strings["Action_Common_MaxBuyout"]));
 
             Properties["Amount"] = new MetaProp("Amount", typeof (DynamicProperty<int>),
-                new TypeConverterAttribute(typeof (DynamicProperty<int>.DynamivExpressionConverter)),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
+                                                new TypeConverterAttribute(
+                                                    typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                                new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
 
             Properties["StackSize"] = new MetaProp("StackSize", typeof (uint),
-                new DisplayNameAttribute(Pb.Strings["Action_Common_StackSize"]));
+                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_StackSize"]));
 
             Properties["IgnoreStackSizeBelow"] = new MetaProp("IgnoreStackSizeBelow", typeof (uint),
-                                                              new DisplayNameAttribute(Pb.Strings["Action_Common_IgnoreStackSizeBelow"]));
+                                                              new DisplayNameAttribute(
+                                                                  Pb.Strings["Action_Common_IgnoreStackSizeBelow"]));
 
             Properties["AmountType"] = new MetaProp("AmountType", typeof (AmountBasedType),
                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
@@ -82,14 +85,17 @@ namespace HighVoltz.Composites
                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
 
             Properties["Location"] = new MetaProp("Location", typeof (string),
-                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),typeof (UITypeEditor)),
+                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
+                                                                      typeof (UITypeEditor)),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof (float),
-                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_BidPercent"]));
+                                                    new DisplayNameAttribute(
+                                                        Pb.Strings["Action_SellItemOnAhAction_BidPercent"]));
 
             Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof (double),
-                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_UndercutPercent"]));
+                                                         new DisplayNameAttribute(
+                                                             Pb.Strings["Action_SellItemOnAhAction_UndercutPercent"]));
 
             Properties["UseCategory"] = new MetaProp("UseCategory", typeof (bool),
                                                      new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
@@ -98,10 +104,13 @@ namespace HighVoltz.Composites
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
 
             Properties["SubCategory"] = new MetaProp("SubCategory", typeof (WoWItemTradeGoodsClass),
-                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+                                                     new DisplayNameAttribute(
+                                                         Pb.Strings["Action_Common_ItemSubCategory"]));
 
             Properties["PostIfBelowMinBuyout"] = new MetaProp("PostIfBelowMinBuyout", typeof (bool),
-                new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_PostIfBelowMinBuyout"]));
+                                                              new DisplayNameAttribute(
+                                                                  Pb.Strings[
+                                                                      "Action_SellItemOnAhAction_PostIfBelowMinBuyout"]));
 
             ItemID = "";
             MinBuyout = new PropertyBag.GoldEditor("0g10s0c");
@@ -325,10 +334,7 @@ namespace HighVoltz.Composites
 
         public override string Help
         {
-            get
-            {
-                return Pb.Strings["Action_SellItemOnAhAction_Help"];
-            }
+            get { return Pb.Strings["Action_SellItemOnAhAction_Help"]; }
         }
 
         protected override RunStatus Run(object context)
@@ -574,11 +580,11 @@ namespace HighVoltz.Composites
             "local me = GetUnitName('player') " +
             "local auctionInfo = {{{0},{1}}} " +
             "for index=1, A do " +
-                "local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) " +
-                "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
-                    "auctionInfo[1] = floor(buyout/cnt) " +
-                "end " +
-                "if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end " +
+            "local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) " +
+            "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
+            "auctionInfo[1] = floor(buyout/cnt) " +
+            "end " +
+            "if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end " +
             "end " +
             "return unpack(auctionInfo) ";
 
@@ -594,32 +600,32 @@ namespace HighVoltz.Composites
             "local numItems = GetItemCount(itemID) " +
             "if numItems == 0 then return -1 end " +
             "if AuctionProgressFrame:IsVisible() == nil then " +
-                "AuctionFrameTab3:Click() " +
-                "local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID) " +
-                "if maxStack < stack then stack = maxStack end " +
-                "if amount * stack > numItems then " +
-                    "amount = floor(numItems/stack) " +
-                    "if amount <= 0 then " +
-                        "amount = 1 " +
-                        "stack = numItems " +
-                    "else " +
-                        "leftovers = numItems-(amount*stack) " +    
-                    "end " +
-                "end " +
-                "for bag = 0,4 do " +
-                    "for slot=GetContainerNumSlots(bag),1,-1 do " +
-                        "local id = GetContainerItemID(bag,slot) " +
-                        "local _,c,l = GetContainerItemInfo(bag, slot) " +
-                        "if id == itemID and l == nil then " +
-                            "PickupContainerItem(bag, slot) " +
-                            "ClickAuctionSellItemButton() " +
-                            "StartAuction(bid*stack, bo*stack, runtime,stack,amount) " +
-                            "return leftovers " +
-                        "end " +
-                    "end " +
-                "end " +
+            "AuctionFrameTab3:Click() " +
+            "local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID) " +
+            "if maxStack < stack then stack = maxStack end " +
+            "if amount * stack > numItems then " +
+            "amount = floor(numItems/stack) " +
+            "if amount <= 0 then " +
+            "amount = 1 " +
+            "stack = numItems " +
             "else " +
-                "return -1 " +  
+            "leftovers = numItems-(amount*stack) " +
+            "end " +
+            "end " +
+            "for bag = 0,4 do " +
+            "for slot=GetContainerNumSlots(bag),1,-1 do " +
+            "local id = GetContainerItemID(bag,slot) " +
+            "local _,c,l = GetContainerItemInfo(bag, slot) " +
+            "if id == itemID and l == nil then " +
+            "PickupContainerItem(bag, slot) " +
+            "ClickAuctionSellItemButton() " +
+            "StartAuction(bid*stack, bo*stack, runtime,stack,amount) " +
+            "return leftovers " +
+            "end " +
+            "end " +
+            "end " +
+            "else " +
+            "return -1 " +
             "end ";
 
         private readonly Stopwatch _queueTimer = new Stopwatch();
@@ -708,7 +714,7 @@ namespace HighVoltz.Composites
         }
 
         #endregion
-
     }
+
     #endregion
 }
