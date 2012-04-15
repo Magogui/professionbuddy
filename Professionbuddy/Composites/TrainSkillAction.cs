@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
+using Styx;
 using Styx.Helpers;
 using Styx.Logic.Inventory.Frames.Gossip;
 using Styx.Logic.Inventory.Frames.Trainer;
@@ -74,8 +75,7 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        private bool _attachedEventHandler;
-        WaitTimer _trainWaitTimer = new WaitTimer(TimeSpan.FromSeconds(2));
+        readonly WaitTimer _trainWaitTimer = new WaitTimer(TimeSpan.FromSeconds(2));
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
@@ -115,31 +115,29 @@ namespace HighVoltz.Composites
                     }
                     return RunStatus.Success;
                 }
-                if (!_attachedEventHandler)
-                {
-                    Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-                    _attachedEventHandler = true;
-                    _trainWaitTimer.Reset();
-                }
                 if (_trainWaitTimer.IsFinished)
                 {
-                    //if (_trainTimeStamp)
-                    Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
-                    Lua.DoString("BuyTrainerService(0) ");
-                    _trainWaitTimer.Reset();
-                    IsDone = true;
+                    using (new FrameLock())
+                    {
+                        Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
+                        // check if there is any abilities to that need training.
+                        var numOfAvailableAbilities =
+                            Lua.GetReturnVal<int>(
+                                "local a=0 for n=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(n)) == 'available' then a=a+1 end end return a ",
+                                0);
+                        if (numOfAvailableAbilities == 0)
+                        {
+                            IsDone = true;
+                            Professionbuddy.Log("Done training");
+                           return RunStatus.Failure;
+                        }
+                        Lua.DoString("BuyTrainerService(0) ");
+                        _trainWaitTimer.Reset();
+                    }
                 }
                 return RunStatus.Success;
             }
             return RunStatus.Failure;
-        }
-
-        private void OnSkillUpdate(object obj, LuaEventArgs args)
-        {
-            Professionbuddy.Log("Training Completed ");
-            IsDone = true;
-            Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-            _attachedEventHandler = false;
         }
 
         public override object Clone()
