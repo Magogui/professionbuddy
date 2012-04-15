@@ -127,6 +127,7 @@ namespace HighVoltz.Composites
                     Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
                     Lua.DoString("BuyTrainerService(0) ");
                     _trainWaitTimer.Reset();
+                    IsDone = true;
                 }
                 return RunStatus.Success;
             }
