@@ -13,18 +13,31 @@ namespace HighVoltz.Dynamic
 {
     public class DynamicCodeCompiler
     {
-        static readonly Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
-        static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> Declarations = from dec in CsharpCodeDict
-                                                                                      where dec.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Declaration
-                                                                                      select dec;
-        static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> NoneDeclarations = from dec in CsharpCodeDict
-                                                                                          where dec.Value.CodeType != HighVoltz.Dynamic.CsharpCodeType.Declaration
-                                                                                          select dec;
-        static object _codeDriverInstance;
+        private static readonly Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
+
+        private static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> Declarations = from dec in CsharpCodeDict
+                                                                                              where
+                                                                                                  dec.Value.CodeType ==
+                                                                                                  CsharpCodeType.
+                                                                                                      Declaration
+                                                                                              select dec;
+
+        private static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> NoneDeclarations =
+            from dec in CsharpCodeDict
+            where dec.Value.CodeType != CsharpCodeType.Declaration
+            select dec;
+
+        private static object _codeDriverInstance;
         public static bool CodeWasModified = true;
 
-        static string _tempFolder;
-        static public string TempFolder { get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.BotPath, "Temp")); } }
+        private static string _tempFolder;
+
+        public static string TempFolder
+        {
+            get { return _tempFolder ?? (_tempFolder = Path.Combine(Professionbuddy.BotPath, "Temp")); }
+        }
+
+        public static StringBuilder CsharpStringBuilder { get; private set; }
 
         public static void WipeTempFolder()
         {
@@ -38,9 +51,9 @@ namespace HighVoltz.Dynamic
                 {
                     File.Delete(file);
                 }
-                // ReSharper disable EmptyGeneralCatchClause
+                    // ReSharper disable EmptyGeneralCatchClause
                 catch
-                // ReSharper restore EmptyGeneralCatchClause
+                    // ReSharper restore EmptyGeneralCatchClause
                 {
                 }
             }
@@ -50,15 +63,15 @@ namespace HighVoltz.Dynamic
                 {
                     Directory.Delete(dir);
                 }
-                // ReSharper disable EmptyGeneralCatchClause
+                    // ReSharper disable EmptyGeneralCatchClause
                 catch
-                // ReSharper restore EmptyGeneralCatchClause
+                    // ReSharper restore EmptyGeneralCatchClause
                 {
                 }
             }
         }
 
-        static public void GenorateDynamicCode()
+        public static void GenorateDynamicCode()
         {
             CsharpCodeDict.Clear();
             StoreMethodName(Professionbuddy.Instance.PbBehavior);
@@ -74,22 +87,32 @@ namespace HighVoltz.Dynamic
                 {
                     if (CsharpCodeDict.ContainsKey(method.Name))
                     {
-                        if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
-                            CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), _codeDriverInstance, method.Name);
-                        else if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.Statements)
-                            CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(typeof(Action<object>), _codeDriverInstance, method.Name);
-                        else if (CsharpCodeDict[method.Name].CodeType == HighVoltz.Dynamic.CsharpCodeType.Expression)
+                        if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.BoolExpression)
+                            CsharpCodeDict[method.Name].CompiledMethod =
+                                Delegate.CreateDelegate(typeof (CanRunDecoratorDelegate), _codeDriverInstance,
+                                                        method.Name);
+                        else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
+                            CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(
+                                typeof (Action<object>), _codeDriverInstance, method.Name);
+                        else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Expression)
                         {
-                            Type gType = typeof(Func<,>).MakeGenericType(new[] { typeof(object), ((IDynamicProperty)CsharpCodeDict[method.Name]).ReturnType });
-                            CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(gType, _codeDriverInstance, method.Name);
+                            Type gType =
+                                typeof (Func<,>).MakeGenericType(new[]
+                                                                     {
+                                                                         typeof (object),
+                                                                         ((IDynamicProperty) CsharpCodeDict[method.Name]).
+                                                                             ReturnType
+                                                                     });
+                            CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(gType,
+                                                                                                 _codeDriverInstance,
+                                                                                                 method.Name);
                         }
-
                     }
                 }
             }
         }
 
-        static void StoreMethodName(Composite comp)
+        private static void StoreMethodName(Composite comp)
         {
             var cSharpCode = comp as ICSharpCode;
             if (cSharpCode != null)
@@ -99,8 +122,8 @@ namespace HighVoltz.Dynamic
             }
             // check for DynamicExpression proprerties
             List<IDynamicProperty> dynProps = (from prop in comp.GetType().GetProperties()
-                                               where typeof(IDynamicProperty).IsAssignableFrom(prop.PropertyType)
-                                               select (IDynamicProperty)prop.GetValue(comp, null)).ToList();
+                                               where typeof (IDynamicProperty).IsAssignableFrom(prop.PropertyType)
+                                               select (IDynamicProperty) prop.GetValue(comp, null)).ToList();
             foreach (IDynamicProperty dynProp in dynProps)
             {
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString(CultureInfo.InvariantCulture)] = dynProp;
@@ -115,10 +138,91 @@ namespace HighVoltz.Dynamic
             }
         }
 
+        public static Type CompileAndLoad()
+        {
+            CompilerResults results;
+            using (var provider = new CSharpCodeProvider(new Dictionary<string, string>
+                                                             {
+                                                                 {"CompilerVersion", "v3.5"},
+                                                             }))
+            {
+                var options = new CompilerParameters();
+                foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (!asm.GetName().Name.Contains(Professionbuddy.Instance.Name))
+                        options.ReferencedAssemblies.Add(asm.Location);
+                }
+                options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
+
+                // disabled due to a bug in 2.0.0.3956;
+                //options.GenerateInMemory = true; 
+                options.GenerateExecutable = false;
+                options.TempFiles = new TempFileCollection(TempFolder, false);
+                options.IncludeDebugInformation = false;
+                options.OutputAssembly = string.Format("{0}\\CodeAssembly{1:N}.dll", TempFolder, Guid.NewGuid());
+                options.CompilerOptions = "/optimize";
+                CsharpStringBuilder = new StringBuilder();
+                CsharpStringBuilder.Append(Prefix);
+                // Line numbers are used to identify actions that genorated compile errors.
+                int currentLine = CsharpStringBuilder.ToString().Count(c => c == '\n') + 1;
+                // genorate CanRun Methods
+                foreach (var met in Declarations)
+                {
+                    CsharpStringBuilder.AppendFormat("{0}\n", met.Value.Code.Replace(Environment.NewLine, ""));
+                    met.Value.CodeLineNumber = currentLine++;
+                }
+                foreach (var met in NoneDeclarations)
+                {
+                    if (met.Value.CodeType == CsharpCodeType.BoolExpression)
+                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key,
+                                                         met.Value.Code.Replace(Environment.NewLine, ""));
+                    else if (met.Value.CodeType == CsharpCodeType.Statements)
+                        CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key,
+                                                         met.Value.Code.Replace(Environment.NewLine, ""));
+                    else if (met.Value.CodeType == CsharpCodeType.Expression)
+                    {
+                        Type retType = ((IDynamicProperty) met.Value).ReturnType;
+                        CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return {2};}}\n",
+                                                         retType.Name, met.Key,
+                                                         met.Value.Code.Replace(Environment.NewLine, ""));
+                    }
+                    met.Value.CodeLineNumber = currentLine++;
+                }
+                CsharpStringBuilder.Append(Postfix);
+                results = provider.CompileAssemblyFromSource(
+                    options, CsharpStringBuilder.ToString());
+            }
+            if (results.Errors.HasErrors)
+            {
+                if (results.Errors.Count > 0)
+                {
+                    foreach (CompilerError error in results.Errors)
+                    {
+                        ICSharpCode icsc = CsharpCodeDict.Values.FirstOrDefault(c => c.CodeLineNumber == error.Line);
+                        if (icsc != null)
+                        {
+                            Professionbuddy.Err("{0}\nCompile Error : {1}\n", icsc.AttachedComposite.Title,
+                                                error.ErrorText);
+                            icsc.CompileError = error.ErrorText;
+                        }
+                        else
+                        {
+                            Professionbuddy.Err("Unable to link action that produced Error: {0}", error.ErrorText);
+                        }
+                    }
+                    if (MainForm.IsValid)
+                        MainForm.Instance.RefreshActionTree(typeof (ICSharpCode));
+                }
+                return null;
+            }
+            CodeWasModified = false;
+            return results.CompiledAssembly.GetType("CodeDriver");
+        }
+
         #region Strings
 
-        const string Prefix =
-        @"using HighVoltz;
+        private const string Prefix =
+            @"using HighVoltz;
         using System;
         using System.Reflection;
         using System.Data;
@@ -157,7 +261,8 @@ namespace HighVoltz.Dynamic
         {
             static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
 ";
-        const string Postfix =
+
+        private const string Postfix =
             @"
             static LocalPlayer Me = ObjectManager.Me;
             static PbProfileSettings Settings = Professionbuddy.Instance.ProfileSettings;
@@ -209,84 +314,7 @@ namespace HighVoltz.Dynamic
             bool HasDataStoreAddon {get{return DataStore.HasDataStoreAddon;}}
             HBRelogApi HBRelog {get{return Helpers.HBRelog;}}
         }";
+
         #endregion
-        static public StringBuilder CsharpStringBuilder { get; private set; }
-
-        static public Type CompileAndLoad()
-        {
-            CompilerResults results;
-            using (var provider = new CSharpCodeProvider(new Dictionary<string, string>{
-                {"CompilerVersion", "v3.5"},
-            }))
-            {
-                var options = new CompilerParameters();
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    if (!asm.GetName().Name.Contains(Professionbuddy.Instance.Name))
-                        options.ReferencedAssemblies.Add(asm.Location);
-                }
-                options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
-
-                // disabled due to a bug in 2.0.0.3956;
-                //options.GenerateInMemory = true; 
-                options.GenerateExecutable = false;
-                options.TempFiles = new TempFileCollection(TempFolder, false);
-                options.IncludeDebugInformation = false;
-                options.OutputAssembly = string.Format("{0}\\CodeAssembly{1:N}.dll", TempFolder, Guid.NewGuid());
-                options.CompilerOptions = "/optimize";
-                CsharpStringBuilder = new StringBuilder();
-                CsharpStringBuilder.Append(Prefix);
-                // Line numbers are used to identify actions that genorated compile errors.
-                int currentLine = CsharpStringBuilder.ToString().Count(c => c == '\n') + 1;
-                // genorate CanRun Methods
-                foreach (var met in Declarations)
-                {
-                    CsharpStringBuilder.AppendFormat("{0}\n", met.Value.Code.Replace(Environment.NewLine, ""));
-                    met.Value.CodeLineNumber = currentLine++;
-                }
-                foreach (var met in NoneDeclarations)
-                {
-                    if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.BoolExpression)
-                        CsharpStringBuilder.AppendFormat("public bool {0} (object context){{return {1};}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
-                    else if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Statements)
-                        CsharpStringBuilder.AppendFormat("public void {0} (object context){{{1}}}\n", met.Key, met.Value.Code.Replace(Environment.NewLine, ""));
-                    else if (met.Value.CodeType == HighVoltz.Dynamic.CsharpCodeType.Expression)
-                    {
-                        Type retType = ((IDynamicProperty)met.Value).ReturnType;
-                        CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return {2};}}\n",
-                                                         retType.Name, met.Key,
-                                                         met.Value.Code.Replace(Environment.NewLine, ""));
-                    }
-                    met.Value.CodeLineNumber = currentLine++;
-                }
-                CsharpStringBuilder.Append(Postfix);
-                results = provider.CompileAssemblyFromSource(
-                options, CsharpStringBuilder.ToString());
-            }
-            if (results.Errors.HasErrors)
-            {
-                if (results.Errors.Count > 0)
-                {
-                    foreach (CompilerError error in results.Errors)
-                    {
-                        ICSharpCode icsc = CsharpCodeDict.Values.FirstOrDefault(c => c.CodeLineNumber == error.Line);
-                        if (icsc != null)
-                        {
-                            Professionbuddy.Err("{0}\nCompile Error : {1}\n", icsc.AttachedComposite.Title, error.ErrorText);
-                            icsc.CompileError = error.ErrorText;
-                        }
-                        else
-                        {
-                            Professionbuddy.Err("Unable to link action that produced Error: {0}", error.ErrorText);
-                        }
-                    }
-                    if (MainForm.IsValid)
-                        MainForm.Instance.RefreshActionTree(typeof(ICSharpCode));
-                }
-                return null;
-            }
-            CodeWasModified = false;
-            return results.CompiledAssembly.GetType("CodeDriver");
-        }
     }
 }

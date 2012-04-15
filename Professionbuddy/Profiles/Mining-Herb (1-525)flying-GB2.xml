@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
   <CustomAction Code="CharacterSettings.Instance.LootMobs = false;" />
   <Settings DefaultValue="true" Type="Boolean" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." Category="Profile" Global="False" Hidden="False" />
@@ -397,7 +397,7 @@
   <SubRoutine SubRoutineName="EmptyBagsInUndercity">
     <CustomAction Code="Log(Color.Green,&quot;Mine/Herb 1-525: &quot;,Color.LightGreen,&quot;Emptying my bags in Undercity&quot;);" />
     <FlyToAction Dismount="True" Location="1688.531, 730.3077, 73.82889" />
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="False" Location="1644.13, 277.5082, -62.18286" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="4g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
