@@ -51,7 +51,7 @@ namespace HighVoltz
                 for (int i = 0; i < size; i++)
                 {
                     // random upper/lowercase character using ascii code
-                    sb.Append((char) (Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
+                    sb.Append((char)(Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
                 }
                 return sb.ToString();
             }
@@ -146,10 +146,12 @@ namespace HighVoltz
         public static int GetBankItemCount(uint itemID)
         {
             try
-            {
-                return (int) (ObjectManager.GetObjectsOfType<WoWItem>().
-                                  Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) -
-                              GetCarriedItemCount(itemID));
+            {  // number of items in objectmanger - (carriedItemCount + BuybackItemCount)
+                return (int)ObjectManager.GetObjectsOfType<WoWItem>().
+                                  Sum(i => i != null
+                                      && i.IsValid
+                                      && i.Entry == itemID ? i.StackCount : 0) -
+                              (GetCarriedItemCount(itemID) + GetBuyBackItemCount(itemID));
             }
             catch
             {
@@ -165,18 +167,29 @@ namespace HighVoltz
         public static int GetCarriedItemCount(uint id)
         {
             return
-                (int) ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+                (int)ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+        }
+
+        /// <summary>
+        /// Returns number items with a matching id that player is carrying
+        /// </summary>
+        /// <param name="id">Item ID</param>
+        /// <returns>Number of items in merchant buyback frame</returns>
+        public static int GetBuyBackItemCount(uint id)
+        {
+            return
+                (int)ObjectManager.Me.Inventory.Buyback.Items.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
             return (from ingred in recipe.Ingredients
-                    let ingredCnt = (int) ingred.InBagItemCount -
+                    let ingredCnt = (int)ingred.InBagItemCount -
                                     (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
                                          ? Professionbuddy.Instance.MaterialList[ingred.ID]
                                          : 0)
-                    select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Concat(new[] {int.MaxValue}).Min();
+                    select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Concat(new[] { int.MaxValue }).Min();
         }
 
         internal static void OnBankFrameOpened(object obj, LuaEventArgs args)
@@ -200,15 +213,15 @@ namespace HighVoltz
             byte[] patternArray = HexStringToByteArray(pattern);
             bool[] maskArray = MaskStringToBoolArray(mask);
             ProcessModule wowModule = ObjectManager.WoWProcess.MainModule;
-            var start = (uint) wowModule.BaseAddress.ToInt32();
+            var start = (uint)wowModule.BaseAddress.ToInt32();
             int size = wowModule.ModuleMemorySize;
             int patternLength = mask.Length;
 
-            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint) (CacheSize - patternLength))
+            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
             {
                 byte[] cache = ObjectManager.Wow.ReadBytes(start + cacheOffset,
                                                            CacheSize > size - cacheOffset
-                                                               ? size - (int) cacheOffset
+                                                               ? size - (int)cacheOffset
                                                                : CacheSize);
                 for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
                 {
