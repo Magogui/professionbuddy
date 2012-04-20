@@ -187,13 +187,13 @@ xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(Targe
 
 IF EXIST \\HIGHVOLTZ-VM\Buddy\Honorbuddy\Honorbuddy.exe (
 echo Copying files to VM
-xcopy "$(ProjectDir)*.cs"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)*.png"   "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)*.bmp"   "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Guide.rtf"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Profiles\*.xml"  "Z:\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)Localization\*.xml"   "Z:\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
-xcopy  "$(ProjectDir)ChangeLog.txt"  "Z:\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)*.cs"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)*.png"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)*.bmp"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)Guide.rtf"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
+xcopy "$(ProjectDir)Profiles\*.xml"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
+xcopy "$(ProjectDir)Localization\*.xml"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
+xcopy  "$(ProjectDir)ChangeLog.txt"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
 )
 
 )

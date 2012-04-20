@@ -19,6 +19,7 @@ namespace HighVoltz.Dynamic
         private readonly Func<string, int> _getProfileStatus;
         private readonly Assembly _hbRelogHelperAsm;
         private readonly Action<string, TimeSpan> _idleProfile;
+        private readonly Action<string> _skipCurrentTask;
 
         private readonly Func<bool> _isConnected;
         private readonly LogonDelegate _logon;
@@ -75,6 +76,9 @@ namespace HighVoltz.Dynamic
                 // Logon
                 methodInfo = apiType.GetMethod("Logon", BindingFlags.Public | BindingFlags.Static);
                 _logon = (LogonDelegate) Delegate.CreateDelegate(typeof (LogonDelegate), methodInfo);
+
+                methodInfo = apiType.GetMethod("SkipCurrentTask", BindingFlags.Public | BindingFlags.Static);
+                _skipCurrentTask = (Action<string>) Delegate.CreateDelegate(typeof (Action<string>), methodInfo);
             }
         }
 
@@ -175,6 +179,11 @@ namespace HighVoltz.Dynamic
             if (_setProfileStatusText != null) _setProfileStatusText(status);
         }
 
+        public void SkipCurrentTask(string profileName)
+        {
+            if (_skipCurrentTask != null) _skipCurrentTask(profileName);
+        }
+
         /// <summary>
         /// Re-opens wow and logs on a character
         /// </summary>
@@ -218,6 +227,8 @@ namespace HighVoltz.Dynamic
             if (_logon != null)
                 _logon(character, server, customClass, botBase, profilePath);
         }
+
+
 
         #region Nested type: LogonDelegate
 
