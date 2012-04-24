@@ -185,17 +185,6 @@ xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(Targe
 xcopy "$(ProjectDir)Localization\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
 xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
 
-IF EXIST \\HIGHVOLTZ-VM\Buddy\Honorbuddy\Honorbuddy.exe (
-echo Copying files to VM
-xcopy "$(ProjectDir)*.cs"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)*.png"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)*.bmp"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Guide.rtf"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Profiles\*.xml"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)Localization\*.xml"   "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
-xcopy  "$(ProjectDir)ChangeLog.txt"  "\\HIGHVOLTZ-VM\Buddy\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-)
-
 )
 </PostBuildEvent>
   </PropertyGroup>

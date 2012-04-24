@@ -43,17 +43,17 @@ namespace HighVoltz
     {
         public PbProfileSettings()
         {
-            _settingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
+            SettingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
         }
 
-        private Dictionary<string, PbProfileSettingEntry> _settingsDictionary;
+        public Dictionary<string, PbProfileSettingEntry> SettingsDictionary { get;private set; }
 
         public object this[string name]
         {
-            get { return _settingsDictionary.ContainsKey(name) ? _settingsDictionary[name].Value : null; }
+            get { return SettingsDictionary.ContainsKey(name) ? SettingsDictionary[name].Value : null; }
             set
             {
-                _settingsDictionary[name].Value = value;
+                SettingsDictionary[name].Value = value;
                 if (Professionbuddy.Instance.CurrentProfile != null)
                 {
                     Save();
@@ -97,8 +97,8 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                bool hasGlobalSettings = _settingsDictionary.Any(setting => setting.Value.Global);
-                bool hasCharacterSettings = _settingsDictionary.Any(setting => !setting.Value.Global);
+                bool hasGlobalSettings = SettingsDictionary.Any(setting => setting.Value.Global);
+                bool hasCharacterSettings = SettingsDictionary.Any(setting => !setting.Value.Global);
                 if (hasGlobalSettings)
                     SaveGlobalSettings();
                 if (hasCharacterSettings)
@@ -113,7 +113,7 @@ namespace HighVoltz
             {
                 var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
                 Dictionary<string, object> temp =
-                    _settingsDictionary.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                    SettingsDictionary.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
@@ -125,7 +125,7 @@ namespace HighVoltz
             {
                 var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
                 Dictionary<string, object> temp =
-                    _settingsDictionary.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                    SettingsDictionary.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
@@ -134,7 +134,7 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                _settingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
+                SettingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
                 LoadCharacterSettings();
                 LoadGlobalSettings();
                 LoadDefaultValues();
@@ -155,7 +155,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                _settingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                                SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -181,7 +181,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                _settingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                                SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -198,16 +198,16 @@ namespace HighVoltz
             List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.PbBehavior);
             foreach (Composites.Settings setting in settingsList)
             {
-                if (!_settingsDictionary.ContainsKey(setting.SettingName))
-                    _settingsDictionary[setting.SettingName] = new PbProfileSettingEntry
+                if (!SettingsDictionary.ContainsKey(setting.SettingName))
+                    SettingsDictionary[setting.SettingName] = new PbProfileSettingEntry
                                                         {Value = GetValue(setting.Type, setting.DefaultValue)};
-                _settingsDictionary[setting.SettingName].Summary = setting.Summary;
-                _settingsDictionary[setting.SettingName].Category = setting.Category;
-                _settingsDictionary[setting.SettingName].Global = setting.Global;
-                _settingsDictionary[setting.SettingName].Hidden = setting.Hidden;
+                SettingsDictionary[setting.SettingName].Summary = setting.Summary;
+                SettingsDictionary[setting.SettingName].Category = setting.Category;
+                SettingsDictionary[setting.SettingName].Global = setting.Global;
+                SettingsDictionary[setting.SettingName].Hidden = setting.Hidden;
             }
             // remove unused settings..
-            _settingsDictionary = _settingsDictionary.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
+            SettingsDictionary = SettingsDictionary.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
                                                                                                          kv => kv.Value);
         }
 
@@ -279,7 +279,7 @@ namespace HighVoltz
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _settingsDictionary.GetEnumerator();
-        }
+            return SettingsDictionary.GetEnumerator();
+        }   
     }
 }
