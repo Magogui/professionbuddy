@@ -448,7 +448,7 @@ namespace HighVoltz
                                                    LoadPBProfile(ProfileManager.XmlLocation);
                                                    if (MainForm.IsValid)
                                                    {
-                                                       if (Instance.ProfileSettings.Settings.Count > 0)
+                                                       if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
                                                            MainForm.Instance.AddProfileSettingsTab();
                                                        else
                                                            MainForm.Instance.RemoveProfileSettingsTab();
@@ -466,7 +466,7 @@ namespace HighVoltz
                         LoadPBProfile(ProfileManager.XmlLocation);
                         if (MainForm.IsValid)
                         {
-                            if (Instance.ProfileSettings.Settings.Count > 0)
+                            if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
                                 MainForm.Instance.AddProfileSettingsTab();
                             else
                                 MainForm.Instance.RemoveProfileSettingsTab();

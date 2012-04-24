@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,21 +39,21 @@ namespace HighVoltz
         public bool Hidden { get; set; }
     }
 
-    public class PbProfileSettings
+    public class PbProfileSettings : IEnumerable
     {
         public PbProfileSettings()
         {
-            Settings = new Dictionary<string, PbProfileSettingEntry>();
+            _settingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
         }
 
-        public Dictionary<string, PbProfileSettingEntry> Settings { get; private set; }
+        private Dictionary<string, PbProfileSettingEntry> _settingsDictionary;
 
         public object this[string name]
         {
-            get { return Settings.ContainsKey(name) ? Settings[name].Value : null; }
+            get { return _settingsDictionary.ContainsKey(name) ? _settingsDictionary[name].Value : null; }
             set
             {
-                Settings[name].Value = value;
+                _settingsDictionary[name].Value = value;
                 if (Professionbuddy.Instance.CurrentProfile != null)
                 {
                     Save();
@@ -96,8 +97,8 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                bool hasGlobalSettings = Settings.Any(setting => setting.Value.Global);
-                bool hasCharacterSettings = Settings.Any(setting => !setting.Value.Global);
+                bool hasGlobalSettings = _settingsDictionary.Any(setting => setting.Value.Global);
+                bool hasCharacterSettings = _settingsDictionary.Any(setting => !setting.Value.Global);
                 if (hasGlobalSettings)
                     SaveGlobalSettings();
                 if (hasCharacterSettings)
@@ -112,7 +113,7 @@ namespace HighVoltz
             {
                 var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
                 Dictionary<string, object> temp =
-                    Settings.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                    _settingsDictionary.Where(setting => !setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
@@ -124,7 +125,7 @@ namespace HighVoltz
             {
                 var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
                 Dictionary<string, object> temp =
-                    Settings.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+                    _settingsDictionary.Where(setting => setting.Value.Global).ToDictionary(kv => kv.Key, kv => kv.Value.Value);
                 serializer.WriteObject(writer, temp);
             }
         }
@@ -133,7 +134,7 @@ namespace HighVoltz
         {
             if (Professionbuddy.Instance.CurrentProfile != null)
             {
-                Settings = new Dictionary<string, PbProfileSettingEntry>();
+                _settingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
                 LoadCharacterSettings();
                 LoadGlobalSettings();
                 LoadDefaultValues();
@@ -154,7 +155,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry {Value = kv.Value};
+                                _settingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -180,7 +181,7 @@ namespace HighVoltz
                         {
                             foreach (var kv in temp)
                             {
-                                Settings[kv.Key] = new PbProfileSettingEntry {Value = kv.Value};
+                                _settingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
                             }
                         }
                     }
@@ -197,16 +198,16 @@ namespace HighVoltz
             List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.PbBehavior);
             foreach (Composites.Settings setting in settingsList)
             {
-                if (!Settings.ContainsKey(setting.SettingName))
-                    Settings[setting.SettingName] = new PbProfileSettingEntry
+                if (!_settingsDictionary.ContainsKey(setting.SettingName))
+                    _settingsDictionary[setting.SettingName] = new PbProfileSettingEntry
                                                         {Value = GetValue(setting.Type, setting.DefaultValue)};
-                Settings[setting.SettingName].Summary = setting.Summary;
-                Settings[setting.SettingName].Category = setting.Category;
-                Settings[setting.SettingName].Global = setting.Global;
-                Settings[setting.SettingName].Hidden = setting.Hidden;
+                _settingsDictionary[setting.SettingName].Summary = setting.Summary;
+                _settingsDictionary[setting.SettingName].Category = setting.Category;
+                _settingsDictionary[setting.SettingName].Global = setting.Global;
+                _settingsDictionary[setting.SettingName].Hidden = setting.Hidden;
             }
             // remove unused settings..
-            Settings = Settings.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
+            _settingsDictionary = _settingsDictionary.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
                                                                                                          kv => kv.Value);
         }
 
@@ -274,6 +275,11 @@ namespace HighVoltz
                 foreach (Composite child in ((GroupComposite) comp).Children)
                     GetProfileSettings(child, ref list);
             }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _settingsDictionary.GetEnumerator();
         }
     }
 }

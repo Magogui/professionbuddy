@@ -216,7 +216,7 @@ namespace HighVoltz
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ProfileManager.LoadNew(openFileDialog.FileName, true);
-                if (_pb.ProfileSettings.Settings.Count > 0)
+                if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
                     AddProfileSettingsTab();
                 else
                     RemoveProfileSettingsTab();
@@ -408,7 +408,7 @@ namespace HighVoltz
                 // Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
                 ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-                if (_pb.ProfileSettings.Settings.Count > 0)
+                if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
                     AddProfileSettingsTab();
                 else
                     RemoveProfileSettingsTab();
@@ -552,7 +552,7 @@ namespace HighVoltz
             toolStripMaterials.Image = Image.FromFile(imagePath + "Notepad_32x32.png");
             toolStripHelp.Image = Image.FromFile(imagePath + "109_AllAnnotations_Help_32x32_72.png");
 
-            if (_pb.ProfileSettings.Settings.Count > 0)
+            if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
                 AddProfileSettingsTab();
             else
                 RemoveProfileSettingsTab();
@@ -715,7 +715,7 @@ namespace HighVoltz
             RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
             _profilePropertyBag = new PropertyBag();
-            foreach (var kv in _pb.ProfileSettings.Settings)
+            foreach (var kv in _pb.ProfileSettings.SettingsDictionary)
             {
                 if (!kv.Value.Hidden)
                 {
@@ -743,7 +743,7 @@ namespace HighVoltz
 
         private void RefreshSettingsPropertyGridCallback()
         {
-            foreach (var kv in _pb.ProfileSettings.Settings)
+            foreach (var kv in _pb.ProfileSettings.SettingsDictionary)
             {
                 MetaProp prop = _profilePropertyBag[kv.Key];
                 if (prop != null)
