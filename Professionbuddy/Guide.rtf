@@ -1,6 +1,6 @@
 {\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033\deflangfe1033{\fonttbl{\f0\fswiss\fprq2\fcharset0 Calibri;}{\f1\fswiss\fprq2\fcharset0 Verdana;}{\f2\froman\fprq2\fcharset0 Times New Roman;}{\f3\fmodern\fprq1\fcharset0 Consolas;}{\f4\fswiss\fprq2\fcharset0 Arial Black;}{\f5\fswiss\fprq2\fcharset0 Arial;}{\f6\fswiss\fprq2\fcharset0 Microsoft Sans Serif;}{\f7\froman\fprq2\fcharset0 Cambria;}}
 {\colortbl ;\red192\green80\blue77;\red51\green51\blue51;\red255\green255\blue255;\red0\green128\blue0;\red0\green0\blue255;\red43\green145\blue175;\red0\green0\blue0;}
-{\*\generator Riched20 6.2.8250}{\*\mmathPr\mnaryLim0\mdispDef1\mwrapIndent1440 }\viewkind4\uc1 
+{\*\generator Riched20 6.2.8250}{\*\mmathPr\mdispDef1\mwrapIndent1440 }\viewkind4\uc1 
 \pard\widctlpar\ul\b\f0\fs28 Introduction\par
 
 \pard\nowidctlpar\sa200\sl276\slmult1\ulnone\b0\fs24\lang9 Professionbuddy is a plugin designed to automate Tradeskill related tasks including but not limited to automatically leveling Tradeskills, disenchanting items, milling herbs or crafting a list of items.\par
@@ -13,7 +13,7 @@ Having basic knowledge of the C# language is recommended to build advanced profi
 
 \pard\cbpat3 
 {\pntext\f1 1.\tab}{\*\pn\pnlvlbody\pnf1\pnindent480\pnstart1\pndec{\pntxta.}}
-\widctlpar\fi-360\li600\ri600\cf2\f1\fs20 Run Honorbuddy and set bot to 'Professionbuddy' from the drop-down list\par
+\fi-360\li600\ri600\cf2\f1\fs20 Run Honorbuddy and set bot to 'Professionbuddy' from the drop-down list\par
 {\pntext\f1 2.\tab}Open the PB window by clicking the 'Bot Config' button in HB\par
 {\pntext\f1 3.\tab}Select one of the profiles in the profile list on the left side of the config window and press 'Load Profile' button (or double-click it)\par
 {\pntext\f1 4.\tab}If the profile has any settings attached to it a new tab named 'Profile Settings' will be loaded in the right side of the window. Adjust the settings if needed and close PB's window\par
@@ -93,6 +93,7 @@ Each of the listed tradeskills wrapers has 2 properties, Level and MaxLevel\par
 \b HasMats (RecipeID) \b0 - checks if the player has material for the recipe\par
 \b HasRecipe (RecipeID) \b0 - checks if the player has the specific recipe\par
 \b HasTools (RecipeID) \b0 - checks if the player has the tools need to craft the recipe.\par
+\b RecipeIsOnCD (RecipeID) \b0 - checks if the recipe is on cooldown\par
 
 \pard\widctlpar\ul\b\fs28\par
 HBRelog\par

@@ -313,6 +313,7 @@ namespace HighVoltz.Dynamic
             BotBase SecondaryBot {get{return Professionbuddy.Instance.SecondaryBot;}}
             bool HasDataStoreAddon {get{return DataStore.HasDataStoreAddon;}}
             HBRelogApi HBRelog {get{return Helpers.HBRelog;}}
+            bool RecipeIsOnCD (int id) {return Lua.GetReturnVal<bool>(string.Format(""return GetSpellCooldown({0})"",id), 0) ; }
         }";
 
         #endregion
