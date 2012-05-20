@@ -338,7 +338,7 @@ namespace HighVoltz.Composites
                     if (_itemList == null)
                         _itemList = BuildItemList();
                     // no bag space... 
-                    if (Me.FreeNormalBagSlots <= MinFreeBagSlots || _itemList.Count == 0)
+                    if (Util.BagRoomLeft(_itemList.Keys.FirstOrDefault()) <= MinFreeBagSlots || _itemList.Count == 0)
                         IsDone = true;
                     else
                     {

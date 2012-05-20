@@ -181,6 +181,43 @@ namespace HighVoltz
                 (int)ObjectManager.Me.Inventory.Buyback.Items.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
+        // credits Dfagan
+        readonly static Dictionary<uint, int> BagStorageTypes = new Dictionary<uint, int>();
+        public static int StorageType(uint id)
+        {
+            int storagetype;
+            if (BagStorageTypes.ContainsKey(id))
+            {
+                BagStorageTypes.TryGetValue(id, out storagetype);
+            }
+            else
+            {
+                storagetype = Lua.GetReturnVal<int>("return GetItemFamily(" + id + ")", 0);
+                BagStorageTypes.Add(id, storagetype);
+            }
+            return storagetype;
+        }
+
+
+        public static uint BagRoomLeft(uint id)
+        {
+            int storagetype = StorageType(id);
+            uint freeSlots = StyxWoW.Me.Inventory.Backpack.FreeSlots;
+            for (uint i = 0; i < 4; i++)
+            {
+                WoWContainer bagAtIndex = StyxWoW.Me.GetBagAtIndex(i);
+                if (bagAtIndex != null)
+                {
+                    int bagtype = StorageType(bagAtIndex.Entry);
+                    if (bagtype == 0 || (bagtype & storagetype) > 0 )
+                    {
+                        freeSlots += bagAtIndex.FreeSlots;
+                    }
+                }
+            }
+            return freeSlots;
+        }
+
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
