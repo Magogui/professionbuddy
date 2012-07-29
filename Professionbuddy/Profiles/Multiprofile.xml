@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Professionbuddy>
   <!--ATTENTION: READ BELOW BEFORE YOU START-->
   <!--Set Hearth to Dwarf area in Stormwind if Alliance or Org if horde-->
@@ -488,13 +488,13 @@
     <CustomAction Code="MyLog(&quot;Repairing&quot;);" />
     <If Condition="Me.IsAlliance" IgnoreCanRun="True">
       <FlyToAction Dismount="False" Location="-8430.486, 623.2193, 95.50689" />
-      <While Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
+      <While Condition="MerchantFrame.Instance != null &amp;&amp; !MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
         <InteractionAction InteractType="NPC" Entry="5512" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
       </While>
     </If>
     <If Condition="Me.IsHorde" IgnoreCanRun="True">
       <FlyToAction Dismount="True" Location="1910.451, -4213.775, 36.9762" />
-      <While Condition="MerchantFrame.Instance != null &amp;&amp; MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
+      <While Condition="MerchantFrame.Instance != null &amp;&amp; !MerchantFrame.Instance.IsVisible" IgnoreCanRun="True">
         <InteractionAction InteractType="NPC" Entry="3322" InteractDelay="2000" GameObjectType="Mailbox" SpellFocus="Anvil" />
       </While>
     </If>

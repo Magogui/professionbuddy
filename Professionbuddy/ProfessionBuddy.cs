@@ -34,7 +34,7 @@ namespace HighVoltz
 {
     public class Professionbuddy : BotBase
     {
-        #region Declarations
+        #region Declarations 
 
         private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
