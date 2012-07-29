@@ -245,6 +245,8 @@ namespace HighVoltz
                 _onSpellsChangedSpamSw.Reset();
                 OnSpellsChangedCB();
             }
+            if (SecondaryBot != null)
+                SecondaryBot.Pulse();
         }
 
         public override void Initialize()
