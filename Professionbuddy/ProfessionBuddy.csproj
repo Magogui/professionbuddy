@@ -192,7 +192,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF $(ConfigurationName)=='HighVoltz' (
+    <PostBuildEvent>IF $(ConfigurationName) == HighVoltz (
 xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
 xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
 xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
