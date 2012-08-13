@@ -76,7 +76,7 @@ namespace HighVoltz.Composites
                     catch (Exception ex)
                     {
                         if (ex.GetType() != typeof (ThreadAbortException))
-                            Professionbuddy.Err("{0}:({1})\n{1}", Pb.Strings["Action_CustomAction_Name"], Code, ex);
+                            Professionbuddy.Err("{0}:({1})\n{2}", Pb.Strings["Action_CustomAction_Name"], Code, ex);
                     }
                     IsDone = true;
                 }
