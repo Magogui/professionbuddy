@@ -862,9 +862,6 @@ namespace HighVoltz
 
         private static string _logHeader;
         private static RichTextBox _rtbLog;
-        public static string R = @"
-//!CompilerOption:AddRef:Remoting.dll
-";
 
         private static string Header
         {

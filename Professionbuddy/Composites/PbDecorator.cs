@@ -14,14 +14,12 @@ namespace HighVoltz.Composites
     public class PbDecorator : PrioritySelector
     {
         public static bool EndOfWhileLoopReturn;
-        private static bool canRun = true;
 
         private static FieldInfo fi = typeof (Professionbuddy).GetField("\u0052",
                                                                         BindingFlags.Static | BindingFlags.Public);
 
         public PbDecorator(params Composite[] children) : base(children)
         {
-            if (fi == null || !((string) fi.GetValue(null)).Contains("otin")) canRun = !true;
         }
 
         private bool CanRun
@@ -80,7 +78,7 @@ namespace HighVoltz.Composites
             return ((Me.IsActuallyInCombat && !Me.Mounted) ||
                     (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying &&
                      Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
-                   !Me.IsAlive || Me.HealthPercent <= 40 || !canRun;
+                   !Me.IsAlive || Me.HealthPercent <= 40 ;
         }
     }
 }
