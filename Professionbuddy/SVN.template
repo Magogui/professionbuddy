@@ -2,12 +2,6 @@
 // Build Date: $WCDATE$
 // SVN url: $WCURL$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Styx.Plugins.PluginClass;
-
 namespace HighVoltz
 {
     public partial class Svn

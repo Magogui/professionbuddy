@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Design;
 using System.Globalization;
-using Styx.Logic;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Pathing;
+using Styx;
+using Styx.CommonBot;
+using Styx.Pathing;
 using Styx.WoWInternals;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

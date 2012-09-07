@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Styx.WoWInternals;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

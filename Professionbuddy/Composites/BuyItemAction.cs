@@ -4,13 +4,12 @@ using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
 using HighVoltz.Dynamic;
+using Styx;
+using Styx.CommonBot.Frames;
 using Styx.Helpers;
-using Styx.Logic.Inventory.Frames.Gossip;
-using Styx.Logic.Inventory.Frames.Merchant;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -300,7 +299,7 @@ namespace HighVoltz.Composites
             //        var leftovers = (int)(count % 20);
             //        if (count >= 20)
             //        {
-            //            //using (new FrameLock()) // framelock was causing DCs
+            //            //using (StyxWoW.Memory.AcquireFrame()) // framelock was causing DCs
             //            //{
             //            for (int i = 0; i < stacks; i++)
             //                MerchantFrame.Instance.BuyItem(mi.Index, 20);

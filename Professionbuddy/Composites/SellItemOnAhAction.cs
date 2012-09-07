@@ -9,16 +9,12 @@ using System.Xml.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region SellItemOnAhAction
-
     internal sealed class SellItemOnAhAction : PBAction
     {
         #region AmountBasedType enum
@@ -648,7 +644,7 @@ namespace HighVoltz.Composites
             }
             else if (_queueTimer.ElapsedMilliseconds <= 10000)
             {
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     if (
                         Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) ==
@@ -715,6 +711,4 @@ namespace HighVoltz.Composites
 
         #endregion
     }
-
-    #endregion
 }

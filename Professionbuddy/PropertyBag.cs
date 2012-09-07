@@ -6,8 +6,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Pathing;
+using Styx;
+using Styx.CommonBot;
 using Styx.WoWInternals;
 
 namespace HighVoltz
@@ -251,7 +251,7 @@ namespace HighVoltz
 
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
-                if (ObjectManager.IsInGame)
+                if (StyxWoW.IsInGame)
                 {
                     if (!TreeRoot.IsRunning)
                         ObjectManager.Update();
@@ -464,7 +464,7 @@ namespace HighVoltz
 
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
-                if (ObjectManager.IsInGame)
+                if (StyxWoW.IsInGame)
                 {
                     if (!TreeRoot.IsRunning)
                         ObjectManager.Update();

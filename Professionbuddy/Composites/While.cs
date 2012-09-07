@@ -1,8 +1,6 @@
-﻿//!CompilerOption:AddRef:System.Design.dll
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

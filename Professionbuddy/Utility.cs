@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Styx;
-using Styx.Logic;
-using Styx.Logic.POI;
-using Styx.Logic.Pathing;
+using Styx.CommonBot;
+using Styx.CommonBot.POI;
+using Styx.MemoryManagement;
+using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
@@ -97,7 +98,7 @@ namespace HighVoltz
         {
             WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
-                return ObjectManager.Wow.Read<string>(cache.ItemSparse.Name);
+                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name,Encoding.ASCII);
             return null;
         }
 
@@ -209,7 +210,7 @@ namespace HighVoltz
                 if (bagAtIndex != null)
                 {
                     int bagtype = StorageType(bagAtIndex.Entry);
-                    if (bagtype == 0 || (bagtype & storagetype) > 0 )
+                    if (bagtype == 0 || (bagtype & storagetype) > 0)
                     {
                         freeSlots += bagAtIndex.FreeSlots;
                     }
@@ -245,25 +246,34 @@ namespace HighVoltz
         /// <param name="pattern">the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
         /// <param name="mask">the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored</param>
         /// <returns>The offset the first match of the pattern was found at.</returns>
-        public static uint FindPattern(string pattern, string mask)
+        unsafe public static IntPtr FindPattern(string pattern, string mask)
         {
             byte[] patternArray = HexStringToByteArray(pattern);
             bool[] maskArray = MaskStringToBoolArray(mask);
-            ProcessModule wowModule = ObjectManager.WoWProcess.MainModule;
+            ProcessModule wowModule = StyxWoW.Memory.Process.MainModule;
+
             var start = (uint)wowModule.BaseAddress.ToInt32();
             int size = wowModule.ModuleMemorySize;
             int patternLength = mask.Length;
-
-            for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
+            var cache = new byte[CacheSize];
+            using (AllocatedMemory memory = StyxWoW.Memory.CreateAllocatedMemory(CacheSize))
             {
-                byte[] cache = ObjectManager.Wow.ReadBytes(start + cacheOffset,
-                                                           CacheSize > size - cacheOffset
-                                                               ? size - (int)cacheOffset
-                                                               : CacheSize);
-                for (uint cacheIndex = 0; cacheIndex < (cache.Length - patternLength); cacheIndex++)
+
+                for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
                 {
-                    if (DataCompare(cache, cacheIndex, patternArray, maskArray))
-                        return cacheOffset + cacheIndex;
+                    var bytesToRead = CacheSize > size - cacheOffset ? size - (int)cacheOffset : CacheSize;
+
+                    // byte[] cache = StyxWoW.Memory.ReadBytes(cacheOffset,
+                    //                                             CacheSize > size - cacheOffset
+                    //                                                 ? size - (int)cacheOffset
+                    //                                                 : CacheSize);
+                    StyxWoW.Memory.ReadBytes(start + cacheOffset, (void*)memory.Address, bytesToRead);
+
+                    for (uint cacheIndex = 0; cacheIndex < bytesToRead - patternLength; cacheIndex++)
+                    {
+                        if (DataCompare(cache, cacheIndex, patternArray, maskArray))
+                            return new IntPtr(cacheOffset + cacheIndex);
+                    }
                 }
             }
             throw new InvalidDataException("Pattern not found");

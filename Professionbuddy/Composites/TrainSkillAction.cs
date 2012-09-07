@@ -4,13 +4,12 @@ using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
 using Styx;
+using Styx.Common.Helpers;
+using Styx.CommonBot.Frames;
 using Styx.Helpers;
-using Styx.Logic.Inventory.Frames.Gossip;
-using Styx.Logic.Inventory.Frames.Trainer;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -117,7 +116,7 @@ namespace HighVoltz.Composites
                 }
                 if (_trainWaitTimer.IsFinished)
                 {
-                    using (new FrameLock())
+                    using (StyxWoW.Memory.AcquireFrame())
                     {
                         Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
                         // check if there is any abilities to that need training.

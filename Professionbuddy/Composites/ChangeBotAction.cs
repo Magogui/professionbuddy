@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

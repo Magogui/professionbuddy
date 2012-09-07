@@ -7,10 +7,9 @@ using System.Linq;
 using System.Reflection;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -339,7 +338,7 @@ namespace HighVoltz.Composites
 
             if (UseCategory)
             {
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     foreach (var aucKV in myAucs)
                     {
@@ -438,7 +437,7 @@ namespace HighVoltz.Composites
             }
             else if (_queueTimer.ElapsedMilliseconds <= 10000)
             {
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     if (
                         Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) ==
@@ -487,7 +486,7 @@ namespace HighVoltz.Composites
         private Dictionary<uint, string> GetMyAuctions()
         {
             var ret = new Dictionary<uint, string>();
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 var numOfMyItemsOnAH = Lua.GetReturnVal<int>("return GetNumAuctionItems('owner')", 0);
                 for (int i = 1; i <= numOfMyItemsOnAH; i++)

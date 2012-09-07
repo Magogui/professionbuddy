@@ -5,17 +5,12 @@ using System.Globalization;
 using System.Linq;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Combat;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region InteractAction
-
     internal sealed class InteractionAction : PBAction
     {
         #region InteractActionType enum
@@ -203,6 +198,4 @@ namespace HighVoltz.Composites
                        };
         }
     }
-
-    #endregion
 }

@@ -96,7 +96,7 @@ namespace HighVoltz
                 "end " +
                 "return 0 ";
 
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 List<string> retVals = Lua.GetReturnValues(storeInTableLua);
                 if (retVals != null && retVals[0] != "0")

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Windows.Documents;
@@ -16,19 +17,18 @@ using System.Xml.Linq;
 using HighVoltz.Composites;
 using HighVoltz.Dynamic;
 using Styx;
-using Styx.Helpers;
-using Styx.Logic;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Profiles;
+using Styx.Common;
+using Styx.CommonBot;
+using Styx.CommonBot.Profiles;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
-using Tripper.Tools.Math;
+using Styx.TreeSharp;
 using Action = System.Action;
 using Application = System.Windows.Application;
-using Color = System.Drawing.Color;
+using Color = System.Windows.Media.Color;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using Timer = System.Threading.Timer;
+using Vector3 = Tripper.Tools.Math.Vector3;
 
 namespace HighVoltz
 {
@@ -38,7 +38,7 @@ namespace HighVoltz
 
         private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
-        public static readonly string BotPath = Logging.ApplicationPath + @"\Bots\" + _name;
+        public static readonly string BotPath =  Utilities.AssemblyDirectory +  @"\Bots\" + _name;
         private static readonly LocalPlayer Me = ObjectManager.Me;
         public static readonly Svn Svn = new Svn();
 
@@ -65,11 +65,11 @@ namespace HighVoltz
                                                                                       FileAccess.Read))
                                                      {
                                                          byte[] hash = hashAlg.ComputeHash(file);
-                                                         Logging.WriteDebug("H: {0}", BitConverter.ToString(hash));
+                                                         Logging.WriteDiagnostic("H: {0}", BitConverter.ToString(hash));
                                                      }
                                                  }
                                                  FileVersionInfo vInfo = mod.FileVersionInfo;
-                                                 Logging.WriteDebug("V: {0}", vInfo.FileVersion);
+                                                 Logging.WriteDiagnostic("V: {0}", vInfo.FileVersion);
                                              }
                                              catch (Exception ex)
                                              {
@@ -207,7 +207,7 @@ namespace HighVoltz
             }
             catch (Exception ex)
             {
-                Logging.WriteDebug(ex.ToString());
+                Logging.WriteDiagnostic(ex.ToString());
             }
         }
 
@@ -552,13 +552,13 @@ namespace HighVoltz
                     new Vector3(0, 0, 0);
 
                     MySettings = new ProfessionBuddySettings(
-                        Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
+                        Path.Combine(Utilities.AssemblyDirectory, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
                                                                             Name, Me.Name,
                                                                             Lua.GetReturnVal<string>(
                                                                                 "return GetRealmName()", 0)))
                         );
                     GlobalSettings = new GlobalPBSettings(
-                        Path.Combine(Logging.ApplicationPath, string.Format(@"Settings\{0}\{0}.xml", Name)));
+                        Path.Combine(Utilities.AssemblyDirectory, string.Format(@"Settings\{0}\{0}.xml", Name)));
 
                     IsTradeSkillsLoaded = false;
                     MaterialList = new Dictionary<uint, int>();
@@ -582,7 +582,7 @@ namespace HighVoltz
             }
             catch (Exception ex)
             {
-                Logging.Write(Color.Red, ex.ToString());
+                Logging.Write(Colors.Red, ex.ToString());
             }
         }
 
@@ -672,9 +672,9 @@ namespace HighVoltz
                               }
                               catch (Exception ex)
                               {
-                                  Logging.Write(Color.Red, ex.ToString());
+                                  Logging.Write(Colors.Red, ex.ToString());
                               }
-                          }, null, 0, Timeout.Infinite);
+                          }, null, (long) 0, Timeout.Infinite);
         }
 
         public void UpdateMaterials()
@@ -870,13 +870,13 @@ namespace HighVoltz
 
         public static void Err(string format, params object[] args)
         {
-            Logging.Write(Color.Red, "Err: " + format, args);
+            Logging.Write(Colors.Red, "Err: " + format, args);
         }
 
         public static void Log(string format, params object[] args)
         {
             //Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
-            LogInvoker(Color.DodgerBlue, Header, Color.LightSteelBlue, format, args);
+            LogInvoker(Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
         }
 
         public static void Log(Color headerColor, string header, Color msgColor, string format, params object[] args)
@@ -886,7 +886,7 @@ namespace HighVoltz
 
         public static void Debug(string format, params object[] args)
         {
-            Logging.WriteDebug(Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
+            Logging.WriteDiagnostic(Colors.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
         }
 
         private static void LogInvoker(Color headerColor, string header, Color msgColor, string format,
@@ -920,7 +920,7 @@ namespace HighVoltz
                 string msg = String.Format(format, args);
                 messageTR.Text = msg + Environment.NewLine;
                 messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColorMedia));
-                Logging.WriteDebug(header + msg);
+                Logging.WriteDiagnostic(header + msg);
             }
             catch
             {

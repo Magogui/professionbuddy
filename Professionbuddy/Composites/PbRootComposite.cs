@@ -1,5 +1,6 @@
 ﻿using Styx;
-using TreeSharp;
+using Styx.CommonBot;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

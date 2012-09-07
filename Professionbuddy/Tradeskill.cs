@@ -8,11 +8,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Styx;
+using Styx.Common;
+using Styx.CommonBot;
 using Styx.Helpers;
-using Styx.Logic;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Combat;
 using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
@@ -26,7 +26,7 @@ namespace HighVoltz
     public class TradeSkill
     {
         private const uint SkillLineAbilityFieldNum = 14;
-        private const uint SkillLineAbilityEntrySize = SkillLineAbilityFieldNum*4; // number of fields * sizeof int
+        private const uint SkillLineAbilityEntrySize = SkillLineAbilityFieldNum * 4; // number of fields * sizeof int
 
         public static readonly List<SkillLine> SupportedSkills = new List<SkillLine>
                                                                      {
@@ -51,20 +51,20 @@ namespace HighVoltz
 
         static TradeSkill()
         {
-            ProcessModule mod = ObjectManager.WoWProcess.MainModule;
-            var baseAddress = (uint) mod.BaseAddress;
+            ProcessModule mod = StyxWoW.Memory.Process.MainModule;
+            var baseAddress = (uint)mod.BaseAddress;
             if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
                 GlobalPBSettings.Instance.KnownSpellsPtr == 0)
             {
                 Professionbuddy.Log("A new wow version has been detected\nScanning for new KnownSpellsPtr offset");
                 try
                 {
-                    uint pointer =
+                    IntPtr pointer =
                         Util.FindPattern(
                             "94 1E B3 00 8B CB 83 E1 1F B8 01 00 00 00 D3 E0 8B CB C1 E9 05 85 04 8A 0F 95 C0 84 C0 75",
                             "????xxxxxxxxxxxxxxxxxxxxxxxxxx");
-                    GlobalPBSettings.Instance.KnownSpellsPtr = ObjectManager.Wow.Read<uint>(baseAddress + pointer) -
-                                                               baseAddress;
+
+                    GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
                     GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
                     Professionbuddy.Log("Found KnownSpellsPtr offset for WoW Version {0} at offset 0x{1:X}",
                                         mod.FileVersionInfo.FileVersion, GlobalPBSettings.Instance.KnownSpellsPtr);
@@ -121,7 +121,7 @@ namespace HighVoltz
 
         public SkillLine SkillLine
         {
-            get { return (SkillLine) WoWSkill.Id; }
+            get { return (SkillLine)WoWSkill.Id; }
         }
 
         /// <summary>
@@ -182,47 +182,47 @@ namespace HighVoltz
         private List<SkillLineAbilityEntry> GetSkillLineAbilityEntries()
         {
             var abilityList = new List<SkillLineAbilityEntry>();
-            var targetSkillId = (int) SkillLine;
+            var targetSkillId = (int)SkillLine.Inscription;
 
             WoWDb.DbTable table = StyxWoW.Db[ClientDb.SkillLineAbility];
-            var minIndex = (uint) table.MinIndex;
-            var topIndex = (uint) table.NumRows;
+            var minIndex = (uint)table.MinIndex;
+            var topIndex = (uint)table.NumRows;
             uint bomIndex = 0;
             uint half;
 
-            var firstRowPtr =
-                ObjectManager.Wow.Read<uint>(((uint) ClientDb.SkillLineAbility + ObjectManager.Wow.ImageBase) + 0x14);
+            var firstRowPtr = StyxWoW.Memory.Read<uint>(new IntPtr((uint)ClientDb.SkillLineAbility) + 0x14);
             uint id;
             // optimized search
             do
             {
-                half = (topIndex + bomIndex)/2;
-                id = ObjectManager.Wow.Read<uint>((firstRowPtr + half*SkillLineAbilityEntrySize) + 4); // skill
+                half = (topIndex + bomIndex) / 2;
+
+                id = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + half * SkillLineAbilityEntrySize) + 4); // skill
                 if (id > targetSkillId)
-                    topIndex = (topIndex + half)/2;
+                    topIndex = (topIndex + half) / 2;
                 else if (id < targetSkillId)
-                    bomIndex = ((half + bomIndex)/2) + 1;
+                    bomIndex = ((half + bomIndex) / 2) + 1;
                 else
                     break;
             } while (bomIndex < topIndex);
 
-            var index = ObjectManager.Wow.Read<uint>((firstRowPtr + (half - 1)*SkillLineAbilityEntrySize));
+            var index = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
             uint prevIndex = index;
             while (index > minIndex)
             {
-                id = ObjectManager.Wow.Read<uint>((firstRowPtr + (half - 1)*SkillLineAbilityEntrySize) + 4);
-                index = ObjectManager.Wow.Read<uint>((firstRowPtr + (half - 1)*SkillLineAbilityEntrySize));
+                id = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize) + 4);
+                index = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
                 if (id != targetSkillId)
                     break;
                 half--;
                 prevIndex = index;
             }
 
-            for (uint i = prevIndex; i <= table.MaxIndex;)
+            for (uint i = prevIndex; i <= table.MaxIndex; )
             {
                 WoWDb.Row row = table.GetRow(i);
                 var entry = row.GetStruct<SkillLineAbilityEntry>();
-                if ((int) entry.SkillLine != targetSkillId)
+                if ((int)entry.SkillLine != targetSkillId)
                     break;
                 abilityList.Add(entry);
                 if (i != table.MaxIndex) // get next index
@@ -287,7 +287,7 @@ namespace HighVoltz
         /// </summary>
         public void Update()
         {
-            if (!ObjectManager.IsInGame)
+            if (!StyxWoW.IsInGame)
                 return;
             // if HB is not running then we should maybe pulse objectmanger for item counts
             if (!TreeRoot.IsRunning)
@@ -304,7 +304,7 @@ namespace HighVoltz
             foreach (var kv in newRecipies)
             {
                 Professionbuddy.Log("Leaned a new recipe {0}", kv.Value.Name);
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     kv.Value.UpdateHeader();
                 }
@@ -319,7 +319,7 @@ namespace HighVoltz
         /// <returns></returns>
         public static TradeSkill GetTradeSkill(SkillLine skillLine)
         {
-            if (!ObjectManager.IsInGame)
+            if (!StyxWoW.IsInGame)
                 throw new InvalidOperationException("Must Be in game to call GetTradeSkill()");
             if (skillLine == 0 || !SupportedSkills.Contains(skillLine))
                 throw new InvalidOperationException(String.Format("The tradekill {0} can not be loaded", skillLine));
@@ -330,7 +330,7 @@ namespace HighVoltz
             TradeSkill tradeSkill = null;
             try
             {
-                //using (new FrameLock())
+                //using (StyxWoW.Memory.AcquireFrame())
                 //{
                 WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
                 // sw.Start();
@@ -369,11 +369,10 @@ namespace HighVoltz
             {
                 // GlobalPBSettings.Instance.KnownSpellsPtr is 0xB31E94 in WOW 4.3.3
                 if (_knownSpellsPtr == 0)
-                    _knownSpellsPtr =
-                        ObjectManager.Wow.Read<uint>(GlobalPBSettings.Instance.KnownSpellsPtr +
-                                                     ObjectManager.Wow.ImageBase);
-                var value = ObjectManager.Wow.Read<uint>(_knownSpellsPtr + (spellId >> 5)*4);
-                return (value & (1 << ((int) spellId & 0x1F))) != 0;
+                    _knownSpellsPtr = StyxWoW.Memory.Read<uint>(new IntPtr(GlobalPBSettings.Instance.KnownSpellsPtr), true);
+
+                var value = StyxWoW.Memory.Read<uint>(new IntPtr(_knownSpellsPtr + (spellId >> 5) * 4));
+                return (value & (1 << ((int)spellId & 0x1F))) != 0;
             }
             return false;
         }
@@ -410,7 +409,7 @@ namespace HighVoltz
             SpellId = skillLineAbilityEntry.SpellId;
             OrangeSkillLevel = skillLineAbilityEntry.OrangeSkillLevel;
             YellowSkillLevel = skillLineAbilityEntry.YellowSkillLevel;
-            GreenSkillLevel = (skillLineAbilityEntry.YellowSkillLevel + skillLineAbilityEntry.GreySkillLevel)/2;
+            GreenSkillLevel = (skillLineAbilityEntry.YellowSkillLevel + skillLineAbilityEntry.GreySkillLevel) / 2;
             GreySkillLevel = skillLineAbilityEntry.GreySkillLevel;
             OptimalSkillups = skillLineAbilityEntry.SkillPointsEarned;
             Skill = skillLineAbilityEntry.SkillLine;
@@ -448,7 +447,7 @@ namespace HighVoltz
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
-                    var cnt = (uint) Math.Floor(ingred.InBagItemCount/(double) ingred.Required);
+                    var cnt = (uint)Math.Floor(ingred.InBagItemCount / (double)ingred.Required);
                     if (repeat > cnt)
                     {
                         repeat = cnt;
@@ -468,7 +467,7 @@ namespace HighVoltz
                 uint repeat = uint.MaxValue;
                 foreach (Ingredient ingred in Ingredients)
                 {
-                    var cnt = (uint) Math.Floor(Ingredient.GetInBagItemCount(ingred.ID)/(double) ingred.Required);
+                    var cnt = (uint)Math.Floor(Ingredient.GetInBagItemCount(ingred.ID) / (double)ingred.Required);
                     if (repeat > cnt)
                     {
                         repeat = cnt;
@@ -529,7 +528,7 @@ namespace HighVoltz
             {
                 if (_header == null || string.IsNullOrEmpty(_header))
                 {
-                    using (new FrameLock())
+                    using (StyxWoW.Memory.AcquireFrame())
                     {
                         foreach (var recipe in _parent.KnownRecipes)
                         {
@@ -603,7 +602,7 @@ namespace HighVoltz
         /// </summary>
         public WoWSpell Spell
         {
-            get { return WoWSpell.FromId((int) SpellId); }
+            get { return WoWSpell.FromId((int)SpellId); }
         }
 
         public ReadOnlyCollection<Tool> Tools
@@ -642,8 +641,8 @@ namespace HighVoltz
                 WoWDb.Row spelldbRow = spelldbTable.GetRow(recipeID);
                 if (spelldbRow != null)
                 {
-                    var reagentIndex = spelldbRow.GetField<uint>((uint) SpellDB.SpellReagentsIndex);
-                        // Changed to 43 in WoW 4.2
+                    var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
+                    // Changed to 43 in WoW 4.2
                     WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
                         reagentIndex >= reagentDbTable.MinIndex)
@@ -672,8 +671,8 @@ namespace HighVoltz
             if (CraftedItemID == 0)
             {
                 dbTable = StyxWoW.Db[ClientDb.SkillLine];
-                dbRow = dbTable.GetRow((uint) Skill);
-                _header = ObjectManager.Wow.Read<string>(dbRow.GetField<uint>(5));
+                dbRow = dbTable.GetRow((uint)Skill);
+                _header = StyxWoW.Memory.ReadString(new IntPtr(dbRow.GetField<uint>(5)), Encoding.ASCII);
             }
             else
             {
@@ -685,7 +684,7 @@ namespace HighVoltz
                     dbTable = StyxWoW.Db[ClientDb.ItemSubClass];
                     for (int i = dbTable.MinIndex; i <= dbTable.MaxIndex; i++)
                     {
-                        dbRow = dbTable.GetRow((uint) i);
+                        dbRow = dbTable.GetRow((uint)i);
                         var iSubClass1 = dbRow.GetField<int>(1);
                         var iSubClass2 = dbRow.GetField<int>(2);
                         if (iSubClass1 == cache.Item.ClassId && iSubClass2 == cache.Item.SubClassId)
@@ -693,11 +692,11 @@ namespace HighVoltz
                             var stringPtr = dbRow.GetField<uint>(12);
                             // if pointer in field (12) is 0 or it points to null string then use field (11)
                             if (stringPtr == 0 ||
-                                string.IsNullOrEmpty(_header = ObjectManager.Wow.Read<string>(stringPtr)))
+                                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr),Encoding.ASCII )))
                             {
                                 stringPtr = dbRow.GetField<uint>(11);
                                 if (stringPtr != 0)
-                                    _header = ObjectManager.Wow.Read<string>(stringPtr);
+                                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
                             }
                             break;
                         }
@@ -712,10 +711,10 @@ namespace HighVoltz
             string getName = null;
             WoWDb.DbTable t = StyxWoW.Db[ClientDb.Spell];
             WoWDb.Row r = t.GetRow(SpellId);
-            var stringPtr = r.GetField<uint>((uint) SpellDB.NamePtr);
+            var stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
             if (stringPtr != 0)
             {
-                getName = ObjectManager.Wow.Read<string>(stringPtr);
+                getName = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
             }
             return getName;
         }
@@ -728,8 +727,8 @@ namespace HighVoltz
             _tools = new List<Tool>();
             WoWDb.DbTable t = StyxWoW.Db[ClientDb.Spell];
             WoWDb.Row spellDbRow = t.GetRow(SpellId);
-            var spellReqIndex = spellDbRow.GetField<uint>((uint) SpellDB.SpellCastingReqIndex);
-                // changed from 33 to 34 in WOW 4.2
+            var spellReqIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellCastingReqIndex);
+            // changed from 33 to 34 in WOW 4.2
             if (spellReqIndex != 0)
             {
                 t = StyxWoW.Db[ClientDb.SpellCastingRequirements];
@@ -753,8 +752,8 @@ namespace HighVoltz
                     }
                 }
             }
-            var spellTotemsIndex = spellDbRow.GetField<uint>((uint) SpellDB.SpellTotemsIndex);
-                // changed from 45 to 46 in WOW 4.2
+            var spellTotemsIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellTotemsIndex);
+            // changed from 45 to 46 in WOW 4.2
             if (spellTotemsIndex != 0)
             {
                 t = StyxWoW.Db[ClientDb.SpellTotems];
@@ -860,7 +859,7 @@ namespace HighVoltz
                 // might as well do a framelock and try load all the items. 
                 IEnumerable<uint> ids = Parent.MasterList.Keys.Where(id => id != Parent.ID);
 
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     foreach (uint id in ids)
                     {
@@ -994,7 +993,7 @@ namespace HighVoltz
 
         public override int GetHashCode()
         {
-            return (int) _index + (int) _toolType*100000;
+            return (int)_index + (int)_toolType * 100000;
         }
 
         private string GetName()
@@ -1024,7 +1023,7 @@ namespace HighVoltz
             }
             if (stringPtr != 0)
             {
-                name = ObjectManager.Wow.Read<string>(stringPtr);
+                name = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
             }
             return name;
         }
@@ -1172,7 +1171,7 @@ namespace HighVoltz
                 string.Format(
                     "{0} SkillLine: {1},NextSpellId: {2},AquireMethod: {3},OrangeSkillLevel: {4},YellowSkillLevel: {5}\n\tGreenSkillLevel: {6},GreySkillLevel: {7},SkillPointsEarned: {8},DisplayOrder: {9}",
                     SpellId, SkillLine, NextSpellId, AquireMethod, OrangeSkillLevel, YellowSkillLevel,
-                    (YellowSkillLevel + GreySkillLevel)/2, GreySkillLevel, SkillPointsEarned, DisplayOrder);
+                    (YellowSkillLevel + GreySkillLevel) / 2, GreySkillLevel, SkillPointsEarned, DisplayOrder);
         }
     }
 

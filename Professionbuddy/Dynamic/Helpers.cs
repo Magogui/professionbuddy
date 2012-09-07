@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media;
 using Styx;
+using Styx.Common;
+using Styx.CommonBot;
 using Styx.Helpers;
-using Styx.Logic;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 
 namespace HighVoltz.Dynamic
@@ -179,9 +178,9 @@ namespace HighVoltz.Dynamic
 
                                    new Thread(() =>
                                                   {
-                                                      while (ObjectManager.IsInGame)
+                                                      while (StyxWoW.IsInGame)
                                                           Thread.Sleep(2000);
-                                                      while (!ObjectManager.IsInGame)
+                                                      while (!StyxWoW.IsInGame)
                                                       {
                                                           Lua.DoString(loginLua);
                                                           Thread.Sleep(2000);
@@ -204,7 +203,7 @@ namespace HighVoltz.Dynamic
         public static int InGBankCount(string character, uint itemId)
         {
             int ret = 0;
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 var hasDataStore =
                     Lua.GetReturnVal<bool>("if DataStoreDB and DataStore_ContainersDB then return 1 else return 0 end",
@@ -249,7 +248,7 @@ namespace HighVoltz.Dynamic
         public static int OnAhCount(string character, uint itemId)
         {
             int ret = 0;
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 var hasDataStore =
                     Lua.GetReturnVal<bool>("if DataStoreDB and DataStore_AuctionsDB then return 1 else return 0 end", 0);

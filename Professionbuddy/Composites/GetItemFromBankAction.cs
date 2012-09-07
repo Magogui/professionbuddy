@@ -6,10 +6,9 @@ using System.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
-using Styx.Logic.Profiles;
-using TreeSharp;
+using Styx.CommonBot.Profiles;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

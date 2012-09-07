@@ -7,10 +7,10 @@ using System.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Pathing;
+using Styx.MemoryManagement;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -236,7 +236,7 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                using (new FrameLock())
+                using (StyxWoW.Memory.AcquireFrame())
                 {
                     if (
                         Lua.GetReturnVal<int>(

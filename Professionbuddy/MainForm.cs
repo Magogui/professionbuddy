@@ -11,11 +11,10 @@ using System.Threading;
 using System.Windows.Forms;
 using HighVoltz.Composites;
 using HighVoltz.Dynamic;
-using Styx;
-using Styx.Helpers;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Profiles;
-using TreeSharp;
+using Styx.Common;
+using Styx.CommonBot;
+using Styx.CommonBot.Profiles;
+using Styx.TreeSharp;
 
 namespace HighVoltz
 {

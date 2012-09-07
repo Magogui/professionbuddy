@@ -4,13 +4,10 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
 using HighVoltz.Dynamic;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region Declaration
-
     public sealed class Declaration : CsharpAction
     {
         public Declaration()
@@ -61,6 +58,4 @@ namespace HighVoltz.Composites
             return new Declaration {Code = Code};
         }
     }
-
-    #endregion
 }

@@ -15,7 +15,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using HighVoltz.Composites;
 using HighVoltz.Dynamic;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz
 {

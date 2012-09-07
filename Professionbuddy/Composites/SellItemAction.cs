@@ -5,13 +5,11 @@ using System.Globalization;
 using System.Linq;
 using HighVoltz.Dynamic;
 using Styx;
-using Styx.Database;
-using Styx.Logic.Inventory.Frames.Gossip;
-using Styx.Logic.Inventory.Frames.Merchant;
-using Styx.Logic.Pathing;
+using Styx.CommonBot.Database;
+using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -239,7 +237,7 @@ namespace HighVoltz.Composites
                         }
                         List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).
                             Take(Sell == DepositWithdrawAmount.All ? int.MaxValue : Count).ToList();
-                        using (new FrameLock())
+                        using (StyxWoW.Memory.AcquireFrame())
                         {
                             foreach (WoWItem item in itemList)
                                 item.UseContainerItem();
@@ -265,7 +263,7 @@ namespace HighVoltz.Composites
                         }
                         if (itemList != null)
                         {
-                            using (new FrameLock())
+                            using (StyxWoW.Memory.AcquireFrame())
                             {
                                 foreach (WoWItem item in itemList)
                                 {

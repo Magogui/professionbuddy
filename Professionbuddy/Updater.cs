@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Windows.Media;
+using Styx.Common;
 using Styx.Helpers;
+using Color = System.Drawing.Color;
 
 namespace HighVoltz
 {
@@ -36,10 +38,10 @@ namespace HighVoltz
                     Professionbuddy.Log("Download complete.");
                     GlobalPBSettings.Instance.CurrentRevision = remoteRev;
                     GlobalPBSettings.Instance.Save();
-                    Logging.Write(Color.DodgerBlue, "************* Change Log ****************");
-                    Logging.Write(Color.SkyBlue, GetChangeLog(remoteRev));
-                    Logging.Write(Color.DodgerBlue, "*****************************************");
-                    Logging.Write(Color.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
+                    Logging.Write(Colors.DodgerBlue, "************* Change Log ****************");
+                    Logging.Write(Colors.SkyBlue, GetChangeLog(remoteRev));
+                    Logging.Write(Colors.DodgerBlue, "*****************************************");
+                    Logging.Write(Colors.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
                 }
                 else
                 {

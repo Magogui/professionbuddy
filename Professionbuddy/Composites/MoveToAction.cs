@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Drawing.Design;
 using System.Linq;
 using Styx;
-using Styx.Database;
-using Styx.Logic.Pathing;
+using Styx.CommonBot.Database;
+using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

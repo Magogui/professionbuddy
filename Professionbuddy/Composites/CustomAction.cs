@@ -7,14 +7,12 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Threading;
 using HighVoltz.Dynamic;
+using Styx.Common;
 using Styx.Helpers;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region CustomAction
-
     internal class CustomAction : CsharpAction
     {
         public CustomAction()
@@ -85,7 +83,7 @@ namespace HighVoltz.Composites
             catch (Exception ex)
             {
                 if (ex.GetType() != typeof (ThreadAbortException))
-                    Logging.Write(Color.Red, "There was an exception while executing a CustomAction\n{0}", ex);
+                    Professionbuddy.Err( "There was an exception while executing a CustomAction\n{0}", ex);
             }
             return RunStatus.Failure;
         }
@@ -95,6 +93,4 @@ namespace HighVoltz.Composites
             return new CustomAction {Code = Code};
         }
     }
-
-    #endregion
 }

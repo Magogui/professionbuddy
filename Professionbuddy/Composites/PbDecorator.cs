@@ -3,10 +3,10 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 using Styx;
-using Styx.Logic;
+using Styx.CommonBot;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

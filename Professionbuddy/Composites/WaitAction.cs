@@ -1,13 +1,11 @@
-﻿//!CompilerOption:AddRef:System.Design.dll
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Threading;
 using HighVoltz.Dynamic;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

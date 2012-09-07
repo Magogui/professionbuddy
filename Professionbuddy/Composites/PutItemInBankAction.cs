@@ -9,16 +9,12 @@ using System.Xml.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region PutItemInBankAction
-
     public sealed class PutItemInBankAction : PBAction
     {
         #region Strings
@@ -599,7 +595,7 @@ namespace HighVoltz.Composites
 
         public int PutItemInGBank(uint id, int amount, uint tab)
         {
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 if (_queueServerSW == null)
                 {
@@ -673,7 +669,7 @@ namespace HighVoltz.Composites
         private List<BankSlotInfo> GetBankSlotInfo()
         {
             var bankSlotInfo = new List<BankSlotInfo>();
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 if (Bank == BankType.Guild)
                 {
@@ -763,6 +759,4 @@ namespace HighVoltz.Composites
 
         #endregion
     }
-
-    #endregion
 }

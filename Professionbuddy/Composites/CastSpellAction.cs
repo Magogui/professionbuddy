@@ -7,11 +7,10 @@ using System.Globalization;
 using System.Linq;
 using HighVoltz.Dynamic;
 using Styx;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Combat;
+using Styx.CommonBot;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
@@ -456,7 +455,7 @@ namespace HighVoltz.Composites
     {
         public static void CastOnItem(this WoWSpell spell, WoWItem item)
         {
-            using (new FrameLock())
+            using (StyxWoW.Memory.AcquireFrame())
             {
                 spell.Cast();
                 Lua.DoString("UseContainerItem({0}, {1})", item.BagIndex + 1, item.BagSlot + 1);

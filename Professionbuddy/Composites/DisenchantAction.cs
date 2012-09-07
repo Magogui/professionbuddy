@@ -4,12 +4,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Styx;
-using Styx.Logic.BehaviorTree;
-using Styx.Logic.Combat;
-using Styx.Logic.Inventory.Frames.LootFrame;
+using Styx.CommonBot;
+using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {

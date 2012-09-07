@@ -5,9 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
+using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
-using TreeSharp;
+using Styx.TreeSharp;
 using ObjectManager = Styx.WoWInternals.ObjectManager;
 
 namespace HighVoltz
@@ -77,7 +78,7 @@ namespace HighVoltz
         {
             get
             {
-                return Path.Combine(Logging.ApplicationPath,
+                return Path.Combine(Utilities.AssemblyDirectory,
                                     string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
                                                   ObjectManager.Me.Name,
                                                   Lua.GetReturnVal<string>("return GetRealmName()", 0)));
@@ -88,7 +89,7 @@ namespace HighVoltz
         {
             get
             {
-                return Path.Combine(Logging.ApplicationPath,
+                return Path.Combine(Utilities.AssemblyDirectory,
                                     string.Format("Settings\\ProfessionBuddy\\{0}.xml", ProfileName));
             }
         }

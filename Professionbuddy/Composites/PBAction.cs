@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using HighVoltz.Dynamic;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using Action = TreeSharp.Action;
+using Action = Styx.TreeSharp.Action;
 
 namespace HighVoltz.Composites
 {

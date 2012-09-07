@@ -8,12 +8,11 @@ using System.Reflection;
 using System.Xml.Linq;
 using HighVoltz.Dynamic;
 using Styx;
+using Styx.CommonBot.Frames;
 using Styx.Helpers;
-using Styx.Logic.Inventory.Frames.MailBox;
-using Styx.Logic.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using TreeSharp;
+using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
