@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Styx;
 using Styx.Common;
@@ -25,7 +26,7 @@ namespace HighVoltz
 
     public class TradeSkill
     {
-        private const uint SkillLineAbilityFieldNum = 14;
+        private const uint SkillLineAbilityFieldNum = 13;
         private const uint SkillLineAbilityEntrySize = SkillLineAbilityFieldNum * 4; // number of fields * sizeof int
 
         public static readonly List<SkillLine> SupportedSkills = new List<SkillLine>
@@ -61,8 +62,8 @@ namespace HighVoltz
                 {
                     IntPtr pointer =
                         Util.FindPattern(
-                            "94 1E B3 00 8B CB 83 E1 1F B8 01 00 00 00 D3 E0 8B CB C1 E9 05 85 04 8A 0F 95 C0 84 C0 75",
-                            "????xxxxxxxxxxxxxxxxxxxxxxxxxx");
+                            "00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3",
+                            "????xxxxxxxxxxxxxx");
 
                     GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
                     GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
@@ -182,22 +183,20 @@ namespace HighVoltz
         private List<SkillLineAbilityEntry> GetSkillLineAbilityEntries()
         {
             var abilityList = new List<SkillLineAbilityEntry>();
-            var targetSkillId = (int)SkillLine.Inscription;
+            var targetSkillId = (int) SkillLine;
 
             WoWDb.DbTable table = StyxWoW.Db[ClientDb.SkillLineAbility];
             var minIndex = (uint)table.MinIndex;
             var topIndex = (uint)table.NumRows;
             uint bomIndex = 0;
             uint half;
-
-            var firstRowPtr = StyxWoW.Memory.Read<uint>(new IntPtr((uint)ClientDb.SkillLineAbility) + 0x14);
+            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility) + 0x14, true);
             uint id;
             // optimized search
             do
             {
                 half = (topIndex + bomIndex) / 2;
-
-                id = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + half * SkillLineAbilityEntrySize) + 4); // skill
+                id = StyxWoW.Memory.Read<uint>((IntPtr)(firstRowPtr + half * SkillLineAbilityEntrySize) + 4); // skill id
                 if (id > targetSkillId)
                     topIndex = (topIndex + half) / 2;
                 else if (id < targetSkillId)
@@ -206,12 +205,12 @@ namespace HighVoltz
                     break;
             } while (bomIndex < topIndex);
 
-            var index = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
+            var index = StyxWoW.Memory.Read<uint>((IntPtr)(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
             uint prevIndex = index;
             while (index > minIndex)
             {
-                id = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize) + 4);
-                index = StyxWoW.Memory.Read<uint>(new IntPtr(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
+                id = StyxWoW.Memory.Read<uint>((IntPtr)(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize) + 4);
+                index = StyxWoW.Memory.Read<uint>((IntPtr)(firstRowPtr + (half - 1) * SkillLineAbilityEntrySize));
                 if (id != targetSkillId)
                     break;
                 half--;
@@ -228,6 +227,7 @@ namespace HighVoltz
                 if (i != table.MaxIndex) // get next index
                     i = row.GetField<uint>((SkillLineAbilityFieldNum));
             }
+
             return abilityList;
         }
 
@@ -340,7 +340,7 @@ namespace HighVoltz
                 foreach (SkillLineAbilityEntry entry in entries)
                 {
                     // check if the entry is a recipe
-                    if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0)
+                    if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0 && entry.TradeSkillCategoryIndex != 0) 
                     {
                         var recipe = new Recipe(tradeSkill, entry);
                         recipe.UpdateHeader();
@@ -367,11 +367,10 @@ namespace HighVoltz
         {
             if (spellId <= StyxWoW.Db[ClientDb.Spell].MaxIndex)
             {
-                // GlobalPBSettings.Instance.KnownSpellsPtr is 0xB31E94 in WOW 4.3.3
                 if (_knownSpellsPtr == 0)
                     _knownSpellsPtr = StyxWoW.Memory.Read<uint>(new IntPtr(GlobalPBSettings.Instance.KnownSpellsPtr), true);
 
-                var value = StyxWoW.Memory.Read<uint>(new IntPtr(_knownSpellsPtr + (spellId >> 5) * 4));
+                var value = StyxWoW.Memory.Read<uint>((IntPtr)(_knownSpellsPtr + (spellId >> 5) * 4));
                 return (value & (1 << ((int)spellId & 0x1F))) != 0;
             }
             return false;
@@ -628,6 +627,7 @@ namespace HighVoltz
             return null;
         }
 
+        private const int MaxSpellReagents = 9;
         internal void InitIngredients()
         {
             // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
@@ -642,18 +642,17 @@ namespace HighVoltz
                 if (spelldbRow != null)
                 {
                     var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
-                    // Changed to 43 in WoW 4.2
                     WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
                         reagentIndex >= reagentDbTable.MinIndex)
                     {
                         WoWDb.Row reagentDbRow = reagentDbTable.GetRow(reagentIndex);
-                        for (uint index = 1; index <= 8; index++)
+                        for (uint index = 1; index <= MaxSpellReagents; index++)
                         {
                             var id = reagentDbRow.GetField<uint>(index);
                             if (id != 0)
                             {
-                                _ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + 8),
+                                _ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + MaxSpellReagents),
                                                                 _parent.Ingredients));
                             }
                         }
@@ -745,7 +744,7 @@ namespace HighVoltz
                     t = StyxWoW.Db[ClientDb.AreaGroup];
                     WoWDb.Row areaGroupDbRow = t.GetRow(areaGroupIndex);
                     var areaTableIndex = areaGroupDbRow.GetField<uint>(1);
-                    // not sure which kind of tools this covers
+                    // recipes that need to be crafted at a specific area.
                     if (areaTableIndex != 0)
                     {
                         _tools.Add(GetTool(areaTableIndex, Tool.ToolType.AreaTable));
@@ -753,7 +752,7 @@ namespace HighVoltz
                 }
             }
             var spellTotemsIndex = spellDbRow.GetField<uint>((uint)SpellDB.SpellTotemsIndex);
-            // changed from 45 to 46 in WOW 4.2
+
             if (spellTotemsIndex != 0)
             {
                 t = StyxWoW.Db[ClientDb.SpellTotems];
@@ -803,10 +802,10 @@ namespace HighVoltz
 
         private enum SpellDB
         {
-            NamePtr = 21,
-            SpellCastingReqIndex = 34,
-            SpellReagentsIndex = 43,
-            SpellTotemsIndex = 46,
+            NamePtr = 1,
+            SpellCastingReqIndex = 12,
+            SpellReagentsIndex = 19,
+            SpellTotemsIndex = 22,
         };
 
         #endregion
@@ -1010,7 +1009,7 @@ namespace HighVoltz
                 case ToolType.AreaTable:
                     t = StyxWoW.Db[ClientDb.AreaTable];
                     r = t.GetRow(_index);
-                    stringPtr = r.GetField<uint>(11);
+                    stringPtr = r.GetField<uint>(13);
                     break;
                 case ToolType.Item:
                     name = Util.GetItemCacheName(_index);
@@ -1120,6 +1119,7 @@ namespace HighVoltz
         /// </summary>
         public uint ReqClasses { get; private set; }
 
+        /*
         /// <summary>
         /// Excluded race bitmask for ChrRaces.dbc
         /// </summary>
@@ -1129,6 +1129,7 @@ namespace HighVoltz
         /// Excluded class bitmask for ChrClasses.dbc
         /// </summary>
         public uint ExclClasses { get; private set; }
+         */
 
         /// <summary>
         /// The skill level that recipe is shown as orange (optimal) difficulty
@@ -1164,6 +1165,11 @@ namespace HighVoltz
         /// The order in which the entries are displayed in the tradeskill frame.
         /// </summary>
         public int DisplayOrder { get; private set; }
+
+        /// <summary>
+        /// Index into ClientDb.TradeSkillCategory
+        /// </summary>
+        public int TradeSkillCategoryIndex { get; private set; }
 
         public override string ToString()
         {

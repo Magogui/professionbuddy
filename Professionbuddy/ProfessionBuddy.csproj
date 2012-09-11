@@ -180,7 +180,6 @@
     <EmbeddedResource Include="Icons\copy.png" />
     <EmbeddedResource Include="Icons\cut.png" />
     <EmbeddedResource Include="Icons\delete.png" />
-    <EmbeddedResource Include="Icons\Notepad_32x32.png" />
     <EmbeddedResource Include="Icons\OpenPL.bmp" />
     <EmbeddedResource Include="Icons\paste_32x32.png" />
     <EmbeddedResource Include="Icons\SaveHL.bmp" />

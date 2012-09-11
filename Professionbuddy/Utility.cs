@@ -98,7 +98,7 @@ namespace HighVoltz
         {
             WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
-                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name,Encoding.ASCII);
+                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name, Encoding.ASCII);
             return null;
         }
 
@@ -222,12 +222,13 @@ namespace HighVoltz
         // this factors in the material list
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
-            return (from ingred in recipe.Ingredients
+            var repeat = (from ingred in recipe.Ingredients
                     let ingredCnt = (int)ingred.InBagItemCount -
                                     (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
                                          ? Professionbuddy.Instance.MaterialList[ingred.ID]
                                          : 0)
-                    select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Concat(new[] { int.MaxValue }).Min();
+                    select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Min();
+            return repeat > 0 ? repeat : 0;
         }
 
         internal static void OnBankFrameOpened(object obj, LuaEventArgs args)
@@ -252,28 +253,23 @@ namespace HighVoltz
             bool[] maskArray = MaskStringToBoolArray(mask);
             ProcessModule wowModule = StyxWoW.Memory.Process.MainModule;
 
-            var start = (uint)wowModule.BaseAddress.ToInt32();
+            var start = wowModule.BaseAddress;
             int size = wowModule.ModuleMemorySize;
             int patternLength = mask.Length;
-            var cache = new byte[CacheSize];
-            using (AllocatedMemory memory = StyxWoW.Memory.CreateAllocatedMemory(CacheSize))
+            for (int cacheOffset = 0; cacheOffset < size; cacheOffset += CacheSize - patternLength)
             {
+                var bytesToRead = CacheSize > size - cacheOffset ? size - (int)cacheOffset : CacheSize;
 
-                for (uint cacheOffset = 0; cacheOffset < size; cacheOffset += (uint)(CacheSize - patternLength))
+                // byte[] cache = StyxWoW.Memory.ReadBytes(cacheOffset,
+                //                                             CacheSize > size - cacheOffset
+                //                                                 ? size - (int)cacheOffset
+                //                                                 : CacheSize);
+                var cache = StyxWoW.Memory.ReadBytes(start + cacheOffset, bytesToRead);
+
+                for (uint cacheIndex = 0; cacheIndex < cache.Length - patternLength; cacheIndex++)
                 {
-                    var bytesToRead = CacheSize > size - cacheOffset ? size - (int)cacheOffset : CacheSize;
-
-                    // byte[] cache = StyxWoW.Memory.ReadBytes(cacheOffset,
-                    //                                             CacheSize > size - cacheOffset
-                    //                                                 ? size - (int)cacheOffset
-                    //                                                 : CacheSize);
-                    StyxWoW.Memory.ReadBytes(start + cacheOffset, (void*)memory.Address, bytesToRead);
-
-                    for (uint cacheIndex = 0; cacheIndex < bytesToRead - patternLength; cacheIndex++)
-                    {
-                        if (DataCompare(cache, cacheIndex, patternArray, maskArray))
-                            return new IntPtr(cacheOffset + cacheIndex);
-                    }
+                    if (DataCompare(cache, cacheIndex, patternArray, maskArray))
+                        return new IntPtr(cacheOffset + cacheIndex);
                 }
             }
             throw new InvalidDataException("Pattern not found");

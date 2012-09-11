@@ -143,7 +143,7 @@ namespace HighVoltz.Dynamic
             CompilerResults results;
             using (var provider = new CSharpCodeProvider(new Dictionary<string, string>
                                                              {
-                                                                 {"CompilerVersion", "v3.5"},
+                                                                 {"CompilerVersion", "v4.0"},
                                                              }))
             {
                 var options = new CompilerParameters();
@@ -223,40 +223,37 @@ namespace HighVoltz.Dynamic
 
         private const string Prefix =
             @"using HighVoltz;
-        using System;
-        using System.Reflection;
-        using System.Data;
-        using System.Threading;
-        using System.Diagnostics;
-        using System.Drawing;
-        using System.Collections.Generic;
-        using System.Collections; 
-        using System.Linq; 
-        using System.Text; 
-        using System.IO; 
-        using System.Windows.Forms;
-        using Styx;
-        using Styx.Helpers;
-        using Styx.Logic.Combat;
-        using Styx.WoWInternals;
-        using Styx.WoWInternals.WoWObjects;
-        using Styx.Logic;
-        using Styx.Logic.AreaManagement;
-        using Styx.Logic.BehaviorTree;
-        using Styx.Logic.Inventory.Frames.Gossip;
-        using Styx.Logic.Inventory.Frames.LootFrame;
-        using Styx.Logic.Inventory.Frames.MailBox;
-        using Styx.Logic.Inventory.Frames.Merchant;
-        using Styx.Logic.Pathing;
-        using Styx.Logic.Profiles;
-        using Styx.Plugins;
-        using Styx.Plugins.PluginClass;
-        using Styx.WoWInternals.World;
-        using Styx.Combat.CombatRoutine;
-        using System.Xml.Linq;
-        using HighVoltz.Composites;
-        using HighVoltz.Dynamic;
-        using Bots.Gatherbuddy;
+            using System;
+            using System.Reflection;
+            using System.Data;
+            using System.Threading;
+            using System.Diagnostics;
+            using System.Collections.Generic;
+            using System.Collections;
+            using System.Linq;
+            using System.Text;
+            using System.IO;
+            using System.Windows.Forms;
+            using System.Windows.Media;
+
+            using Styx;
+            using Styx.Common;
+            using Styx.Helpers;
+            using Styx.Combat;
+            using Styx.WoWInternals;
+            using Styx.WoWInternals.WoWObjects;
+            using Styx.CommonBot.AreaManagement;
+            using Styx.CommonBot;
+            using Styx.CommonBot.Frames;
+            using Styx.Pathing;
+            using Styx.CommonBot.Profiles;
+            using Styx.Plugins;
+            using Styx.WoWInternals.World;
+            using Styx.Combat.CombatRoutine;
+            using System.Xml.Linq;
+            using HighVoltz.Composites;
+            using HighVoltz.Dynamic;
+            using Bots.Gatherbuddy;
         public class CodeDriver
         {
             static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
@@ -295,9 +292,9 @@ namespace HighVoltz.Dynamic
             int InGBankCount(string character, uint itemId) {return Helpers.InGBankCount(character,itemId);}
             int OnAhCount(uint itemId) {return Helpers.OnAhCount(itemId);}
             int OnAhCount(string character, uint itemId) {return Helpers.OnAhCount(character,itemId);}
-            void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
+            void Log (Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
-            void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
+            void Log(Color headerColor, string header, Color msgColor, string format, params object[] args) 
             {
                 Professionbuddy.Log(headerColor, header, msgColor, format, args);
             }

@@ -430,6 +430,8 @@ namespace HighVoltz
 
         private static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
         {
+            if (args.NewProfile.XmlElement == null)
+                return;
             if (args.NewProfile.XmlElement.Name == "Professionbuddy")
             {
                 // prevents HB from reloading current profile when bot is started.
@@ -629,24 +631,6 @@ namespace HighVoltz
                                   lock (TradeSkillList)
                                   {
                                       TradeSkillList.Clear();
-                                      //IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
-                                      //                                  select Me.GetSkill(skill);
-
-                                      //foreach (WoWSkill skill in skillList)
-                                      //{
-                                      //    Log("Adding TradeSkill {0}", skill.Name);
-                                      //    TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
-                                      //    if (ts != null)
-                                      //    {
-                                      //        TradeSkillList.Add(ts);
-                                      //    }
-                                      //    else
-                                      //    {
-                                      //        IsTradeSkillsLoaded = false;
-                                      //        Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
-                                      //        return;
-                                      //    }
-                                      //}
                                       foreach (WoWSkill skill in SupportedTradeSkills)
                                       {
                                           Log("Adding TradeSkill {0}", skill.Name);

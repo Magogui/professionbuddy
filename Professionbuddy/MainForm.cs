@@ -548,7 +548,6 @@ namespace HighVoltz
             toolStripPaste.Image = Image.FromFile(imagePath + "paste_32x32.png");
             toolStripDelete.Image = Image.FromFile(imagePath + "delete.png");
             toolStripAddBtn.Image = Image.FromFile(imagePath + "112_RightArrowLong_Orange_32x32_72.png");
-            toolStripMaterials.Image = Image.FromFile(imagePath + "Notepad_32x32.png");
             toolStripHelp.Image = Image.FromFile(imagePath + "109_AllAnnotations_Help_32x32_72.png");
 
             if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
