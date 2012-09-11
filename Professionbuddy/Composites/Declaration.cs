@@ -1,6 +1,4 @@
-﻿//!CompilerOption:AddRef:System.Design.dll
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
 using HighVoltz.Dynamic;

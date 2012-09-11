@@ -110,6 +110,7 @@
     <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="GlobalPBSettings.cs" />
     <Compile Include="SvnBase.cs" />
+    <None Include="Guide.rtf" />
     <None Include="SVN.template" />
     <Compile Include="Composites\BuyItemAction.cs" />
     <Compile Include="Composites\BuyItemFromAhAction.cs" />
@@ -188,6 +189,54 @@
     <Content Include="Localization\Strings.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Profiles\AHBot.xml" />
+    <Content Include="Profiles\Alchemist %281-500%29%28Dalaran AH%29.xml" />
+    <Content Include="Profiles\Fishing1-525%28dalaran%29.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 1-75%29%28Elwynn.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 120-160%29%28StranglethornJungle.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 160-175%29%28TheCapeOfStranglethorn.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 175-235%29%28Badlands.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 235-255%29%28BlasstedLands.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 255-300%29%28SwampOfSorrows.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 75-120%29%28Duskwood.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 1-50%29%28Durotar.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 120-180%29%28Ashenvale.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 180-225%29%28SouthernBarrens.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 225-275%29%28Felwood.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 270-300%29%28Winterspring.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Horde\%28GB2 50-120%29%28Barrens.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Neutral\%28GB2 300-350%29%28Outlands.Neutral%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Neutral\%28GB2 350-400%29%28HowlingFjord.Neutral%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Neutral\%28GB2 400-450%29%28SholazarBasin.Neutral%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Neutral\%28GB2 450-475%29%28Hyjal.Neutral%29Herb&amp;Mining-herb.xml" />
+    <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Neutral\%28GB2 475-525%29%28Uldum.Neutral%29Herb&amp;Mining-herb.xml" />
+    <Content Include="Profiles\HBProfiles\%28ground 1-300%29Herb&amp;Mining\%28ground 1-300%29%28Eastern Kindom.Alliance%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28ground 1-300%29Herb&amp;Mining\%28ground 1-300%29%28Eastern Kindom.Alliance%29Herb.xml" />
+    <Content Include="Profiles\HBProfiles\%28ground 1-300%29Herb&amp;Mining\%28ground 1-300%29%28Kalimdor.Horde%29Herb&amp;Mining.xml" />
+    <Content Include="Profiles\HBProfiles\%28ground 1-300%29Herb&amp;Mining\%28ground 1-300%29%28Kalimdor.Horde%29Herb.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Deepholm\Alliance\%28GB2%29%28Deepholm.Nuetral%29Herb&amp;Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Deepholm\Horde\%28GB2%29%28Deepholm.Nuetral%29Herb&amp;Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Hyjal\Alliance\%28GB2%29%28Hyjal.Nuetral%29Mines&amp;Herbs.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Hyjal\Alliance\%28GB2%29%28Hyjal.Nuetral%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Hyjal\Horde\%28GB2%29%28Hyjal.Nuetral%29Mines&amp;Herbs.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Hyjal\Horde\%28GB2%29%28Hyjal.Nuetral%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Twilight\Alliance\%28GB2%29%28TwilightHighlands.Alliance%29Herb&amp;Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Twilight\Alliance\%28GB2%29%28TwilightHighlands.Alliance%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Twilight\Horde\%28GB2%29%28TwilightHighlands.Horde%29Herb&amp;mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Twilight\Horde\%28GB2%29%28TwilightHighlands.Horde%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Uldum\Alliance\%28GB2%29%28Uldum.Nuetral%29Mines&amp;Herbs.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Uldum\Alliance\%28GB2%29%28Uldum.Nuetral%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Uldum\Horde\%28GB2%29%28Uldum.Nuetral%29Mines&amp;Herbs.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Uldum\Horde\%28GB2%29%28Uldum.Nuetral%29Mines.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Vashjir\Alliance\Vashhir.xml" />
+    <Content Include="Profiles\HBProfiles\GatheringProfiles\Vashjir\Horde\Vashhir.xml" />
+    <Content Include="Profiles\Herb %281-300%29ground.xml" />
+    <Content Include="Profiles\Mining %281-340%29%28Dalaran%29.xml" />
+    <Content Include="Profiles\Mining %281-340%29%28org-Stormwind%29.xml" />
+    <Content Include="Profiles\Mining-Herb %281-300%29ground.xml" />
+    <Content Include="Profiles\Mining-Herb %281-525%29flying-GB2.xml" />
+    <Content Include="Profiles\Multiprofile.xml" />
+    <Content Include="Protected Items.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

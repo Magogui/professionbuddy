@@ -1,6 +1,4 @@
-﻿//!CompilerOption:AddRef:System.Design.dll
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
