@@ -6,10 +6,10 @@
   <CustomAction Code="var2 = DateTime.Now;" />
   <!--check for undercut items every 30 to 300 seconds-->
   <CustomAction Code="var3 = new Random().Next(30, 300);" />
-  <CustomAction Code="Log (Color.Orange,&quot;AHBot: &quot;,Color.LightYellow,&quot;Made by HighVoltz&quot;);" />
-  <CustomAction Code="Log (Color.Orange,&quot;AHBot: &quot;,Color.LightYellow,&quot;Canceling of auctions is {0}&quot;,(bool)Settings[&quot;Cancel Undercut Auctions&quot;]? &quot;enabled&quot;:&quot;disabled&quot;);" />
+  <CustomAction Code="Log (Colors.Orange,&quot;AHBot: &quot;,Colors.LightYellow,&quot;Made by HighVoltz&quot;);" />
+  <CustomAction Code="Log (Colors.Orange,&quot;AHBot: &quot;,Colors.LightYellow,&quot;Canceling of auctions is {0}&quot;,(bool)Settings[&quot;Cancel Undercut Auctions&quot;]? &quot;enabled&quot;:&quot;disabled&quot;);" />
   <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True">
-    <CustomAction Code="Log (Color.Orange,&quot;AHBot: &quot;,Color.LightYellow,&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />
+    <CustomAction Code="Log (Colors.Orange,&quot;AHBot: &quot;,Colors.LightYellow,&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
     <If Condition="((bool)var1) || (HasNewMail || MailCount&gt; 0)" IgnoreCanRun="True">
@@ -65,9 +65,9 @@
       <CustomAction Code="var2 = DateTime.Now;" />
       <CustomAction Code="var3 = new Random().Next(30, 300);" />
       <If Condition="(bool)Settings[&quot;Cancel Undercut Auctions&quot;]" IgnoreCanRun="True">
-        <CustomAction Code="Log (Color.Orange,&quot;AHBot: &quot;,Color.LightYellow,&quot;Checking for undercut auctions&quot;);" />
+        <CustomAction Code="Log (Colors.Orange,&quot;AHBot: &quot;,Colors.LightYellow,&quot;Checking for undercut auctions&quot;);" />
         <CancelAuctionAction UseCategory="False" Category="TradeGoods" SubCategory="None" SubCategoryType="WoWItemTradeGoodsClass" ItemID="0" AutoFindAh="True" MinBuyout="0g0s0c" Location="0, 0, 0" IgnoreStackSizeBelow="1" />
-        <CustomAction Code="Log (Color.Orange,&quot;AHBot: &quot;,Color.LightYellow,&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />
+        <CustomAction Code="Log (Colors.Orange,&quot;AHBot: &quot;,Colors.LightYellow,&quot;Checking for undercut auctions in {0} seconds&quot;,var3);" />
       </If>
       <CustomAction Code="KeyboardManager.AntiAfk();" />
     </If>
