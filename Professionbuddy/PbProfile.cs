@@ -155,7 +155,7 @@ namespace HighVoltz
                                     if (typeConverter.CanConvertFrom(typeof (string)))
                                     {
                                         pi.SetValue(pbComp,
-                                                    typeConverter.ConvertFrom(null, CultureInfo.CurrentCulture,
+                                                    typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture,
                                                                               attr.Value), null);
                                     }
                                     else
@@ -173,7 +173,7 @@ namespace HighVoltz
                                 pi.SetValue(pbComp,
                                             pi.PropertyType.IsEnum
                                                 ? Enum.Parse(pi.PropertyType, attr.Value)
-                                                : Convert.ChangeType(attr.Value, pi.PropertyType), null);
+                                                : Convert.ChangeType(attr.Value, pi.PropertyType, CultureInfo.InvariantCulture), null);
                             }
                         }
                         else
@@ -253,7 +253,7 @@ namespace HighVoltz
                                     Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
                                 if (typeConverter.CanConvertTo(typeof (string)))
                                 {
-                                    value = (string) typeConverter.ConvertTo(pi.GetValue(pbComp, null), typeof (string));
+                                    value = (string)typeConverter.ConvertTo(null, CultureInfo.InvariantCulture, pi.GetValue(pbComp, null), typeof(string));
                                 }
                                 else
                                     Professionbuddy.Err("The TypeConvert {0} can not convert to string.",
@@ -267,7 +267,7 @@ namespace HighVoltz
                         }
                         else
                         {
-                            value = pi.GetValue(pbComp, null).ToString();
+                            value = Convert.ToString(pi.GetValue(pbComp, null), CultureInfo.InvariantCulture);
                         }
                         newElement.Add(new XAttribute(name, value));
                     }

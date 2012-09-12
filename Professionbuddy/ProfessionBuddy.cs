@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -548,6 +549,7 @@ namespace HighVoltz
                 if (!_init)
                 {
                     Debug("Initializing ...");
+
                     if (!Directory.Exists(BotPath))
                         Directory.CreateDirectory(BotPath);
                     DynamicCodeCompiler.WipeTempFolder();
@@ -860,7 +862,6 @@ namespace HighVoltz
 
         public static void Log(string format, params object[] args)
         {
-            //Logging.Write(System.Drawing.Color.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
             LogInvoker(Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
         }
 
