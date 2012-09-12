@@ -408,17 +408,17 @@ namespace HighVoltz.Composites
         }
 
         #region Auction House
-
+        // Indexes are {0}=ItemID, {1}=MinBuyout, {2}=LowestBuyoutFound
         private const string CancelAuctionLuaFormat =
-            "local A =GetNumAuctionItems('owner') " +
-            "local cnt=0 " +
-            "for i=A,1,-1 do " +
-            "local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) " +
-            "if id == {0} and sold ~= 1 and {2} > {1} and (buyout/cnt) > {2} then " +
-            "CancelAuction(i) cnt=cnt+1 " +
-            "end " +
-            "end " +
-            "return cnt";
+@"local A =GetNumAuctionItems('owner') 
+local cnt=0 
+for i=A,1,-1 do 
+    local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) 
+    if id == {0} and sold ~= 1 and {1} > {2} and (buyout/cnt) > {2} then 
+        CancelAuction(i) cnt=cnt+1 
+    end 
+end 
+return cnt";
 
         private readonly Stopwatch _queueTimer = new Stopwatch();
         private int _page;
@@ -469,8 +469,6 @@ namespace HighVoltz.Composites
             }
             return scanned;
         }
-
-        // Indexes are {0}=ItemID, {1}=MinBuyout, {2}=LowestBuyoutFound
 
         private bool CancelAuction(AuctionEntry ae)
         {
