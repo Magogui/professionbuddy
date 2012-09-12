@@ -144,9 +144,9 @@
           <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
         </If>
         <!--Wait for Flying mount info to refresh-->
-        <If Condition="MountHelper.FlyingMounts.Count == 0" IgnoreCanRun="True">
+        <If Condition="Mount.FlyingMounts.Count == 0" IgnoreCanRun="True">
           <CustomAction Code="Err(&quot;Waiting for MountHelper to refresh !!&quot;);" />
-          <WaitAction Condition="MountHelper.FlyingMounts.Count &gt; 0" Timeout="300000" />
+          <WaitAction Condition="Mount.FlyingMounts.Count &gt; 0" Timeout="300000" />
         </If>
         <!--Repair and sell junk-->
         <If Condition="(bool)Settings[&quot;Repair In Cty&quot;]" IgnoreCanRun="True">
@@ -250,7 +250,7 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="Init">
     <CustomAction Code="MyLog(&quot;Made by HighVoltz&quot;);" />
-    <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;*************** Settings ****************&quot;);" />
+    <CustomAction Code="Log(Colors.GreenYellow,&quot;&quot;,Colors.GreenYellow,&quot;*************** Settings ****************&quot;);" />
     <CustomAction Code="MyLog(&quot;SwitchToBanker: {0}&quot;,Settings[&quot;SwitchToBanker&quot;]);" />
     <CustomAction Code="MyLog(&quot;DepositGoldInGbank: {0}&quot;,Settings[&quot;DepositGoldInGbank&quot;]);" />
     <CustomAction Code="MyLog(&quot;MinMinutesPerZone: {0}&quot;,Settings[&quot;MinMinutesPerZone&quot;]);" />
@@ -259,7 +259,7 @@
     <CustomAction Code="MyLog(&quot;DepositInGbank: {0}&quot;,Settings[&quot;DepositInGbank&quot;]);" />
     <CustomAction Code="MyLog(&quot;CancelAuctions: {0}&quot;,Settings[&quot;CancelAuctions&quot;]);" />
     <CustomAction Code="MyLog(&quot;Max Stack Number: {0}&quot;,Settings[&quot;Max Stack Number&quot;]);" />
-    <CustomAction Code="Log(Color.GreenYellow,&quot;&quot;,Color.GreenYellow,&quot;***************** Zones *****************&quot;);" />
+    <CustomAction Code="Log(Colors.GreenYellow,&quot;&quot;,Colors.GreenYellow,&quot;***************** Zones *****************&quot;);" />
     <CustomAction Code="MyLog(&quot;Hyjal: {0}&quot;,Settings[&quot;Hyjal&quot;]);" />
     <CustomAction Code="MyLog(&quot;Twilight: {0}&quot;,Settings[&quot;Twilight&quot;]);" />
     <CustomAction Code="MyLog(&quot;Uldum: {0}&quot;,Settings[&quot;Uldum&quot;]);" />
@@ -315,7 +315,7 @@
     <CustomAction Code="currentZoneID = Me.ZoneId;" />
     <!--Hyjal-->
     <If Condition="(uint)Settings[&quot;FarmedZone&quot;] == 616" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
+      <CustomAction Code="Log(Colors.Green,&quot;Multiprofile: &quot;,Colors.LightGreen,&quot;Using Portal to Hyjal&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="-8211.333, 402.3037, 117.2938" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207692);" Timeout="10000" />
@@ -443,7 +443,7 @@
       <CustomAction Code="GBankLocations.Add(new WoWPoint(5651.325, 682.1651, 651.9932));" />
     </If>
     <If Condition="GBankLocations.Count== 0" IgnoreCanRun="True">
-      <CustomAction Code="Log(Color.Green,&quot;Multiprofile: &quot;,Color.LightGreen,&quot;There is no gbank found in your area&quot;);" />
+      <CustomAction Code="Log(Colors.Green,&quot;Multiprofile: &quot;,Colors.LightGreen,&quot;There is no gbank found in your area&quot;);" />
     </If>
     <If Condition="GBankLocations.Count &gt; 0" IgnoreCanRun="True">
       <CustomAction Code="GbankLocation  = GBankLocations.OrderBy( pnt =&gt; pnt.Distance(Me.Location)).FirstOrDefault();" />
