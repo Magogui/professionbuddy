@@ -627,7 +627,7 @@ namespace HighVoltz
             return null;
         }
 
-        private const int MaxSpellReagents = 9;
+        private const int MaxSpellReagents = 8;
         internal void InitIngredients()
         {
             // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 

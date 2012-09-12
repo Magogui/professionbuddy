@@ -505,7 +505,7 @@
   </SubRoutine>
   <SubRoutine SubRoutineName="UseNormalMountAsDruid">
     <While Condition="!Me.Mounted" IgnoreCanRun="True">
-      <CustomAction Code="if (Me.IsMoving)&#xD;&#xA;   WoWMovement.MoveStop();&#xD;&#xA;if (MountHelper.FlyingMounts.Count &gt; 0)&#xD;&#xA;{&#xD;&#xA;  SpellManager.Cast(MountHelper.FlyingMounts.First().CreatureSpell);&#xD;&#xA;}&#xD;&#xA;else&#xD;&#xA;{&#xD;&#xA;   Err(&quot;You need to go learn a normal flying mount or do most quests here in Vashjir&quot;);&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;" />
+      <CustomAction Code="if (Me.IsMoving)&#xD;&#xA;   WoWMovement.MoveStop();&#xD;&#xA;if (Mount.FlyingMounts.Count &gt; 0)&#xD;&#xA;{&#xD;&#xA;  SpellManager.Cast(Mount.FlyingMounts.First().CreatureSpell);&#xD;&#xA;}&#xD;&#xA;else&#xD;&#xA;{&#xD;&#xA;   Err(&quot;You need to go learn a normal flying mount or do most quests here in Vashjir&quot;);&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;" />
       <WaitAction Condition="Me.Mounted" Timeout="4000" />
     </While>
   </SubRoutine>
