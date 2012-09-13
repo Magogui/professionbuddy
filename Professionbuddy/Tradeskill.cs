@@ -50,36 +50,6 @@ namespace HighVoltz
         private Dictionary<uint, IngredientSubClass> _ingredients;
         private List<Tool> _tools;
 
-        static TradeSkill()
-        {
-            ProcessModule mod = StyxWoW.Memory.Process.MainModule;
-            var baseAddress = (uint)mod.BaseAddress;
-            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
-                GlobalPBSettings.Instance.KnownSpellsPtr == 0)
-            {
-                Professionbuddy.Log("A new wow version has been detected\nScanning for new KnownSpellsPtr offset");
-                try
-                {
-                    IntPtr pointer =
-                        Util.FindPattern(
-                            "00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3",
-                            "????xxxxxxxxxxxxxx");
-
-                    GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
-                    GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
-                    Professionbuddy.Log("Found KnownSpellsPtr offset for WoW Version {0} at offset 0x{1:X}",
-                                        mod.FileVersionInfo.FileVersion, GlobalPBSettings.Instance.KnownSpellsPtr);
-                    GlobalPBSettings.Instance.Save();
-                }
-                catch (InvalidDataException)
-                {
-                    Professionbuddy.Log(
-                        "Unable to find KnownSpellsPtr offset for WoW Version {0}\nPlease notify the developer of this issue",
-                        mod.FileVersionInfo.FileVersion);
-                }
-            }
-        }
-
         private TradeSkill(WoWSkill skill)
         {
             WoWSkill = skill;

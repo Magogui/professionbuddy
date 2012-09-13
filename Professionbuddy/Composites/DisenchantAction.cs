@@ -4,12 +4,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Frames;
 using Styx.CommonBot.Profiles;
+using Styx.Patchables;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
 using Styx.TreeSharp;
 
@@ -242,30 +245,33 @@ namespace HighVoltz.Composites
 
         private List<WoWItem> BuildItemList()
         {
-            int skillLevel = 0;
-            // cache the skillevel for this pulse..
-            if (ActionType == DeActionType.Disenchant)
-                skillLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
-            else if (ActionType == DeActionType.Mill)
-                skillLevel = ObjectManager.Me.GetSkill(SkillLine.Inscription).CurrentValue;
-            else if (ActionType == DeActionType.Prospect)
-                skillLevel = ObjectManager.Me.GetSkill(SkillLine.Jewelcrafting).CurrentValue;
-
-            IEnumerable<WoWItem> itemQueue = from item in ObjectManager.Me.BagItems
-                                             where !IsBlackListed(item) &&
-                                                   !Pb.ProtectedItems.Contains(item.Entry) &&
-                                                   ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
-                                                    ItemTarget == ItemTargetType.All)
-                                             select item;
-
-            switch (ActionType)
+            using (StyxWoW.Memory.AcquireFrame())
             {
-                case DeActionType.Disenchant:
-                    return itemQueue.Where(i => i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
-                case DeActionType.Mill:
-                    return itemQueue.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
-                case DeActionType.Prospect:
-                    return itemQueue.Where(i => i.CanProspect(skillLevel) && i.StackCount >= 5).ToList();
+                int skillLevel = 0;
+                // cache the skillevel for this pulse..
+                if (ActionType == DeActionType.Disenchant)
+                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
+                else if (ActionType == DeActionType.Mill)
+                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Inscription).CurrentValue;
+                else if (ActionType == DeActionType.Prospect)
+                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Jewelcrafting).CurrentValue;
+
+                IEnumerable<WoWItem> itemQueue = from item in ObjectManager.Me.BagItems
+                                                 where !IsBlackListed(item) &&
+                                                       !Pb.ProtectedItems.Contains(item.Entry) &&
+                                                       ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
+                                                        ItemTarget == ItemTargetType.All)
+                                                 select item;
+
+                switch (ActionType)
+                {
+                    case DeActionType.Disenchant:
+                        return itemQueue.Where(i => i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
+                    case DeActionType.Mill:
+                        return itemQueue.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
+                    case DeActionType.Prospect:
+                        return itemQueue.Where(i => i.CanProspect(skillLevel) && i.StackCount >= 5).ToList();
+                }
             }
             return null;
         }
@@ -503,18 +509,27 @@ namespace HighVoltz.Composites
 
         public static bool CanMill(this WoWItem item, int skillLevel)
         {
+            var requiredLevel = item.MinInscriptionLevelReq();
+            return requiredLevel >= 0 && skillLevel >= requiredLevel;
             // returns true if item is found in the dictionary and player meets the level requirement
-            return MillableHerbList.ContainsKey(item.Entry) && MillableHerbList[item.Entry] <= skillLevel;
+            //return MillableHerbList.ContainsKey(item.Entry) && MillableHerbList[item.Entry] <= skillLevel;
         }
 
         public static bool CanProspect(this WoWItem item, int skillLevel)
         {
+            var requiredLevel = item.MinJewelCraftLevelReq();
+            return requiredLevel >= 0 && skillLevel >= requiredLevel;
             // returns true if item is found in the dictionary and player meets the level requirement
-            return ProspectList.ContainsKey(item.Entry) && ProspectList[item.Entry] <= skillLevel;
+            //return ProspectList.ContainsKey(item.Entry) && ProspectList[item.Entry] <= skillLevel;
         }
+
 
         public static bool CanDisenchant(this WoWItem item, int skillLevel)
         {
+            var requiredLevel = item.MinEnchantLevelReq();
+            return requiredLevel >= 0 && skillLevel >= requiredLevel;
+
+            /*
             ItemInfo itemInfo = item.ItemInfo;
             if (itemInfo.StatsCount == 0 && itemInfo.RandomPropertiesId == 0 && itemInfo.RandomSuffixId == 0)
             {
@@ -547,6 +562,7 @@ namespace HighVoltz.Composites
             Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2}. SkillLevel: {3}",
                                 item.Name, item.BagIndex + 1, item.BagSlot + 1, skillLevel);
             return false;
+             */
         }
     }
 }

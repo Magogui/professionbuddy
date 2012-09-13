@@ -88,7 +88,6 @@ namespace HighVoltz
         }
 
         public ProfessionBuddySettings MySettings { get; private set; }
-        public GlobalPBSettings GlobalSettings { get; private set; }
         public List<TradeSkill> TradeSkillList { get; private set; }
         public Dictionary<string, string> Strings { get; private set; }
 
@@ -549,7 +548,7 @@ namespace HighVoltz
                 if (!_init)
                 {
                     Debug("Initializing ...");
-
+                    Util.ScanForOffsets();
                     if (!Directory.Exists(BotPath))
                         Directory.CreateDirectory(BotPath);
                     DynamicCodeCompiler.WipeTempFolder();
@@ -562,8 +561,6 @@ namespace HighVoltz
                                                                             Lua.GetReturnVal<string>(
                                                                                 "return GetRealmName()", 0)))
                         );
-                    GlobalSettings = new GlobalPBSettings(
-                        Path.Combine(Utilities.AssemblyDirectory, string.Format(@"Settings\{0}\{0}.xml", Name)));
 
                     IsTradeSkillsLoaded = false;
                     MaterialList = new Dictionary<uint, int>();

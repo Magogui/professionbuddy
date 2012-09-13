@@ -1,23 +1,27 @@
-﻿using Styx.Helpers;
+﻿using System.IO;
+using Styx.Common;
+using Styx.Helpers;
 
 namespace HighVoltz
 {
     public class GlobalPBSettings : Settings
     {
-        public GlobalPBSettings(string settingsPath)
-            : base(settingsPath)
+
+        public static readonly GlobalPBSettings Instance = new GlobalPBSettings();
+        public GlobalPBSettings() : base(Path.Combine(Utilities.AssemblyDirectory, string.Format(@"Settings\{0}\{0}.xml", Professionbuddy.Instance.Name)))
         {
-            Instance = this;
             Load();
         }
 
-        public static GlobalPBSettings Instance { get; private set; }
 
         [Setting, DefaultValue(0)]
         public int CurrentRevision { get; set; }
 
         [Setting, DefaultValue(0u)]
         public uint KnownSpellsPtr { get; set; }
+
+        [Setting, DefaultValue(0u)]
+        public uint MinEnchantSkillReqPtr { get; set; }
 
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }

@@ -6,7 +6,7 @@ namespace HighVoltz
 {
     public class DataStore : Dictionary<uint, int>
     {
-        private readonly GlobalPBSettings _settings = Professionbuddy.Instance.GlobalSettings;
+        private readonly GlobalPBSettings _settings = GlobalPBSettings.Instance;
         private Professionbuddy _pb = Professionbuddy.Instance;
 
         public DataStore()
