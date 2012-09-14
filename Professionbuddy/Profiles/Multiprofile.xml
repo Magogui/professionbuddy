@@ -184,7 +184,11 @@
       <Declaration Code="bool StopGettingMail;" />
       <CustomAction Code=" StopGettingMail = false;" />
       <While Condition="(HasNewMail || MailCount&gt; 0) &amp;&amp; ! StopGettingMail" IgnoreCanRun="True">
+        <Declaration Code="uint mailCount;" />
+        <CustomAction Code="mailCount =  TotalItemsInBag();" />
         <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="0" AutoFindMailBox="True" Location="0, 0, 0" />
+        <!--If we didn't get any items from mailbox then exit loop-->
+        <CustomAction Code="if (TotalItemsInBag() == mailCount)  StopGettingMail = true;" />
         <CallSubRoutine SubRoutineName="SellOnAH" />
         <CustomAction Code="if (Me.NormalBagsFull)  StopGettingMail = true;" />
       </While>
@@ -511,5 +515,6 @@
   </SubRoutine>
   <Declaration Code="void MyLog(string format,params object[] args)&#xD;&#xA;        {&#xD;&#xA;            Log(Colors.Green,&quot;Multiprofile: &quot;,Colors.LightGreen,format,args);&#xD;&#xA;        }&#xD;&#xA;" />
   <Declaration Code="void Err(string format,params object[] args)&#xD;&#xA;        {&#xD;&#xA;            Log(Colors.Green,&quot;Multiprofile: &quot;,Colors.Red,format,args);&#xD;&#xA;        }&#xD;&#xA;" />
+  <Declaration Code="uint TotalItemsInBag()&#xD;&#xA;        {&#xD;&#xA;            uint cnt=0;&#xD;&#xA;            foreach (var item in Me.BagItems)&#xD;&#xA;                 cnt += item.StackCount;&#xD;&#xA;            return cnt;&#xD;&#xA;        }&#xD;&#xA;" />
   <Declaration Code="        void LoadPorfileFromSubfolder(string folder)&#xD;&#xA;        {&#xD;&#xA;            string path = (string)Settings[&quot;ProfileFolderPath&quot;];&#xD;&#xA;            bool isAbsolute = System.IO.Path.IsPathRooted(path);&#xD;&#xA;            if (!isAbsolute)&#xD;&#xA;                path = System.IO.Path.Combine(Utilities.AssemblyDirectory, path);&#xD;&#xA;            path = System.IO.Path.Combine(path, folder);&#xD;&#xA;            path = System.IO.Path.Combine(path, Me.IsHorde ? &quot;Horde&quot; : &quot;Alliance&quot;);&#xD;&#xA;            if (System.IO.Directory.Exists(path))&#xD;&#xA;            {&#xD;&#xA;                string[] files = System.IO.Directory.GetFiles(path, &quot;*.xml&quot;, System.IO.SearchOption.TopDirectoryOnly);&#xD;&#xA;                if (files != null &amp;&amp; files.Length &gt; 0)&#xD;&#xA;                {&#xD;&#xA;                    int index = new Random().Next(0, files.Length);&#xD;&#xA;                    ProfileManager.LoadNew(files[index]);&#xD;&#xA;                    MyLog(&quot;Loading profile for zone: {0}&quot;, folder);&#xD;&#xA;                }&#xD;&#xA;                else&#xD;&#xA;                    Err(&quot;no profiles found in path: {0}&quot;, path);&#xD;&#xA;            }&#xD;&#xA;            else&#xD;&#xA;                MyLog(&quot;ProfilePath: {0} not found&quot;, path);&#xD;&#xA;        }" />
 </Professionbuddy>
