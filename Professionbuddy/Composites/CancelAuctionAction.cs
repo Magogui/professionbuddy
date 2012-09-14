@@ -414,7 +414,7 @@ namespace HighVoltz.Composites
 local cnt=0 
 for i=A,1,-1 do 
     local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) 
-    if id == {0} and sold ~= 1 and {1} > {2} and (buyout/cnt) > {2} then 
+    if id == {0} and sold ~= 1 and ({1} > {2} or {1} == 0) and (buyout/cnt) > {2} then 
         CancelAuction(i) cnt=cnt+1 
     end 
 end 
