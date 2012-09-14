@@ -189,7 +189,9 @@
         <GetMailAction GetMailType="AllItems" ItemID="" CheckNewMail="True" MinFreeBagSlots="0" AutoFindMailBox="True" Location="0, 0, 0" />
         <!--If we didn't get any items from mailbox then exit loop-->
         <CustomAction Code="if (TotalItemsInBag() == mailCount)  StopGettingMail = true;" />
-        <CallSubRoutine SubRoutineName="SellOnAH" />
+        <If Condition="!StopGettingMail" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="SellOnAH" />
+        </If>
         <CustomAction Code="if (Me.NormalBagsFull)  StopGettingMail = true;" />
       </While>
       <If Condition="(int)Settings[&quot;FarmersGold&quot;] &lt; 200 &amp;&amp; (int)Me.Gold &gt; 600" IgnoreCanRun="True">
