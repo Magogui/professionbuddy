@@ -184,26 +184,26 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
 
-            if (!_firstStartDone)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(_profileToLoad))
-                    {
-                        LoadPBProfile(_profileToLoad);
-                        LastProfileIsHBProfile = false;
-                    }
-                    else if (!string.IsNullOrEmpty(MySettings.LastProfile))
-                    {
-                        LoadPBProfile(MySettings.LastProfile);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Err(ex.ToString());
-                }
-                _firstStartDone = true;
-            }
+            //if (!_firstStartDone)
+            //{
+            //    try
+            //    {
+            //        if (!string.IsNullOrEmpty(_profileToLoad))
+            //        {
+            //            LoadPBProfile(_profileToLoad);
+            //            LastProfileIsHBProfile = false;
+            //        }
+            //        else if (!string.IsNullOrEmpty(MySettings.LastProfile))
+            //        {
+            //            LoadPBProfile(MySettings.LastProfile);
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Err(ex.ToString());
+            //    }
+            //    _firstStartDone = true;
+            //}
             try
             {
                 if (SecondaryBot != null)
@@ -580,6 +580,24 @@ namespace HighVoltz
                             b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
                     if (bot != null)
                         _root.SecondaryBot = bot;
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(_profileToLoad))
+                        {
+                            LoadPBProfile(_profileToLoad);
+                            LastProfileIsHBProfile = false;
+                        }
+                        else if (!string.IsNullOrEmpty(MySettings.LastProfile))
+                        {
+                            LoadPBProfile(MySettings.LastProfile);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Err(ex.ToString());
+                    }
+
                     // check for Professionbuddy updates
                     new Thread(Updater.CheckForUpdate) {IsBackground = true}.Start();
                     _init = true;
