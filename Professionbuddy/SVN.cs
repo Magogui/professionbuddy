@@ -1,5 +1,5 @@
 ﻿// This file is auto genorated from using SubRCRev.exe and template SVN.template
-// Build Date: 2012/09/13 13:26:28
+// Build Date: 2012/09/14 18:29:38
 // SVN url: https://professionbuddy.googlecode.com/svn/trunk/Professionbuddy
 
 namespace HighVoltz
@@ -10,7 +10,7 @@ namespace HighVoltz
         {
             get
             {
-                return "493";
+                return "496";
             }
         }
     }

@@ -26,8 +26,14 @@ namespace HighVoltz.Composites
             set
             {
                 _secondaryBot = value;
-                Children[1] = value.Root;
+                //Children[1] = value.Root;
             }
+        }
+
+        // hackish fix but needed.
+        public void AddSecondaryBot()
+        {
+            Children[1] = SecondaryBot.Root;
         }
     }
 }

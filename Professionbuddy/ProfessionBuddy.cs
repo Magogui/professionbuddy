@@ -22,6 +22,7 @@ using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
+using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.TreeSharp;
@@ -155,6 +156,8 @@ namespace HighVoltz
         {
             Debug("Start Called");
             IsRunning = true;
+            _root.AddSecondaryBot();
+
             // reattach lua events on bot start in case it they get destroyed from loging out of game
             Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
             Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
