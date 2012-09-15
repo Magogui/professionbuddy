@@ -239,7 +239,7 @@ namespace HighVoltz.Dynamic
             using Styx;
             using Styx.Common;
             using Styx.Helpers;
-            using Styx.Combat;
+            using Styx.CommonBot.Routines;
             using Styx.WoWInternals;
             using Styx.WoWInternals.WoWObjects;
             using Styx.CommonBot.AreaManagement;
@@ -249,7 +249,6 @@ namespace HighVoltz.Dynamic
             using Styx.CommonBot.Profiles;
             using Styx.Plugins;
             using Styx.WoWInternals.World;
-            using Styx.Combat.CombatRoutine;
             using System.Xml.Linq;
             using HighVoltz.Composites;
             using HighVoltz.Dynamic;

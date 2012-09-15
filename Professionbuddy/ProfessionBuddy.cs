@@ -532,6 +532,7 @@ namespace HighVoltz
         private static bool _init;
         private static bool _isChangingBot;
 
+
         private WoWSkill[] SupportedTradeSkills
         {
             get
@@ -548,6 +549,7 @@ namespace HighVoltz
         {
             try
             {
+
                 if (!_init)
                 {
                     Debug("Initializing ...");
