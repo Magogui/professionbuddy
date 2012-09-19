@@ -191,7 +191,9 @@
     </Content>
     <Content Include="Profiles\AHBot.xml" />
     <Content Include="Profiles\Alchemist %281-500%29%28Dalaran AH%29.xml" />
-    <Content Include="Profiles\Fishing1-525%28dalaran%29.xml" />
+    <Content Include="Profiles\Fishing1-525%28dalaran%29.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 1-75%29%28Elwynn.Alliance%29Herb&amp;Mining.xml" />
     <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 120-160%29%28StranglethornJungle.Alliance%29Herb&amp;Mining.xml" />
     <Content Include="Profiles\HBProfiles\%28GB2 1-300%29Herb&amp;Mining\Alliance\%28GB2 160-175%29%28TheCapeOfStranglethorn.Alliance%29Herb&amp;Mining.xml" />

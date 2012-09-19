@@ -29,7 +29,7 @@ namespace HighVoltz.Composites
 
         private static LocalPlayer Me
         {
-            get { return ObjectManager.Me; }
+            get { return StyxWoW.Me; }
         }
 
         protected override IEnumerable<RunStatus> Execute(object context)

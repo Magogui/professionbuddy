@@ -179,9 +179,9 @@ namespace HighVoltz.Composites
                     if (_entry == 0)
                     {
                         MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestVendor, 0);
-                        NpcResult npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate,
-                                                                        ObjectManager.Me.MapId,
-                                                                        ObjectManager.Me.Location, UnitNPCFlags.Vendor);
+                        NpcResult npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate,
+                                                                        StyxWoW.Me.MapId,
+                                                                        StyxWoW.Me.Location, UnitNPCFlags.Vendor);
                         _entry = (uint) npcResults.Entry;
                         movetoPoint = npcResults.Location;
                     }
@@ -191,7 +191,7 @@ namespace HighVoltz.Composites
                         movetoPoint = unit.Location;
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
-                    if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
+                    if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
                     {
                         Util.MoveTo(movetoPoint);
                     }
@@ -235,7 +235,7 @@ namespace HighVoltz.Composites
                             IsDone = true;
                             return RunStatus.Failure;
                         }
-                        List<WoWItem> itemList = ObjectManager.Me.BagItems.Where(u => idList.Contains(u.Entry)).
+                        List<WoWItem> itemList = StyxWoW.Me.BagItems.Where(u => idList.Contains(u.Entry)).
                             Take(Sell == DepositWithdrawAmount.All ? int.MaxValue : Count).ToList();
                         using (StyxWoW.Memory.AcquireFrame())
                         {

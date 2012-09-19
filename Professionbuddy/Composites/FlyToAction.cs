@@ -72,7 +72,7 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (ObjectManager.Me.Location.Distance(_loc) > 6)
+                if (StyxWoW.Me.Location.Distance(_loc) > 6)
                 {
                     Flightor.MoveTo(_loc);
                     TreeRoot.StatusText = string.Format("Flying to location {0}", _loc);

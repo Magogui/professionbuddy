@@ -321,7 +321,7 @@ namespace HighVoltz.Composites
             {
                 Professionbuddy.Err(Pb.Strings["Error_UnableToFindAuctioneer"]);
             }
-            if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
+            if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
             {
                 Util.MoveTo(movetoPoint);
             }

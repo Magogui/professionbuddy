@@ -182,7 +182,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return ObjectManager.Me.BagItems.Where(i => (i.ItemInfo.InventoryType == ItemType && ItemId == 0) ||
+                return StyxWoW.Me.BagItems.Where(i => (i.ItemInfo.InventoryType == ItemType && ItemId == 0) ||
                                                             (ItemId > 0 && i.Entry == ItemId)).
                     OrderByDescending(i => i.ItemInfo.Level).ThenBy(i => i.Quality).FirstOrDefault();
             }
@@ -274,7 +274,7 @@ namespace HighVoltz.Composites
                     CheckTradeskillList();
                 if (Casted >= CalculatedRepeat)
                 {
-                    if (ObjectManager.Me.IsCasting && ObjectManager.Me.CastingSpell.Id == Entry)
+                    if (StyxWoW.Me.IsCasting && StyxWoW.Me.CastingSpell.Id == Entry)
                         SpellManager.StopCasting();
                     _spamControl.Stop();
                     _spamControl.Reset();
@@ -296,12 +296,12 @@ namespace HighVoltz.Composites
                                                                       (Confimed || !_spamControl.IsRunning ||
                                                                        (_spamControl.ElapsedMilliseconds >=
                                                                         (_recastTime + (_recastTime/2)) + _waitTime &&
-                                                                        !ObjectManager.Me.IsCasting))))
+                                                                        !StyxWoW.Me.IsCasting))))
                 {
                     if (!_spamControl.IsRunning || _spamControl.ElapsedMilliseconds >= _recastTime ||
-                        (!ObjectManager.Me.IsCasting && _spamControl.ElapsedMilliseconds >= _waitTime))
+                        (!StyxWoW.Me.IsCasting && _spamControl.ElapsedMilliseconds >= _waitTime))
                     {
-                        if (ObjectManager.Me.IsMoving)
+                        if (StyxWoW.Me.IsMoving)
                             WoWMovement.MoveStop();
                         if (!QueueIsRunning)
                         {

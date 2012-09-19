@@ -79,8 +79,8 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
-                if (TrainerFrame.Instance == null || !TrainerFrame.Instance.IsVisible || !ObjectManager.Me.GotTarget ||
-                    (ObjectManager.Me.GotTarget && ObjectManager.Me.CurrentTarget.Entry != NpcEntry))
+                if (TrainerFrame.Instance == null || !TrainerFrame.Instance.IsVisible || !StyxWoW.Me.GotTarget ||
+                    (StyxWoW.Me.GotTarget && StyxWoW.Me.CurrentTarget.Entry != NpcEntry))
                 {
                     WoWPoint movetoPoint = _loc;
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
@@ -89,7 +89,7 @@ namespace HighVoltz.Composites
                         movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, unit.Location, 3);
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
-                    if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
+                    if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
                     {
                         Util.MoveTo(movetoPoint);
                     }

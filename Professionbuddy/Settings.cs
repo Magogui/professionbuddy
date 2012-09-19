@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
+using Styx;
 using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -80,7 +81,7 @@ namespace HighVoltz
             {
                 return Path.Combine(Utilities.AssemblyDirectory,
                                     string.Format("Settings\\ProfessionBuddy\\{0}[{1}-{2}].xml", ProfileName,
-                                                  ObjectManager.Me.Name,
+                                                  StyxWoW.Me.Name,
                                                   Lua.GetReturnVal<string>("return GetRealmName()", 0)));
             }
         }

@@ -263,7 +263,7 @@ namespace HighVoltz
             if (!TreeRoot.IsRunning)
                 ObjectManager.Update();
 
-            WoWSkill = ObjectManager.Me.GetSkill(SkillLine);
+            WoWSkill = StyxWoW.Me.GetSkill(SkillLine);
             Dictionary<uint, Recipe> oldList = KnownRecipes;
             // cycle through entire recipe list and check update the 'HasRecipe' property
             foreach (var recipe in Recipes)
@@ -302,7 +302,7 @@ namespace HighVoltz
             {
                 //using (StyxWoW.Memory.AcquireFrame())
                 //{
-                WoWSkill wowSkill = ObjectManager.Me.GetSkill(skillLine);
+                WoWSkill wowSkill = StyxWoW.Me.GetSkill(skillLine);
                 // sw.Start();
                 tradeSkill = new TradeSkill(wowSkill);
 
@@ -905,7 +905,7 @@ namespace HighVoltz
             {
                 return
                     (uint)
-                    ObjectManager.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+                    StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
             }
             catch (Exception ex)
             {

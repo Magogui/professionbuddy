@@ -244,7 +244,7 @@ namespace HighVoltz.Composites
                         return RunStatus.Failure;
                     }
 
-                    if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
+                    if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
                         Util.MoveTo(movetoPoint);
                     else if (_mailbox != null)
                     {

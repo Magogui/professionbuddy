@@ -120,7 +120,7 @@ namespace HighVoltz.Dynamic
 
         public static float DistanceTo(double x, double y, double z)
         {
-            return ObjectManager.Me.Location.Distance(new WoWPoint(x, y, z));
+            return StyxWoW.Me.Location.Distance(new WoWPoint(x, y, z));
         }
 
         public static void MoveTo(double x, double y, double z)
@@ -301,14 +301,14 @@ namespace HighVoltz.Dynamic
             public TradeskillHelper(SkillLine skillLine)
             {
                 _skillLine = skillLine;
-                _wowSkill = ObjectManager.Me.GetSkill(skillLine);
+                _wowSkill = StyxWoW.Me.GetSkill(skillLine);
             }
 
             public uint Level
             {
                 get
                 {
-                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    _wowSkill = StyxWoW.Me.GetSkill(_skillLine);
                     return (uint) _wowSkill.CurrentValue;
                 }
             }
@@ -317,7 +317,7 @@ namespace HighVoltz.Dynamic
             {
                 get
                 {
-                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    _wowSkill = StyxWoW.Me.GetSkill(_skillLine);
                     return (uint) _wowSkill.MaxValue;
                 }
             }
@@ -326,7 +326,7 @@ namespace HighVoltz.Dynamic
             {
                 get
                 {
-                    _wowSkill = ObjectManager.Me.GetSkill(_skillLine);
+                    _wowSkill = StyxWoW.Me.GetSkill(_skillLine);
                     return _wowSkill.Bonus;
                 }
             }

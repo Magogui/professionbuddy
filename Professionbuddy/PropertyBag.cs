@@ -255,7 +255,7 @@ namespace HighVoltz
                 {
                     if (!TreeRoot.IsRunning)
                         ObjectManager.Update();
-                    return ObjectManager.Me.GotTarget ? ObjectManager.Me.CurrentTarget.Entry : 0;
+                    return StyxWoW.Me.GotTarget ? StyxWoW.Me.CurrentTarget.Entry : 0;
                 }
                 return value;
             }
@@ -468,9 +468,9 @@ namespace HighVoltz
                 {
                     if (!TreeRoot.IsRunning)
                         ObjectManager.Update();
-                    WoWPoint loc = ObjectManager.Me.GotTarget
-                                       ? ObjectManager.Me.CurrentTarget.Location
-                                       : ObjectManager.Me.Location;
+                    WoWPoint loc = StyxWoW.Me.GotTarget
+                                       ? StyxWoW.Me.CurrentTarget.Location
+                                       : StyxWoW.Me.Location;
                     return string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
                 }
                 return value;

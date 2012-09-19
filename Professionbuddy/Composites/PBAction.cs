@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using HighVoltz.Dynamic;
+using Styx;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Action = Styx.TreeSharp.Action;
@@ -28,7 +29,7 @@ namespace HighVoltz.Composites
 
     public abstract class PBAction : Action, IPBComposite
     {
-        protected LocalPlayer Me = ObjectManager.Me;
+        protected LocalPlayer Me = StyxWoW.Me;
         protected Professionbuddy Pb;
         [XmlIgnore] private Color _color = Color.Black;
 

@@ -399,7 +399,7 @@ namespace HighVoltz.Composites
                 IsDone = true;
                 Professionbuddy.Err("Unable to find bank");
             }
-            if (movetoPoint.Distance(ObjectManager.Me.Location) > 4)
+            if (movetoPoint.Distance(StyxWoW.Me.Location) > 4)
             {
                 Util.MoveTo(movetoPoint);
             }
@@ -490,7 +490,7 @@ namespace HighVoltz.Composites
                 bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
             else if (AutoFindBank || _loc == WoWPoint.Zero)
                 bank = bankers.OrderBy(o => o.Distance).FirstOrDefault();
-            else if (ObjectManager.Me.Location.Distance(_loc) <= 90)
+            else if (StyxWoW.Me.Location.Distance(_loc) <= 90)
             {
                 bank = bankers.Where(o => o.Location.Distance(_loc) < 10).
                     OrderBy(o => o.Distance).FirstOrDefault();

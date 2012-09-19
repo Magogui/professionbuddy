@@ -201,7 +201,7 @@ namespace HighVoltz.Composites
                         movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, unit.Location, 3);
                     else if (movetoPoint == WoWPoint.Zero)
                         movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
-                    if (movetoPoint != WoWPoint.Zero && ObjectManager.Me.Location.Distance(movetoPoint) > 4.5)
+                    if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
                     {
                         Util.MoveTo(movetoPoint);
                     }

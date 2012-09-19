@@ -42,7 +42,7 @@ namespace HighVoltz
         private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         public static readonly string BotPath =  Utilities.AssemblyDirectory +  @"\Bots\" + _name;
-        private static readonly LocalPlayer Me = ObjectManager.Me;
+        private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
 
         public readonly string ProfilePath = Environment.UserName == "highvoltz"

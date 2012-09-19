@@ -181,15 +181,15 @@ namespace HighVoltz.Composites
                         return RunStatus.Failure;
                     }
                 }
-                if (Entry > 0 && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget.Entry != Entry))
+                if (Entry > 0 && (!StyxWoW.Me.GotTarget || StyxWoW.Me.CurrentTarget.Entry != Entry))
                 {
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>(true).FirstOrDefault(u => u.Entry == Entry);
                     if (unit != null)
                         unit.Target();
                 }
-                float speed = ObjectManager.Me.MovementInfo.CurrentSpeed;
+                float speed = StyxWoW.Me.MovementInfo.CurrentSpeed;
                 Navigator.PathPrecision = speed > 7 ? (SpeedModifer*speed)/7f : SpeedModifer;
-                if (ObjectManager.Me.Location.Distance(_loc) > 4.5)
+                if (StyxWoW.Me.Location.Distance(_loc) > 4.5)
                 {
                     if (Pathing == NavigationType.ClickToMove)
                         WoWMovement.ClickToMove(_loc);
@@ -283,7 +283,7 @@ namespace HighVoltz.Composites
             }
             if (obj != null)
             {
-                if (obj is WoWUnit && (!ObjectManager.Me.GotTarget || ObjectManager.Me.CurrentTarget != obj))
+                if (obj is WoWUnit && (!StyxWoW.Me.GotTarget || StyxWoW.Me.CurrentTarget != obj))
                 {
                     ((WoWUnit) obj).Target();
                 }
@@ -298,32 +298,32 @@ namespace HighVoltz.Composites
             switch (type)
             {
                 case MoveToType.NearestAH:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.Auctioneer);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.Auctioneer);
                     break;
                 case MoveToType.NearestBanker:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.Banker);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.Banker);
                     break;
                 case MoveToType.NearestFlight:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.Flightmaster);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.Flightmaster);
                     break;
                 case MoveToType.NearestGB:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.GuildBanker);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.GuildBanker);
                     break;
                 case MoveToType.NearestReagentVendor:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.ReagentVendor);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.ReagentVendor);
                     break;
                 case MoveToType.NearestRepair:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.Repair);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.Repair);
                     break;
                 case MoveToType.NearestVendor:
-                    npcResults = NpcQueries.GetNearestNpc(ObjectManager.Me.FactionTemplate, ObjectManager.Me.MapId,
-                                                          ObjectManager.Me.Location, UnitNPCFlags.Vendor);
+                    npcResults = NpcQueries.GetNearestNpc(StyxWoW.Me.FactionTemplate, StyxWoW.Me.MapId,
+                                                          StyxWoW.Me.Location, UnitNPCFlags.Vendor);
                     break;
                 case MoveToType.NpcByID:
                     npcResults = NpcQueries.GetNpcById(entry);

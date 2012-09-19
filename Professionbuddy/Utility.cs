@@ -108,7 +108,7 @@ namespace HighVoltz
         {
             if (BotPoi.Current.Type != PoiType.None)
                 BotPoi.Clear();
-            if (!ObjectManager.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
+            if (!StyxWoW.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
                 Mount.MountUp(() => point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
@@ -119,7 +119,7 @@ namespace HighVoltz
         {
             if (DateTime.Now.Subtract(_lastMove).TotalSeconds < 4 && _lastPoint != WoWPoint.Zero)
                 return _lastPoint;
-            return ObjectManager.Me.Location;
+            return StyxWoW.Me.Location;
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace HighVoltz
         public static int GetCarriedItemCount(uint id)
         {
             return
-                (int) ObjectManager.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+                (int) StyxWoW.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace HighVoltz
         {
             return
                 (int)
-                ObjectManager.Me.Inventory.Buyback.Items.Sum(
+                StyxWoW.Me.Inventory.Buyback.Items.Sum(
                     i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 

@@ -123,8 +123,8 @@ namespace HighVoltz.Composites
                         obj =
                             ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == Entry).OrderBy(
                                 u => u.Distance).FirstOrDefault();
-                    else if (ObjectManager.Me.GotTarget)
-                        obj = ObjectManager.Me.CurrentTarget;
+                    else if (StyxWoW.Me.GotTarget)
+                        obj = StyxWoW.Me.CurrentTarget;
                 }
                 else if (InteractType == InteractActionType.GameObject)
                     obj =

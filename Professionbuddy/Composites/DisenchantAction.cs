@@ -250,13 +250,13 @@ namespace HighVoltz.Composites
                 int skillLevel = 0;
                 // cache the skillevel for this pulse..
                 if (ActionType == DeActionType.Disenchant)
-                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
+                    skillLevel = StyxWoW.Me.GetSkill(SkillLine.Enchanting).CurrentValue;
                 else if (ActionType == DeActionType.Mill)
-                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Inscription).CurrentValue;
+                    skillLevel = StyxWoW.Me.GetSkill(SkillLine.Inscription).CurrentValue;
                 else if (ActionType == DeActionType.Prospect)
-                    skillLevel = ObjectManager.Me.GetSkill(SkillLine.Jewelcrafting).CurrentValue;
+                    skillLevel = StyxWoW.Me.GetSkill(SkillLine.Jewelcrafting).CurrentValue;
 
-                IEnumerable<WoWItem> itemQueue = from item in ObjectManager.Me.BagItems
+                IEnumerable<WoWItem> itemQueue = from item in StyxWoW.Me.BagItems
                                                  where !IsBlackListed(item) &&
                                                        !Pb.ProtectedItems.Contains(item.Entry) &&
                                                        ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||

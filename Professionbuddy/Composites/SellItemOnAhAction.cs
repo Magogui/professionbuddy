@@ -436,7 +436,7 @@ namespace HighVoltz.Composites
             {
                 Professionbuddy.Err(Pb.Strings["Error_UnableToFindAuctioneer"]);
             }
-            if (movetoPoint.Distance(ObjectManager.Me.Location) > 4.5)
+            if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
             {
                 Util.MoveTo(movetoPoint);
             }
@@ -452,7 +452,7 @@ namespace HighVoltz.Composites
             List<WoWItem> itemList;
             if (UseCategory)
             {
-                itemList = ObjectManager.Me.BagItems.
+                itemList = StyxWoW.Me.BagItems.
                     Where(i => !i.IsSoulbound && !i.IsConjured && !i.IsDisabled &&
                                !Pb.ProtectedItems.Contains(i.Entry) &&
                                i.ItemInfo.ItemClass == Category && SubCategoryCheck(i)).ToList();
@@ -472,7 +472,7 @@ namespace HighVoltz.Composites
                         uint id;
                         uint.TryParse(entry.Trim(), out id);
                         itemList =
-                            ObjectManager.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == id).
+                            StyxWoW.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == id).
                                 ToList();
                         if (itemList.Count > 0)
                         {

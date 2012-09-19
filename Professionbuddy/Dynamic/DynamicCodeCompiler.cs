@@ -260,7 +260,7 @@ namespace HighVoltz.Dynamic
 
         private const string Postfix =
             @"
-            static LocalPlayer Me = ObjectManager.Me;
+            static LocalPlayer Me = StyxWoW.Me;
             static PbProfileSettings Settings = Professionbuddy.Instance.ProfileSettings;
             public static Helpers.TradeskillHelper Alchemy { get { return Helpers.Alchemy;} }
             public static Helpers.TradeskillHelper Archaeology { get { return Helpers.Archaeology;} }
