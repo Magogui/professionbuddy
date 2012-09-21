@@ -71,13 +71,6 @@
       <If Condition="var1 != null" IgnoreCanRun="True">
         <CustomAction Code="((WoWItem)var1).UseContainerItem();" />
       </If>
-      <!--No fishing pole in bags, lets go buy one.-->
-      <If Condition="var1 == null" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Buying Fishing Pole&quot;);" />
-        <BuyItemAction NpcEntry="28742" Location="5707.309, 612.2144, 646.6996" ItemID="6256" BuyItemType="SpecificItem" Count="1" BuyAdditively="True" />
-        <WaitAction Condition="false" Timeout="3000" />
-        <CustomAction Code="Lua.DoString(&quot;EquipItemByName(6256)&quot;);" />
-      </If>
       <WaitAction Condition="false" Timeout="2000" />
     </If>
   </SubRoutine>

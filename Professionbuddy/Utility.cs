@@ -108,8 +108,8 @@ namespace HighVoltz
         {
             if (BotPoi.Current.Type != PoiType.None)
                 BotPoi.Clear();
-            if (!StyxWoW.Me.Mounted && Mount.ShouldMount(point) && Mount.CanMount())
-                Mount.MountUp(() => point);
+            if (Mount.ShouldMount(point))
+                Mount.StateMount(() => point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
             Navigator.MoveTo(point);
