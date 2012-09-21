@@ -26,30 +26,30 @@ namespace HighVoltz.Composites
         #endregion
 
         private const string BuyItemFormat =
-            "local amount={1} " +
-            "local id={0} " +
-            "local stackSize " +
-            "local index = -1 " +
-            "local quantity " +
-            "for i=1,GetMerchantNumItems() do " +
-            "local link=GetMerchantItemLink(i) " +
-            "if link then if link:find(id) then " +
-            "index=i " +
-            "stackSize=GetMerchantItemMaxStack(i) " +
-            "end " +
-            "end " +
-            "end " +
-            "if index == -1 then return -1 end " +
-            "while amount>0 do " +
-            "if amount>=stackSize then " +
-            "quantity=stackSize " +
-            "else " +
-            "quantity=amount " +
-            "end " +
-            "BuyMerchantItem(index, quantity) " +
-            "amount=amount-quantity " +
-            "end " +
-            "return 1 ";
+        @"local amount={1}    
+        local id={0}    
+        local stackSize    
+        local index = -1    
+        local quantity    
+        for i=1,GetMerchantNumItems() do    
+            local link=GetMerchantItemLink(i)    
+            if link and link:find(id) then    
+                index=i    
+                stackSize=GetMerchantItemMaxStack(i)    
+                break 
+            end    
+        end    
+        if index == -1 then return -1 end    
+        while amount>0 do    
+            if amount>=stackSize then    
+                quantity=stackSize    
+            else    
+                quantity=amount    
+            end    
+            BuyMerchantItem(index, quantity)    
+            amount=amount-quantity    
+        end    
+        return 1";
 
         private Stopwatch _concludingSw = new Stopwatch();
         // add pause at the end to give objectmanager a chance to update.
