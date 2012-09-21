@@ -471,7 +471,7 @@ namespace HighVoltz
                     WoWPoint loc = StyxWoW.Me.GotTarget
                                        ? StyxWoW.Me.CurrentTarget.Location
                                        : StyxWoW.Me.Location;
-                    return string.Format("{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
+                    return string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", loc.X, loc.Y, loc.Z);
                 }
                 return value;
             }

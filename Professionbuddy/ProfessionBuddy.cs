@@ -41,7 +41,7 @@ namespace HighVoltz
 
         private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
-        public static readonly string BotPath =  Utilities.AssemblyDirectory +  @"\Bots\" + _name;
+        public static readonly string BotPath = Utilities.AssemblyDirectory + @"\Bots\" + _name;
         private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
 
@@ -56,29 +56,29 @@ namespace HighVoltz
         public Professionbuddy()
         {
             Instance = this;
-            new Thread((ThreadStart) delegate
-                                         {
-                                             try
-                                             {
-                                                 ProcessModule mod = Process.GetCurrentProcess().MainModule;
-                                                 using (HashAlgorithm hashAlg = new SHA1Managed())
-                                                 {
-                                                     using (
-                                                         Stream file = new FileStream(mod.FileName, FileMode.Open,
-                                                                                      FileAccess.Read))
-                                                     {
-                                                         byte[] hash = hashAlg.ComputeHash(file);
-                                                         Logging.WriteDiagnostic("H: {0}", BitConverter.ToString(hash));
-                                                     }
-                                                 }
-                                                 FileVersionInfo vInfo = mod.FileVersionInfo;
-                                                 Logging.WriteDiagnostic("V: {0}", vInfo.FileVersion);
-                                             }
-                                             catch (Exception ex)
-                                             {
-                                                 Err(ex.ToString());
-                                             }
-                                         }).Start();
+            new Thread(()=>
+                           {
+                               try
+                               {
+                                   ProcessModule mod = Process.GetCurrentProcess().MainModule;
+                                   using (HashAlgorithm hashAlg = new SHA1Managed())
+                                   {
+                                       using (
+                                           Stream file = new FileStream(mod.FileName, FileMode.Open,
+                                                                        FileAccess.Read))
+                                       {
+                                           byte[] hash = hashAlg.ComputeHash(file);
+                                           Logging.WriteDiagnostic("H: {0}", BitConverter.ToString(hash));
+                                       }
+                                   }
+                                   FileVersionInfo vInfo = mod.FileVersionInfo;
+                                   Logging.WriteDiagnostic("V: {0}", vInfo.FileVersion);
+                               }
+                               catch (Exception ex)
+                               {
+                                   Err(ex.ToString());
+                               }
+                           }).Start();
             // Initialize is called when bot is started.. we need to hook these events before that.
             if (!_ctorRunOnce)
             {
@@ -549,7 +549,6 @@ namespace HighVoltz
         {
             try
             {
-
                 if (!_init)
                 {
                     Debug("Initializing ...");
@@ -562,9 +561,9 @@ namespace HighVoltz
 
                     MySettings = new ProfessionBuddySettings(
                         Path.Combine(Utilities.AssemblyDirectory, string.Format(@"Settings\{0}\{0}[{1}-{2}].xml",
-                                                                            Name, Me.Name,
-                                                                            Lua.GetReturnVal<string>(
-                                                                                "return GetRealmName()", 0)))
+                                                                                Name, Me.Name,
+                                                                                Lua.GetReturnVal<string>(
+                                                                                    "return GetRealmName()", 0)))
                         );
 
                     IsTradeSkillsLoaded = false;
@@ -885,6 +884,13 @@ namespace HighVoltz
             LogInvoker(Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
         }
 
+        public static void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor,
+                               string format, params object[] args)
+        {
+            LogInvoker(Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B), header,
+                       Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B), format, args);
+        }
+
         public static void Log(Color headerColor, string header, Color msgColor, string format, params object[] args)
         {
             LogInvoker(headerColor, header, msgColor, format, args);
@@ -912,12 +918,12 @@ namespace HighVoltz
             {
                 if (_rtbLog == null)
                     _rtbLog = (RichTextBox) Application.Current.MainWindow.FindName("rtbLog");
-                System.Windows.Media.Color headerColorMedia = System.Windows.Media.Color.FromArgb(headerColor.A,
-                                                                                                  headerColor.R,
-                                                                                                  headerColor.G,
-                                                                                                  headerColor.B);
-                System.Windows.Media.Color msgColorMedia = System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R,
-                                                                                               msgColor.G, msgColor.B);
+                Color headerColorMedia = Color.FromArgb(headerColor.A,
+                                                        headerColor.R,
+                                                        headerColor.G,
+                                                        headerColor.B);
+                Color msgColorMedia = Color.FromArgb(msgColor.A, msgColor.R,
+                                                     msgColor.G, msgColor.B);
 
                 var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) {Text = header};
                 headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColorMedia));

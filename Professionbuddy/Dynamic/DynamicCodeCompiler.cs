@@ -253,6 +253,8 @@ namespace HighVoltz.Dynamic
             using HighVoltz.Composites;
             using HighVoltz.Dynamic;
             using Bots.Gatherbuddy;
+            using Color = System.Drawing.Color;
+
         public class CodeDriver
         {
             static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
@@ -291,9 +293,14 @@ namespace HighVoltz.Dynamic
             int InGBankCount(string character, uint itemId) {return Helpers.InGBankCount(character,itemId);}
             int OnAhCount(uint itemId) {return Helpers.OnAhCount(itemId);}
             int OnAhCount(string character, uint itemId) {return Helpers.OnAhCount(character,itemId);}
-            void Log (Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
+            void Log (System.Windows.Media.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
+            void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
-            void Log(Color headerColor, string header, Color msgColor, string format, params object[] args) 
+            void Log(System.Windows.Media.Color headerColor, string header, System.Windows.Media.Color msgColor, string format, params object[] args) 
+            {
+                Professionbuddy.Log(headerColor, header, msgColor, format, args);
+            }
+            void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
             {
                 Professionbuddy.Log(headerColor, header, msgColor, format, args);
             }

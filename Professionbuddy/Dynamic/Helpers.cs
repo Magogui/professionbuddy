@@ -113,6 +113,12 @@ namespace HighVoltz.Dynamic
             Logging.Write(c, f, args);
         }
 
+        public static void Log(System.Drawing.Color c, string f, params object[] args)
+        {
+
+            Logging.Write(Color.FromArgb(c.A,c.R, c.G, c.B), f, args);
+        }
+
         public static int InbagCount(uint id)
         {
             return (int) Ingredient.GetInBagItemCount(id);
