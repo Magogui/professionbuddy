@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
+using Styx.Helpers;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
@@ -108,8 +109,8 @@ namespace HighVoltz
         {
             if (BotPoi.Current.Type != PoiType.None)
                 BotPoi.Clear();
-            if (Mount.ShouldMount(point))
-                Mount.StateMount(() => point);
+            if (CharacterSettings.Instance.UseMount && !StyxWoW.Me.Mounted && Mount.CanMount() && Mount.ShouldMount(point))
+                Mount.MountUp(() => point);
             _lastPoint = point;
             _lastMove = DateTime.Now;
             Navigator.MoveTo(point);
