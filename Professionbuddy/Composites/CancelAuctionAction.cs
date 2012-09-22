@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Styx;
@@ -79,7 +80,7 @@ namespace HighVoltz.Composites
         {
             _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
-            Properties["Location"].Value = string.Format("{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
             RefreshPropertyGrid();
         }
