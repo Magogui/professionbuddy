@@ -13,7 +13,7 @@
 	<MailPurple>True</MailPurple>
 
 	<MinLevel>1</MinLevel>
-	<MaxLevel>86</MaxLevel>
+  <MaxLevel>91</MaxLevel>
 
 	<Mailboxes>
 		<!-- Ewynn Forest -->
