@@ -147,19 +147,13 @@ namespace HighVoltz.Dynamic
                                                              }))
             {
                 var options = new CompilerParameters();
-
                 foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
                     if (!asm.GetName().Name.Contains(Professionbuddy.Instance.Name))
                         options.ReferencedAssemblies.Add(asm.Location);
                 }
 
-                // most recent assembly
-                var myAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.GetName().Name.Contains(Professionbuddy.Instance.Name))
-                    .OrderByDescending(a => new FileInfo(a.Location).CreationTime).FirstOrDefault();
-
-                options.ReferencedAssemblies.Add(myAssembly.Location);
+                options.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
 
                 // disabled due to a bug in 2.0.0.3956;
                 //options.GenerateInMemory = true; 
