@@ -814,7 +814,7 @@ namespace HighVoltz
                     {
                         if (!string.IsNullOrEmpty(kv.Key) && File.Exists(kv.Key))
                         {
-                            Log("Preloading profile {0}", kv.Key);
+                            Log("Preloading profile {0}", Path.GetFileName(kv.Key));
                             // unhook event to prevent recursive loop
                             BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
                             ProfileManager.LoadNew(kv.Key, true);
