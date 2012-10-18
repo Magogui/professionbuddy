@@ -86,7 +86,6 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Design" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Presentation" />
@@ -113,6 +112,7 @@
     <Compile Include="Dynamic\Helpers.cs" />
     <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="GlobalPBSettings.cs" />
+    <Compile Include="MultilineStringEditor.cs" />
     <Compile Include="SvnBase.cs" />
     <None Include="Guide.rtf" />
     <None Include="SVN.template" />
