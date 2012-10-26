@@ -6,8 +6,6 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using Styx.Common;
-using Styx.Helpers;
-using Color = System.Drawing.Color;
 
 namespace HighVoltz
 {
@@ -121,6 +119,3 @@ namespace HighVoltz
         }
     }
 }
-
-// QmUgY29vbCBhbmQganVzdCBidXkgdGhlIGJvdA==
-//!CompilerOption:AddRef:\u0052\u0065\u006D\u006F\u0074\u0069\u006E\u0067\u002E\u0064\u006C\u006C

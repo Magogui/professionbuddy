@@ -36,7 +36,7 @@ namespace HighVoltz
 {
     public class Professionbuddy : BotBase
     {
-        #region Declarations 
+        #region Declarations
 
         private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
@@ -55,7 +55,7 @@ namespace HighVoltz
         public Professionbuddy()
         {
             Instance = this;
-            new Thread(()=>
+            new Thread(() =>
                            {
                                try
                                {
@@ -268,7 +268,7 @@ namespace HighVoltz
             {
                 if (!MainForm.IsValid)
                 {
-                    new MainForm {TopLevel = true}.Show();
+                    new MainForm { TopLevel = true }.Show();
                     MainForm.Instance.TopLevel = true;
                 }
                 DialogResult = DialogResult.OK;
@@ -306,7 +306,7 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.RefreshTradeSkillTabs();
-                    MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
+                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                 }
             }
             catch (Exception ex)
@@ -341,7 +341,7 @@ namespace HighVoltz
                 // check if there was any tradeskills added or removed.
                 WoWSkill[] skills = SupportedTradeSkills;
                 bool changed = skills.
-                                   Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine) s.Id) == 1) !=
+                                   Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine)s.Id) == 1) !=
                                TradeSkillList.Count ||
                                skills.Length != TradeSkillList.Count;
                 if (changed)
@@ -360,7 +360,7 @@ namespace HighVoltz
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
+                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                     }
                 }
             }
@@ -405,7 +405,7 @@ namespace HighVoltz
                 if (MainForm.IsValid)
                 {
                     MainForm.Instance.InitTradeSkillTab();
-                    MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
+                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                 }
             }
             catch (Exception ex)
@@ -599,7 +599,7 @@ namespace HighVoltz
                     }
 
                     // check for Professionbuddy updates
-                    new Thread(Updater.CheckForUpdate) {IsBackground = true}.Start();
+                    new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
                     _init = true;
                 }
             }
@@ -655,7 +655,7 @@ namespace HighVoltz
                                       foreach (WoWSkill skill in SupportedTradeSkills)
                                       {
                                           Log("Adding TradeSkill {0}", skill.Name);
-                                          TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine) skill.Id);
+                                          TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
                                           if (ts != null)
                                           {
                                               TradeSkillList.Add(ts);
@@ -663,7 +663,7 @@ namespace HighVoltz
                                           else
                                           {
                                               IsTradeSkillsLoaded = false;
-                                              Log("Unable to load tradeskill {0}", (SkillLine) skill.Id);
+                                              Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
                                               return;
                                           }
                                       }
@@ -679,7 +679,7 @@ namespace HighVoltz
                               {
                                   Logging.Write(Colors.Red, ex.ToString());
                               }
-                          }, null, (long) 0, Timeout.Infinite);
+                          }, null, (long)0, Timeout.Infinite);
         }
 
         public void UpdateMaterials()
@@ -704,11 +704,11 @@ namespace HighVoltz
                                     MaterialList[ingred.ID] = MaterialList.ContainsKey(ingred.ID)
                                                                   ? MaterialList[ingred.ID] +
                                                                     (ca.CalculatedRepeat > 0
-                                                                         ? (int) ingred.Required*
+                                                                         ? (int)ingred.Required *
                                                                            (ca.CalculatedRepeat - ca.Casted)
                                                                          : 0)
                                                                   : (ca.CalculatedRepeat > 0
-                                                                         ? (int) ingred.Required*
+                                                                         ? (int)ingred.Required *
                                                                            (ca.CalculatedRepeat - ca.Casted)
                                                                          : 0);
                                 }
@@ -830,9 +830,9 @@ namespace HighVoltz
         {
             if (list == null)
                 list = new List<T>();
-            if (comp.GetType() == typeof (T))
+            if (comp.GetType() == typeof(T))
             {
-                list.Add((T) comp);
+                list.Add((T)comp);
             }
             var groupComposite = comp as GroupComposite;
             if (groupComposite != null)
@@ -916,7 +916,7 @@ namespace HighVoltz
             try
             {
                 if (_rtbLog == null)
-                    _rtbLog = (RichTextBox) Application.Current.MainWindow.FindName("rtbLog");
+                    _rtbLog = (RichTextBox)Application.Current.MainWindow.FindName("rtbLog");
                 Color headerColorMedia = Color.FromArgb(headerColor.A,
                                                         headerColor.R,
                                                         headerColor.G,
@@ -924,7 +924,7 @@ namespace HighVoltz
                 Color msgColorMedia = Color.FromArgb(msgColor.A, msgColor.R,
                                                      msgColor.G, msgColor.B);
 
-                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) {Text = header};
+                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
                 headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColorMedia));
 
                 var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
@@ -932,6 +932,11 @@ namespace HighVoltz
                 messageTR.Text = msg + Environment.NewLine;
                 messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColorMedia));
                 Logging.WriteDiagnostic(header + msg);
+                try
+                {
+                    File.AppendAllText(Logging.LogFilePath, string.Format("[{0}]{1},{2}", DateTime.Now.ToString("HH:mm:ss.fff"), header, msg));
+                }
+                catch { }
             }
             catch
             {
