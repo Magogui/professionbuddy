@@ -641,7 +641,7 @@ namespace HighVoltz
             {
                 dbTable = StyxWoW.Db[ClientDb.SkillLine];
                 dbRow = dbTable.GetRow((uint)Skill);
-                _header = StyxWoW.Memory.ReadString(new IntPtr(dbRow.GetField<uint>(5)), Encoding.ASCII);
+                _header = StyxWoW.Memory.ReadString(new IntPtr(dbRow.GetField<uint>(5)), Encoding.UTF8);
             }
             else
             {
@@ -661,11 +661,11 @@ namespace HighVoltz
                             var stringPtr = dbRow.GetField<uint>(12);
                             // if pointer in field (12) is 0 or it points to null string then use field (11)
                             if (stringPtr == 0 ||
-                                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr),Encoding.ASCII )))
+                                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8)))
                             {
                                 stringPtr = dbRow.GetField<uint>(11);
                                 if (stringPtr != 0)
-                                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
+                                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
                             }
                             break;
                         }
@@ -683,7 +683,7 @@ namespace HighVoltz
             var stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
             if (stringPtr != 0)
             {
-                getName = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
+                getName = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
             }
             return getName;
         }
@@ -992,7 +992,7 @@ namespace HighVoltz
             }
             if (stringPtr != 0)
             {
-                name = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.ASCII);
+                name = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
             }
             return name;
         }

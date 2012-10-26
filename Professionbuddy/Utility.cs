@@ -101,7 +101,7 @@ namespace HighVoltz
         {
             WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
             if (cache != null)
-                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name, Encoding.ASCII);
+                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name, Encoding.UTF8);
             return null;
         }
 
