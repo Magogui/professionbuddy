@@ -38,15 +38,12 @@ namespace HighVoltz
     {
         #region Declarations
 
-        private const string _name = "ProfessionBuddy";
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
-        public static readonly string BotPath = Utilities.AssemblyDirectory + @"\Bots\" + _name;
+        public static readonly string BotPath = GetProfessionbuddyPath();
         private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
 
-        public readonly string ProfilePath = Environment.UserName == "highvoltz"
-                                                 ? @"C:\Users\highvoltz\Desktop\Buddy\Projects\Professionbuddy\Profiles"
-                                                 : Path.Combine(BotPath, "Profiles");
+        public readonly string ProfilePath = Path.Combine(BotPath, "Profiles");
 
         private readonly bool _ctorRunOnce;
         private readonly PbProfileSettings _profileSettings = new PbProfileSettings();
@@ -60,7 +57,7 @@ namespace HighVoltz
                                try
                                {
                                    ProcessModule mod = Process.GetCurrentProcess().MainModule;
-                                   using (HashAlgorithm hashAlg = new SHA1Managed())
+                                   using (HashAlgorithm hashAlg = new SHA1CryptoServiceProvider())
                                    {
                                        using (
                                            Stream file = new FileStream(mod.FileName, FileMode.Open,
@@ -127,13 +124,11 @@ namespace HighVoltz
         #endregion
 
         #region Overrides
-
-        private bool _firstStartDone;
         private InvisiForm _ivisibleForm;
 
         public override string Name
         {
-            get { return _name; }
+            get { return "ProfessionBuddy"; }
         }
 
         public override PulseFlags PulseFlags
@@ -183,26 +178,6 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
 
-            //if (!_firstStartDone)
-            //{
-            //    try
-            //    {
-            //        if (!string.IsNullOrEmpty(_profileToLoad))
-            //        {
-            //            LoadPBProfile(_profileToLoad);
-            //            LastProfileIsHBProfile = false;
-            //        }
-            //        else if (!string.IsNullOrEmpty(MySettings.LastProfile))
-            //        {
-            //            LoadPBProfile(MySettings.LastProfile);
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Err(ex.ToString());
-            //    }
-            //    _firstStartDone = true;
-            //}
             try
             {
                 if (SecondaryBot != null)
@@ -947,6 +922,20 @@ namespace HighVoltz
         private delegate void LogDelegate(
             Color headerColor, string header, Color msgColor, string format, params object[] args);
 
+        static string GetProfessionbuddyPath()
+        {   // taken from Singular.
+            // bit of a hack, but location of source code for assembly is only.
+            var asmName = Assembly.GetExecutingAssembly().GetName().Name;
+            var len = asmName.LastIndexOf("_", StringComparison.Ordinal);
+            var folderName = asmName.Substring(0, len);
+            
+            var botsPath = Styx.Helpers.GlobalSettings.Instance.BotsPath;    
+            if (!Path.IsPathRooted(botsPath))
+            {
+                botsPath = Path.Combine(Utilities.AssemblyDirectory, botsPath);
+            }
+            return Path.Combine(botsPath, folderName);        
+        }
         #endregion
     }
 }
