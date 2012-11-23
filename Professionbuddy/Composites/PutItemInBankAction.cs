@@ -20,69 +20,72 @@ namespace HighVoltz.Composites
     {
         #region Strings
 
-        private const string GbankSlotInfo =
-            "local _,c,l=GetGuildBankItemInfo({0}, {1}) " +
-            "if c > 0 and l == nil then " +
-            "local id = tonumber(string.match(GetGuildBankItemLink({0},{1}), 'Hitem:(%d+)')) " +
-            "local maxStack = select(8,GetItemInfo(id)) " +
-            "return id,c,maxStack " +
-            "elseif c == 0 then " +
-            "return 0,0,0 " +
-            "end ";
+        private const string GbankSlotInfo = @"
+        local _,c,l=GetGuildBankItemInfo({0}, {1})  
+        if c > 0 and l == nil then  
+           local id = tonumber(string.match(GetGuildBankItemLink({0},{1}), 'Hitem:(%d+)'))  
+           local maxStack = select(8,GetItemInfo(id))  
+           return id,c,maxStack  
+        elseif c == 0 then  
+           return 0,0,0  
+        end 
+";
 
         #endregion
 
         private const long GbankItemThrottle = 1000;
 
-        private const string DepositItemInPersonalBankLuaFormat =
-            "local bagged = 0 " +
-            "local bagInfo = {{0}} " +
-            "local bag = -1 " +
-            "local i=1; " +
-            "local _,_,_,_,_,_,_,maxStack = GetItemInfo({0}) " +
-            "while bag <= 11 do " +
-            "local itemf  = GetItemFamily({0}) " +
-            "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
-            "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-            "for slot=1, GetContainerNumSlots(bag) do " +
-            "local _,c,l = GetContainerItemInfo(bag, slot) " +
-            "local id = GetContainerItemID(bag, slot) or 0 " +
-            "if c == nil then " +
-            "bagInfo[i]={{bag,slot,maxStack}} " +
-            "i=i+1 " +
-            "elseif l == nil and id == {0} and c < maxStack then " +
-            "bagInfo[i]={{bag,slot,maxStack-c}} " +
-            "i=i+1 " +
-            "end " +
-            "end " +
-            "end " +
-            "bag = bag + 1 " +
-            "if bag == 0 then bag = 5 end " +
-            "end " +
-            "i=1 " +
-            "for bag = 0,4 do " +
-            "for slot=1,GetContainerNumSlots(bag) do " +
-            "if i > #bagInfo then return end " +
-            "local id = GetContainerItemID(bag,slot) or 0 " +
-            "local _,c,l = GetContainerItemInfo(bag, slot) " +
-            "local _,_,_,_,_,_,_, maxStack = GetItemInfo(id) " +
-            "if id == {0} and l == nil then " +
-            "if c + bagged <= {1} and c <= bagInfo[i][3] then " +
-            "PickupContainerItem(bag, slot) " +
-            "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
-            "bagged = bagged + c " +
-            "else " +
-            "local cnt = {1}-bagged " +
-            "if cnt > bagInfo[i][3] then cnt = bagInfo[i][3] end " +
-            "SplitContainerItem(bag,slot, cnt) " +
-            "PickupContainerItem(bagInfo[i][1], bagInfo[i][2]) " +
-            "bagged = bagged + cnt " +
-            "end " +
-            "i=i+1 " +
-            "end " +
-            "if bagged == {1} then return end " +
-            "end " +
-            "end return ";
+        private const string DepositItemInPersonalBankLuaFormat = @"
+        local bagged = 0  
+        local bagInfo = {{0}}  
+        local bag = -1  
+        local i=1;  
+        local _,_,_,_,_,_,_,maxStack = GetItemInfo({0})  
+        ClearCursor()
+        while bag <= 11 do  
+           local itemf  = GetItemFamily({0})  
+           local fs,bfamily = GetContainerNumFreeSlots(bag)  
+           if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then  
+              for slot=1, GetContainerNumSlots(bag) do  
+                 local _,c,l = GetContainerItemInfo(bag, slot)  
+                 local id = GetContainerItemID(bag, slot) or 0  
+                 if c == nil then  
+                    bagInfo[i]={{bag,slot,maxStack}}  
+                    i=i+1  
+                 elseif l == nil and id == {0} and c < maxStack then  
+                    bagInfo[i]={{bag,slot,maxStack-c}}  
+                    i=i+1  
+                 end  
+              end  
+           end  
+           bag = bag + 1  
+           if bag == 0 then bag = 5 end  
+        end  
+        i=1  
+        for bag = 0,4 do  
+           for slot=1,GetContainerNumSlots(bag) do  
+              if i > #bagInfo then return end  
+              local id = GetContainerItemID(bag,slot) or 0  
+              local _,c,l = GetContainerItemInfo(bag, slot)  
+              local _,_,_,_,_,_,_, maxStack = GetItemInfo(id)  
+              if id == {0} and l == nil then  
+                 if c + bagged <= {1} and c <= bagInfo[i][3] then  
+                    PickupContainerItem(bag, slot)  
+                    PickupContainerItem(bagInfo[i][1], bagInfo[i][2])  
+                    bagged = bagged + c  
+                 else  
+                    local cnt = {1}-bagged  
+                    if cnt > bagInfo[i][3] then cnt = bagInfo[i][3] end  
+                    SplitContainerItem(bag,slot, cnt)  
+                    PickupContainerItem(bagInfo[i][1], bagInfo[i][2])  
+                    bagged = bagged + cnt  
+                 end  
+                 i=i+1  
+              end  
+              if bagged == {1} then return end  
+           end  
+        end return 
+";
 
         private readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
         private Dictionary<uint, int> _itemList;

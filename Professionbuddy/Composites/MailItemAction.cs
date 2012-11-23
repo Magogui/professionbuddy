@@ -22,72 +22,74 @@ namespace HighVoltz.Composites
 
     internal sealed class MailItemAction : PBAction
     {
-        private const string MailItemLuaFormat =
-            "local mailItemI =1 " +
-            "local freeBagSlots = 0 " +
-            "local amount = {1} " +
-            "local itemId = {0} " +
-            "local bagged =0 " +
-            "for i=0,NUM_BAG_SLOTS do " +
-            "freeBagSlots = freeBagSlots + GetContainerNumFreeSlots(i) " +
-            "end " +
-            "local bagInfo={{}} " +
-            "for bag = 0,NUM_BAG_SLOTS do " +
-            "for slot=1,GetContainerNumSlots(bag) do " +
-            "local id = GetContainerItemID(bag,slot) or 0 " +
-            "local _,c,l = GetContainerItemInfo(bag, slot) " +
-            "if id == itemId and l == nil then " +
-            "table.insert(bagInfo,{{bag,slot,c}}) " +
-            "end " +
-            "end " +
-            "end " +
-            "local sortF = function (a,b) " +
-            "if a == nil and b == nil or b == nil then return false end " +
-            "if a == nil or  a[3] < b[3] then return true else return false end " +
-            "end " +
-            "if #bagInfo == 0 then return -1 end " +
-            "table.sort(bagInfo,sortF) " +
-            "local bagI = #bagInfo " +
-            "while bagI > 0 do " +
-            "if GetSendMailItem(mailItemI) == nil then " +
-            "while bagInfo[bagI][3] > amount-bagged and bagI >1 do bagI = bagI - 1 end " +
-            "if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then " +
-            "PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2]) " +
-            "ClickSendMailItemButton(mailItemI) " +
-            "bagged = bagged + bagInfo[bagI][3] " +
-            "bagI = bagI - 1 " +
-            "return bagged " +
-            "else " +
-            "local cnt = bagInfo[bagI][3]-amount " +
-            "SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt) " +
-            "local bagSpaces ={{}} " + "for b=NUM_BAG_SLOTS,0,-1 do " +
-            "bagSpaces = GetContainerFreeSlots(b) " +
-            "if #bagSpaces > 0 then " +
-            "PickupContainerItem(b,bagSpaces[#bagSpaces]) " +
-            "return 0 " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "if bagged >= amount then return -1 end " +
-            "mailItemI = mailItemI + 1 " +
-            "if mailItemI >= ATTACHMENTS_MAX_SEND then " +
-            "return bagged " +
-            "end " +
-            "end " +
-            "return bagged ";
+        private const string MailItemLuaFormat = @"
+            local mailItemI =1  
+            local freeBagSlots = 0  
+            local amount = {1}  
+            local itemId = {0}  
+            local bagged =0  
+            for i=0,NUM_BAG_SLOTS do  
+               freeBagSlots = freeBagSlots + GetContainerNumFreeSlots(i)  
+            end  
+            local bagInfo={{}}  
+            for bag = 0,NUM_BAG_SLOTS do  
+               for slot=1,GetContainerNumSlots(bag) do  
+                  local id = GetContainerItemID(bag,slot) or 0  
+                  local _,c,l = GetContainerItemInfo(bag, slot)  
+                  if id == itemId and l == nil then  
+                     table.insert(bagInfo,{{bag,slot,c}})  
+                  end  
+               end  
+            end  
+            local sortF = function (a,b)  
+               if a == nil and b == nil or b == nil then return false end  
+               if a == nil or  a[3] < b[3] then return true else return false end  
+            end  
+            if #bagInfo == 0 then return -1 end  
+            table.sort(bagInfo,sortF)  
+            local bagI = #bagInfo  
+            while bagI > 0 do  
+               if GetSendMailItem(mailItemI) == nil then  
+                  while bagInfo[bagI][3] > amount-bagged and bagI >1 do bagI = bagI - 1 end  
+                  if bagInfo[bagI][3] + bagged <= amount or freeBagSlots == 0 then  
+                     PickupContainerItem(bagInfo[bagI][1], bagInfo[bagI][2])  
+                     ClickSendMailItemButton(mailItemI)  
+                     bagged = bagged + bagInfo[bagI][3]  
+                     bagI = bagI - 1  
+                     return bagged  
+                  else  
+                     local cnt = bagInfo[bagI][3]-amount  
+                     SplitContainerItem(bagInfo[bagI][1],bagInfo[bagI][2], cnt)  
+                     local bagSpaces ={{}}    for b=NUM_BAG_SLOTS,0,-1 do  
+                        bagSpaces = GetContainerFreeSlots(b)  
+                        if #bagSpaces > 0 then  
+                           PickupContainerItem(b,bagSpaces[#bagSpaces])  
+                           return 0  
+                        end  
+                     end  
+                  end  
+               end  
+               if bagged >= amount then return -1 end  
+               mailItemI = mailItemI + 1  
+               if mailItemI >= ATTACHMENTS_MAX_SEND then  
+                  return bagged  
+               end  
+            end  
+            return bagged 
+        ";
 
         // format indexs are MailRecipient=0, Mail subject=1
-        private const string MailItemsFormat =
-            "local cnt = 0 " +
-            "for i=1,ATTACHMENTS_MAX_SEND do " +
-            "if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end " +
-            "end " +
-            "if cnt >= ATTACHMENTS_MAX_SEND - 1 then " +
-            "SendMail (\"{0}\",\"{1}\",'') " +
-            "return 1 " +
-            "end " +
-            "return 0 ";
+        private const string MailItemsFormat = @"
+            local cnt = 0  
+            for i=1,ATTACHMENTS_MAX_SEND do  
+               if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end  
+            end  
+            if cnt >= ATTACHMENTS_MAX_SEND - 1 then  
+               SendMail (""{0}"",""{1}"",'')  
+               return 1  
+            end  
+            return 0 
+    ";
 
         private readonly Stopwatch _itemSplitSW = new Stopwatch();
         private Dictionary<uint, int> _itemList;

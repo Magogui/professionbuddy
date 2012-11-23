@@ -446,7 +446,7 @@ return cnt";
                     {
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(SellItemOnAhAction.ScanAHFormatLua,
+                        string lua = string.Format(SellItemOnAhAction.ScanAhFormatLua,
                                                    ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow, int.MaxValue);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);

@@ -39,9 +39,6 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        private readonly Func<WoWItem, IEnumerable<AuctionEntry>, bool> _containsItem =
-            (i, en) => en.Count(ae => ae.Id == i.Entry) > 0;
-
         private WoWPoint _loc;
         private List<AuctionEntry> _toScanItemList;
         private List<AuctionEntry> _toSellItemList;
@@ -375,12 +372,10 @@ namespace HighVoltz.Composites
                             bool enoughItemsPosted = AmountType == AmountBasedType.Amount && ae.MyAuctions >= Amount;
                             bool tooLowBuyout = !PostIfBelowMinBuyout && lowestBo < MinBuyout.TotalCopper;
 
-                            Professionbuddy.Debug("PB: PostIfBelowMinBuyout:{0} ", PostIfBelowMinBuyout,
+                            Professionbuddy.Debug("Post If Below MinBuyout:{0} ", PostIfBelowMinBuyout,
                                                   MinBuyout.TotalCopper);
-                            Professionbuddy.Debug("PB: lowestBo:{0}  MinBuyout.TotalCopper: {1}", lowestBo,
-                                                  MinBuyout.TotalCopper);
-                            Professionbuddy.Debug("PB: tooLowBuyout:{0} enoughItemsPosted: {1}", enoughItemsPosted,
-                                                  enoughItemsPosted);
+                            Professionbuddy.Debug("Lowest Buyout on AH: {0}, My Minimum Bouyout: {1}", AuctionEntry.GoldString(lowestBo),
+                                                  AuctionEntry.GoldString(MinBuyout.TotalCopper));
 
                             if (!enoughItemsPosted && !tooLowBuyout)
                             {
@@ -390,7 +385,7 @@ namespace HighVoltz.Composites
                                 Professionbuddy.Log("Skipping {0} since {1}",
                                                     ae.Name,
                                                     tooLowBuyout
-                                                        ? string.Format("lowest buyout:{0} is below MinBuyout:{1}",
+                                                        ? string.Format("lowest buyout:{0} is below my MinBuyout:{1}",
                                                                         AuctionEntry.GoldString(lowestBo), MinBuyout)
                                                         : string.Format(
                                                             "{0} items from me are already posted. Max amount is {1}",
@@ -454,12 +449,11 @@ namespace HighVoltz.Composites
             if (UseCategory)
             {
                 itemList = StyxWoW.Me.BagItems.
-                    Where(i => !i.IsSoulbound && !i.IsConjured && !i.IsDisabled &&
-                               !Pb.ProtectedItems.Contains(i.Entry) &&
+                    Where(i => !i.IsSoulbound && !i.IsConjured && !i.IsDisabled && !i.IsGiftWrapped &&
                                i.ItemInfo.ItemClass == Category && SubCategoryCheck(i)).ToList();
                 foreach (WoWItem item in itemList)
                 {
-                    if (!_containsItem(item, tmpItemlist))
+                    if (tmpItemlist.All(ae => ae.Id != item.Entry))
                         tmpItemlist.Add(new AuctionEntry(item.Name, item.Entry, 0, 0));
                 }
             }
@@ -572,58 +566,65 @@ namespace HighVoltz.Composites
         #region Auction House
 
         // indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow, {4}=MaxStackSize
-        public const string ScanAHFormatLua =
-            "local A,totalA= GetNumAuctionItems('list') " +
-            "local me = GetUnitName('player') " +
-            "local auctionInfo = {{{0},{1}}} " +
-            "for index=1, A do " +
-            "local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) " +
-            "if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then " +
-            "auctionInfo[1] = floor(buyout/cnt) " +
-            "end " +
-            "if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end " +
-            "end " +
-            "return unpack(auctionInfo) ";
+        public const string ScanAhFormatLua = @"
+            local A,totalA= GetNumAuctionItems('list')
+            local me = GetUnitName('player') 
+            local auctionInfo = {{{0},{1}}} 
+            for index=1, A do 
+                local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) 
+                if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then 
+                    auctionInfo[1] = floor(buyout/cnt) 
+                end 
+                if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end 
+            end 
+            return unpack(auctionInfo)
+";
 
-        private const string SellOnAHLuaFormat =
-            "local itemID = {0} " +
-            "local amount = {1} " +
-            "local bid = {3} " +
-            "local bo = {4} " +
-            "local runtime = {5} " +
-            "local stack = {2} " +
-            "local sold = 0 " +
-            "local leftovers = 0 " +
-            "local numItems = GetItemCount(itemID) " +
-            "if numItems == 0 then return -1 end " +
-            "if AuctionProgressFrame:IsVisible() == nil then " +
-            "AuctionFrameTab3:Click() " +
-            "local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID) " +
-            "if maxStack < stack then stack = maxStack end " +
-            "if amount * stack > numItems then " +
-            "amount = floor(numItems/stack) " +
-            "if amount <= 0 then " +
-            "amount = 1 " +
-            "stack = numItems " +
-            "else " +
-            "leftovers = numItems-(amount*stack) " +
-            "end " +
-            "end " +
-            "for bag = 0,4 do " +
-            "for slot=GetContainerNumSlots(bag),1,-1 do " +
-            "local id = GetContainerItemID(bag,slot) " +
-            "local _,c,l = GetContainerItemInfo(bag, slot) " +
-            "if id == itemID and l == nil then " +
-            "PickupContainerItem(bag, slot) " +
-            "ClickAuctionSellItemButton() " +
-            "StartAuction(bid*stack, bo*stack, runtime,stack,amount) " +
-            "return leftovers " +
-            "end " +
-            "end " +
-            "end " +
-            "else " +
-            "return -1 " +
-            "end ";
+        private const string SellOnAhLuaFormat = @"
+            local itemID = {0}  
+            local amount = {1}  
+            local bid = {3}  
+            local bo = {4}  
+            local runtime = {5}  
+            local stack = {2}  
+            local sold = 0  
+            local leftovers = 0  
+            local numItems = GetItemCount(itemID)  
+            ClearCursor()
+            if numItems == 0 then return -1 end  
+            if AuctionProgressFrame:IsVisible() == nil then  
+                AuctionFrameTab3:Click()  
+                local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID)  
+                if maxStack < stack then stack = maxStack end  
+                if amount * stack > numItems then  
+                    amount = floor(numItems/stack)  
+                    if amount <= 0 then  
+                        amount = 1  
+                        stack = numItems  
+                    else  
+                        leftovers = numItems-(amount*stack)  
+                    end  
+                end  
+                for bag = 0,4 do  
+                    for slot=GetContainerNumSlots(bag),1,-1 do  
+                        local id = GetContainerItemID(bag,slot)  
+                        local _,c,l = GetContainerItemInfo(bag, slot)  
+                        if id == itemID then print ('item: '..itemID..' found, lock: ',l) end
+                        if id == itemID and l == nil then  
+                            print ('picking up item in bag '..bag..' and slot '..slot)
+                            PickupContainerItem(bag, slot)  
+                            ClickAuctionSellItemButton()  
+                            StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
+                            print ('StartAuction('..bid*stack, bo*stack, runtime,stack,amount..')')
+                            return leftovers  
+                        end  
+                    end 
+                end 
+            else
+                print ('auction in progress')
+                return -1 
+            end 
+";
 
         private readonly Stopwatch _queueTimer = new Stopwatch();
         private int _leftOver;
@@ -653,7 +654,7 @@ namespace HighVoltz.Composites
                     {
                         _queueTimer.Reset();
                         _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(ScanAHFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id,
+                        string lua = string.Format(ScanAhFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id,
                                                    IgnoreStackSizeBelow, StackSize);
                         List<string> retVals = Lua.GetReturnValues(lua);
                         uint.TryParse(retVals[0], out ae.LowestBo);
@@ -670,7 +671,6 @@ namespace HighVoltz.Composites
             // reset to default values in preparations for next scan
             if (scanned)
             {
-                Professionbuddy.Debug("lowest buyout {0}", ae.LowestBo);
                 _queueTimer.Stop();
                 _queueTimer.Reset();
                 _totalAuctions = 0;
@@ -687,7 +687,7 @@ namespace HighVoltz.Composites
                 int amount = AmountType == AmountBasedType.Everything
                                  ? (_leftOver == 0 ? int.MaxValue : _leftOver)
                                  : (_leftOver == 0 ? subAmount : _leftOver);
-                string lua = string.Format(SellOnAHLuaFormat, ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int) RunTime);
+                string lua = string.Format(SellOnAhLuaFormat, ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int) RunTime);
                 var ret = Lua.GetReturnVal<int>(lua, 0);
                 if (ret != -1) // returns -1 if waiting for auction to finish posting..
                     _leftOver = ret;

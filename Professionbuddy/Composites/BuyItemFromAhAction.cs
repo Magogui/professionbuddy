@@ -22,8 +22,6 @@ namespace HighVoltz.Composites
         public string Name; // localized name
     }
 
-    #region BuyItemFromAhAction
-
     internal sealed class BuyItemFromAhAction : PBAction
     {
         #region ItemType enum
@@ -37,31 +35,32 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        private const string BuyFromAHLuaFormat =
-            "local A,totalA= GetNumAuctionItems('list') " +
-            "local amountBought={0} " +
-            "local want={1} " +
-            "local each={3} " +
-            "local useBid={4} " +
-            "local buyPrice=0 " +
-            "for index=1, A do " +
-            "local name,_,cnt,_,_,_,_,minBid,minInc,buyout,bidNum,isHighBidder,owner,sold,id=GetAuctionItemInfo('list', index) " +
-            "if useBid == 1 and buyout > each*cnt and isHighBidder == nil then " +
-            "if bidNum == nil then " +
-            "buyPrice = minBid + minInc " +
-            "else " +
-            "buyPrice = bidNum + minInc " +
-            "end " +
-            "else " +
-            "buyPrice = buyout " +
-            "end " +
-            "if id == {2} and buyPrice > 0 and buyPrice <= each*cnt and amountBought < want then " +
-            "amountBought = amountBought + cnt " +
-            "PlaceAuctionBid('list', index,buyPrice) " +
-            "end " +
-            "if amountBought >=  want then return -1 end " +
-            "end " +
-            "return amountBought ";
+        private const string BuyFromAHLuaFormat = @"
+        local A,totalA= GetNumAuctionItems('list')  
+        local amountBought={0}  
+        local want={1}  
+        local each={3}  
+        local useBid={4}  
+        local buyPrice=0  
+        for index=1, A do  
+           local name,_,cnt,_,_,_,_,minBid,minInc,buyout,bidNum,isHighBidder,owner,sold,id=GetAuctionItemInfo('list', index)  
+           if useBid == 1 and buyout > each*cnt and isHighBidder == nil then  
+              if bidNum == nil then  
+                 buyPrice = minBid + minInc  
+              else  
+                 buyPrice = bidNum + minInc  
+              end  
+           else  
+              buyPrice = buyout  
+           end  
+           if id == {2} and buyPrice > 0 and buyPrice <= each*cnt and amountBought < want then  
+              amountBought = amountBought + cnt  
+              PlaceAuctionBid('list', index,buyPrice)  
+           end  
+           if amountBought >=  want then return -1 end  
+        end  
+        return amountBought  
+";
 
         private int _counter;
         private WoWPoint _loc;
@@ -447,5 +446,4 @@ namespace HighVoltz.Composites
         }
     }
 
-    #endregion
 }

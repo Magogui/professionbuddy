@@ -872,7 +872,7 @@ namespace HighVoltz
 
         public static void Debug(string format, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.DodgerBlue, string.Format("PB {0}:", Instance.Version) + format, args);
+            Logging.WriteDiagnostic(Colors.DodgerBlue, string.Format("PB {0}: ", Instance.Version) + format, args);
         }
 
         private static void LogInvoker(Color headerColor, string header, Color msgColor, string format,

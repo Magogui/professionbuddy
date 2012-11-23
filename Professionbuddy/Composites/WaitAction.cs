@@ -92,7 +92,7 @@ namespace HighVoltz.Composites
                     {
                         _timeout.Stop();
                         _timeout.Reset();
-                        Professionbuddy.Debug("Wait Until {0} Completed", Condition);
+                        Professionbuddy.Debug("Wait for {0} or until {1} Completed", TimeSpan.FromMilliseconds(Timeout), Condition);
                         IsDone = true;
                     }
                     else

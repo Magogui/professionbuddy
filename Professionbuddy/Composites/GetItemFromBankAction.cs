@@ -29,78 +29,80 @@ namespace HighVoltz.Composites
 
         private const long GbankItemThrottle = 1000;
 
-        private const string WithdrawItemFromGBankLuaFormat =
-            "local tabnum = GetNumGuildBankTabs() " +
-            "local bagged = 0 " +
-            "local itemID = {0} " +
-            "local  sawItem = 0  " +
-            "local amount = {1} " +
-            "for tab = 1,tabnum do " +
-            "local _,_,iv,_,nw, rw = GetGuildBankTabInfo(tab)  " +
-            "if iv and (nw > 0 or nw == -1) and (rw == -1 or rw > 0) then " +
-            "SetCurrentGuildBankTab(tab) " +
-            "for slot = 1, 98 do " +
-            "local _,c,l=GetGuildBankItemInfo(tab, slot) " +
-            "local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)')) " +
-            "if l == nil and c > 0 and (id == itemID or itemID == 0) then " +
-            "sawItem = 1 " +
-            "if c  <= amount then " +
-            "AutoStoreGuildBankItem(tab, slot) " +
-            "return c " +
-            "else " +
-            "local itemf  = GetItemFamily(id) " +
-            "for bag =0 ,NUM_BAG_SLOTS do " +
-            "local fs,bfamily = GetContainerNumFreeSlots(bag) " +
-            "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-            "local freeSlots = GetContainerFreeSlots(bag) " +
-            "SplitGuildBankItem(tab, slot, amount) " +
-            "PickupContainerItem(bag, freeSlots[1]) " +
-            "return amount-c " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "if sawItem == 0 then return -1 else return bagged end ";
+        private const string WithdrawItemFromGBankLuaFormat = @"
+            local tabnum = GetNumGuildBankTabs()  
+            local bagged = 0  
+            local itemID = {0}  
+            local  sawItem = 0   
+            local amount = {1}  
+            for tab = 1,tabnum do  
+               local _,_,iv,_,nw, rw = GetGuildBankTabInfo(tab)   
+               if iv and (nw > 0 or nw == -1) and (rw == -1 or rw > 0) then  
+                  SetCurrentGuildBankTab(tab)  
+                  for slot = 1, 98 do  
+                     local _,c,l=GetGuildBankItemInfo(tab, slot)  
+                     local id = tonumber(string.match(GetGuildBankItemLink(tab, slot) or '','|Hitem:(%d+)'))  
+                     if l == nil and c > 0 and (id == itemID or itemID == 0) then  
+                        sawItem = 1  
+                        if c  <= amount then  
+                           AutoStoreGuildBankItem(tab, slot)  
+                           return c  
+                        else  
+                           local itemf  = GetItemFamily(id)  
+                           for bag =0 ,NUM_BAG_SLOTS do  
+                              local fs,bfamily = GetContainerNumFreeSlots(bag)  
+                              if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then  
+                                 local freeSlots = GetContainerFreeSlots(bag)  
+                                 SplitGuildBankItem(tab, slot, amount)  
+                                 PickupContainerItem(bag, freeSlots[1])  
+                                 return amount-c  
+                              end  
+                           end  
+                        end  
+                     end  
+                  end  
+               end  
+            end  
+            if sawItem == 0 then return -1 else return bagged end   
+";
 
-        private const string WithdrawItemFromPersonalBankLuaFormat =
-            "local numSlots = GetNumBankSlots() " +
-            "local splitUsed = 0 " +
-            "local bagged = 0 " +
-            "local amount = {1} " +
-            "local itemID = {0} " +
-            "local bag1 = numSlots + 4  " +
-            "while bag1 >= -1 do " +
-            "if bag1 == 4 then " +
-            "bag1 = -1 " +
-            "end " +
-            "for slot1 = 1, GetContainerNumSlots(bag1) do " +
-            "local _,c,l=GetContainerItemInfo(bag1, slot1) " +
-            "local id = GetContainerItemID(bag1,slot1) " +
-            "if l ~= 1 and c and c > 0 and (id == itemID or itemID == 0) then " +
-            "if c + bagged <= amount  then " +
-            "UseContainerItem(bag1,slot1) " +
-            "bagged = bagged + c " +
-            "else " +
-            "local itemf  = GetItemFamily(id) " +
-            "for bag2 = 0,4 do " +
-            "local fs,bfamily = GetContainerNumFreeSlots(bag2) " +
-            "if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then " +
-            "local freeSlots = GetContainerFreeSlots(bag2) " +
-            "SplitContainerItem(bag1,slot1,amount - bagged) " +
-            "if bag2 == 0 then PutItemInBackpack() else PutItemInBag(bag2) end " +
-            "return " +
-            "end " +
-            "bag2 = bag2 -1 " +
-            "end " +
-            "end " +
-            "if bagged >= amount then return end " +
-            "end " +
-            "end " +
-            "bag1 = bag1 -1 " +
-            "end ";
+        private const string WithdrawItemFromPersonalBankLuaFormat = @"
+            local numSlots = GetNumBankSlots()  
+            local splitUsed = 0  
+            local bagged = 0  
+            local amount = {1}  
+            local itemID = {0}  
+            local bag1 = numSlots + 4   
+            while bag1 >= -1 do  
+               if bag1 == 4 then  
+                  bag1 = -1  
+               end  
+               for slot1 = 1, GetContainerNumSlots(bag1) do  
+                  local _,c,l=GetContainerItemInfo(bag1, slot1)  
+                  local id = GetContainerItemID(bag1,slot1)  
+                  if l ~= 1 and c and c > 0 and (id == itemID or itemID == 0) then  
+                     if c + bagged <= amount  then  
+                        UseContainerItem(bag1,slot1)  
+                        bagged = bagged + c  
+                     else  
+                        local itemf  = GetItemFamily(id)  
+                        for bag2 = 0,4 do  
+                           local fs,bfamily = GetContainerNumFreeSlots(bag2)  
+                           if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then  
+                              local freeSlots = GetContainerFreeSlots(bag2)  
+                              SplitContainerItem(bag1,slot1,amount - bagged)  
+                              if bag2 == 0 then PutItemInBackpack() else PutItemInBag(bag2) end  
+                              return  
+                           end  
+                           bag2 = bag2 -1  
+                        end  
+                     end  
+                     if bagged >= amount then return end  
+                  end  
+               end  
+               bag1 = bag1 -1  
+            end  
+";
 
         private static Stopwatch _queueServerSW;
         private readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();

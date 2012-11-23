@@ -13,9 +13,6 @@ using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-
-    #region GetMailAction
-
     internal sealed class GetMailAction : PBAction
     {
         #region GetMailActionType enum
@@ -28,53 +25,55 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        private const string MailFormat =
-            "local numItems,totalItems = GetInboxNumItems() " +
-            "local foundMail=0 " +
-            "local newMailCheck = {0} " +
-            "for index=numItems,1,-1 do " +
-            "local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText,canReply,IsGM=GetInboxHeaderInfo(index) " +
-            "if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and canReply == nil and IsGM == nil then " +
-            "DeleteInboxItem(index) " +
-            "end " +
-            "if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then " +
-            "for i=1,ATTACHMENTS_MAX_RECEIVE do " +
-            "if gold and gold > 0 then TakeInboxMoney(index) foundMail = 1 break end " +
-            "if GetInboxItem(index,i) ~= nil then " +
-            "TakeInboxItem (index,i) " +
-            "foundMail = 1 " +
-            "break " +
-            "end " +
-            "end " +
-            "end " +
-            "if foundMail == 1 then break end " +
-            "end " +
-            "local beans = BeanCounterMail and BeanCounterMail:IsVisible() " +
-            "if foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end ";
+        private const string MailFormat = @"
+            local numItems,totalItems = GetInboxNumItems()  
+            local foundMail=0  
+            local newMailCheck = {0}  
+            for index=numItems,1,-1 do  
+               local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText,canReply,IsGM=GetInboxHeaderInfo(index)  
+               if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and canReply == nil and IsGM == nil then  
+                  DeleteInboxItem(index)  
+               end  
+               if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then  
+                  for i=1,ATTACHMENTS_MAX_RECEIVE do  
+                     if gold and gold > 0 then TakeInboxMoney(index) foundMail = 1 break end  
+                     if GetInboxItem(index,i) ~= nil then  
+                        TakeInboxItem (index,i)  
+                        foundMail = 1  
+                        break  
+                     end  
+                  end  
+               end  
+               if foundMail == 1 then break end  
+            end  
+            local beans = BeanCounterMail and BeanCounterMail:IsVisible()  
+            if foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 ) and totalItems == numItems and beans ~= 1 then return 1 else return 0 end   
+        ";
 
         // format index. {0} = ItemID {1}=CheckForNewMail which can be only 1 or 0
-        private const string MailByIdFormat =
-            "local numItems,totalItems = GetInboxNumItems() " +
-            "local foundMail=0 " +
-            "local newMailCheck = {1} " +
-            "for index=numItems,1,-1 do " +
-            "local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index) " +
-            "if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then " +
-            "DeleteInboxItem(index) " +
-            "end " +
-            "if cod == 0 and itemCnt and itemCnt >0  then " +
-            "for i2=1, ATTACHMENTS_MAX_RECEIVE do " +
-            "local itemlink = GetInboxItemLink(index, i2) " +
-            "if itemlink ~= nil and string.find(itemlink,'{0}') then " +
-            "foundMail = foundMail + 1 " +
-            "TakeInboxItem(index, i2) " +
-            "break " +
-            "end " +
-            "end " +
-            "end " +
-            "if foundMail == 1 then break end " +
-            "end " +
-            "if (foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 )) or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end ";
+        private const string MailByIdFormat = @"
+            local numItems,totalItems = GetInboxNumItems()  
+            local foundMail=0  
+            local newMailCheck = {1}  
+            for index=numItems,1,-1 do  
+               local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index)  
+               if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then  
+                  DeleteInboxItem(index)  
+               end  
+               if cod == 0 and itemCnt and itemCnt >0  then  
+                  for i2=1, ATTACHMENTS_MAX_RECEIVE do  
+                     local itemlink = GetInboxItemLink(index, i2)  
+                     if itemlink ~= nil and string.find(itemlink,'{0}') then  
+                        foundMail = foundMail + 1  
+                        TakeInboxItem(index, i2)  
+                        break  
+                     end  
+                  end  
+               end  
+               if foundMail == 1 then break end  
+            end  
+            if (foundMail == 0 and ((newMailCheck == 1 and HasNewMail() == nil) or newMailCheck ==0 )) or (foundMail == 0 and (numItems == 50 and totalItems >= 50)) then return 1 else return 0 end  
+";
 
         private Stopwatch _concludingSW = new Stopwatch();
         private List<uint> _idList;
@@ -359,5 +358,4 @@ namespace HighVoltz.Composites
         }
     }
 
-    #endregion
 }
