@@ -5,8 +5,10 @@
     <CustomAction Code="MyErr(&quot;You need to move to Dalaran&quot;);" />
     <CustomAction Code="TreeRoot.Stop();" />
   </If>
-  <CustomAction Code="MyLog(&quot;Leveling Fishing to 525&quot;);" />
-  <CustomAction Code="" />
+  <CustomAction Code="MyLog(&quot;Leveling Fishing to 600&quot;);" />
+  <If Condition="System.AppDomain.CurrentDomain.GetData(&quot;PB Fish LootHandler&quot;)  == null" IgnoreCanRun="True">
+    <CustomAction Code="MyLog(&quot;Setting custom loot handler&quot;);&#xD;&#xA;AppDomain.CurrentDomain.SetData(&quot;PB Fish LootHandler&quot;, new LuaEventHandlerDelegate((o, args) =&gt; LootFrame.Instance.LootAll()));&#xD;&#xA;Lua.Events.AttachEvent(&quot;LOOT_OPENED&quot;, (LuaEventHandlerDelegate)AppDomain.CurrentDomain.GetData(&quot;PB Fish LootHandler&quot;));" />
+  </If>
   <If Condition="SecondaryBot.Name != &quot;Combat Bot&quot;" IgnoreCanRun="True">
     <ChangeBotAction BotName="Combat Bot" />
   </If>
@@ -20,7 +22,7 @@
   <CustomAction Code="Lua.DoString(&quot;SetCVar(\&quot;AutoLootDefault\&quot;, 1)&quot;);" />
   <CallSubRoutine SubRoutineName="EquipFishingPole" />
   <!--Equip a fishing pole-->
-  <While Condition="Fishing.Level &lt; 525" IgnoreCanRun="True">
+  <While Condition="Fishing.Level &lt; 600" IgnoreCanRun="True">
     <!--Train if our fishing level is 25 or less from current max level -->
     <!--Or if max level is 0 or bags are full then we vendor-->
     <If Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Me.BagsFull" IgnoreCanRun="True">
@@ -40,8 +42,8 @@
     </If>
     <CustomAction Code="Fish();" />
   </While>
-  <If Condition="Fishing.Level == 525" IgnoreCanRun="True">
-    <CustomAction Code="Log(&quot;Level 525 fishing!! Logging out&quot;);" />
+  <If Condition="Fishing.Level == 600" IgnoreCanRun="True">
+    <CustomAction Code="Log(&quot;Level 600 fishing!! Logging out&quot;);" />
     <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
   </If>
   <SubRoutine SubRoutineName="MoveToFishingSpot">
@@ -65,10 +67,10 @@
   <SubRoutine SubRoutineName="EquipFishingPole">
     <If Condition="Me.Inventory.Equipped.MainHand == null || Me.Inventory.Equipped.MainHand.ItemInfo.WeaponClass != WoWItemWeaponClass.FishingPole" IgnoreCanRun="True">
       <CustomAction Code="PulseSW.Reset();" />
-      <CustomAction Code="MyLog(&quot;Equipting Fishing Pole&quot;);" />
       <CustomAction Code="var1 = Me.BagItems.FirstOrDefault(i =&gt; i.ItemInfo.WeaponClass == WoWItemWeaponClass.FishingPole);" />
       <!--We have a fishing pole in bags, use it.-->
       <If Condition="var1 != null" IgnoreCanRun="True">
+        <CustomAction Code="MyLog(&quot;Equiping Fishing Pole&quot;);" />
         <CustomAction Code="((WoWItem)var1).UseContainerItem();" />
       </If>
       <WaitAction Condition="false" Timeout="2000" />
@@ -76,8 +78,8 @@
   </SubRoutine>
   <Declaration Code="Stopwatch PulseSW = new Stopwatch();" />
   <Declaration Code="DateTime CastTimeStamp = DateTime.Now;" />
-  <Declaration Code="void MyErr(string fmt,params object[] args)&#xD;&#xA;{&#xD;&#xA;    Log(Colors.Green,&quot;Fishing1-525: &quot;,Colors.Red,fmt,args);&#xD;&#xA;}" />
-  <Declaration Code="void MyLog(string fmt,params object[] args)&#xD;&#xA;{&#xD;&#xA;    Log(Colors.Green,&quot;Fishing1-525: &quot;,Colors.LightGreen,fmt,args);&#xD;&#xA;}" />
+  <Declaration Code="void MyErr(string fmt,params object[] args)&#xD;&#xA;{&#xD;&#xA;    Log(Colors.Green,&quot;Fishing1-600: &quot;,Colors.Red,fmt,args);&#xD;&#xA;}" />
+  <Declaration Code="void MyLog(string fmt,params object[] args)&#xD;&#xA;{&#xD;&#xA;    Log(Colors.Green,&quot;Fishing1-600: &quot;,Colors.LightGreen,fmt,args);&#xD;&#xA;}" />
   <Declaration Code="void Fish()&#xD;&#xA;{&#xD;&#xA;  if (!PulseSW.IsRunning)&#xD;&#xA;    PulseSW.Start();&#xD;&#xA;  using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;  {&#xD;&#xA;  if (PulseSW.ElapsedMilliseconds &gt;= 1000)&#xD;&#xA;  { &#xD;&#xA;    MyErr(&quot;Warning: It took {0} milliseconds to pulse.\nThis can cause missed bites. To fix try disabling all plugins&quot;,&#xD;&#xA;        PulseSW.ElapsedMilliseconds); &#xD;&#xA;  }&#xD;&#xA;  PulseSW.Reset(); PulseSW.Start();&#xD;&#xA;  try&#xD;&#xA;  {&#xD;&#xA;    var bobber = ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().&#xD;&#xA;           FirstOrDefault(u =&gt; u.SubType == WoWGameObjectType.FishingNode &amp;&amp; u.CreatedByGuid == Me.Guid);&#xD;&#xA;    if (bobber != null &amp;&amp; bobber.IsValid &amp;&amp; bobber.AnimationState == 1)&#xD;&#xA;    {&#xD;&#xA;       bobber.Interact();&#xD;&#xA;    }&#xD;&#xA;    else if (bobber == null &amp;&amp; !Me.IsCasting &amp;&amp; DateTime.Now -  CastTimeStamp &gt;= TimeSpan.FromSeconds(1))&#xD;&#xA;    {&#xD;&#xA;      TreeRoot.StatusText= string.Format(&quot;Fishing level: {0}&quot;,Fishing.Level);&#xD;&#xA;       SpellManager.Cast(&quot;Fishing&quot;);&#xD;&#xA;       CastTimeStamp = DateTime.Now;&#xD;&#xA;    }&#xD;&#xA;  }&#xD;&#xA;  catch(Exception ex){MyErr(ex.ToString());}&#xD;&#xA;  }&#xD;&#xA;}" />
   <Declaration Code="bool IsFacing(float dirInRadians)&#xD;&#xA;{&#xD;&#xA;  var facePoint = WoWPoint.RayCast(Me.Location, dirInRadians, 1f);&#xD;&#xA;  return WoWMathHelper.IsFacing(Me.Location, Me.RenderFacing, facePoint,0.5f);&#xD;&#xA;}&#xD;&#xA;" />
 </Professionbuddy>
