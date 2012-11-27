@@ -147,7 +147,6 @@ namespace HighVoltz.Dynamic
                 var options = new CompilerParameters();
                 foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    asm.GetTypes();
                     if (!asm.GetName().Name.Contains(Professionbuddy.Instance.Name) && !asm.IsDynamic)
                         options.ReferencedAssemblies.Add(asm.Location);
                 }
