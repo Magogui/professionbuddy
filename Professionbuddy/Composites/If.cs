@@ -63,7 +63,6 @@ namespace HighVoltz.Composites
 
             CanRunDelegate = c => false;
             Condition = "";
-            CompileError = "";
             Properties["CompileError"].Show = false;
 
             Properties["Condition"].PropertyChanged += Condition_PropertyChanged;

@@ -430,10 +430,12 @@ namespace HighVoltz
                                                    LoadPBProfile(ProfileManager.XmlLocation);
                                                    if (MainForm.IsValid)
                                                    {
+                                                       MainForm.Instance.ActionTree.SuspendLayout();
                                                        if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
                                                            MainForm.Instance.AddProfileSettingsTab();
                                                        else
                                                            MainForm.Instance.RemoveProfileSettingsTab();
+                                                       MainForm.Instance.ActionTree.ResumeLayout();
                                                    }
                                                    TreeRoot.Start();
                                                }

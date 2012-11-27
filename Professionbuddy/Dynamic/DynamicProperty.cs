@@ -24,6 +24,7 @@ namespace HighVoltz.Dynamic
             Code = code;
             _expressionMethod = context => default(T);
             AttachedComposite = parent;
+            _compileError = "";
         }
 
         public T Value
@@ -49,10 +50,10 @@ namespace HighVoltz.Dynamic
                             ((PBAction) AttachedComposite).Color = value != ""
                                                                        ? Color.Red
                                                                        : Color.Black;
-                            MainForm.Instance.RefreshActionTree(AttachedComposite);
+                   //         MainForm.Instance.RefreshActionTree(AttachedComposite);
                         }
-                        else
-                            MainForm.Instance.RefreshActionTree();
+                      //  else
+                     //       MainForm.Instance.RefreshActionTree();
                     }
                 }
                 if (MainForm.IsValid)

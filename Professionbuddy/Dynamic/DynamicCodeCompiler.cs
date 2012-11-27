@@ -118,7 +118,6 @@ namespace HighVoltz.Dynamic
             if (cSharpCode != null)
             {
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString(CultureInfo.InvariantCulture)] = cSharpCode;
-                cSharpCode.CompileError = "";
             }
             // check for DynamicExpression proprerties
             List<IDynamicProperty> dynProps = (from prop in comp.GetType().GetProperties()
@@ -127,7 +126,6 @@ namespace HighVoltz.Dynamic
             foreach (IDynamicProperty dynProp in dynProps)
             {
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString(CultureInfo.InvariantCulture)] = dynProp;
-                dynProp.CompileError = "";
             }
 
             var groupComposite = comp as GroupComposite;

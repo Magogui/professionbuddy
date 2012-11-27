@@ -24,7 +24,6 @@ namespace HighVoltz.Composites
                                                       new ReadOnlyAttribute(true),
                                                       new DisplayNameAttribute(
                                                           Pb.Strings["Action_CSharpAction_CompileError"]));
-            CompileError = "";
             Properties["CompileError"].Show = false;
             Properties["CompileError"].PropertyChanged += CompileErrorPropertyChanged;
             // ReSharper restore DoNotCallOverridableMethodsInConstructor

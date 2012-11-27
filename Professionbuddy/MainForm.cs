@@ -215,10 +215,10 @@ namespace HighVoltz
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ProfileManager.LoadNew(openFileDialog.FileName, true);
-                if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
-                    AddProfileSettingsTab();
-                else
-                    RemoveProfileSettingsTab();
+              //  if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+             //       AddProfileSettingsTab();
+              //  else
+              //      RemoveProfileSettingsTab();
             }
         }
 
@@ -407,10 +407,10 @@ namespace HighVoltz
                 // Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
                 ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-                if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
-                    AddProfileSettingsTab();
-                else
-                    RemoveProfileSettingsTab();
+               // if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+               //     AddProfileSettingsTab();
+              //  else
+              //      RemoveProfileSettingsTab();
             }
         }
 
@@ -509,7 +509,7 @@ namespace HighVoltz
                 _profileWatcher.EnableRaisingEvents = true;
 
                 // used by the dev to display the 'Secret button', a button that dumps some debug info of the Task list.
-                if (Environment.UserName == "highvoltz")
+                if (Environment.UserName == "high")
                 {
                     toolStripSecretButton.Visible = true;
                 }

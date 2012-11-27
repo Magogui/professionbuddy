@@ -45,6 +45,7 @@
     <!--enable Herb in GB2 if enabled in profile Settings and Herb MaxLevel <= Mining.MaxLevel-->
     <CustomAction Code="if ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel != HerbMaxLevel &amp;&amp;&#xD;&#xA;  (HerbMaxLevel &lt;= MiningMaxLevel  || !(bool)Settings[&quot;Mining&quot;] ) )&#xD;&#xA;{&#xD;&#xA;   herb = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;&#xD;&#xA;}" />
     <CustomAction Code="LowestMinLevel = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? (MiningMaxLevel &lt; HerbMaxLevel ? MiningMaxLevel : HerbMaxLevel):(bool)Settings[&quot;Mining&quot;] ? MiningMaxLevel :HerbMaxLevel;" />
+    <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.HasValue &amp;&amp; skillLevel  &gt;= (int)requiredSkillLevel.Value &amp;&amp; node.IsHerb )&#xD;&#xA;    {&#xD;&#xA;      var infoBlock = StyxWoW.Cache[Styx.WoWInternals.WoWCache.CacheDb.GameObject].GetInfoBlockById(node.Entry);&#xD;&#xA;      if (infoBlock != null)&#xD;&#xA;      {&#xD;&#xA;        var greyLevel = infoBlock.GameObject.Properties[24];&#xD;&#xA;        if (greyLevel == 0 || skillLevel  &gt;= greyLevel)&#xD;&#xA;        {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;         }&#xD;&#xA;       }  &#xD;&#xA;    }&#xD;&#xA;  }&#xD;&#xA;}" />
     <!--Herb/Mining 1-300-->
     <If Condition=" LowestMinLevel &lt;=300" IgnoreCanRun="True">
       <If Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
@@ -62,34 +63,34 @@
         </If>
         <If Condition=" LowestMinLevel ==75" IgnoreCanRun="True">
           <!--Mining 1-50 and Herb 1-50-->
-          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" />
+          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 1-75)(Elwynn.Alliance)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel ==150" IgnoreCanRun="True">
           <!--Mining 50-125 and Herb 50-125-->
-          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" />
+          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 75-120)(Duskwood.Alliance)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel ==225" IgnoreCanRun="True">
           <If Condition="(herb &amp;&amp; HerbLevel &lt; 160)" IgnoreCanRun="True">
             <!--Mining 65-125 and Herb 120-160-->
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 120-160)(StranglethornJungle.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="(herb &amp;&amp; HerbLevel&gt;=160 &amp;&amp; HerbLevel &lt;200 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &lt;175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=160 &amp;&amp; HerbLevel &lt; 200 ))" IgnoreCanRun="True">
             <!--Mining 125-175 and Herb 160-200-->
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 160-175)(TheCapeOfStranglethorn.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=175  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=200 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=200 ))" IgnoreCanRun="True">
             <!--Mining 175-235 and Herb 200-260-->
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel ==300" IgnoreCanRun="True">
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 235) || (herb &amp;&amp; HerbLevel &lt; 260)" IgnoreCanRun="True">
             <!--Mining 175-235 and Herb 200-260-->
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 175-235)(Badlands.Alliance)Herb&amp;Mining.xml" />
           </If>
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=235  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=260 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=260 ))" IgnoreCanRun="True">
             <!--Mining 250-300 and Herb 260-300-->
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Alliance\(GB2 255-300)(SwampOfSorrows.Alliance)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 )" IgnoreCanRun="True">
@@ -102,39 +103,39 @@
         </If>
         <!--Mining 1-50 and Herb 1-50-->
         <If Condition=" LowestMinLevel ==75" IgnoreCanRun="True">
-          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" />
+          <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 1-50)(Durotar.Horde)Herb&amp;Mining.xml" />
         </If>
         <If Condition=" LowestMinLevel == 150" IgnoreCanRun="True">
           <!--Mining 50-65 and Herb 50-75-->
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 65) || (herb &amp;&amp; HerbLevel &lt; 75)" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 50-120)(Barrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 65-125 and Herb 75-150-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=65  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=75 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=65 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=75 ))" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 120-180)(Ashenvale.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel == 225" IgnoreCanRun="True">
           <!--Mining 125-175 and Herb 150-225-->
           <If Condition="(mining &amp;&amp; MiningLevel &lt; 175) || (herb &amp;&amp; HerbLevel &lt;225)" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 175-235 and Herb 225-280-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=175  &amp;&amp; herb &amp;&amp; HerbLevel &gt;=225 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=175 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=225 ))" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition=" LowestMinLevel == 300" IgnoreCanRun="True">
           <If Condition="(herb &amp;&amp; HerbLevel &lt;225)" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 180-225)(SouthernBarrens.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 175-235 and Herb 225-280-->
           <If Condition="(herb &amp;&amp; HerbLevel&gt;=225 &amp;&amp; HerbLevel &lt;280 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &lt;235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=225 &amp;&amp; HerbLevel &lt; 280))" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 225-275)(Felwood.Horde)Herb&amp;Mining.xml" />
           </If>
           <!--Mining 235-300 and Herb 280-300-->
           <If Condition="(mining &amp;&amp; MiningLevel &gt;=235 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=280 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=235 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=280 ))" IgnoreCanRun="True">
-            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" />
+            <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Horde\(GB2 270-300)(Winterspring.Horde)Herb&amp;Mining.xml" />
           </If>
         </If>
         <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 )" IgnoreCanRun="True">
@@ -144,7 +145,7 @@
     </If>
     <!--Herb/Mining 300-350-->
     <If Condition=" LowestMinLevel ==375" IgnoreCanRun="True">
-      <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" />
+      <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" />
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.MapId == 530" IgnoreCanRun="True">
@@ -204,6 +205,7 @@
     <!--Herb/Mining 350-450-->
     <If Condition=" LowestMinLevel == 450" IgnoreCanRun="True">
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+        <CustomAction Code="MyLog(&quot;{0} free normal bags slots left, Empting bags.&quot;, Me.FreeNormalBagSlots);" />
         <If Condition="Me.MapId == 571" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
         </If>
@@ -220,34 +222,18 @@
         </If>
       </While>
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 400) || (herb &amp;&amp; HerbLevel &lt; 400)" IgnoreCanRun="True">
-        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" />
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" />
       </If>
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=400 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=400 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=400 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=400 ))" IgnoreCanRun="True">
-        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" />
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 400-450)(SholazarBasin.Neutral)Herb&amp;Mining.xml" />
       </If>
       <If Condition="Me.MapId == 0" IgnoreCanRun="True">
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt; 450)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 450)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
-          <If Condition="Me.IsHorde" IgnoreCanRun="True">
-            <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt;1000" IgnoreCanRun="True">
-              <MoveToAction Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
-            </If>
-            <FlyToAction Dismount="False" Location="2062.034, 358.3257, 82.47099" />
-            <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ).Location.Distance(new WoWPoint(2056.493, 381.6347, 100.362)) &lt; 1" Timeout="600000" />
-            <CustomAction Code="CTM(2058.573, 372.6453, 82.5169);" />
-            <WaitAction Condition="Me.MapId == 571" Timeout="600000" />
-          </If>
-          <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-            <FlyToAction Dismount="False" Location="-3689.26, -602.9856, 4.345168" />
-            <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ).Location.Distance(new WoWPoint(-3674.43, -586.774, 0.04286573)) &lt; 1" Timeout="6000000" />
-            <CustomAction Code="CTM(-3674.097, -593.0407, 9.392573);" />
-            <WaitAction Condition="Me.MapId == 571" Timeout="600000" />
-          </If>
+          <CallSubRoutine SubRoutineName="MoveToNorthrendFromEasternKingdoms" />
         </If>
       </If>
       <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="1662.198, -4132.378, 56.96952" />
-        <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
-        <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
+        <CallSubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor" />
       </If>
       <If Condition="Me.MapId == 571" IgnoreCanRun="True">
         <If Condition="!Me.IsFlying &amp;&amp; InbagCount(37701) &gt;= 10" IgnoreCanRun="True">
@@ -269,82 +255,113 @@
     </If>
     <!--Herb/Mining 450-500-->
     <If Condition=" LowestMinLevel == 525" IgnoreCanRun="True">
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
-        <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
-        <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-          <FlyToAction Dismount="False" Location="-3994.829, -4719.628, 4.139777" />
-          <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-4016.39, -4740.588, -0.04110325)) &lt; 1" Timeout="6000000" />
-          <CustomAction Code="CTM(-4010.385, -4735.384, 6.06652);" />
-          <WaitAction Condition="Me.MapId == 0" Timeout="600000" />
-          <CallSubRoutine SubRoutineName="EmptyBagsInIronforge" />
-        </If>
-        <If Condition="Me.IsHorde" IgnoreCanRun="True">
-          <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
-        </If>
-      </While>
+      <!--Mount Hyjal 450 - 475-->
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 475) || (herb &amp;&amp; HerbLevel &lt; 475)" IgnoreCanRun="True">
-        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining-herb.xml" />
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining.xml" />
+        <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
+          <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+            <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor" />
+            </If>
+            <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="EmptyBagsInIronforge" />
+            </If>
+          </If>
+          <If Condition="Me.IsHorde" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
+          </If>
+        </While>
+        <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+          <CallSubRoutine SubRoutineName="MoveToKalimdorFromEasternKindoms" />
+        </If>
       </If>
+      <!--Deepholm 475+-->
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=475 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=475 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=475 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=475 ))" IgnoreCanRun="True">
-        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 475-500)(Uldum.Neutral)Herb&amp;Mining-herb.xml" />
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 475-500)(Deepholm.Nuetral)Herb&amp;Mines.xml" />
+        <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+          <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
+          <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+            <If Condition="Me.MapId == 646" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToStormwindFromDeepholm" />
+            </If>
+            <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor" />
+            </If>
+            <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
+            </If>
+          </If>
+          <If Condition="Me.IsHorde" IgnoreCanRun="True">
+            <If Condition="Me.MapId == 646" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToOrgrimmarFromDeepholm" />
+            </If>
+            <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
+            </If>
+          </If>
+        </While>
+        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt;500)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 500)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
+          <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+            <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToDeepholmFromStormwind" />
+            </If>
+            <If Condition="Me.IsHorde" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToKalimdorFromEasternKindoms" />
+            </If>
+          </If>
+          <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+            <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor" />
+            </If>
+            <If Condition="Me.IsHorde" IgnoreCanRun="True">
+              <CallSubRoutine SubRoutineName="MoveToDeepholmFromOrgrimmar" />
+            </If>
+          </If>
+        </If>
       </If>
+      <!--Train-->
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &gt;= 500)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &gt;= 500)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <If Condition="Me.MapId == 1" IgnoreCanRun="True">
-            <FlyToAction Dismount="False" Location="-3994.829, -4719.628, 9.139777" />
-            <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-4016.39, -4740.588, -0.04110325)) &lt; 1" Timeout="60000000" />
-            <CustomAction Code="CTM(-4010.385, -4735.384, 5.06652);" />
-            <WaitAction Condition="Me.MapId == 0" Timeout="6000000" />
+            <CallSubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor" />
           </If>
           <If Condition="Me.MapId == 0" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="TrainInStormwind" />
           </If>
+          <If Condition="Me.MapId == 646" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="MoveToStormwindFromDeepholm" />
+          </If>
         </If>
         <If Condition="Me.IsHorde" IgnoreCanRun="True">
-          <CallSubRoutine SubRoutineName="TrainInOrg" />
+          <If Condition="Me.MapId == 646" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="MoveToOrgrimmarFromDeepholm" />
+          </If>
+          <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+            <CallSubRoutine SubRoutineName="TrainInOrg" />
+          </If>
         </If>
       </If>
       <If Condition="Me.MapId == 1 &amp;&amp; DistanceTo(1804.349, -4346.937, -10.66582) &lt; 70" IgnoreCanRun="True">
         <MoveToAction Location="1894.106, -4495.328, 23.87761" MoveType="Location" Pathing="Navigator" Entry="0" />
       </If>
-      <If Condition="Me.MapId == 0" IgnoreCanRun="True">
-        <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt; 525)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 525)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
-          <If Condition="Me.IsHorde" IgnoreCanRun="True">
-            <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt; 500" IgnoreCanRun="True">
-              <MoveToAction Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
-            </If>
-            <FlyToAction Dismount="False" Location="2067.27, 285.2988, 97.03257" />
-            <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871).Location.Distance(new WoWPoint(2062.376, 292.998, 114.973)) &lt; 1" Timeout="6000000" />
-            <CustomAction Code="CTM(2068.119, 295.5195, 97.24951);" />
-            <WaitAction Condition="Me.MapId == 1" Timeout="6000000" />
-          </If>
-          <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-            <If Condition="DistanceTo(-5047.012, -800.6297, 495.1275) &lt; 500" IgnoreCanRun="True">
-              <MoveToAction Location="-5047.012, -800.6297, 495.1275" MoveType="Location" Pathing="Navigator" Entry="0" />
-            </If>
-            <FlyToAction Dismount="False" Location="-3859.199, -661.5073, 10.08274" />
-            <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-3872.35, -639.9439, 0.04815831)) &lt; 1" Timeout="6000000" />
-            <CustomAction Code="CTM(-3866.837, -642.1938, 5.096432);" />
-            <WaitAction Condition="Me.MapId == 1" Timeout="6000000" />
-          </If>
-        </If>
-      </If>
       <If Condition="Me.MapId == 571" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-          <FlyToAction Dismount="True" Location="5768.25, 707.2867, 641.5833" />
-          <InteractionAction InteractType="GameObject" Entry="190960" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
-          <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
+          <CallSubRoutine SubRoutineName="MoveToEasternKingdomsFromNorthrend" />
         </If>
         <If Condition="Me.IsHorde" IgnoreCanRun="True">
-          <FlyToAction Dismount="True" Location="5897.042, 562.7647, 639.48" />
-          <InteractionAction InteractType="GameObject" Entry="191009" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
-          <WaitAction Condition="Me.MapId == 1" Timeout="20000" />
+          <CallSubRoutine SubRoutineName="MoveToKalimdorFromNorthrend" />
         </If>
       </If>
     </If>
     <!--Herb/Mining 500-600-->
     <If Condition=" LowestMinLevel == 600" IgnoreCanRun="True">
-      <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\(GB2 1-600)Herb-Mining\Neutral\(GB2 500-600)(JadeForest.Neutral)Herb&amp;Mining-herb.xml" />
+      <If Condition="(mining &amp;&amp; MiningLevel &lt; 575) || (herb &amp;&amp; HerbLevel &lt; 575)" IgnoreCanRun="True">
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 500-575)(JadeForest.Neutral)Herb&amp;Mining.xml" />
+      </If>
+      <If Condition="(mining &amp;&amp; MiningLevel &gt;=575 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=575 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=575 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=575 ))" IgnoreCanRun="True">
+        <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 575-600)(KunLaiSummit.Neutral)Herb&amp;Mining.xml" />
+      </If>
       <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -389,9 +406,7 @@
             <CallSubRoutine SubRoutineName="TrainInOrg" />
           </If>
         </If>
-        <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Stopping HB since We are 600 herb/mining&quot;);" />
-        <CustomAction Code="Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;&#xD;&#xA;Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;&#xD;&#xA;&#xD;&#xA;" />
-        <CustomAction Code=" Lua.DoString(&quot;Logout()&quot;);TreeRoot.Stop();" />
+        <CustomAction Code="Quit(&quot;Stopping HB since We are 600 herb/mining&quot;);" />
       </If>
       <If Condition="Me.IsAlliance &amp;&amp; Me.MapId == 0" IgnoreCanRun="True">
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt; 600)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 600)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
@@ -537,6 +552,8 @@
     </If>
     <MoveToAction Location="5901.044, 724.9983, 639.8762" MoveType="Location" Pathing="Navigator" Entry="0" />
   </SubRoutine>
+  <Declaration Code="void Quit(string reason,params object[] args)&#xD;&#xA;{&#xD;&#xA;  MyLog(reason,args);&#xD;&#xA;  Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = true;&#xD;&#xA;  Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;&#xD;&#xA;   Lua.DoString(&quot;Logout()&quot;);&#xD;&#xA;  TreeRoot.Stop();&#xD;&#xA;}" />
+  <Declaration Code="void MyLog(string format, params object[] args)&#xD;&#xA;{&#xD;&#xA;    Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,format, args);&#xD;&#xA;}" />
   <SubRoutine SubRoutineName="TrainInDalaran">
     <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
     <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Training in Dalaran&quot;);" />
@@ -554,6 +571,124 @@
       <TrainSkillAction NpcEntry="28704" Location="5878.112, 696.3543, 644.9129" />
       <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
       <MoveToAction Location="5869.937, 683.9773, 643.323" MoveType="Location" Pathing="Navigator" Entry="0" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToNorthrendFromEasternKingdoms">
+    <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Northrend from Eastern Kingdoms&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="False" Location="-3689.26, -602.9856, 4.345168" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ).Location.Distance(new WoWPoint(-3674.43, -586.774, 0.04286573)) &lt; 1" Timeout="6000000" />
+        <CustomAction Code="CTM(-3674.097, -593.0407, 9.392573);" />
+        <WaitAction Condition="Me.MapId == 571" Timeout="600000" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt;1000" IgnoreCanRun="True">
+          <MoveToAction Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
+        </If>
+        <FlyToAction Dismount="False" Location="2062.034, 358.3257, 82.47099" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ).Location.Distance(new WoWPoint(2056.493, 381.6347, 100.362)) &lt; 1" Timeout="600000" />
+        <CustomAction Code="CTM(2058.573, 372.6453, 82.5169);" />
+        <WaitAction Condition="Me.MapId == 571" Timeout="600000" />
+      </If>
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToEasternKindomsFromKalimdor">
+    <If Condition="Me.MapId == 1" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Eastern Kingdoms from Kalimdor&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="False" Location="-3994.829, -4719.628, 4.139777" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-4016.39, -4740.588, -0.04110325)) &lt; 1" Timeout="6000000" />
+        <CustomAction Code="CTM(-4010.385, -4735.384, 6.06652);" />
+        <WaitAction Condition="Me.MapId == 0" Timeout="600000" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" Location="1662.198, -4132.378, 56.96952" />
+        <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+        <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
+      </If>
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToKalimdorFromEasternKindoms">
+    <If Condition="Me.MapId == 0" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Kalimdor from Eastern Kingdoms&quot;);" />
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <If Condition="DistanceTo(-5047.012, -800.6297, 495.1275) &lt; 500" IgnoreCanRun="True">
+          <MoveToAction Location="-5047.012, -800.6297, 495.1275" MoveType="Location" Pathing="Navigator" Entry="0" />
+        </If>
+        <FlyToAction Dismount="False" Location="-3859.199, -661.5073, 10.08274" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-3872.35, -639.9439, 0.04815831)) &lt; 1" Timeout="6000000" />
+        <CustomAction Code="CTM(-3866.837, -642.1938, 5.096432);" />
+      </If>
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt; 500" IgnoreCanRun="True">
+          <MoveToAction Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
+        </If>
+        <FlyToAction Dismount="False" Location="2067.27, 285.2988, 97.03257" />
+        <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871).Location.Distance(new WoWPoint(2062.376, 292.998, 114.973)) &lt; 1" Timeout="6000000" />
+        <CustomAction Code="CTM(2068.119, 295.5195, 97.24951);" />
+      </If>
+      <WaitAction Condition="Me.MapId == 1" Timeout="6000000" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToOrgrimmarFromDeepholm">
+    <If Condition="Me.MapId == 646 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Orgrimmar from Deepholm&quot;);" />
+      <FlyToAction Dismount="False" Location="896.2609, 499.879, -52.38813" />
+      <MoveToAction Location="990.8522, 455.0518, -44.24983" MoveType="Location" Pathing="Navigator" Entry="0" />
+      <InteractionAction InteractType="GameObject" Entry="205273" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      <WaitAction Condition="Me.MapId == 1" Timeout="30000" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToDeepholmFromOrgrimmar">
+    <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Deepholm from Orgrimmar&quot;);" />
+      <FlyToAction Dismount="False" Location="2058.579, -4384.915, 98.90421" />
+      <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207689);" Timeout="10000" />
+      <InteractionAction InteractType="GameObject" Entry="207689" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      <WaitAction Condition="Me.MapId == 646 &amp;&amp; Me.IsHorde" Timeout="30000" />
+      <MoveToAction Location="893.0169, 498.9317, -53.9152" MoveType="Location" Pathing="Navigator" Entry="0" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToStormwindFromDeepholm">
+    <If Condition="Me.MapId == 646 &amp;&amp; Me.IsAlliance" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Stormwind from Deepholm&quot;);" />
+      <FlyToAction Dismount="False" Location="896.2609, 499.879, -52.38813" />
+      <MoveToAction Location="965.2048, 577.558, -44.25824" MoveType="Location" Pathing="Navigator" Entry="0" />
+      <InteractionAction InteractType="GameObject" Entry="205272" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      <WaitAction Condition="Me.MapId == 0" Timeout="30000" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToDeepholmFromStormwind">
+    <!--Check if player has deepholm portal quest done (Deepholm, Realm of Earth)-->
+    <If Condition="!Me.QuestLog.GetCompletedQuests().Any(i =&gt; i == 27123)" IgnoreCanRun="True">
+      <CustomAction Code="Quit(&quot;Stopping HB since the Deepholm quest portal isn't completed&quot;);" />
+    </If>
+    <If Condition="Me.MapId == 0 &amp;&amp; Me.IsAlliance" IgnoreCanRun="True">
+      <CustomAction Code="MyLog(&quot;Heading to Deepholm from Stormwind&quot;);" />
+      <FlyToAction Dismount="True" Location="-8218.854, 447.5847, 117.6766" />
+      <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Any(o =&gt; o.Entry == 207693);" Timeout="10000" />
+      <InteractionAction InteractType="GameObject" Entry="207693" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      <WaitAction Condition="Me.MapId == 646" Timeout="30000" />
+      <MoveToAction Location="893.0169, 498.9317, -53.9152" MoveType="Location" Pathing="Navigator" Entry="0" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToKalimdorFromNorthrend">
+    <If Condition="Me.MapId == 571" IgnoreCanRun="True">
+      <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" Location="5897.042, 562.7647, 639.48" />
+        <InteractionAction InteractType="GameObject" Entry="191009" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <WaitAction Condition="Me.MapId == 1" Timeout="20000" />
+    </If>
+  </SubRoutine>
+  <SubRoutine SubRoutineName="MoveToEasternKingdomsFromNorthrend">
+    <If Condition="Me.MapId == 571" IgnoreCanRun="True">
+      <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyToAction Dismount="True" Location="5768.25, 707.2867, 641.5833" />
+        <InteractionAction InteractType="GameObject" Entry="190960" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
+      </If>
+      <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
     </If>
   </SubRoutine>
 </Professionbuddy>

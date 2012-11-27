@@ -615,19 +615,15 @@ namespace HighVoltz.Composites
                     for slot=GetContainerNumSlots(bag),1,-1 do  
                         local id = GetContainerItemID(bag,slot)  
                         local _,c,l = GetContainerItemInfo(bag, slot)  
-                        if id == itemID then print ('item: '..itemID..' found, lock: ',l) end
                         if id == itemID and l == nil then  
-                            print ('picking up item in bag '..bag..' and slot '..slot)
                             PickupContainerItem(bag, slot)  
                             ClickAuctionSellItemButton()  
                             StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
-                            print ('StartAuction('..bid*stack, bo*stack, runtime,stack,amount..')')
                             return leftovers  
                         end  
                     end 
                 end 
             else
-                print ('auction in progress')
                 return -1 
             end 
 ";

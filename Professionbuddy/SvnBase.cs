@@ -2,6 +2,12 @@
 //!CompilerOption:AddRef:WindowsBase.dll
 // Professionbuddy plugin by HighVoltz
 
+using System.Linq;
+using Styx;
+using Styx.Patchables;
+using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
+
 namespace HighVoltz
 {
     public class SvnBase
