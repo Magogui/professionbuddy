@@ -4,8 +4,10 @@
   <Settings DefaultValue="true" Type="Boolean" Name="AH Items" Summary="If set to true this profile will sell items on AH, otherwise it'll mail items to an alt.If mailing items to alt make sure to set the Grind Bot's 'Recipient' field to your alts name." Category="Profile" Global="False" Hidden="False" />
   <Settings DefaultValue="true" Type="Boolean" Name="Herb" Summary="Set to true if you want to level herbalism" Category="Profile" Global="False" Hidden="False" />
   <Settings DefaultValue="true" Type="Boolean" Name="Mining" Summary="Set to true if you want to level Mining" Category="Profile" Global="False" Hidden="False" />
+  <Settings DefaultValue="false" Type="Boolean" Name="Ignore grey nodes" Summary="Ignores grey nodes, not fully working yet" Category="Profile" Global="False" Hidden="False" />
   <Declaration Code="bool mining,herb;" />
   <Declaration Code="int MiningLevel,MiningMaxLevel,HerbLevel,HerbMaxLevel, LowestMinLevel;" />
+  <Declaration Code="int FreeBagSlots;" />
   <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Made by HighVoltz&quot;);" />
   <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Mining: {0}&quot;,Settings[&quot;Mining&quot;]);" />
   <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Herb: {0}&quot;,Settings[&quot;Herb&quot;]);" />
@@ -45,10 +47,13 @@
     <!--enable Herb in GB2 if enabled in profile Settings and Herb MaxLevel <= Mining.MaxLevel-->
     <CustomAction Code="if ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel != HerbMaxLevel &amp;&amp;&#xD;&#xA;  (HerbMaxLevel &lt;= MiningMaxLevel  || !(bool)Settings[&quot;Mining&quot;] ) )&#xD;&#xA;{&#xD;&#xA;   herb = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherHerbs = true;&#xD;&#xA;}" />
     <CustomAction Code="LowestMinLevel = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? (MiningMaxLevel &lt; HerbMaxLevel ? MiningMaxLevel : HerbMaxLevel):(bool)Settings[&quot;Mining&quot;] ? MiningMaxLevel :HerbMaxLevel;" />
-    <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.HasValue &amp;&amp; skillLevel  &gt;= (int)requiredSkillLevel.Value &amp;&amp; node.IsHerb )&#xD;&#xA;    {&#xD;&#xA;      var infoBlock = StyxWoW.Cache[Styx.WoWInternals.WoWCache.CacheDb.GameObject].GetInfoBlockById(node.Entry);&#xD;&#xA;      if (infoBlock != null)&#xD;&#xA;      {&#xD;&#xA;        var greyLevel = infoBlock.GameObject.Properties[24];&#xD;&#xA;        if (greyLevel == 0 || skillLevel  &gt;= greyLevel)&#xD;&#xA;        {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;         }&#xD;&#xA;       }  &#xD;&#xA;    }&#xD;&#xA;  }&#xD;&#xA;}" />
+    <CustomAction Code="FreeBagSlots = Me.FreeNormalSlots;&#xD;&#xA;if(FreeBagSlots &lt; 4)&#xD;&#xA;  MyLog(&quot;FreeBagSlots: {0}&quot;,FreeBagSlots);" />
+    <If Condition="(bool)Settings[&quot;Ignore grey nodes&quot;]" IgnoreCanRun="True">
+      <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.HasValue &amp;&amp; skillLevel  &gt;= (int)requiredSkillLevel.Value &amp;&amp; node.IsHerb )&#xD;&#xA;    {&#xD;&#xA;      var infoBlock = StyxWoW.Cache[Styx.WoWInternals.WoWCache.CacheDb.GameObject].GetInfoBlockById(node.Entry);&#xD;&#xA;      if (infoBlock != null)&#xD;&#xA;      {&#xD;&#xA;        var greyLevel = infoBlock.GameObject.Properties[24];&#xD;&#xA;        if (greyLevel == 0 || skillLevel  &gt;= greyLevel)&#xD;&#xA;        {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;         }&#xD;&#xA;       }  &#xD;&#xA;    }&#xD;&#xA;  }&#xD;&#xA;}" />
+    </If>
     <!--Herb/Mining 1-300-->
     <If Condition=" LowestMinLevel &lt;=300" IgnoreCanRun="True">
-      <If Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInStormwind" />
         </If>
@@ -146,7 +151,7 @@
     <!--Herb/Mining 300-350-->
     <If Condition=" LowestMinLevel ==375" IgnoreCanRun="True">
       <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 300-350)(Outlands.Neutral)Herb&amp;Mining.xml" />
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.MapId == 530" IgnoreCanRun="True">
           <FlyToAction Dismount="False" Location="-252.0331, 965.9687, 90.23502" />
@@ -159,7 +164,7 @@
         <If Condition="Me.IsHorde &amp;&amp; Me.MapId == 0" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
         </If>
-      </While>
+      </If>
       <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde " IgnoreCanRun="True">
         <FlyToAction Dismount="True" Location="1662.198, -4132.378, 56.96952" />
         <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
@@ -204,7 +209,7 @@
     </If>
     <!--Herb/Mining 350-450-->
     <If Condition=" LowestMinLevel == 450" IgnoreCanRun="True">
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="MyLog(&quot;{0} free normal bags slots left, Empting bags.&quot;, Me.FreeNormalBagSlots);" />
         <If Condition="Me.MapId == 571" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="EmptyBagsInDalaran" />
@@ -220,7 +225,7 @@
             <CallSubRoutine SubRoutineName="EmptyBagsInUndercity" />
           </If>
         </If>
-      </While>
+      </If>
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 400) || (herb &amp;&amp; HerbLevel &lt; 400)" IgnoreCanRun="True">
         <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 350-400)(HowlingFjord.Neutral)Herb&amp;Mining.xml" />
       </If>
@@ -258,7 +263,7 @@
       <!--Mount Hyjal 450 - 475-->
       <If Condition="(mining &amp;&amp; MiningLevel &lt; 475) || (herb &amp;&amp; HerbLevel &lt; 475)" IgnoreCanRun="True">
         <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 450-475)(Hyjal.Neutral)Herb&amp;Mining.xml" />
-        <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+        <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
           <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
           <If Condition="Me.IsAlliance" IgnoreCanRun="True">
             <If Condition="Me.MapId == 1" IgnoreCanRun="True">
@@ -271,7 +276,7 @@
           <If Condition="Me.IsHorde" IgnoreCanRun="True">
             <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
           </If>
-        </While>
+        </If>
         <If Condition="Me.MapId == 0" IgnoreCanRun="True">
           <CallSubRoutine SubRoutineName="MoveToKalimdorFromEasternKindoms" />
         </If>
@@ -279,7 +284,7 @@
       <!--Deepholm 475+-->
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=475 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=475 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=475 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=475 ))" IgnoreCanRun="True">
         <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 475-500)(Deepholm.Nuetral)Herb&amp;Mines.xml" />
-        <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+        <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
           <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
           <If Condition="Me.IsAlliance" IgnoreCanRun="True">
             <If Condition="Me.MapId == 646" IgnoreCanRun="True">
@@ -300,7 +305,7 @@
               <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
             </If>
           </If>
-        </While>
+        </If>
         <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel &lt;500)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &lt; 500)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
           <If Condition="Me.MapId == 0" IgnoreCanRun="True">
             <If Condition="Me.IsAlliance" IgnoreCanRun="True">
@@ -362,7 +367,7 @@
       <If Condition="(mining &amp;&amp; MiningLevel &gt;=575 &amp;&amp; herb &amp;&amp; HerbLevel &gt;=575 ) || ((mining &amp;&amp; !herb &amp;&amp; MiningLevel &gt;=575 ) ^ (herb &amp;&amp; !mining &amp;&amp; HerbLevel &gt;=575 ))" IgnoreCanRun="True">
         <LoadProfileAction ProfileType="Honorbuddy" Path="HBProfiles\GB2 Herb and Mining profiles\Neutral\(GB2 575-600)(KunLaiSummit.Neutral)Herb&amp;Mining.xml" />
       </If>
-      <While Condition="Me.FreeNormalBagSlots &lt;=4" IgnoreCanRun="True">
+      <If Condition="FreeBagSlots &lt;=4" IgnoreCanRun="True">
         <CustomAction Code="Log(&quot;Bags are full, selling&quot;);" />
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <If Condition="Me.MapId == 870" IgnoreCanRun="True">
@@ -384,7 +389,7 @@
             <CallSubRoutine SubRoutineName="EmptyBagsInOrg" />
           </If>
         </If>
-      </While>
+      </If>
       <If Condition="(((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningLevel == 600)|| !(bool)Settings[&quot;Mining&quot;]) &amp;&amp; (((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbLevel &gt;= 600)|| !(bool)Settings[&quot;Herb&quot;])" IgnoreCanRun="True">
         <If Condition="Me.IsAlliance" IgnoreCanRun="True">
           <If Condition="Me.MapId == 870" IgnoreCanRun="True">
