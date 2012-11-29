@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.CSharp;
+using Styx;
 using Styx.TreeSharp;
 
 namespace HighVoltz.Dynamic
