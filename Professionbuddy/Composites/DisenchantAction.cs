@@ -183,7 +183,7 @@ namespace HighVoltz.Composites
                     _lootSw.Start();
                     return RunStatus.Success;
                 }
-                uint timeToWait = ((uint) ActionType*1000) + 2500;
+                uint timeToWait =  3500;
                 if (!Me.IsCasting && (!_castTimer.IsRunning || _castTimer.ElapsedMilliseconds >= timeToWait))
                 {
                     List<WoWItem> itemList = BuildItemList();
