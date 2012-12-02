@@ -246,7 +246,9 @@
     <Content Include="Profiles\Mining-Herb %281-300%29ground.xml" />
     <Content Include="Profiles\Mining-Herb %281-600%29flying-GB2.xml" />
     <Content Include="Profiles\Multiprofile.xml" />
-    <Content Include="Protected Items.xml" />
+    <Content Include="Protected Items.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

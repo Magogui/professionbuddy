@@ -160,7 +160,7 @@ namespace HighVoltz
             var topIndex = (uint)table.NumRows;
             uint bomIndex = 0;
             uint half;
-            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility) + 0x14, true);
+            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility - 0x400000) + 0x14, true);
             uint id;
             // optimized search
             do
