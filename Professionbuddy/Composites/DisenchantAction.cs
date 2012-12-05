@@ -65,16 +65,16 @@ namespace HighVoltz.Composites
 
         public DisenchantAction()
         {
-            Properties["ActionType"] = new MetaProp("ActionType", typeof (DeActionType),
+            Properties["ActionType"] = new MetaProp("ActionType", typeof(DeActionType),
                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_ActionType"]));
 
-            Properties["ItemTarget"] = new MetaProp("ItemTarget", typeof (ItemTargetType),
+            Properties["ItemTarget"] = new MetaProp("ItemTarget", typeof(ItemTargetType),
                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_ItemTarget"]));
 
-            Properties["ItemQuality"] = new MetaProp("ItemQuality", typeof (DeItemQualites),
+            Properties["ItemQuality"] = new MetaProp("ItemQuality", typeof(DeItemQualites),
                                                      new DisplayNameAttribute(Pb.Strings["Action_Common_ItemQuality"]));
 
-            Properties["ItemId"] = new MetaProp("ItemId", typeof (int),
+            Properties["ItemId"] = new MetaProp("ItemId", typeof(int),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
 
             ActionType = DeActionType.Disenchant;
@@ -89,28 +89,28 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public DeActionType ActionType
         {
-            get { return (DeActionType) Properties["ActionType"].Value; }
+            get { return (DeActionType)Properties["ActionType"].Value; }
             set { Properties["ActionType"].Value = value; }
         }
 
         [PbXmlAttribute]
         public ItemTargetType ItemTarget
         {
-            get { return (ItemTargetType) Properties["ItemTarget"].Value; }
+            get { return (ItemTargetType)Properties["ItemTarget"].Value; }
             set { Properties["ItemTarget"].Value = value; }
         }
 
         [PbXmlAttribute]
         public DeItemQualites ItemQuality
         {
-            get { return (DeItemQualites) Properties["ItemQuality"].Value; }
+            get { return (DeItemQualites)Properties["ItemQuality"].Value; }
             set { Properties["ItemQuality"].Value = value; }
         }
 
         [PbXmlAttribute]
         public int ItemId
         {
-            get { return (int) Properties["ItemId"].Value; }
+            get { return (int)Properties["ItemId"].Value; }
             set { Properties["ItemId"].Value = value; }
         }
 
@@ -168,13 +168,39 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
+        uint GetCastTime()
+        {
+            uint castime = 0;
+            switch (ActionType)
+            {
+                case DeActionType.Disenchant:
+                    castime = 1500;
+                    break;
+                case DeActionType.Mill:
+                    castime = 1000;
+                    break;
+                default:
+                    castime = 2000;
+                    break;
+            }
+            return castime + WaitForLagTimeMs;
+        }
+
+        uint WaitForLagTimeMs
+        {
+            get
+            {
+                return Util.WoWPing + (2 * StyxWoW.WoWClient.Latency) + 50;
+            }
+        }
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
                 if (Me.IsFlying)
                     return RunStatus.Failure;
-                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < 1000)
+                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < WaitForLagTimeMs)
                     return RunStatus.Success;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
@@ -183,7 +209,8 @@ namespace HighVoltz.Composites
                     _lootSw.Start();
                     return RunStatus.Success;
                 }
-                uint timeToWait =  3500;
+                uint timeToWait = GetCastTime();
+
                 if (!Me.IsCasting && (!_castTimer.IsRunning || _castTimer.ElapsedMilliseconds >= timeToWait))
                 {
                     List<WoWItem> itemList = BuildItemList();
