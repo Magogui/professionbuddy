@@ -192,6 +192,12 @@ namespace HighVoltz.Dynamic
                 results = provider.CompileAssemblyFromSource(
                     options, CsharpStringBuilder.ToString());
             }
+            // clear all previous compile errors
+            foreach (var code in CsharpCodeDict.Values)
+            {
+                code.CompileError = string.Empty;
+            }
+
             if (results.Errors.HasErrors)
             {
                 if (results.Errors.Count > 0)
