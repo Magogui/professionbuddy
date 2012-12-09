@@ -59,10 +59,10 @@ namespace HighVoltz.Composites
 
         private void CompileErrorPropertyChanged(object sender, MetaPropArgs e)
         {
-            if (CompileError != "" || (CompileError == "" && _lastError != ""))
+            if (CompileError != "")
             {
-                MainForm.Instance.RefreshActionTree(this);
                 Properties["CompileError"].Show = true;
+                MainForm.Instance.RefreshActionTree(this);
             }
             else
                 Properties["CompileError"].Show = false;

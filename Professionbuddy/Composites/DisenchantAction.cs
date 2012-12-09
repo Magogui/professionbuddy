@@ -183,14 +183,14 @@ namespace HighVoltz.Composites
                     castime = 2000;
                     break;
             }
-            return castime + WaitForLagTimeMs;
+            return castime + WaitForLagTimeMs +1000;
         }
 
         uint WaitForLagTimeMs
         {
             get
             {
-                return Util.WoWPing + (2 * StyxWoW.WoWClient.Latency) + 50;
+                return (3 * Util.WoWPing) + 50;
             }
         }
 
@@ -200,7 +200,7 @@ namespace HighVoltz.Composites
             {
                 if (Me.IsFlying)
                     return RunStatus.Failure;
-                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < WaitForLagTimeMs)
+                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < WaitForLagTimeMs + 2000)
                     return RunStatus.Success;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
@@ -310,9 +310,7 @@ namespace HighVoltz.Composites
 
         private bool CheckItemQuality(WoWItem item)
         {
-            bool returnVal = false;
-            if (ItemQuality == DeItemQualites.Uncommon && item.Quality == WoWItemQuality.Uncommon)
-                returnVal = true;
+            bool returnVal = ItemQuality == DeItemQualites.Uncommon && item.Quality == WoWItemQuality.Uncommon;
             if (ItemQuality == DeItemQualites.Rare &&
                 (item.Quality == WoWItemQuality.Uncommon || item.Quality == WoWItemQuality.Rare))
                 returnVal = true;
