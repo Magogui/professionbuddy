@@ -11,6 +11,7 @@ using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
 using Styx.Helpers;
+using Styx.Patchables;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
@@ -20,14 +21,14 @@ using Styx.MemoryManagement;
 namespace HighVoltz
 {
     /// <summary>
-    /// Utility functions
+    ///   Utility functions
     /// </summary>
     public static class Util
     {
         private const int CacheSize = 0x500;
 
         /// <summary>
-        ///  Random Number Genorator
+        ///   Random Number Genorator
         /// </summary>
         public static Random Rng = new Random(Environment.TickCount);
 
@@ -43,9 +44,9 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Creates a random upper/lowercase string
+        ///   Creates a random upper/lowercase string
         /// </summary>
-        /// <returns>Random String</returns>
+        /// <returns> Random String </returns>
         public static string RandomString
         {
             get
@@ -55,7 +56,7 @@ namespace HighVoltz
                 for (int i = 0; i < size; i++)
                 {
                     // random upper/lowercase character using ascii code
-                    sb.Append((char) (Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
+                    sb.Append((char)(Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
                 }
                 return sb.ToString();
             }
@@ -65,16 +66,11 @@ namespace HighVoltz
 
         public static bool IsGbankFrameVisible
         {
-            get
-            {
-                return
-                    Lua.GetReturnVal<int>(
-                        "if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1;
-            }
+            get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; }
         }
 
         /// <summary>
-        /// Returns WoW's ping, refreshed every 30 seconds.
+        ///   Returns WoW's ping, refreshed every 30 seconds.
         /// </summary>
         public static uint WoWPing
         {
@@ -93,10 +89,10 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Returns the localized name of an item that is cached
+        ///   Returns the localized name of an item that is cached
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id"> </param>
+        /// <returns> </returns>
         public static string GetItemCacheName(uint id)
         {
             WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
@@ -124,10 +120,10 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Converts a string of 3 numbers to a WoWPoint.
+        ///   Converts a string of 3 numbers to a WoWPoint.
         /// </summary>
-        /// <param name="location"></param>
-        /// <returns></returns>
+        /// <param name="location"> </param>
+        /// <returns> </returns>
         public static WoWPoint StringToWoWPoint(string location)
         {
             WoWPoint loc = WoWPoint.Zero;
@@ -143,21 +139,16 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///  Returns number items with a matching id that player has in personal bank
+        ///   Returns number items with a matching id that player has in personal bank
         /// </summary>
-        /// <param name="itemID"></param>
-        /// <returns></returns>
+        /// <param name="itemID"> </param>
+        /// <returns> </returns>
         public static int GetBankItemCount(uint itemID)
         {
             try
             {
                 // number of items in objectmanger - (carriedItemCount + BuybackItemCount)
-                return (int) ObjectManager.GetObjectsOfType<WoWItem>().
-                                 Sum(i => i != null
-                                          && i.IsValid
-                                          && i.Entry == itemID
-                                              ? i.StackCount
-                                              : 0) -
+                return (int)ObjectManager.GetObjectsOfType<WoWItem>().Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) -
                        (GetCarriedItemCount(itemID) + GetBuyBackItemCount(itemID));
             }
             catch
@@ -167,27 +158,23 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Returns number items with a matching id that player is carrying
+        ///   Returns number items with a matching id that player is carrying
         /// </summary>
-        /// <param name="id">Item ID</param>
-        /// <returns>Number of items in player Inventory</returns>
+        /// <param name="id"> Item ID </param>
+        /// <returns> Number of items in player Inventory </returns>
         public static int GetCarriedItemCount(uint id)
         {
-            return
-                (int) StyxWoW.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int)StyxWoW.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         /// <summary>
-        /// Returns number items with a matching id that player is carrying
+        ///   Returns number items with a matching id that player is carrying
         /// </summary>
-        /// <param name="id">Item ID</param>
-        /// <returns>Number of items in merchant buyback frame</returns>
+        /// <param name="id"> Item ID </param>
+        /// <returns> Number of items in merchant buyback frame </returns>
         public static int GetBuyBackItemCount(uint id)
         {
-            return
-                (int)
-                StyxWoW.Me.Inventory.Buyback.Items.Sum(
-                    i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int)StyxWoW.Me.Inventory.Buyback.Items.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         // credits Dfagan
@@ -231,11 +218,10 @@ namespace HighVoltz
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
             int repeat = (from ingred in recipe.Ingredients
-                          let ingredCnt = (int) ingred.InBagItemCount -
-                                          (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID)
-                                               ? Professionbuddy.Instance.MaterialList[ingred.ID]
-                                               : 0)
-                          select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Min();
+                          let ingredCnt =
+                              (int)ingred.InBagItemCount -
+                              (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ? Professionbuddy.Instance.MaterialList[ingred.ID] : 0)
+                          select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Min();
             return repeat > 0 ? repeat : 0;
         }
 
@@ -250,11 +236,11 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
+        ///   Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
         /// </summary>
-        /// <param name="pattern">the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
-        /// <param name="mask">the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored</param>
-        /// <returns>The offset the first match of the pattern was found at.</returns>
+        /// <param name="pattern"> the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
+        /// <param name="mask"> the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored </param>
+        /// <returns> The offset the first match of the pattern was found at. </returns>
         public static IntPtr FindPattern(string pattern, string mask)
         {
             byte[] patternArray = HexStringToByteArray(pattern);
@@ -285,22 +271,24 @@ namespace HighVoltz
 
         private static byte[] HexStringToByteArray(string hexString)
         {
-            return hexString.Split(' ')
-                .Aggregate(new List<byte>(), (a, b) =>
-                                                 {
-                                                     a.Add(byte.Parse(b, NumberStyles.HexNumber));
-                                                     return a;
-                                                 })
-                .ToArray();
+            return hexString.Split(' ').Aggregate(
+                new List<byte>(),
+                (a, b) =>
+                {
+                    a.Add(byte.Parse(b, NumberStyles.HexNumber));
+                    return a;
+                }).ToArray();
         }
 
         private static bool[] MaskStringToBoolArray(string mask)
         {
-            return mask.Aggregate(new List<bool>(), (a, b) =>
-                                                        {
-                                                            a.Add(b != '?');
-                                                            return a;
-                                                        }).ToArray();
+            return mask.Aggregate(
+                new List<bool>(),
+                (a, b) =>
+                {
+                    a.Add(b != '?');
+                    return a;
+                }).ToArray();
         }
 
         private static bool DataCompare(byte[] data, uint dataOffset, byte[] pattern, IEnumerable<bool> mask)
@@ -311,28 +299,16 @@ namespace HighVoltz
         public static void ScanForOffsets()
         {
             ProcessModule mod = StyxWoW.Memory.Process.MainModule;
-            var baseAddress = (uint) mod.BaseAddress;
-            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion ||
-                GlobalPBSettings.Instance.KnownSpellsPtr == 0 || GlobalPBSettings.Instance.MinEnchantSkillReqPtr == 0)
+            var baseAddress = (uint)mod.BaseAddress;
+            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0 )
             {
                 Professionbuddy.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
                 try
                 {
-                    IntPtr pointer =
-                        FindPattern(
-                            "00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3",
-                            "????xxxxxxxxxxxxxx");
+                    IntPtr pointer = FindPattern("00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3", "????xxxxxxxxxxxxxx");
 
                     GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
                     Professionbuddy.Log("Found KnownSpellsPtr offset 0x{0:X}", GlobalPBSettings.Instance.KnownSpellsPtr);
-
-                    GlobalPBSettings.Instance.MinEnchantSkillReqPtr =
-                        (uint)FindPattern(
-                            "56 8b c1 33 f6 e8 00 00 00 00 85 c0 7e 00 50 b9 00 00 00 00 e8 00 00 00 00 85 c0 74 00 8b 40 18 5e c3",
-                            "xxxxxx????xxx?xx????x????xxx?xxxxx");
-
-                    Professionbuddy.Log("Found MinEnchantSkillReqPtr offset 0x{0:X}",
-                                        GlobalPBSettings.Instance.MinEnchantSkillReqPtr);
 
                     GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
 
@@ -353,57 +329,82 @@ namespace HighVoltz
         public static uint ToUint(this string str)
         {
             uint val;
-            uint.TryParse(str, out val);
+            UInt32.TryParse(str, out val);
             return val;
         }
 
         /// <summary>
-        /// Converts a string to a float using En-US based culture
+        ///   Converts a string to a float using En-US based culture
         /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
+        /// <param name="str"> </param>
+        /// <returns> </returns>
         public static float ToSingle(this string str)
         {
             float val;
-            float.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign
-                           , CultureInfo.InvariantCulture, out val);
+            Single.TryParse(str, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out val);
             return val;
         }
 
         /// <summary>
-        /// Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing names into lua that are UTF-16 or higher.
+        ///   Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing names into lua that are UTF-16 or higher.
         /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        /// <param name="text"> </param>
+        /// <returns> </returns>
         public static string ToFormatedUTF8(this string text)
         {
             var buffer = new StringBuilder(EncodeUtf8.GetByteCount(text));
             byte[] utf8Encoded = EncodeUtf8.GetBytes(text);
             foreach (byte b in utf8Encoded)
             {
-                buffer.Append(string.Format("\\{0:D3}", b));
+                buffer.Append(String.Format("\\{0:D3}", b));
             }
             return buffer.ToString();
         }
 
         /// <summary>
-        /// This is a fix for WoWPoint.ToString using current cultures decimal separator.
+        ///   This is a fix for WoWPoint.ToString using current cultures decimal separator.
         /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        /// <param name="text"> </param>
+        /// <returns> </returns>
         public static string ToInvariantString(this WoWPoint text)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", text.X, text.Y, text.Z);
+            return String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", text.X, text.Y, text.Z);
         }
 
         public static int MinEnchantLevelReq(this WoWItem item)
         {
+            /* ToDO .. use this once bug where last row isn't returned is fixed.
+            foreach (var row in StyxWoW.Db[ClientDb.ItemDisenchantLoot])
+            {
+                var itemDe = row.GetStruct<ItemDisenchantLootStruct>();
+                if (item.ItemInfo.ItemClass == itemDe.ItemCLass && item.Quality == itemDe.ItemQuality && item.ItemInfo.Level >= itemDe.MinItemLevel &&
+                    item.ItemInfo.Level <= itemDe.MaxItemLevel)
+                {
+                    return itemDe.RequiredEnchantingLvl;
+                }
+            }*/
+
+            var table = StyxWoW.Db[ClientDb.ItemDisenchantLoot];
+            for (int i = table.MinIndex; i <= table.MaxIndex; i++ )
+            {
+                var row = table.GetRow((uint) i);
+                if (!row.IsValid) continue;
+                var itemDe = row.GetStruct<ItemDisenchantLootStruct>();
+                if (item.ItemInfo.ItemClass == itemDe.ItemCLass && item.Quality == itemDe.ItemQuality && item.ItemInfo.Level >= itemDe.MinItemLevel &&
+                    item.ItemInfo.Level <= itemDe.MaxItemLevel)
+                {
+                    return itemDe.RequiredEnchantingLvl;
+                }
+            }
+                return -1;
+            /* No longer used.
             WoWCache.InfoBlock infoBlock = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(item.Entry);
 
             return
                 StyxWoW.Memory.Call<int>(
                     StyxWoW.Memory.ImageBase + (int) GlobalPBSettings.Instance.MinEnchantSkillReqPtr,
                     CallingConvention.ThisCall, (uint) infoBlock.Address);
+             */
         }
 
         public static int MinInscriptionLevelReq(this WoWItem item)
@@ -421,5 +422,20 @@ namespace HighVoltz
                 return itemSparse.RequiredSkillLevel;
             return -1;
         }
+
+        #region Embedded Type - ItemDisenchantLootStruct
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ItemDisenchantLootStruct
+        {
+            public readonly uint Id;
+            public readonly WoWItemClass ItemCLass;
+            private readonly int _unk_8;
+            public readonly WoWItemQuality ItemQuality;
+            public readonly int MinItemLevel; // inclusive
+            public readonly int MaxItemLevel; // inclusive
+            public readonly int RequiredEnchantingLvl;
+        }
+
+        #endregion
     }
 }

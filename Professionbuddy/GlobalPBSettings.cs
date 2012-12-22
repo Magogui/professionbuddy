@@ -20,9 +20,6 @@ namespace HighVoltz
         [Setting, DefaultValue(0u)]
         public uint KnownSpellsPtr { get; set; }
 
-        [Setting, DefaultValue(0u)]
-        public uint MinEnchantSkillReqPtr { get; set; }
-
         [Setting, DefaultValue(null)]
         public string DataStoreTable { get; set; }
 

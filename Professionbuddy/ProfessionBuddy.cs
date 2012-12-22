@@ -19,6 +19,7 @@ using HighVoltz.Composites;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
 using Styx.Patchables;
@@ -203,26 +204,6 @@ namespace HighVoltz
 
         public override void Pulse()
         {
-            // Due to some non-thread safe HB api I need to make sure the callbacks are executed from main thread
-            // Throttling the events so the callback doesn't get called repeatedly in a short time frame.
-            if (_onBagUpdateSpamSW.ElapsedMilliseconds >= 1000)
-            {
-                _onBagUpdateSpamSW.Stop();
-                _onBagUpdateSpamSW.Reset();
-                OnBagUpdateTimerCB();
-            }
-            if (_onSkillUpdateSpamSW.ElapsedMilliseconds >= 1000)
-            {
-                _onSkillUpdateSpamSW.Stop();
-                _onSkillUpdateSpamSW.Reset();
-                OnSkillUpdateTimerCB();
-            }
-            if (_onSpellsChangedSpamSw.ElapsedMilliseconds >= 1000)
-            {
-                _onSpellsChangedSpamSw.Stop();
-                _onSpellsChangedSpamSw.Reset();
-                OnSpellsChangedCB();
-            }
             if (SecondaryBot != null)
                 SecondaryBot.Pulse();
         }
@@ -257,36 +238,32 @@ namespace HighVoltz
 
         #region OnBagUpdate
 
-        private readonly Stopwatch _onBagUpdateSpamSW = new Stopwatch();
-
+        readonly WaitTimer _onBagUpdateTimer = new WaitTimer(TimeSpan.FromSeconds(1));
         private void OnBagUpdate(object obj, LuaEventArgs args)
         {
-            if (!_onBagUpdateSpamSW.IsRunning)
+            if (_onBagUpdateTimer.IsFinished)
             {
-                Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
-                _onBagUpdateSpamSW.Start();
-            }
-        }
-
-        private void OnBagUpdateTimerCB()
-        {
-            try
-            {
-                Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
-                foreach (TradeSkill ts in TradeSkillList)
+                try
                 {
-                    ts.PulseBags();
+                    lock (TradeSkillList)
+                    {
+                        foreach (TradeSkill ts in TradeSkillList)
+                        {
+                            ts.PulseBags();
+                        }
+                        UpdateMaterials();
+                        if (MainForm.IsValid)
+                        {
+                            MainForm.Instance.RefreshTradeSkillTabs();
+                            MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                        }
+                    }
                 }
-                UpdateMaterials();
-                if (MainForm.IsValid)
+                catch (Exception ex)
                 {
-                    MainForm.Instance.RefreshTradeSkillTabs();
-                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                    Err(ex.ToString());
                 }
-            }
-            catch (Exception ex)
-            {
-                Err(ex.ToString());
+                _onBagUpdateTimer.Reset();
             }
         }
 
@@ -294,56 +271,50 @@ namespace HighVoltz
 
         #region OnSkillUpdate
 
-        private readonly Stopwatch _onSkillUpdateSpamSW = new Stopwatch();
-
+        readonly WaitTimer _onSkillUpdateTimer = new WaitTimer(TimeSpan.FromSeconds(1));
         private void OnSkillUpdate(object obj, LuaEventArgs args)
         {
-            foreach (object o in args.Args)
-                Debug("spell changed {0}", o);
-            if (!_onSkillUpdateSpamSW.IsRunning)
+            if (_onSkillUpdateTimer.IsFinished)
             {
-                Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-                _onSkillUpdateSpamSW.Start();
+                try
+                {
+                    lock (TradeSkillList)
+                    {
+                        UpdateMaterials();
+                        // check if there was any tradeskills added or removed.
+                        WoWSkill[] skills = SupportedTradeSkills;
+                        bool changed = skills.Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine)s.Id) == 1) != TradeSkillList.Count ||
+                                       skills.Length != TradeSkillList.Count;
+                        if (changed)
+                        {
+                            Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
+                            OnTradeSkillsLoaded += Professionbuddy_OnTradeSkillsLoaded;
+                            LoadTradeSkills();
+                        }
+                        else
+                        {
+                            Debug("Updated tradeskills from OnSkillUpdateTimerCB");
+                            foreach (TradeSkill ts in TradeSkillList)
+                            {
+                                ts.PulseSkill();
+                            }
+                            if (MainForm.IsValid)
+                            {
+                                MainForm.Instance.RefreshTradeSkillTabs();
+                                MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Err(ex.ToString());
+                }
+                _onSkillUpdateTimer.Reset();
             }
         }
 
-        private void OnSkillUpdateTimerCB()
-        {
-            Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-            try
-            {
-                UpdateMaterials();
-                // check if there was any tradeskills added or removed.
-                WoWSkill[] skills = SupportedTradeSkills;
-                bool changed = skills.
-                                   Count(s => TradeSkillList.Count(l => l.SkillLine == (SkillLine)s.Id) == 1) !=
-                               TradeSkillList.Count ||
-                               skills.Length != TradeSkillList.Count;
-                if (changed)
-                {
-                    Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
-                    OnTradeSkillsLoaded += Professionbuddy_OnTradeSkillsLoaded;
-                    LoadTradeSkills();
-                }
-                else
-                {
-                    Debug("Updated tradeskills from OnSkillUpdateTimerCB");
-                    foreach (TradeSkill ts in TradeSkillList)
-                    {
-                        ts.PulseSkill();
-                    }
-                    if (MainForm.IsValid)
-                    {
-                        MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Err(ex.ToString());
-            }
-        }
+        #endregion
 
         public void Professionbuddy_OnTradeSkillsLoaded(object sender, EventArgs e)
         {
@@ -352,43 +323,35 @@ namespace HighVoltz
             OnTradeSkillsLoaded -= Professionbuddy_OnTradeSkillsLoaded;
         }
 
-        #endregion
-
         #region OnSpellsChanged
 
-        private readonly Stopwatch _onSpellsChangedSpamSw = new Stopwatch();
+        readonly WaitTimer _onSpellsChangedTimer = new WaitTimer(TimeSpan.FromSeconds(1));
 
         private void OnSpellsChanged(object obj, LuaEventArgs args)
         {
-            if (!_onSpellsChangedSpamSw.IsRunning)
+            if (_onSpellsChangedTimer.IsFinished)
             {
-                Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
-                _onSpellsChangedSpamSw.Start();
+                try
+                {
+                    Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
+                    Debug("Pulsing Tradeskills from OnSpellsChanged");
+                    foreach (TradeSkill ts in TradeSkillList)
+                    {
+                        ts.PulseSkill();
+                    }
+                    if (MainForm.IsValid)
+                    {
+                        MainForm.Instance.InitTradeSkillTab();
+                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Err(ex.ToString());
+                }
+                _onSpellsChangedTimer.Reset();
             }
         }
-
-        private void OnSpellsChangedCB()
-        {
-            try
-            {
-                Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
-                Debug("Pulsing Tradeskills from OnSpellsChanged");
-                foreach (TradeSkill ts in TradeSkillList)
-                {
-                    ts.PulseSkill();
-                }
-                if (MainForm.IsValid)
-                {
-                    MainForm.Instance.InitTradeSkillTab();
-                    MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
-                }
-            }
-            catch (Exception ex)
-            {
-                Err(ex.ToString());
-            }
-        }
-
         #endregion
 
         // Used as a fix when profile is loaded before Inititialize is called
@@ -930,13 +893,13 @@ namespace HighVoltz
             var asmName = Assembly.GetExecutingAssembly().GetName().Name;
             var len = asmName.LastIndexOf("_", StringComparison.Ordinal);
             var folderName = asmName.Substring(0, len);
-            
-            var botsPath = Styx.Helpers.GlobalSettings.Instance.BotsPath;    
+
+            var botsPath = Styx.Helpers.GlobalSettings.Instance.BotsPath;
             if (!Path.IsPathRooted(botsPath))
             {
                 botsPath = Path.Combine(Utilities.AssemblyDirectory, botsPath);
             }
-            return Path.Combine(botsPath, folderName);        
+            return Path.Combine(botsPath, folderName);
         }
         #endregion
     }

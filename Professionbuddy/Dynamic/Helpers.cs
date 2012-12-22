@@ -15,46 +15,49 @@ namespace HighVoltz.Dynamic
     public class Helpers
     {
         private const string LoginLua =
-            "if (RealmList and RealmList:IsVisible()) then " +
-            "for i = 1, select('#',GetRealmCategories()) do " +
-            "for j = 1, GetNumRealms(i) do " +
-            "if GetRealmInfo(i, j) == \"{1}\" then " +
-            "RealmList:Hide() " +
-            "ChangeRealm(i, j) " +
-            "end " +
-            "end " +
-            "end " +
-            "elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then " +
-            "if GetServerName() ~= \"{1}\" and (not RealmList or not RealmList:IsVisible()) then " +
-            "RequestRealmList(1) " +
-            "else " +
-            "for i = 1,GetNumCharacters() do " +
-            "if (GetCharacterInfo(i) == \"{0}\") then " +
-            "CharacterSelect_SelectCharacter(i) " +
-            "EnterWorld() " +
-            "end " +
-            "end " +
-            "end " +
-            "elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then " +
-            "CharacterCreate_Back() " +
-            "end ";
+@" 
+if (RealmList and RealmList:IsVisible()) then  
+    for i = 1, select('#',GetRealmCategories()) do  
+        for j = 1, GetNumRealms(i) do  
+            if GetRealmInfo(i, j) == ""{1}""  then  
+                RealmList:Hide()  
+                ChangeRealm(i, j)  
+            end  
+        end  
+    end  
+elseif (CharacterSelectUI and CharacterSelectUI:IsVisible()) then  
+    if GetServerName() ~= ""{1}""  and (not RealmList or not RealmList:IsVisible()) then  
+        RequestRealmList(1)  
+    else  
+        for i = 1,GetNumCharacters() do  
+            if (GetCharacterInfo(i) == ""{0}"" ) then  
+                CharacterSelect_SelectCharacter(i)  
+                EnterWorld()  
+            end  
+        end  
+    end  
+elseif (CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then  
+    CharacterCreate_Back()  
+end " ;
 
-        private const string InGbankCountFormat =
-            "local itemCount = 0 " +
-            "for k,v in pairs(DataStore_ContainersDB.global.Guilds) do " +
-            "if string.find(k,\"{0}\") and v.Tabs then " +
-            "for k2,v2 in ipairs(v.Tabs) do " +
-            "if v2 and v2.ids then " +
-            "for k3,v3 in pairs(v2.ids) do " +
-            "if v3 == {1} then " +
-            "itemCount = itemCount + (v2.counts[k3] or 1) " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "end " +
-            "return itemCount";
+    // {0} = GuildName, {1} = item Id;
+        private const string InGbankCountFormat = 
+@"local itemCount = 0  
+for k,v in pairs(DataStore_ContainersDB.global.Guilds) do  
+    if string.find(k,""{0}"") and v.Tabs then  
+        for k2,v2 in ipairs(v.Tabs) do  
+            if v2 and v2.ids then  
+                for k3,v3 in pairs(v2.ids) do  
+                    if v3 == {1} then  
+                        itemCount = itemCount + (v2.counts[k3] or 1)  
+                    end  
+                end  
+            end  
+        end  
+    end  
+end  
+return itemCount 
+";
 
         private static HBRelogApi _hbRelog;
         private static bool _isSwitchingToons;

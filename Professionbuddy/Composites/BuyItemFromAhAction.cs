@@ -67,7 +67,7 @@ namespace HighVoltz.Composites
         private int _page;
         private Stopwatch _queueTimer = new Stopwatch();
         private List<BuyItemEntry> _toBuyList;
-        private List<BuyItemEntry> _toQueueNameList;
+        private List<BuyItemEntry> _toQueryNameList;
         private int _totalAuctions;
 
         public BuyItemFromAhAction()
@@ -246,25 +246,25 @@ namespace HighVoltz.Composites
                     }
                     else
                     {
-                        if (_toQueueNameList == null)
+                        if (_toQueryNameList == null)
                         {
-                            _toQueueNameList = BuildItemList();
+                            _toQueryNameList = BuildItemList();
                             _toBuyList = new List<BuyItemEntry>();
                         }
-                        if ((_toQueueNameList == null || _toQueueNameList.Count == 0) && _toBuyList.Count == 0)
+                        if ((_toQueryNameList == null || _toQueryNameList.Count == 0) && _toBuyList.Count == 0)
                         {
                             IsDone = true;
                             return RunStatus.Failure;
                         }
-                        if (_toQueueNameList != null && _toQueueNameList.Count > 0)
+                        if (_toQueryNameList != null && _toQueryNameList.Count > 0)
                         {
-                            string name = GetLocalName(_toQueueNameList[0].Id);
+                            string name = GetLocalName(_toQueryNameList[0].Id);
                             if (!string.IsNullOrEmpty(name))
                             {
-                                BuyItemEntry item = _toQueueNameList[0];
+                                BuyItemEntry item = _toQueryNameList[0];
                                 item.Name = name;
                                 _toBuyList.Add(item);
-                                _toQueueNameList.RemoveAt(0);
+                                _toQueryNameList.RemoveAt(0);
                             }
                         }
                         if (_toBuyList.Count > 0)
@@ -426,7 +426,7 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            _toQueueNameList = null;
+            _toQueryNameList = null;
             _toBuyList = null;
         }
 

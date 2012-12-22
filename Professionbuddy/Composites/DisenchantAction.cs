@@ -183,7 +183,7 @@ namespace HighVoltz.Composites
                     castime = 2000;
                     break;
             }
-            return castime + WaitForLagTimeMs +1000;
+            return castime + WaitForLagTimeMs ;
         }
 
         uint WaitForLagTimeMs
@@ -200,7 +200,7 @@ namespace HighVoltz.Composites
             {
                 if (Me.IsFlying)
                     return RunStatus.Failure;
-                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < WaitForLagTimeMs + 2000)
+                if (_lootSw.IsRunning && _lootSw.ElapsedMilliseconds < WaitForLagTimeMs )
                     return RunStatus.Success;
                 if (LootFrame.Instance != null && LootFrame.Instance.IsVisible)
                 {
@@ -283,7 +283,7 @@ namespace HighVoltz.Composites
                 else if (ActionType == DeActionType.Prospect)
                     skillLevel = StyxWoW.Me.GetSkill(SkillLine.Jewelcrafting).CurrentValue;
 
-                IEnumerable<WoWItem> itemQueue = from item in StyxWoW.Me.BagItems
+                IEnumerable<WoWItem> itemQuery = from item in StyxWoW.Me.BagItems
                                                  where !IsBlackListed(item) &&
                                                        !Pb.ProtectedItems.Contains(item.Entry) &&
                                                        ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
@@ -293,11 +293,11 @@ namespace HighVoltz.Composites
                 switch (ActionType)
                 {
                     case DeActionType.Disenchant:
-                        return itemQueue.Where(i => i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
+                        return itemQuery.Where(i => i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
                     case DeActionType.Mill:
-                        return itemQueue.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
+                        return itemQuery.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
                     case DeActionType.Prospect:
-                        return itemQueue.Where(i => i.CanProspect(skillLevel) && i.StackCount >= 5).ToList();
+                        return itemQuery.Where(i => i.CanProspect(skillLevel) && i.StackCount >= 5).ToList();
                 }
             }
             return null;
@@ -337,201 +337,6 @@ namespace HighVoltz.Composites
 
     internal static class WoWitemExt
     {
-        #region Prospect List
-
-        // (itemId,required level)
-        private static readonly Dictionary<uint, int> ProspectList = new Dictionary<uint, int>
-                                                                         {
-                                                                             {2770, 20},
-                                                                             //Copper Ore
-                                                                             {2771, 50},
-                                                                             //Tin Ore
-                                                                             {2772, 125},
-                                                                             //Iron Ore
-                                                                             {3858, 175},
-                                                                             //Mithril Ore
-                                                                             {10620, 250},
-                                                                             //Thorium Ore
-                                                                             {23424, 275},
-                                                                             //Fel Iron Ore
-                                                                             {23425, 325},
-                                                                             //Adamantite Ore
-                                                                             {36909, 350},
-                                                                             //Cobalt Ore
-                                                                             {36912, 400},
-                                                                             //Saronite Ore
-                                                                             {53038, 425},
-                                                                             //Obsidium Ore
-                                                                             {36910, 450},
-                                                                             //Titanium Ore
-                                                                             {52185, 475},
-                                                                             //Elementium Ore
-                                                                             {52183, 500},
-                                                                             //Pyrite Ore
-                                                                         };
-
-        #endregion
-
-        #region Millable Herb List
-
-        // (itemId,required level)
-        private static readonly Dictionary<uint, int> MillableHerbList = new Dictionary<uint, int>
-                                                                             {
-                                                                                 {765, 1},
-                                                                                 //Silverleaf
-                                                                                 {2447, 1},
-                                                                                 //Peacebloom
-                                                                                 {2449, 1},
-                                                                                 //Earthroot
-                                                                                 {2450, 25},
-                                                                                 //Briarthorn
-                                                                                 {2453, 25},
-                                                                                 //Bruiseweed
-                                                                                 {785, 25},
-                                                                                 //Mageroyal
-                                                                                 {3820, 25},
-                                                                                 //Stranglekelp
-                                                                                 {2452, 25},
-                                                                                 //Swiftthistle
-                                                                                 {3369, 75},
-                                                                                 //Grave Moss
-                                                                                 {3356, 75},
-                                                                                 //Kingsblood
-                                                                                 {3357, 75},
-                                                                                 //Liferoot 
-                                                                                 {3355, 75},
-                                                                                 //Wild Steelbloom
-                                                                                 {3819, 125},
-                                                                                 //Dragon's Teeth
-                                                                                 {3818, 125},
-                                                                                 //Fadeleaf
-                                                                                 {3821, 125},
-                                                                                 //Goldthorn
-                                                                                 {3358, 125},
-                                                                                 //Khadgar's Whisker
-                                                                                 {8836, 175},
-                                                                                 //Arthas' Tears
-                                                                                 {8839, 175},
-                                                                                 //Blindweed
-                                                                                 {4625, 175},
-                                                                                 //Firebloom
-                                                                                 {8845, 175},
-                                                                                 //Ghost Mushroom
-                                                                                 {8846, 175},
-                                                                                 //Gromsblood
-                                                                                 {8838, 175},
-                                                                                 //Sungrass
-                                                                                 {13463, 225},
-                                                                                 //Dreamfoil
-                                                                                 {13464, 225},
-                                                                                 //Golden Sansam
-                                                                                 {13467, 225},
-                                                                                 //Icecap
-                                                                                 {13465, 225},
-                                                                                 //Mountain Silversage
-                                                                                 {13466, 225},
-                                                                                 //Sorrowmoss
-                                                                                 {22790, 275},
-                                                                                 //Ancient Lichen
-                                                                                 {22786, 275},
-                                                                                 //Dreaming Glory
-                                                                                 {22785, 275},
-                                                                                 //Felweed
-                                                                                 {22793, 275},
-                                                                                 //Mana Thistle
-                                                                                 {22791, 275},
-                                                                                 //Netherbloom
-                                                                                 {22792, 275},
-                                                                                 //Nightmare Vine
-                                                                                 {22787, 275},
-                                                                                 //Ragveil
-                                                                                 {22789, 275},
-                                                                                 //Terocone
-                                                                                 {36903, 325},
-                                                                                 //Adder's Tongue
-                                                                                 {37921, 325},
-                                                                                 //Deadnettle
-                                                                                 {39970, 325},
-                                                                                 //Fire Leaf
-                                                                                 {36901, 325},
-                                                                                 //Goldclover
-                                                                                 {36906, 325},
-                                                                                 //Icethorn
-                                                                                 {36905, 325},
-                                                                                 //Lichbloom
-                                                                                 {36907, 325},
-                                                                                 //Talandra's Rose
-                                                                                 {36904, 325},
-                                                                                 //Tiger Lily
-                                                                                 {52985, 450},
-                                                                                 //Azshara's Veil
-                                                                                 {52983, 375},
-                                                                                 //Cinderbloom
-                                                                                 {52986, 375},
-                                                                                 //Heartblossom
-                                                                                 {52984, 375},
-                                                                                 //Stormvine
-                                                                                 {52987, 450},
-                                                                                 //Twilight Jasmine
-                                                                                 {52988, 475},
-                                                                                 //Whiptail
-                                                                             };
-
-        #endregion
-
-        #region Disenchant Info
-
-        // format [skillLevel,max iLevel]
-        private static readonly int[,] UncommonItemDeList = new[,]
-                                                                {
-                                                                    {1, 20},
-                                                                    {25, 25},
-                                                                    {50, 30},
-                                                                    {75, 35},
-                                                                    {100, 40},
-                                                                    {125, 45},
-                                                                    {150, 50},
-                                                                    {175, 55},
-                                                                    {200, 60},
-                                                                    {225, 99},
-                                                                    {275, 120},
-                                                                    {325, 150},
-                                                                    {350, 182},
-                                                                    {425, 333}
-                                                                };
-
-        private static readonly int[,] RareItemDeList = new[,]
-                                                            {
-                                                                {1, 20},
-                                                                {25, 25},
-                                                                {50, 30},
-                                                                {75, 35},
-                                                                {100, 40},
-                                                                {125, 45},
-                                                                {150, 50},
-                                                                {175, 55},
-                                                                {200, 60},
-                                                                {225, 99},
-                                                                {275, 120},
-                                                                {325, 200},
-                                                                {450, 380}
-                                                            };
-
-        private static readonly int[,] EpicItemDeList = new[,]
-                                                            {
-                                                                {1, 20},
-                                                                {25, 25},
-                                                                {50, 30},
-                                                                {75, 35},
-                                                                {100, 40},
-                                                                {125, 88},
-                                                                {225, 164},
-                                                                {375, 284},
-                                                                {475, 372}
-                                                            };
-
-        #endregion
-
         public static bool CanMill(this WoWItem item, int skillLevel)
         {
             var requiredLevel = item.MinInscriptionLevelReq();
@@ -544,50 +349,20 @@ namespace HighVoltz.Composites
         {
             var requiredLevel = item.MinJewelCraftLevelReq();
             return requiredLevel >= 0 && skillLevel >= requiredLevel;
-            // returns true if item is found in the dictionary and player meets the level requirement
-            //return ProspectList.ContainsKey(item.Entry) && ProspectList[item.Entry] <= skillLevel;
         }
-
 
         public static bool CanDisenchant(this WoWItem item, int skillLevel)
         {
-            var requiredLevel = item.MinEnchantLevelReq();
-            return requiredLevel >= 0 && skillLevel >= requiredLevel;
-
-            /*
-            ItemInfo itemInfo = item.ItemInfo;
-            if (itemInfo.StatsCount == 0 && itemInfo.RandomPropertiesId == 0 && itemInfo.RandomSuffixId == 0)
-            {
-                //Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2} because it has no stats.",
-                //    item.Name, item.BagIndex + 1, item.BagSlot + 1);
+            if (item.Quality < WoWItemQuality.Uncommon)
                 return false;
-            }
-            int[,] deList = null;
-            if (item.Quality == WoWItemQuality.Uncommon)
-                deList = UncommonItemDeList;
-            else if (item.Quality == WoWItemQuality.Rare)
-                deList = RareItemDeList;
-            else if (item.Quality == WoWItemQuality.Epic)
-                deList = EpicItemDeList;
-            // returns true if item is found in the dictionary and player meets the level requirement
-            if (deList != null)
-            {
-                int x;
-                int iLevel = item.ItemInfo.Level;
-                for (x = 0; x < deList.Length/2; x++)
-                {
-                    if (iLevel <= deList[x, 1] && skillLevel >= deList[x, 0])
-                    {
-                        Professionbuddy.Log("We can disenchant {0} found in bag {1} at slot {2}",
-                                            item.Name, item.BagIndex + 1, item.BagSlot + 1);
-                        return true;
-                    }
-                }
-            }
-            Professionbuddy.Log("We cannot disenchant {0} found in bag {1} at slot {2}. SkillLevel: {3}",
-                                item.Name, item.BagIndex + 1, item.BagSlot + 1, skillLevel);
-            return false;
-             */
+            if (item.ItemInfo.ItemClass != WoWItemClass.Armor && item.ItemInfo.ItemClass != WoWItemClass.Weapon)
+                return false;
+            if (item.DurabilityPercent < 100)
+                return false;
+
+            var requiredLevel = item.MinEnchantLevelReq();
+
+            return requiredLevel >= 0 && skillLevel >= requiredLevel;
         }
     }
 }

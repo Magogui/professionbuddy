@@ -93,44 +93,44 @@ namespace HighVoltz.Composites
 
         public PutItemInBankAction()
         {
-            Properties["Amount"] = new MetaProp("Amount", typeof (DynamicProperty<int>),
+            Properties["Amount"] = new MetaProp("Amount", typeof(DynamicProperty<int>),
                                                 new TypeConverterAttribute(
-                                                    typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                                    typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
 
-            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
-            Properties["Bank"] = new MetaProp("Bank", typeof (BankType),
+            Properties["Bank"] = new MetaProp("Bank", typeof(BankType),
                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Bank"]));
 
-            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof (bool),
+            Properties["AutoFindBank"] = new MetaProp("AutoFindBank", typeof(bool),
                                                       new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindBank"]));
 
-            Properties["Location"] = new MetaProp("Location", typeof (string),
-                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
-                                                                      typeof (UITypeEditor)),
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
+                                                                      typeof(UITypeEditor)),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof (uint),
-                                                  new EditorAttribute(typeof (PropertyBag.EntryEditor),
-                                                                      typeof (UITypeEditor)),
+            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
+                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
+                                                                      typeof(UITypeEditor)),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
 
-            Properties["GuildTab"] = new MetaProp("GuildTab", typeof (uint),
+            Properties["GuildTab"] = new MetaProp("GuildTab", typeof(uint),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_GuildTab"]));
 
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof (bool),
+            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool),
                                                      new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
 
-            Properties["Category"] = new MetaProp("Category", typeof (WoWItemClass),
+            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
 
-            Properties["SubCategory"] = new MetaProp("SubCategory", typeof (WoWItemTradeGoodsClass),
+            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass),
                                                      new DisplayNameAttribute(
                                                          Pb.Strings["Action_Common_ItemSubCategory"]));
 
-            Properties["Deposit"] = new MetaProp("Deposit", typeof (DepositWithdrawAmount),
+            Properties["Deposit"] = new MetaProp("Deposit", typeof(DepositWithdrawAmount),
                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Deposit"]));
 
             Amount = new DynamicProperty<int>(this, "0");
@@ -171,7 +171,7 @@ namespace HighVoltz.Composites
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -230,20 +230,20 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public DepositWithdrawAmount Deposit
         {
-            get { return (DepositWithdrawAmount) Properties["Deposit"].Value; }
+            get { return (DepositWithdrawAmount)Properties["Deposit"].Value; }
             set { Properties["Deposit"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool UseCategory
         {
-            get { return (bool) Properties["UseCategory"].Value; }
+            get { return (bool)Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
 
         public WoWItemClass Category
         {
-            get { return (WoWItemClass) Properties["Category"].Value; }
+            get { return (WoWItemClass)Properties["Category"].Value; }
             set { Properties["Category"].Value = value; }
         }
 
@@ -256,7 +256,7 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public BankType Bank
         {
-            get { return (BankType) Properties["Bank"].Value; }
+            get { return (BankType)Properties["Bank"].Value; }
             set { Properties["Bank"].Value = value; }
         }
 
@@ -264,43 +264,43 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public string ItemID
         {
-            get { return (string) Properties["ItemID"].Value; }
+            get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint GuildTab
         {
-            get { return (uint) Properties["GuildTab"].Value; }
+            get { return (uint)Properties["GuildTab"].Value; }
             set { Properties["GuildTab"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint NpcEntry
         {
-            get { return (uint) Properties["NpcEntry"].Value; }
+            get { return (uint)Properties["NpcEntry"].Value; }
             set { Properties["NpcEntry"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Amount
         {
-            get { return (DynamicProperty<int>) Properties["Amount"].Value; }
+            get { return (DynamicProperty<int>)Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool AutoFindBank
         {
-            get { return (bool) Properties["AutoFindBank"].Value; }
+            get { return (bool)Properties["AutoFindBank"].Value; }
             set { Properties["AutoFindBank"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string) Properties["Location"].Value; }
+            get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
@@ -340,7 +340,7 @@ namespace HighVoltz.Composites
                         _itemsSW = new Stopwatch();
                         _itemsSW.Start();
                     }
-                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing*3)
+                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing * 3)
                         return RunStatus.Success;
                     if (_itemList == null)
                         _itemList = BuildItemList();
@@ -391,7 +391,7 @@ namespace HighVoltz.Composites
             WoWObject bank = GetLocalBanker();
             if (bank != null)
                 movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, bank.Location, 4);
-                // search the database
+            // search the database
             else if (movetoPoint == WoWPoint.Zero)
             {
                 movetoPoint = MoveToAction.GetLocationFromDB(Bank == BankType.Personal
@@ -407,7 +407,7 @@ namespace HighVoltz.Composites
             {
                 Util.MoveTo(movetoPoint);
             }
-                // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
+            // since there are many personal bank replacement addons I can't just check if frame is open and be generic.. using events isn't reliable
             else if (bank != null)
             {
                 bank.Interact();
@@ -461,7 +461,7 @@ namespace HighVoltz.Composites
 
         private bool SubCategoryCheck(WoWItem item)
         {
-            var sub = (int) SubCategory;
+            var sub = (int)SubCategory;
             if (sub == -1 || sub == 0)
                 return true;
             PropertyInfo prop =
@@ -469,7 +469,7 @@ namespace HighVoltz.Composites
             if (prop != null)
             {
                 object val = prop.GetValue(item.ItemInfo, null);
-                if (val != null && (int) val == sub)
+                if (val != null && (int)val == sub)
                     return true;
             }
             return false;
@@ -486,9 +486,9 @@ namespace HighVoltz.Composites
             else
                 bankers = (from banker in ObjectManager.ObjectList
                            where (banker is WoWUnit &&
-                                  ((WoWUnit) banker).IsBanker &&
-                                  ((WoWUnit) banker).IsAlive &&
-                                  ((WoWUnit) banker).CanSelect)
+                                  ((WoWUnit)banker).IsBanker &&
+                                  ((WoWUnit)banker).IsAlive &&
+                                  ((WoWUnit)banker).CanSelect)
                            select banker).ToList();
             if (!AutoFindBank && NpcEntry != 0)
                 bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
@@ -506,13 +506,13 @@ namespace HighVoltz.Composites
         {
             if (obj is WoWGameObject)
             {
-                var banker = (WoWGameObject) obj;
+                var banker = (WoWGameObject)obj;
                 return banker.SubType == WoWGameObjectType.GuildBank &&
                        (banker.CreatedByGuid == 0 || banker.CreatedByGuid == Me.Guid);
             }
             if (obj is WoWUnit)
             {
-                var banker = (WoWUnit) obj;
+                var banker = (WoWUnit)obj;
                 return banker.IsGuildBanker && banker.IsAlive && banker.CanSelect;
             }
             return false;
@@ -531,7 +531,7 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            _queueServerSW = null;
+            _queryServerSW = null;
             _bankSlots = null;
             _itemList = null;
             _itemsSW = null;
@@ -564,7 +564,7 @@ namespace HighVoltz.Composites
             XAttribute subCatTypeAttr = element.Attribute("SubCategoryType");
             if (cat != null)
             {
-                Category = (WoWItemClass) Enum.Parse(typeof (WoWItemClass), cat.Value);
+                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), cat.Value);
                 cat.Remove();
             }
             if (subCatAttr != null && subCatTypeAttr != null)
@@ -576,7 +576,7 @@ namespace HighVoltz.Composites
                     subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
                 }
                 else
-                    subCategoryType = typeof (SubCategoryType);
+                    subCategoryType = typeof(SubCategoryType);
                 SubCategory = Enum.Parse(subCategoryType, subCatAttr.Value);
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();
@@ -595,23 +595,25 @@ namespace HighVoltz.Composites
         private const int GuildTabSlotNum = 98;
         private List<BankSlotInfo> _bankSlots;
         private Stopwatch _itemsSW;
-        private Stopwatch _queueServerSW;
+        private Stopwatch _queryServerSW;
+
+
 
         public int PutItemInGBank(uint id, int amount, uint tab)
         {
             using (StyxWoW.Memory.AcquireFrame())
             {
-                if (_queueServerSW == null)
+                if (_queryServerSW == null)
                 {
-                    _queueServerSW = new Stopwatch();
-                    _queueServerSW.Start();
+                    _queryServerSW = new Stopwatch();
+                    _queryServerSW.Start();
                     Lua.DoString(
                         "for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end SetCurrentGuildBankTab({0}) ",
                         tab == 0 ? 1 : tab);
-                    Professionbuddy.Log("Queuing server for gbank info");
+                    Professionbuddy.Log("Querying server for gbank info");
                     return 0;
                 }
-                if (_queueServerSW.ElapsedMilliseconds < 2000)
+                if (_queryServerSW.ElapsedMilliseconds < 2000)
                     return 0;
                 if (_bankSlots == null)
                     _bankSlots = GetBankSlotInfo();
@@ -623,9 +625,9 @@ namespace HighVoltz.Composites
                     .FirstOrDefault(item => item.Entry == id && !item.IsDisabled);
                 if (itemToDeposit != null)
                 {
-                    int depositAmount = amount > 0 && amount < (int) itemToDeposit.StackCount
+                    int depositAmount = amount > 0 && amount < (int)itemToDeposit.StackCount
                                             ? amount
-                                            : (int) itemToDeposit.StackCount;
+                                            : (int)itemToDeposit.StackCount;
 
                     BankSlotInfo emptySlot = slotsInCurrentTab.FirstOrDefault(slotI => slotI.StackSize == 0);
                     BankSlotInfo partialStack = slotsInCurrentTab
@@ -678,8 +680,8 @@ namespace HighVoltz.Composites
                 if (Bank == BankType.Guild)
                 {
                     var tabCnt = Lua.GetReturnVal<int>("return GetNumGuildBankTabs()", 0);
-                    int minTab = GuildTab > 0 ? (int) GuildTab : 1;
-                    int maxTab = GuildTab > 0 ? (int) GuildTab : tabCnt;
+                    int minTab = GuildTab > 0 ? (int)GuildTab : 1;
+                    int maxTab = GuildTab > 0 ? (int)GuildTab : tabCnt;
                     for (int tab = minTab; tab <= maxTab; tab++)
                     {
                         // check permissions for tab
@@ -745,12 +747,12 @@ namespace HighVoltz.Composites
 
             public override int GetHashCode()
             {
-                return (Bag*1000 + Slot).GetHashCode();
+                return (Bag * 1000 + Slot).GetHashCode();
             }
 
             public static bool operator ==(BankSlotInfo a, BankSlotInfo b)
             {
-                if ((object) a == null || (object) b == null)
+                if ((object)a == null || (object)b == null)
                     return Equals(a, b);
                 return a.Equals(b);
             }
