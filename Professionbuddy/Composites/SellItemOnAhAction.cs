@@ -587,45 +587,57 @@ namespace HighVoltz.Composites
 ";
 
         private const string SellOnAhLuaFormat = @"
-            local itemID = {0}  
-            local amount = {1}  
-            local bid = {3}  
-            local bo = {4}  
-            local runtime = {5}  
-            local stack = {2}  
-            local sold = 0  
-            local leftovers = 0  
-            local numItems = GetItemCount(itemID)  
-            ClearCursor()
-            if numItems == 0 then return -1 end  
-            if AuctionProgressFrame:IsVisible() == nil then  
-                AuctionFrameTab3:Click()  
-                local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID)  
-                if maxStack < stack then stack = maxStack end  
-                if amount * stack > numItems then  
-                    amount = floor(numItems/stack)  
-                    if amount <= 0 then  
-                        amount = 1  
-                        stack = numItems  
-                    else  
-                        leftovers = numItems-(amount*stack)  
-                    end  
-                end  
-                for bag = 0,4 do  
-                    for slot=GetContainerNumSlots(bag),1,-1 do  
-                        local id = GetContainerItemID(bag,slot)  
-                        local _,c,l = GetContainerItemInfo(bag, slot)  
-                        if id == itemID and l == nil then  
-                            PickupContainerItem(bag, slot)  
-                            ClickAuctionSellItemButton()  
-                            StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
-                            return leftovers  
-                        end  
-                    end 
-                end 
-            else
-                return -1 
-            end 
+local itemID = {0}  
+local amount = {1}  
+local bid = {3}  
+local bo = {4}  
+local runtime = {5}  
+local stack = {2}  
+local sold = 0  
+local leftovers = 0  
+local inbagCount = function (itemId)
+   local cnt = 0
+   for bag = 0,4 do  
+      for slot =1, GetContainerNumSlots(bag) do
+         if GetContainerItemID(bag, slot) == itemId then
+            _,count= GetContainerItemInfo(bag, slot)
+            cnt = cnt + count   
+         end
+      end  
+   end 
+   return cnt
+end
+local numItems = inbagCount(itemID)  
+ClearCursor()
+if numItems == 0 then return -1 end  
+if AuctionProgressFrame:IsVisible() == nil then  
+    AuctionFrameTab3:Click()  
+    local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID)  
+    if maxStack < stack then stack = maxStack end  
+    if amount * stack > numItems then  
+        amount = floor(numItems/stack)  
+        if amount <= 0 then  
+            amount = 1  
+            stack = numItems  
+        else  
+            leftovers = numItems-(amount*stack)  
+        end  
+    end  
+    for bag = 0,4 do  
+        for slot=GetContainerNumSlots(bag),1,-1 do  
+            local id = GetContainerItemID(bag,slot)  
+            local _,c,l = GetContainerItemInfo(bag, slot)  
+            if id == itemID and l == nil then  
+                PickupContainerItem(bag, slot)  
+                ClickAuctionSellItemButton()  
+                StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
+                return leftovers  
+            end  
+        end 
+    end 
+else
+    return -1 
+end 
 ";
 
         private readonly Stopwatch _queueTimer = new Stopwatch();
