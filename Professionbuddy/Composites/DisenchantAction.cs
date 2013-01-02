@@ -190,7 +190,7 @@ namespace HighVoltz.Composites
         {
             get
             {
-                return (3 * Util.WoWPing) + 50;
+                return (3 * Util.WoWPing) + 1000;
             }
         }
 
