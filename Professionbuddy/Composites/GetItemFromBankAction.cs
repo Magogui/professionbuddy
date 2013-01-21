@@ -65,6 +65,7 @@ namespace HighVoltz.Composites
             end  
             if sawItem == 0 then return -1 else return bagged end   
 ";
+        // thanks to Stove for fixing problem with PutItemInBag not working - http://www.thebuddyforum.com/members/134034-stove.html 
 
         private const string WithdrawItemFromPersonalBankLuaFormat = @"
             local numSlots = GetNumBankSlots()  
@@ -91,7 +92,11 @@ namespace HighVoltz.Composites
                            if fs > 0 and (bfamily == 0 or bit.band(itemf, bfamily) > 0) then  
                               local freeSlots = GetContainerFreeSlots(bag2)  
                               SplitContainerItem(bag1,slot1,amount - bagged)  
-                              if bag2 == 0 then PutItemInBackpack() else PutItemInBag(bag2) end  
+                              if bag2 == 0 then PutItemInBackpack() else 
+					            slotTable=GetContainerFreeSlots(bag2) 
+					            first=slotTable[1] 
+					            PickupContainerItem(bag2, first)
+					          end  
                               return  
                            end  
                            bag2 = bag2 -1  
@@ -101,8 +106,8 @@ namespace HighVoltz.Composites
                   end  
                end  
                bag1 = bag1 -1  
-            end  
-";
+            end";
+      
 
         private static Stopwatch _queueServerSW;
         private readonly Stopwatch _gbankItemThrottleSW = new Stopwatch();
