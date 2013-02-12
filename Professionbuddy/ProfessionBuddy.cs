@@ -804,9 +804,8 @@ namespace HighVoltz
         #endregion
 
         #region Utilies
-
+        #region Logging
         private static string _logHeader;
-        private static RichTextBox _rtbLog;
 
         private static string Header
         {
@@ -820,19 +819,24 @@ namespace HighVoltz
 
         public static void Log(string format, params object[] args)
         {
-            LogInvoker(Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
+            LogInvoker(LogLevel.Normal, Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
         }
 
         public static void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor,
                                string format, params object[] args)
         {
-            LogInvoker(Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B), header,
+            LogInvoker(LogLevel.Normal, Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B), header,
                        Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B), format, args);
         }
 
         public static void Log(Color headerColor, string header, Color msgColor, string format, params object[] args)
         {
-            LogInvoker(headerColor, header, msgColor, format, args);
+            LogInvoker(LogLevel.Normal, headerColor, header, msgColor, format, args);
+        }
+
+        public static void Log(LogLevel logLevel, Color headerColor, string header, Color msgColor, string format, params object[] args)
+        {
+            LogInvoker(logLevel, headerColor, header, msgColor, format, args);
         }
 
         public static void Debug(string format, params object[] args)
@@ -840,52 +844,73 @@ namespace HighVoltz
             Logging.WriteDiagnostic(Colors.DodgerBlue, string.Format("PB {0}: ", Instance.Version) + format, args);
         }
 
-        private static void LogInvoker(Color headerColor, string header, Color msgColor, string format,
-                                       params object[] args)
+        private static void LogInvoker(LogLevel level, Color headerColor, string header, Color msgColor, string format,
+                        params object[] args)
         {
             if (Application.Current.Dispatcher.Thread == Thread.CurrentThread)
-                LogInternal(headerColor, header, msgColor, format, args);
+                LogInternal(level, headerColor, header, msgColor, format, args);
             else
-                Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), headerColor, header, msgColor,
-                                                           format, args);
+                Application.Current.Dispatcher.BeginInvoke(new LogDelegate(LogInternal), level, headerColor, header, msgColor,
+                                                            format, args);
         }
-
-        private static void LogInternal(Color headerColor, string header, Color msgColor, string format,
+        private static RichTextBox _rtbLog;
+        // modified by Ingrego.
+        private static void LogInternal(LogLevel level, Color headerColor, string header, Color msgColor, string format,
                                         params object[] args)
         {
+            if (level == LogLevel.None)
+                return;
             try
             {
-                if (_rtbLog == null)
-                    _rtbLog = (RichTextBox)Application.Current.MainWindow.FindName("rtbLog");
-                Color headerColorMedia = Color.FromArgb(headerColor.A,
-                                                        headerColor.R,
-                                                        headerColor.G,
-                                                        headerColor.B);
-                Color msgColorMedia = Color.FromArgb(msgColor.A, msgColor.R,
-                                                     msgColor.G, msgColor.B);
-
-                var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
-                headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColorMedia));
-
-                var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
                 string msg = String.Format(format, args);
-                messageTR.Text = msg + Environment.NewLine;
-                messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColorMedia));
-                Logging.WriteDiagnostic(header + msg);
+                if (Styx.Helpers.GlobalSettings.Instance.LogLevel >= level)
+                {
+                    if (_rtbLog == null)
+                        _rtbLog = (RichTextBox)Application.Current.MainWindow.FindName("rtbLog");
+
+                    var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
+                    headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColor));
+
+                    var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
+                    messageTR.Text = msg + Environment.NewLine;
+                    messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColor));
+                    _rtbLog.ScrollToEnd();
+                }
                 try
                 {
-                    File.AppendAllText(Logging.LogFilePath, string.Format("[{0}]{1},{2}", DateTime.Now.ToString("HH:mm:ss.fff"), header, msg));
+                    char abbr;
+                    switch (level)
+                    {
+                        case LogLevel.Normal:
+                            abbr = 'N';
+                            break;
+                        case LogLevel.Quiet:
+                            abbr = 'Q';
+                            break;
+                        case LogLevel.Diagnostic:
+                            abbr = 'D';
+                            break;
+                        case LogLevel.Verbose:
+                            abbr = 'V';
+                            break;
+                        default:
+                            abbr = 'N';
+                            break;
+                    }
+                    var logMsg = string.Format("[{0} {4}]{1}{2}{3}", DateTime.Now.ToString("HH:mm:ss.fff"), header, msg, Environment.NewLine, abbr);
+                    File.AppendAllText(Logging.LogFilePath, logMsg);
                 }
                 catch { }
             }
             catch
             {
-                Logging.Write("PB: " + format, args);
+                Logging.Write(header + format, args);
             }
         }
 
-        private delegate void LogDelegate(
+        private delegate void LogDelegate(LogLevel level,
             Color headerColor, string header, Color msgColor, string format, params object[] args);
+        #endregion
 
         static string GetProfessionbuddyPath()
         {   // taken from Singular.

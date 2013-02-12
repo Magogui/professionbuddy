@@ -295,16 +295,31 @@ namespace HighVoltz.Dynamic
             bool HasItem (uint id) {return InbagCount(id) > 0; }
             int InbagCount (uint id) {return Helpers.InbagCount(id); }
             int InBankCount (uint id) {return Util.GetBankItemCount(id); }
-            int InGBankCount(uint itemId) {return Helpers.InGBankCount(itemId);}
-            int InGBankCount(string character, uint itemId) {return Helpers.InGBankCount(character,itemId);}
-            int OnAhCount(uint itemId) {return Helpers.OnAhCount(itemId);}
-            int OnAhCount(string character, uint itemId) {return Helpers.OnAhCount(character,itemId);}
+
+            int GBankTabFreeSlots(int gbTab, string character = null,string server = null) {return Helpers.GBankTabFreeSlots(gbTab,character,server);}
+
+            int GBankTotalFreeSlots(string character = null,string server = null) {return Helpers.GBankTotalFreeSlots(character,server);}
+
+            int GbankTabCount(string character = null,string server = null) {return Helpers.GbankTabCount(character,server);}
+
+            int InGBankCount(string character, uint itemId) {return Helpers.InGBankCount(itemId, character);}
+            int InGBankCount(string character, string server, uint itemId) {return Helpers.InGBankCount(itemId, character,server);}
+            int InGBankCount(uint itemId, string character = null, string server = null) {return Helpers.InGBankCount(itemId, character,server);}
+
+            int OnAhCount(string character, uint itemId) {return Helpers.OnAhCount(itemId,character);}
+            int OnAhCount(string character,string server, uint itemId) {return Helpers.OnAhCount(itemId,character,server);}
+            int OnAhCount(uint itemId, string character = null, string server = null) {return Helpers.OnAhCount(itemId,character,server);}
+
             void Log (System.Windows.Media.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (System.Drawing.Color c,string f,params object[] args) {Helpers.Log(c,f,args); }
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
             void Log(System.Windows.Media.Color headerColor, string header, System.Windows.Media.Color msgColor, string format, params object[] args) 
             {
                 Professionbuddy.Log(headerColor, header, msgColor, format, args);
+            }
+            void Log(Styx.Common.LogLevel logLevel, System.Windows.Media.Color headerColor, string header, System.Windows.Media.Color msgColor, string format, params object[] args) 
+            {
+                Professionbuddy.Log(logLevel, headerColor, header, msgColor, format, args);
             }
             void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
             {

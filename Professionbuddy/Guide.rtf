@@ -133,14 +133,37 @@ HBRelog.Logon(string character, string server) \b0\lang1033\par
 \b DataStore\b0  - This is a Dictionary<uint,int> that gets populated when PB starts up or when RefreshDataStore() is called. The dictionary key is an item ID and value is the number of items total that are on that server/faction.\par
 \b MailCount  \b0 - This property returns the number of mail in the inbox, requires mailbox to be open or recently visited.\par
 \b InbagCount (ItemID\b0 ) - Returns the number of items the player has in the bags that match ItemID\par
-\b InBankCount (ItemID\b0 ) - Returns the number of items the player has in personal bank that match ItemID. \par
-\b InGBankCount (ItemID\b0 ) - Returns the number of items the player has in guild bank that match ItemID. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
-\b InGBankCount (CharacterName,ItemID\b0 ) Same as above except it gives the choice to get item count on a character that isn\rquote t currently logged in game.\par
-\b OnAhCount (ItemID\b0 ) - Returns the number of items the player has on AH that match ItemID. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
-\b OnAhCount (CharacterName,ItemID\b0 ) Same as above except it gives the choice to get item count on a character that isn\rquote t currently logged in game.\par
-\b Log(string,params object[] args)\b0  - prints a message to Honorbuddy's Log\par
+\b InBankCount (ItemID\b0 ) - Returns the number of items the player has in personal bank that match ItemID.\par
+
+\pard\nowidctlpar\b GBankTabCount ()\b0  \par
+\b GBankTabFreeSlots (CharacterName\b0 ) \par
+
+\pard\nowidctlpar\sa200\b GBankTabFreeSlots (CharacterName, Server\b0 ) - Returns the number tabs in guild bank. If no character name and/or server name is provided than the name of player currently logged in is used. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required \par
+
+\pard\nowidctlpar\b GBankTotalFreeSlots ()\b0  \par
+\b GBankTabFreeSlots (CharacterName\b0 ) \par
+
+\pard\nowidctlpar\sa200\b GBankTabFreeSlots (CharacterName, Server\b0 ) - Returns the number total number of free slots in guild bank. If no character name and/or server name is provided than the name of player currently logged in is used. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
+
+\pard\nowidctlpar\b GBankTabFreeSlots (tabNumber\b0 ) \par
+\b GBankTabFreeSlots (tabNumber, CharacterName\b0 ) \par
+
+\pard\nowidctlpar\sa200\b GBankTabFreeSlots (tabNumber, CharacterName, Server\b0 ) - Returns the number of free slots in the given guild bank tab. If no character name and/or server name is provided than the name of player currently logged in is used. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
+
+\pard\nowidctlpar\b InGBankCount (ItemID\b0 ) \par
+\b InGBankCount (ItemID, CharacterName\b0 ) \par
+
+\pard\nowidctlpar\sa200\b InGBankCount (ItemID, CharacterName, Server\b0 ) - Returns the number of items the player has in guild bank that match ItemID. If no character name and/or server name is provided than the name of player currently logged in is used. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
+
+\pard\nowidctlpar\sl240\slmult1\b OnAhCount (ItemID\b0 )\par
+\b OnAhCount (ItemID, CharacterName\b0 ) \par
+
+\pard\nowidctlpar\sa200\sl240\slmult1\b OnAhCount (ItemID, CharacterName, Server\b0 )  - Returns the number of items the player has on AH that match ItemID. If no character name and/or server name is provided than the name of player currently logged in is used. Requires Datastore WoW Addon. No \i RefreshDataStore()\i0  call is required\par
+
+\pard\nowidctlpar\sa200\b Log(string,params object[] args)\b0  - prints a message to Honorbuddy's Log\par
 \b Log(Color,string,params object[] args)\b0  - prints a message to Honorbuddy's Log using the specific color\par
 \b Log(Color headerColor,string header,Color msgColor,string msg,params object[] args)\b0  - prints a message to Honorbuddy's Log \par
+\b Log(LogLevel, Color headerColor,string header,Color msgColor,string msg,params object[] args)\b0  - prints a message to Honorbuddy's Log\par
 \b DistanceTo (x,y,z\b0 ) - returns distance to location\par
 \b MoveTo (x,y,z)\b0  - moves to location\par
 \b CTM (x,y,z)\b0  - uses Click-To-Move to go to location\par
