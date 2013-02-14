@@ -125,7 +125,7 @@ namespace HighVoltz
         #endregion
 
         #region Overrides
-        private InvisiForm _ivisibleForm;
+        private MainForm _gui;
 
         public override string Name
         {
@@ -143,7 +143,9 @@ namespace HighVoltz
             {
                 if (!_init)
                     Init();
-                return _ivisibleForm ?? (_ivisibleForm = new InvisiForm());
+                if (!MainForm.IsValid)
+                    _gui = new MainForm();
+                return _gui;
             }
         }
 
@@ -200,7 +202,6 @@ namespace HighVoltz
                 SecondaryBot.Stop();
         }
 
-        // used as a hack to get a modeless form for pb's GUI window. 
 
         public override void Pulse()
         {
@@ -211,25 +212,6 @@ namespace HighVoltz
         public override void Initialize()
         {
             Init();
-        }
-
-        private class InvisiForm : Form
-        {
-            public InvisiForm()
-            {
-                Size = new Size(0, 0);
-            }
-
-            protected override void OnLoad(EventArgs e)
-            {
-                if (!MainForm.IsValid)
-                {
-                    new MainForm { TopLevel = true }.Show();
-                    MainForm.Instance.TopLevel = true;
-                }
-                DialogResult = DialogResult.OK;
-                MainForm.Instance.Activate();
-            }
         }
 
         #endregion
