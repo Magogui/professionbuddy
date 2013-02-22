@@ -145,6 +145,8 @@ namespace HighVoltz
                     Init();
                 if (!MainForm.IsValid)
                     _gui = new MainForm();
+                else 
+                    _gui.Activate();
                 return _gui;
             }
         }
