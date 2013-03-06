@@ -524,6 +524,9 @@ namespace HighVoltz
 
                     // check for Professionbuddy updates
                     new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
+
+                    Log(Colors.Red,"Warning", Colors.Red, "This version does not support tradeskills");
+
                     _init = true;
                 }
             }
@@ -569,6 +572,15 @@ namespace HighVoltz
 
         public void LoadTradeSkills()
         {
+            // todo: romove this once db2 support is added.
+            IsTradeSkillsLoaded = true;
+            if (OnTradeSkillsLoaded != null)
+            {
+                OnTradeSkillsLoaded(this, null);
+            }
+            return;
+
+
             new Timer(state =>
                           {
                               try

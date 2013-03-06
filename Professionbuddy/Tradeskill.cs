@@ -612,6 +612,7 @@ namespace HighVoltz
                 if (spelldbRow != null)
                 {
                     var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
+                    /*
                     WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
                         reagentIndex >= reagentDbTable.MinIndex)
@@ -627,6 +628,8 @@ namespace HighVoltz
                             }
                         }
                     }
+                     */
+
                 }
             }
         }
