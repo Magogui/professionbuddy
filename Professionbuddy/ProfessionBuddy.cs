@@ -461,9 +461,9 @@ namespace HighVoltz
             get
             {
                 IEnumerable<WoWSkill> skillList = from skill in TradeSkill.SupportedSkills
-                                                  where
-                                                      skill != SkillLine.Archaeology && Me.GetSkill(skill).MaxValue > 0
+                                                  where Me.GetSkill(skill).MaxValue > 0
                                                   select Me.GetSkill(skill);
+
                 return skillList.ToArray();
             }
         }
@@ -524,9 +524,6 @@ namespace HighVoltz
 
                     // check for Professionbuddy updates
                     new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
-
-                    Log(Colors.Red,"Warning", Colors.Red, "This version does not support tradeskills");
-
                     _init = true;
                 }
             }
@@ -573,34 +570,37 @@ namespace HighVoltz
         public void LoadTradeSkills()
         {
             // todo: romove this once db2 support is added.
-            IsTradeSkillsLoaded = true;
-            if (OnTradeSkillsLoaded != null)
-            {
-                OnTradeSkillsLoaded(this, null);
-            }
-            return;
+            //IsTradeSkillsLoaded = true;
+            //if (OnTradeSkillsLoaded != null)
+            //{
+            //    OnTradeSkillsLoaded(this, null);
+            //}
+            //return;
 
 
-            new Timer(state =>
-                          {
+          //  new Timer(state =>
+                   //       {
                               try
                               {
                                   lock (TradeSkillList)
                                   {
                                       TradeSkillList.Clear();
-                                      foreach (WoWSkill skill in SupportedTradeSkills)
+                                      using (StyxWoW.Memory.AcquireFrame())
                                       {
-                                          Log("Adding TradeSkill {0}", skill.Name);
-                                          TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
-                                          if (ts != null)
+                                          foreach (WoWSkill skill in SupportedTradeSkills)
                                           {
-                                              TradeSkillList.Add(ts);
-                                          }
-                                          else
-                                          {
-                                              IsTradeSkillsLoaded = false;
-                                              Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
-                                              return;
+                                              Log("Adding TradeSkill {0}", skill.Name);
+                                              TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine) skill.Id);
+                                              if (ts != null)
+                                              {
+                                                  TradeSkillList.Add(ts);
+                                              }
+                                              else
+                                              {
+                                                  IsTradeSkillsLoaded = false;
+                                                  Log("Unable to load tradeskill {0}", (SkillLine) skill.Id);
+                                                  return;
+                                              }
                                           }
                                       }
                                   }
@@ -615,7 +615,7 @@ namespace HighVoltz
                               {
                                   Logging.Write(Colors.Red, ex.ToString());
                               }
-                          }, null, (long)0, Timeout.Infinite);
+                      //    }, null, (long)0, Timeout.Infinite);
         }
 
         public void UpdateMaterials()

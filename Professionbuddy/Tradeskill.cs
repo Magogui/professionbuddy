@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Styx;
 using Styx.Common;
@@ -40,10 +41,9 @@ namespace HighVoltz
                                                                          SkillLine.Inscription,
                                                                          SkillLine.Jewelcrafting,
                                                                          SkillLine.Leatherworking,
-                                                                         SkillLine.Mining,
                                                                          // smelting
-                                                                         SkillLine.Tailoring,
-                                                                         SkillLine.Archaeology,
+                                                                         SkillLine.Mining,
+                                                                         SkillLine.Tailoring
                                                                      };
 
         private static uint _knownSpellsPtr;
@@ -153,14 +153,15 @@ namespace HighVoltz
         private List<SkillLineAbilityEntry> GetSkillLineAbilityEntries()
         {
             var abilityList = new List<SkillLineAbilityEntry>();
-            var targetSkillId = (int) SkillLine;
+            var targetSkillId = (int)SkillLine;
 
             WoWDb.DbTable table = StyxWoW.Db[ClientDb.SkillLineAbility];
             var minIndex = (uint)table.MinIndex;
             var topIndex = (uint)table.NumRows;
             uint bomIndex = 0;
             uint half;
-            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility - 0x400000) + 0x14, true);
+            // var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility - 0x400000) + 0x14, true);
+            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility) + 0x14, true);
             uint id;
             // optimized search
             do
@@ -300,25 +301,25 @@ namespace HighVoltz
             TradeSkill tradeSkill = null;
             try
             {
-                //using (StyxWoW.Memory.AcquireFrame())
-                //{
-                WoWSkill wowSkill = StyxWoW.Me.GetSkill(skillLine);
-                // sw.Start();
-                tradeSkill = new TradeSkill(wowSkill);
-
-                List<SkillLineAbilityEntry> entries = tradeSkill.GetSkillLineAbilityEntries();
-                foreach (SkillLineAbilityEntry entry in entries)
+                using (StyxWoW.Memory.AcquireFrame())
                 {
-                    // check if the entry is a recipe
-                    if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0 && entry.TradeSkillCategoryIndex != 0) 
+                    WoWSkill wowSkill = StyxWoW.Me.GetSkill(skillLine);
+                    // sw.Start();
+                    tradeSkill = new TradeSkill(wowSkill);
+
+                    List<SkillLineAbilityEntry> entries = tradeSkill.GetSkillLineAbilityEntries();
+                    foreach (SkillLineAbilityEntry entry in entries)
                     {
-                        var recipe = new Recipe(tradeSkill, entry);
-                        recipe.UpdateHeader();
-                        tradeSkill.AddRecipe(recipe);
+                        // check if the entry is a recipe
+                        if (entry.NextSpellId == 0 && entry.GreySkillLevel > 0 && entry.TradeSkillCategoryIndex != 0)
+                        {
+                            var recipe = new Recipe(tradeSkill, entry);
+                            recipe.UpdateHeader();
+                            tradeSkill.AddRecipe(recipe);
+                        }
+                        //Logging.Write(entry.ToString());
                     }
-                    //Logging.Write(entry.ToString());
                 }
-                //}
             }
             catch (Exception ex)
             {
@@ -348,6 +349,7 @@ namespace HighVoltz
     }
 
     #endregion
+
 
     #region Recipe
 
@@ -612,6 +614,14 @@ namespace HighVoltz
                 if (spelldbRow != null)
                 {
                     var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
+                    var reagents = GetSpellReagents(reagentIndex);
+                    for (int i = 0; i < reagents.Reagent.Length; i++)
+                    {
+                        if (reagents.Reagent[i] == 0)
+                            continue;
+                        _ingredients.Add(new Ingredient((uint)reagents.Reagent[i], reagents.ReagentCount[i], _parent.Ingredients));
+                    }
+
                     /*
                     WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
                     if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
@@ -632,6 +642,26 @@ namespace HighVoltz
 
                 }
             }
+        }
+
+        internal WoWSpell.SpellReagentsEntry GetSpellReagents(uint spellReagentsId)
+        {
+            if (spellReagentsId == 0)
+                return new WoWSpell.SpellReagentsEntry();
+
+            var cachePtr = StyxWoW.Memory.GetAbsolute((IntPtr)(0x107F5D8 - 0x400000));
+            var funcPtr = StyxWoW.Memory.GetAbsolute((IntPtr)(0x82F510 - 0x400000));
+
+            var retPtr = StyxWoW.Memory.Call<IntPtr>(funcPtr, CallingConvention.ThisCall, (uint)cachePtr, spellReagentsId, 0, 0, 0, 0);
+
+            if (retPtr == IntPtr.Zero)
+                return new WoWSpell.SpellReagentsEntry();
+
+            return StyxWoW.Memory.Read<WoWSpell.SpellReagentsEntry>(retPtr);
+
+
+            //var row = StyxWoW.Db[ClientDb.SpellReagents].GetRow(SpellReagentsId);
+            //return row == null || !row.IsValid ? new SpellReagentsEntry() : row.GetStruct<SpellReagentsEntry>();
         }
 
         public void UpdateHeader()
@@ -1155,4 +1185,5 @@ namespace HighVoltz
     }
 
     #endregion
+
 }
