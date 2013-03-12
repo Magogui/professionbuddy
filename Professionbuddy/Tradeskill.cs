@@ -606,10 +606,7 @@ namespace HighVoltz
             if (_ingredients != null)
                 return;
             _ingredients = new List<Ingredient>();
-            //var reagents = Spell.InternalInfo.SpellReagents;
-            // ToDo remove after HB beta becomes stable
-            var reagents = new WoWSpell.SpellReagentsEntry(){Reagent = new int[0]};
-            // end
+            var reagents = Spell.InternalInfo.SpellReagents;
             for (int i = 0; i < reagents.Reagent.Length; i++)
             {
                 if (reagents.Reagent[i] == 0)

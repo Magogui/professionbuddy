@@ -582,16 +582,6 @@ namespace HighVoltz
 
         public void LoadTradeSkills()
         {
-            // todo Remove after hb beta goes live...
-            IsTradeSkillsLoaded = true;
-            TradeSkillList = new List<TradeSkill>();
-            if (OnTradeSkillsLoaded != null)
-            {
-                OnTradeSkillsLoaded(this, null);
-            }
-            return;
-            // end
-
             var newTradeSkills = new List<TradeSkill>();
             try
             {
