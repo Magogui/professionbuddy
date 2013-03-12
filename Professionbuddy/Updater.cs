@@ -11,8 +11,13 @@ namespace HighVoltz
 {
     public static class Updater
     {
+#if BETA
+        private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/branches/beta";
+        private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r="; 
+#else
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r=";
+#endif
 
         private static readonly Regex _linkPattern = new Regex(@"<li><a href="".+"">(?<ln>.+(?:..))</a></li>",
                                                                RegexOptions.CultureInvariant);
