@@ -1,5 +1,5 @@
 ﻿//!CompilerOption:Optimize:On
-// Copyright Highvoltz 2012
+// Copyright Highvoltz 2013
 
 using System;
 using System.Collections.Generic;
@@ -605,64 +605,50 @@ namespace HighVoltz
             // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
             if (_ingredients != null)
                 return;
-            uint recipeID = SpellId;
             _ingredients = new List<Ingredient>();
-            WoWDb.DbTable spelldbTable = StyxWoW.Db[ClientDb.Spell];
-            if (spelldbTable != null && recipeID <= spelldbTable.MaxIndex && recipeID >= spelldbTable.MinIndex)
+            var reagents = Spell.InternalInfo.SpellReagents;
+            for (int i = 0; i < reagents.Reagent.Length; i++)
             {
-                WoWDb.Row spelldbRow = spelldbTable.GetRow(recipeID);
-                if (spelldbRow != null)
-                {
-                    var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
-                    var reagents = GetSpellReagents(reagentIndex);
-                    for (int i = 0; i < reagents.Reagent.Length; i++)
-                    {
-                        if (reagents.Reagent[i] == 0)
-                            continue;
-                        _ingredients.Add(new Ingredient((uint)reagents.Reagent[i], reagents.ReagentCount[i], _parent.Ingredients));
-                    }
-
-                    /*
-                    WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
-                    if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
-                        reagentIndex >= reagentDbTable.MinIndex)
-                    {
-                        WoWDb.Row reagentDbRow = reagentDbTable.GetRow(reagentIndex);
-                        for (uint index = 1; index <= MaxSpellReagents; index++)
-                        {
-                            var id = reagentDbRow.GetField<uint>(index);
-                            if (id != 0)
-                            {
-                                _ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + MaxSpellReagents),
-                                                                _parent.Ingredients));
-                            }
-                        }
-                    }
-                     */
-
-                }
+                if (reagents.Reagent[i] == 0)
+                    continue;
+                _ingredients.Add(new Ingredient((uint)reagents.Reagent[i], reagents.ReagentCount[i], _parent.Ingredients));
             }
+
+            //WoWDb.DbTable spelldbTable = StyxWoW.Db[ClientDb.Spell];
+            //if (spelldbTable != null && recipeID <= spelldbTable.MaxIndex && recipeID >= spelldbTable.MinIndex)
+            //{
+            //    WoWDb.Row spelldbRow = spelldbTable.GetRow(recipeID);
+            //    if (spelldbRow != null)
+            //    {
+            //        var reagentIndex = spelldbRow.GetField<uint>((uint)SpellDB.SpellReagentsIndex);
+            //        var reagents = GetSpellReagents(reagentIndex);
+            //        for (int i = 0; i < reagents.Reagent.Length; i++)
+            //        {
+            //            if (reagents.Reagent[i] == 0)
+            //                continue;
+            //            _ingredients.Add(new Ingredient((uint)reagents.Reagent[i], reagents.ReagentCount[i], _parent.Ingredients));
+            //        }
+
+            //        WoWDb.DbTable reagentDbTable = StyxWoW.Db[ClientDb.SpellReagents];
+            //        if (reagentDbTable != null && reagentIndex <= reagentDbTable.MaxIndex &&
+            //            reagentIndex >= reagentDbTable.MinIndex)
+            //        {
+            //            WoWDb.Row reagentDbRow = reagentDbTable.GetRow(reagentIndex);
+            //            for (uint index = 1; index <= MaxSpellReagents; index++)
+            //            {
+            //                var id = reagentDbRow.GetField<uint>(index);
+            //                if (id != 0)
+            //                {
+            //                    _ingredients.Add(new Ingredient(id, reagentDbRow.GetField<uint>(index + MaxSpellReagents),
+            //                                                    _parent.Ingredients));
+            //                }
+            //            }
+            //        }
+
+            //    }
+            //}
         }
 
-        internal WoWSpell.SpellReagentsEntry GetSpellReagents(uint spellReagentsId)
-        {
-            if (spellReagentsId == 0)
-                return new WoWSpell.SpellReagentsEntry();
-
-            var cachePtr = StyxWoW.Memory.GetAbsolute((IntPtr)(0x107F5D8 - 0x400000));
-            var funcPtr = StyxWoW.Memory.GetAbsolute((IntPtr)(0x82F510 - 0x400000));
-
-            var retPtr = StyxWoW.Memory.Call<IntPtr>(funcPtr, CallingConvention.ThisCall, (uint)cachePtr, spellReagentsId, 0, 0, 0, 0);
-
-            if (retPtr == IntPtr.Zero)
-                return new WoWSpell.SpellReagentsEntry();
-
-            return StyxWoW.Memory.Read<WoWSpell.SpellReagentsEntry>(retPtr);
-
-
-            //var row = StyxWoW.Db[ClientDb.SpellReagents].GetRow(SpellReagentsId);
-            //return row == null || !row.IsValid ? new SpellReagentsEntry() : row.GetStruct<SpellReagentsEntry>();
-        }
 
         public void UpdateHeader()
         {
