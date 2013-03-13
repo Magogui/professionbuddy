@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Styx;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.Helpers;
 using Styx.Patchables;
@@ -350,7 +351,6 @@ namespace HighVoltz
 
     #endregion
 
-
     #region Recipe
 
     public class Recipe
@@ -384,7 +384,7 @@ namespace HighVoltz
             GreySkillLevel = skillLineAbilityEntry.GreySkillLevel;
             OptimalSkillups = skillLineAbilityEntry.SkillPointsEarned;
             Skill = skillLineAbilityEntry.SkillLine;
-            HasRecipe = TradeSkill.HasSpell(SpellId);
+            HasRecipe = TradeSkill.HasSpell(SpellId) ;
         }
 
         /// <summary>
@@ -605,8 +605,13 @@ namespace HighVoltz
             // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
             if (_ingredients != null)
                 return;
-            _ingredients = new List<Ingredient>();
             var reagents = Spell.InternalInfo.SpellReagents;
+            if (reagents.Reagent == null)
+            {
+                return;
+            }
+            _ingredients = new List<Ingredient>();
+
             for (int i = 0; i < reagents.Reagent.Length; i++)
             {
                 if (reagents.Reagent[i] == 0)
@@ -812,7 +817,6 @@ namespace HighVoltz
     // someone give this a good name, kthz
     public class IngredientSubClass
     {
-        private static readonly object NameLockObject = new object();
         internal Ingredient Parent;
         private string _name;
 
@@ -826,10 +830,19 @@ namespace HighVoltz
         {
             get
             {
-                lock (NameLockObject)
+                if (_name == null)
                 {
-                    return _name ?? (_name = GetName());
+                    // ok so it couldn't find the item in cache. since we're going to need to force a load
+                    // might as well do a framelock and try load all the items. 
+                    using (StyxWoW.Memory.AcquireFrame())
+                    {
+                        foreach (var ingred in Parent.MasterList)
+                        {
+                            ingred.Value.UpdateName();
+                        }
+                    }
                 }
+                return _name;
             }
         }
 
@@ -838,24 +851,14 @@ namespace HighVoltz
         /// </summary>
         public uint InBagsCount { get; internal set; }
 
-        private string GetName()
+        readonly WaitTimer _nameUpdateTimer = new WaitTimer(TimeSpan.FromSeconds(1));
+        private void UpdateName()
         {
-            string name = Util.GetItemCacheName(Parent.ID);
-            if (name == null)
+            if (_nameUpdateTimer.IsFinished && string.IsNullOrEmpty(_name))
             {
-                // ok so it couldn't find the item in cache. since we're going to need to force a load
-                // might as well do a framelock and try load all the items. 
-                IEnumerable<uint> ids = Parent.MasterList.Keys.Where(id => id != Parent.ID);
-
-                using (StyxWoW.Memory.AcquireFrame())
-                {
-                    foreach (uint id in ids)
-                    {
-                        name = Util.GetItemCacheName(id);
-                    }
-                }
+                _name = Util.GetItemCacheName(Parent.ID);
+                _nameUpdateTimer.Reset();
             }
-            return name;
         }
 
         /// <summary>

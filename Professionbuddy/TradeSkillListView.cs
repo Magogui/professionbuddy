@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
+using Timer = System.Threading.Timer;
 
 namespace HighVoltz
 {
@@ -74,7 +77,7 @@ namespace HighVoltz
                     CategoryCombo.Items.Add(kv.Value.Header);
                 }
                 TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), Util.CalculateRecipeRepeat(kv.Value),
-                                       (int) kv.Value.Difficulty); // make color column sortable by dificulty..
+                                       (int)kv.Value.Difficulty); // make color column sortable by dificulty..
             }
             TradeDataView_SelectionChanged(null, null);
             // hook events
@@ -108,6 +111,7 @@ namespace HighVoltz
             }
         }
 
+        private Timer _updateSelectionTimer;
         private void TradeDataView_SelectionChanged(object sender, EventArgs e)
         {
             if (MainForm.IsValid)
@@ -115,14 +119,23 @@ namespace HighVoltz
                 MainForm.Instance.IngredientsView.Rows.Clear();
                 if (TradeDataView.SelectedRows.Count > 0)
                 {
-                    var cell = (TradeSkillRecipeCell) TradeDataView.SelectedRows[0].Cells[0].Value;
+                    var cell = (TradeSkillRecipeCell)TradeDataView.SelectedRows[0].Cells[0].Value;
                     Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].KnownRecipes[cell.RecipeID];
                     var row = new DataGridViewRow();
                     foreach (Ingredient ingred in _recipe.Ingredients)
                     {
                         uint inBags = ingred.InBagItemCount;
-                        MainForm.Instance.IngredientsView.Rows.
-                            Add(ingred.Name, ingred.Required, inBags);
+                        MainForm.Instance.IngredientsView.Rows.Add(ingred.Name, ingred.Required, inBags);
+                        if (string.IsNullOrEmpty(ingred.Name) && _updateSelectionTimer == null)
+                        {
+                            _updateSelectionTimer = new Timer(state =>
+                                                      {
+                                                          TradeDataView_SelectionChanged(sender, e);
+                                                          _updateSelectionTimer.Dispose();
+                                                          _updateSelectionTimer = null;
+                                                      }, null, 1000, -1);
+                            
+                        }
                         if (ingred.InBagItemCount < ingred.Required)
                         {
                             MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
@@ -135,6 +148,7 @@ namespace HighVoltz
                 }
             }
         }
+
 
         private void FilterText_TextChanged(object sender, EventArgs e)
         {
