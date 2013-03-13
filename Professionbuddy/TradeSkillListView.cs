@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Timer = System.Threading.Timer;
 
@@ -11,11 +12,9 @@ namespace HighVoltz
     {
         private readonly int index; // index to Professionbuddy.Instance.TradeSkillList
         private readonly TableLayoutPanel tabTableLayout;
+        private Timer _updateSelectionTimer;
 
-        public TradeSkillListView()
-            : this(0)
-        {
-        }
+        public TradeSkillListView() : this(0) {}
 
         public TradeSkillListView(int index)
         {
@@ -76,8 +75,8 @@ namespace HighVoltz
                 {
                     CategoryCombo.Items.Add(kv.Value.Header);
                 }
-                TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), Util.CalculateRecipeRepeat(kv.Value),
-                                       (int)kv.Value.Difficulty); // make color column sortable by dificulty..
+                TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), Util.CalculateRecipeRepeat(kv.Value), (int) kv.Value.Difficulty);
+                    // make color column sortable by dificulty..
             }
             TradeDataView_SelectionChanged(null, null);
             // hook events
@@ -111,7 +110,6 @@ namespace HighVoltz
             }
         }
 
-        private Timer _updateSelectionTimer;
         private void TradeDataView_SelectionChanged(object sender, EventArgs e)
         {
             if (MainForm.IsValid)
@@ -119,29 +117,39 @@ namespace HighVoltz
                 MainForm.Instance.IngredientsView.Rows.Clear();
                 if (TradeDataView.SelectedRows.Count > 0)
                 {
-                    var cell = (TradeSkillRecipeCell)TradeDataView.SelectedRows[0].Cells[0].Value;
+                    var cell = (TradeSkillRecipeCell) TradeDataView.SelectedRows[0].Cells[0].Value;
                     Recipe _recipe = Professionbuddy.Instance.TradeSkillList[index].KnownRecipes[cell.RecipeID];
                     var row = new DataGridViewRow();
                     foreach (Ingredient ingred in _recipe.Ingredients)
                     {
                         uint inBags = ingred.InBagItemCount;
                         MainForm.Instance.IngredientsView.Rows.Add(ingred.Name, ingred.Required, inBags);
-                        if (string.IsNullOrEmpty(ingred.Name) && _updateSelectionTimer == null)
+                        var idx = MainForm.Instance.IngredientsView.Rows.Count - 1;
+                        if (string.IsNullOrEmpty(ingred.Name))
                         {
-                            _updateSelectionTimer = new Timer(state =>
-                                                      {
-                                                          TradeDataView_SelectionChanged(sender, e);
-                                                          _updateSelectionTimer.Dispose();
-                                                          _updateSelectionTimer = null;
-                                                      }, null, 1000, -1);
-                            
+                            DataGridViewCell c = MainForm.Instance.IngredientsView.Rows[idx].Cells[0];
+                            var task = new Task(
+                                o =>
+                                    {
+                                        var arg = (IngredientNameUpdateArg) o;
+                                        for (int i = 0; i < 50; i++)
+                                        {
+                                            arg.Cell.Value = arg.Ingredient.Name;
+                                            if (arg.Cell.Value != null)
+                                            {
+                                                break;
+                                            }
+                                            Thread.Sleep(200);
+                                        }
+                                    },
+                                new IngredientNameUpdateArg(c, ingred));
+
+                            task.Start();
                         }
                         if (ingred.InBagItemCount < ingred.Required)
                         {
-                            MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
-                                Cells[2].Style.SelectionBackColor = Color.Red;
-                            MainForm.Instance.IngredientsView.Rows[MainForm.Instance.IngredientsView.Rows.Count - 1].
-                                Cells[2].Style.ForeColor = Color.Red;
+                            MainForm.Instance.IngredientsView.Rows[idx].Cells[2].Style.SelectionBackColor = Color.Red;
+                            MainForm.Instance.IngredientsView.Rows[idx].Cells[2].Style.ForeColor = Color.Red;
                         }
                         MainForm.Instance.IngredientsView.ClearSelection();
                     }
@@ -168,13 +176,23 @@ namespace HighVoltz
             bool showAllCategories = string.IsNullOrEmpty(CategoryCombo.Text);
             foreach (var kv in Professionbuddy.Instance.TradeSkillList[index].KnownRecipes)
             {
-                if ((noFilter || kv.Value.Name.ToUpper().Contains(filter)) &&
-                    (showAllCategories || kv.Value.Header == CategoryCombo.Text))
+                if ((noFilter || kv.Value.Name.ToUpper().Contains(filter)) && (showAllCategories || kv.Value.Header == CategoryCombo.Text))
                 {
-                    TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), kv.Value.CanRepeatNum,
-                                           kv.Value.Color);
+                    TradeDataView.Rows.Add(new TradeSkillRecipeCell(index, kv.Key), kv.Value.CanRepeatNum, kv.Value.Color);
                 }
             }
+        }
+    }
+
+    internal class IngredientNameUpdateArg
+    {
+        public readonly DataGridViewCell Cell;
+        public readonly Ingredient Ingredient;
+
+        public IngredientNameUpdateArg(DataGridViewCell cell, Ingredient ingredient)
+        {
+            Cell = cell;
+            Ingredient = ingredient;
         }
     }
 

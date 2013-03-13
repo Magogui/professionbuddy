@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -384,7 +385,7 @@ namespace HighVoltz
             GreySkillLevel = skillLineAbilityEntry.GreySkillLevel;
             OptimalSkillups = skillLineAbilityEntry.SkillPointsEarned;
             Skill = skillLineAbilityEntry.SkillLine;
-            HasRecipe = TradeSkill.HasSpell(SpellId) ;
+            HasRecipe = TradeSkill.HasSpell(SpellId);
         }
 
         /// <summary>
@@ -830,19 +831,7 @@ namespace HighVoltz
         {
             get
             {
-                if (_name == null)
-                {
-                    // ok so it couldn't find the item in cache. since we're going to need to force a load
-                    // might as well do a framelock and try load all the items. 
-                    using (StyxWoW.Memory.AcquireFrame())
-                    {
-                        foreach (var ingred in Parent.MasterList)
-                        {
-                            ingred.Value.UpdateName();
-                        }
-                    }
-                }
-                return _name;
+                return _name ?? (_name = Util.GetItemCacheName(Parent.ID));
             }
         }
 
@@ -851,14 +840,9 @@ namespace HighVoltz
         /// </summary>
         public uint InBagsCount { get; internal set; }
 
-        readonly WaitTimer _nameUpdateTimer = new WaitTimer(TimeSpan.FromSeconds(1));
         private void UpdateName()
         {
-            if (_nameUpdateTimer.IsFinished && string.IsNullOrEmpty(_name))
-            {
-                _name = Util.GetItemCacheName(Parent.ID);
-                _nameUpdateTimer.Reset();
-            }
+            _name = Util.GetItemCacheName(Parent.ID);
         }
 
         /// <summary>
