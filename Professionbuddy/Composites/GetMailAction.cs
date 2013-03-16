@@ -29,12 +29,18 @@ namespace HighVoltz.Composites
             local numItems,totalItems = GetInboxNumItems()  
             local foundMail=0  
             local newMailCheck = {0}  
+            local maxCopperCOD = {1}
             for index=numItems,1,-1 do  
                local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText,canReply,IsGM=GetInboxHeaderInfo(index)  
                if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and canReply == nil and IsGM == nil then  
                   DeleteInboxItem(index)  
                end  
-               if cod == 0 and ((itemCnt and itemCnt >0) or (gold and gold > 0)) then  
+               local itemStackCnt = 0
+               for i=1, ATTACHMENTS_MAX_RECEIVE do
+                  local   _,_,cnt = GetInboxItem(index,i)
+                  itemStackCnt = itemStackCnt + cnt
+               end
+               if ((itemCnt and itemCnt >0) or (gold and gold > 0)) and (cod == 0 or maxCopperCOD and maxCopperCOD >= cod/itemStackCnt ) then  
                   for i=1,ATTACHMENTS_MAX_RECEIVE do  
                      if gold and gold > 0 then TakeInboxMoney(index) foundMail = 1 break end  
                      if GetInboxItem(index,i) ~= nil then  
@@ -55,12 +61,21 @@ namespace HighVoltz.Composites
             local numItems,totalItems = GetInboxNumItems()  
             local foundMail=0  
             local newMailCheck = {1}  
+            local maxCopperCOD = {2}
             for index=numItems,1,-1 do  
                local _,_,sender,subj,gold,cod,_,itemCnt,_,_,hasText=GetInboxHeaderInfo(index)  
                if sender ~= nil and cod == 0 and itemCnt == nil and gold == 0 and hasText == nil then  
                   DeleteInboxItem(index)  
                end  
-               if cod == 0 and itemCnt and itemCnt >0  then  
+               local itemStackCnt = 0
+               for i=1, ATTACHMENTS_MAX_RECEIVE do
+                  local itemlink = GetInboxItemLink(index, i2)  
+                  if itemlink ~= nil and string.find(itemlink,'{0}') then 
+                        local   _,_,cnt = GetInboxItem(index,i)
+                        itemStackCnt = itemStackCnt + cnt
+                  end
+               end
+               if itemCnt and itemCnt >0 and (cod == 0 or maxCopperCOD and maxCopperCOD >= cod/itemStackCnt ) then  
                   for i2=1, ATTACHMENTS_MAX_RECEIVE do  
                      local itemlink = GetInboxItemLink(index, i2)  
                      if itemlink ~= nil and string.find(itemlink,'{0}') then  
@@ -87,31 +102,36 @@ namespace HighVoltz.Composites
         public GetMailAction()
         {
             //CheckNewMail
-            Properties["ItemID"] = new MetaProp("ItemID", typeof (string),
+            Properties["ItemID"] = new MetaProp("ItemID", typeof(string),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
-            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof (int),
+            Properties["MinFreeBagSlots"] = new MetaProp("MinFreeBagSlots", typeof(int),
                                                          new DisplayNameAttribute(
                                                              Pb.Strings["Action_Common_MinFreeBagSlots"]));
 
-            Properties["CheckNewMail"] = new MetaProp("CheckNewMail", typeof (bool),
+            Properties["CheckNewMail"] = new MetaProp("CheckNewMail", typeof(bool),
                                                       new DisplayNameAttribute(
                                                           Pb.Strings["Action_GetMailAction_CheckNewMail"]));
 
-            Properties["GetMailType"] = new MetaProp("GetMailType", typeof (GetMailActionType),
+            Properties["GetMailType"] = new MetaProp("GetMailType", typeof(GetMailActionType),
                                                      new DisplayNameAttribute(Pb.Strings["Action_GetMailAction_Name"]));
 
-            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof (bool),
+            Properties["AutoFindMailBox"] = new MetaProp("AutoFindMailBox", typeof(bool),
                                                          new DisplayNameAttribute(
                                                              Pb.Strings["Action_Common_AutoFindMailbox"]));
 
-            Properties["Location"] = new MetaProp("Location", typeof (string),
-                                                  new EditorAttribute(typeof (PropertyBag.LocationEditor),
-                                                                      typeof (UITypeEditor)),
+            Properties["Location"] = new MetaProp("Location", typeof(string),
+                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
+                                                                      typeof(UITypeEditor)),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+
+            Properties["MaxCODAmount"] = new MetaProp("MaxCODAmount", typeof(PropertyBag.GoldEditor),
+                                       new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)),
+                                       new DisplayNameAttribute(Pb.Strings["Action_Common_MaxCODPrice"]));
 
             ItemID = "";
             CheckNewMail = true;
+            MaxCODAmount = new PropertyBag.GoldEditor("0g0s0c");
             GetMailType = GetMailActionType.AllItems;
             AutoFindMailBox = true;
             _loc = WoWPoint.Zero;
@@ -128,7 +148,7 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public GetMailActionType GetMailType
         {
-            get { return (GetMailActionType) Properties["GetMailType"].Value; }
+            get { return (GetMailActionType)Properties["GetMailType"].Value; }
             set { Properties["GetMailType"].Value = value; }
         }
 
@@ -136,35 +156,43 @@ namespace HighVoltz.Composites
         [PbXmlAttribute("Entry")]
         public string ItemID
         {
-            get { return (string) Properties["ItemID"].Value; }
+            get { return (string)Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool CheckNewMail
         {
-            get { return (bool) Properties["CheckNewMail"].Value; }
+            get { return (bool)Properties["CheckNewMail"].Value; }
             set { Properties["CheckNewMail"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        [TypeConverter(typeof(PropertyBag.GoldEditorConverter))]
+        public PropertyBag.GoldEditor MaxCODAmount
+        {
+            get { return (PropertyBag.GoldEditor)Properties["MaxCODAmount"].Value; }
+            set { Properties["MaxCODAmount"].Value = value; }
         }
 
         [PbXmlAttribute]
         public int MinFreeBagSlots
         {
-            get { return (int) Properties["MinFreeBagSlots"].Value; }
+            get { return (int)Properties["MinFreeBagSlots"].Value; }
             set { Properties["MinFreeBagSlots"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool AutoFindMailBox
         {
-            get { return (bool) Properties["AutoFindMailBox"].Value; }
+            get { return (bool)Properties["AutoFindMailBox"].Value; }
             set { Properties["AutoFindMailBox"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string) Properties["Location"].Value; }
+            get { return (string)Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
@@ -191,7 +219,7 @@ namespace HighVoltz.Composites
 
         private void LocationChanged(object sender, MetaPropArgs e)
         {
-            _loc = Util.StringToWoWPoint((string) ((MetaProp) sender).Value);
+            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
             Properties["Location"].PropertyChanged -= LocationChanged;
             Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
             Properties["Location"].PropertyChanged += LocationChanged;
@@ -270,14 +298,14 @@ namespace HighVoltz.Composites
                         {
                             if (!_throttleSW.IsRunning)
                                 _throttleSW.Start();
-                            if (_throttleSW.ElapsedMilliseconds < 4000 - (Me.FreeNormalBagSlots - MinFreeBagSlots)*1000)
+                            if (_throttleSW.ElapsedMilliseconds < 4000 - (Me.FreeNormalBagSlots - MinFreeBagSlots) * 1000)
                                 return RunStatus.Success;
                             _throttleSW.Reset();
                             _throttleSW.Start();
                         }
                         if (GetMailType == GetMailActionType.AllItems)
                         {
-                            string lua = string.Format(MailFormat, CheckNewMail ? 1 : 0);
+                            string lua = string.Format(MailFormat, CheckNewMail ? 1 : 0, MaxCODAmount.TotalCopper);
                             if (Me.FreeNormalBagSlots <= MinFreeBagSlots || Lua.GetReturnValues(lua)[0] == "1")
                                 _concludingSW.Start();
                         }
@@ -285,7 +313,7 @@ namespace HighVoltz.Composites
                         {
                             if (_idList.Count > 0 && Me.FreeNormalBagSlots > MinFreeBagSlots)
                             {
-                                string lua = string.Format(MailByIdFormat, _idList[0], CheckNewMail ? 1 : 0);
+                                string lua = string.Format(MailByIdFormat, _idList[0], CheckNewMail ? 1 : 0, MaxCODAmount.TotalCopper);
 
                                 if (Lua.GetReturnValues(lua)[0] == "1")
                                     _idList.RemoveAt(0);
@@ -354,6 +382,7 @@ namespace HighVoltz.Composites
                            Location = Location,
                            MinFreeBagSlots = MinFreeBagSlots,
                            CheckNewMail = CheckNewMail,
+                           MaxCODAmount = MaxCODAmount,
                        };
         }
     }

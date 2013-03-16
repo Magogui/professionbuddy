@@ -69,6 +69,7 @@
   <Action_Common_Material>Material</Action_Common_Material>
   <Action_Common_MaxBuyout>Max Buyout</Action_Common_MaxBuyout>
   <Action_Common_MinBuyout>Min Buyout</Action_Common_MinBuyout>
+  <Action_Common_MaxCODPrice>Max COD Price</Action_Common_MaxCODPrice>
   <Action_Common_MinFreeBagSlots>Min Free Bagslots</Action_Common_MinFreeBagSlots>
   <Action_Common_Name>Name</Action_Common_Name>
   <Action_Common_NpcEntry>Npc Entry</Action_Common_NpcEntry>
@@ -156,7 +157,7 @@
   
   <!-- GetMailAction -->
   <Action_GetMailAction_Name>Get Mail</Action_GetMailAction_Name>
-  <Action_GetMailAction_Help>This action retrieves all mail in the mailbox, or only items that match the entries found in 'Item Entries'. Since mailboxes are not in the NPC database you need to be within 100 yards of a mailbox to 'autofind' it</Action_GetMailAction_Help>
+  <Action_GetMailAction_Help>This action retrieves all mail in the mailbox, or only items that match the entries found in 'Item Entries'. 'Max COD Price' is the price per item in stack. Since mailboxes are not in the NPC database you need to be within 100 yards of a mailbox to 'autofind' it</Action_GetMailAction_Help>
   <Action_GetMailAction_CheckNewMail>Check for New Mail</Action_GetMailAction_CheckNewMail>
 	
   <!-- If -->
