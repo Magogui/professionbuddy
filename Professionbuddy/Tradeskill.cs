@@ -196,7 +196,9 @@ namespace HighVoltz
                 var entry = row.GetStruct<SkillLineAbilityEntry>();
                 if ((int)entry.SkillLine != targetSkillId)
                     break;
-                abilityList.Add(entry);
+                if (WoWSpell.FromId((int)entry.SpellId).IsValid)
+                    abilityList.Add(entry);
+
                 if (i != table.MaxIndex) // get next index
                     i = row.GetField<uint>((SkillLineAbilityFieldNum));
             }
@@ -606,6 +608,13 @@ namespace HighVoltz
             // instantizing ingredients in here and doing a null check to prevent recursion from Trade.Ingredients() 
             if (_ingredients != null)
                 return;
+
+            var spell = Spell;
+            if (spell == null)
+            {
+                Professionbuddy.Debug("{0} is not a valid spell. ", SpellId);
+                return;
+            }
             var reagents = Spell.InternalInfo.SpellReagents;
             if (reagents.Reagent == null)
             {
