@@ -196,7 +196,8 @@ namespace HighVoltz
                 var entry = row.GetStruct<SkillLineAbilityEntry>();
                 if ((int)entry.SkillLine != targetSkillId)
                     break;
-                if (WoWSpell.FromId((int)entry.SpellId).IsValid)
+                var spell = WoWSpell.FromId((int)entry.SpellId);
+                if (spell != null && spell.IsValid)
                     abilityList.Add(entry);
 
                 if (i != table.MaxIndex) // get next index
