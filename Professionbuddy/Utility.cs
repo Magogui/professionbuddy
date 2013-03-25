@@ -64,6 +64,8 @@ namespace HighVoltz
 
         public static bool IsBankFrameOpen { get; internal set; }
 
+        public static bool IsGBankFrameOpen { get; internal set; }
+
         public static bool IsGbankFrameVisible
         {
             get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; }
@@ -223,6 +225,16 @@ namespace HighVoltz
                               (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ? Professionbuddy.Instance.MaterialList[ingred.ID] : 0)
                           select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Min();
             return repeat > 0 ? repeat : 0;
+        }
+
+        internal static void OnGBankFrameOpened(object obj, LuaEventArgs args)
+        {
+            IsGBankFrameOpen = true;
+        }
+
+        internal static void OnGBankFrameClosed(object obj, LuaEventArgs args)
+        {
+            IsGBankFrameOpen = false;
         }
 
         internal static void OnBankFrameOpened(object obj, LuaEventArgs args)

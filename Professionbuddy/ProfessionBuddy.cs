@@ -187,12 +187,20 @@ namespace HighVoltz
             Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
             Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
+
+            Lua.Events.DetachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
+            Lua.Events.DetachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
+
             Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
             Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
 
             Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
             Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
             Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
+
+            Lua.Events.AttachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
+            Lua.Events.AttachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
+
             Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
             Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
 
