@@ -72,9 +72,9 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Returns WoW's ping, refreshed every 30 seconds.
+        ///   Returns WoW's latency, refreshed every 30 seconds.
         /// </summary>
-        public static uint WoWPing
+        public static uint WowWorldLatency
         {
             get
             {

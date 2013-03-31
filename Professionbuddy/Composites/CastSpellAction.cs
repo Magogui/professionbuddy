@@ -44,31 +44,31 @@ namespace HighVoltz.Composites
         {
             _spamControl = new Stopwatch();
             QueueIsRunning = false;
-            Properties["Casted"] = new MetaProp("Casted", typeof (int), new ReadOnlyAttribute(true),
+            Properties["Casted"] = new MetaProp("Casted", typeof(int), new ReadOnlyAttribute(true),
                                                 new DisplayNameAttribute(Pb.Strings["Action_CastSpellAction_Casted"]));
 
-            Properties["SpellName"] = new MetaProp("SpellName", typeof (string), new ReadOnlyAttribute(true),
+            Properties["SpellName"] = new MetaProp("SpellName", typeof(string), new ReadOnlyAttribute(true),
                                                    new DisplayNameAttribute(Pb.Strings["Action_Common_SpellName"]));
 
-            Properties["Repeat"] = new MetaProp("Repeat", typeof (DynamicProperty<int>),
+            Properties["Repeat"] = new MetaProp("Repeat", typeof(DynamicProperty<int>),
                                                 new TypeConverterAttribute(
-                                                    typeof (DynamicProperty<int>.DynamivExpressionConverter)),
+                                                    typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_Repeat"]));
 
-            Properties["Entry"] = new MetaProp("Entry", typeof (uint),
+            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
                                                new DisplayNameAttribute(Pb.Strings["Action_Common_SpellEntry"]));
 
-            Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof (bool),
+            Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof(bool),
                                                     new DisplayNameAttribute(
                                                         Pb.Strings["Action_CastSpellAction_CastOnItem"]));
 
-            Properties["ItemType"] = new MetaProp("ItemType", typeof (InventoryType),
+            Properties["ItemType"] = new MetaProp("ItemType", typeof(InventoryType),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_ItemType"]));
 
-            Properties["ItemId"] = new MetaProp("ItemId", typeof (uint),
+            Properties["ItemId"] = new MetaProp("ItemId", typeof(uint),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntry"]));
 
-            Properties["RepeatType"] = new MetaProp("RepeatType", typeof (RepeatCalculationType),
+            Properties["RepeatType"] = new MetaProp("RepeatType", typeof(RepeatCalculationType),
                                                     new DisplayNameAttribute(
                                                         Pb.Strings["Action_CastSpellAction_RepeatType"]));
             // Properties["Recipe"] = new MetaProp("Recipe", typeof(Recipe), new TypeConverterAttribute(typeof(RecipeConverter)));
@@ -109,7 +109,7 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public RepeatCalculationType RepeatType
         {
-            get { return (RepeatCalculationType) Properties["RepeatType"].Value; }
+            get { return (RepeatCalculationType)Properties["RepeatType"].Value; }
             set { Properties["RepeatType"].Value = value; }
         }
 
@@ -119,17 +119,17 @@ namespace HighVoltz.Composites
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
+        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Repeat
         {
-            get { return (DynamicProperty<int>) Properties["Repeat"].Value; }
+            get { return (DynamicProperty<int>)Properties["Repeat"].Value; }
             set { Properties["Repeat"].Value = value; }
         }
 
         // number of times repeated.
         public int Casted
         {
-            get { return (int) Properties["Casted"].Value; }
+            get { return (int)Properties["Casted"].Value; }
             set { Properties["Casted"].Value = value; }
         }
 
@@ -137,7 +137,7 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public uint Entry
         {
-            get { return (uint) Properties["Entry"].Value; }
+            get { return (uint)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
 
@@ -146,21 +146,21 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public bool CastOnItem
         {
-            get { return (bool) Properties["CastOnItem"].Value; }
+            get { return (bool)Properties["CastOnItem"].Value; }
             set { Properties["CastOnItem"].Value = value; }
         }
 
         [PbXmlAttribute]
         public InventoryType ItemType
         {
-            get { return (InventoryType) Properties["ItemType"].Value; }
+            get { return (InventoryType)Properties["ItemType"].Value; }
             set { Properties["ItemType"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint ItemId
         {
-            get { return (uint) Properties["ItemId"].Value; }
+            get { return (uint)Properties["ItemId"].Value; }
             set { Properties["ItemId"].Value = value; }
         }
 
@@ -243,7 +243,7 @@ namespace HighVoltz.Composites
                     case RepeatCalculationType.Specific:
                         return Repeat;
                     case RepeatCalculationType.Craftable:
-                        return IsRecipe ? (int) Recipe.CanRepeatNum2 : Repeat;
+                        return IsRecipe ? (int)Recipe.CanRepeatNum2 : Repeat;
                     case RepeatCalculationType.Banker:
                         if (IsRecipe && Pb.DataStore.ContainsKey(Recipe.CraftedItemID))
                         {
@@ -270,35 +270,32 @@ namespace HighVoltz.Composites
         {
             if (!IsDone)
             {
+                if (Me.IsFlying)
+                    Mount.Dismount();
+
                 if (!IsRecipe)
                     CheckTradeskillList();
                 if (Casted >= CalculatedRepeat)
                 {
-                    if (StyxWoW.Me.IsCasting && StyxWoW.Me.CastingSpell.Id == Entry)
-                        SpellManager.StopCasting();
-                    _spamControl.Stop();
-                    _spamControl.Reset();
-                    Lua.Events.DetachEvent("UNIT_SPELLCAST_SUCCEEDED", OnUnitSpellCastSucceeded);
-                    IsDone = true;
+                    Finished();
                     return RunStatus.Failure;
                 }
                 // can't make recipe so stop trying.
                 if (IsRecipe && Recipe.CanRepeatNum2 <= 0)
                 {
-                    Professionbuddy.Debug("{0} doesn't have enough material to craft.", SpellName);
-                    IsDone = true;
+                    Finished("Not enough material.");
                     return RunStatus.Failure;
                 }
                 if (Me.IsCasting && Me.CastingSpellId != Entry)
                     SpellManager.StopCasting();
                 // we should confirm the last recipe in list so we don't make an axtra
-                if (!Me.IsFlying && Casted + 1 < CalculatedRepeat || (Casted + 1 == CalculatedRepeat &&
+                if (Casted + 1 < CalculatedRepeat || (Casted + 1 == CalculatedRepeat &&
                                                                       (Confimed || !_spamControl.IsRunning ||
                                                                        (_spamControl.ElapsedMilliseconds >=
-                                                                        (_recastTime + (_recastTime/2)) + _waitTime &&
+                                                                        (_recastTime + (_recastTime / 2)) + _waitTime &&
                                                                         !StyxWoW.Me.IsCasting))))
                 {
-                    if (!_spamControl.IsRunning || _spamControl.ElapsedMilliseconds >= _recastTime ||
+                    if (!_spamControl.IsRunning || Me.IsCasting && Me.CurrentCastTimeLeft <= TimeSpan.FromMilliseconds(250) ||
                         (!StyxWoW.Me.IsCasting && _spamControl.ElapsedMilliseconds >= _waitTime))
                     {
                         if (StyxWoW.Me.IsMoving)
@@ -312,7 +309,7 @@ namespace HighVoltz.Composites
                                                                     ? Recipe.Name
                                                                     : Entry.ToString(CultureInfo.InvariantCulture));
                         }
-                        WoWSpell spell = WoWSpell.FromId((int) Entry);
+                        WoWSpell spell = WoWSpell.FromId((int)Entry);
                         if (spell == null)
                         {
                             Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindSpellWithEntry"], Entry);
@@ -337,7 +334,7 @@ namespace HighVoltz.Composites
                         }
                         else
                             spell.Cast();
-                        _waitTime = StyxWoW.WoWClient.Latency*2;
+                        _waitTime = Util.WowWorldLatency * 3 + 50;
                         Confimed = false;
                         _spamControl.Reset();
                         _spamControl.Start();
@@ -349,11 +346,22 @@ namespace HighVoltz.Composites
             return RunStatus.Failure;
         }
 
+        void Finished(string reason = null)
+        {
+            if (StyxWoW.Me.IsCasting && StyxWoW.Me.CastingSpell.Id == Entry)
+                SpellManager.StopCasting();
+            Lua.Events.DetachEvent("UNIT_SPELLCAST_SUCCEEDED", OnUnitSpellCastSucceeded);
+            var reasonString = !string.IsNullOrEmpty(reason) ? string.Format(" Reason: {0}", reason) : "";
+            Professionbuddy.Debug("Done crafting {0}.{1}", IsRecipe ? SpellName : Entry.ToString(), reasonString);
+            IsDone = true;
+        }
+
+
         private void OnUnitSpellCastSucceeded(object obj, LuaEventArgs args)
         {
             try
             {
-                if ((string) args.Args[0] == "player" && (uint) ((double) args.Args[4]) == Entry)
+                if ((string)args.Args[0] == "player" && (uint)((double)args.Args[4]) == Entry)
                 {
                     // confirm last recipe
                     if (Casted + 1 == CalculatedRepeat)
@@ -366,7 +374,7 @@ namespace HighVoltz.Composites
                     if (MainForm.IsValid)
                     {
                         MainForm.Instance.RefreshTradeSkillTabs();
-                        MainForm.Instance.RefreshActionTree(typeof (CastSpellAction));
+                        MainForm.Instance.RefreshActionTree(typeof(CastSpellAction));
                     }
                 }
             }
@@ -402,7 +410,6 @@ namespace HighVoltz.Composites
         public override void Reset()
         {
             base.Reset();
-            _spamControl.Stop();
             _spamControl.Reset();
             Lua.Events.DetachEvent("UNIT_SPELLCAST_SUCCEEDED", OnUnitSpellCastSucceeded);
             Casted = 0;
@@ -427,7 +434,7 @@ namespace HighVoltz.Composites
         public static List<CastSpellAction> GetCastSpellActionList(Composite pa)
         {
             if (pa is CastSpellAction)
-                return new List<CastSpellAction> {(pa as CastSpellAction)};
+                return new List<CastSpellAction> { (pa as CastSpellAction) };
 
             List<CastSpellAction> ret = null;
             var groupComposite = pa as GroupComposite;

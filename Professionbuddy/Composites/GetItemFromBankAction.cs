@@ -340,7 +340,7 @@ namespace HighVoltz.Composites
                         _itemsSW = new Stopwatch();
                         _itemsSW.Start();
                     }
-                    else if (_itemsSW.ElapsedMilliseconds < Util.WoWPing*3)
+                    else if (_itemsSW.ElapsedMilliseconds < Util.WowWorldLatency*3)
                         return RunStatus.Success;
                     if (_itemList == null)
                         _itemList = BuildItemList();
