@@ -340,7 +340,7 @@ return 0";
             var profile = GetCharacterProfileName(character, server);
             if (string.IsNullOrEmpty(profile))
                 return null;
-            string lua = string.Format("local val = DataStoreDB.global.Characters[\"{0}\"] if val and val.guildName then return val.guildName end return '' ", profile);
+            string lua = string.Format("local val = DataStoreDB.global.Characters[\"{0}\"] if val and val.guildName then return val.guildName end return '' ", profile.ToFormatedUTF8());
             var guildName = Lua.GetReturnVal<string>(lua, 0);
             if (!string.IsNullOrEmpty(guildName))
                 return guildName;
@@ -356,7 +356,7 @@ return 0";
                 if (string.IsNullOrEmpty(profile))
                     return 0;
                 string lua = string.Format(
-                    "local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char and char.Auctions then return #char.Auctions end return 0 ", profile);
+                    "local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char and char.Auctions then return #char.Auctions end return 0 ", profile.ToFormatedUTF8());
                 var tableSize = Lua.GetReturnVal<int>(lua, 0);
                 for (int i = 1; i <= tableSize; i++)
                 {
