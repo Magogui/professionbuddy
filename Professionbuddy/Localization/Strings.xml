@@ -169,7 +169,7 @@
 	
   <!-- InteractAction -->
   <Action_InteractAction_Name>Interact</Action_InteractAction_Name>
-  <Action_InteractAction_Help>This action will cause your character to interact with a specific target. 'Interact Delay' is a time in milliseconds to wait before interacting with target. This can be also used to go to objects like forge/anvil or NPCs that are within 100 feet</Action_InteractAction_Help>
+  <Action_InteractAction_Help>This action will cause your character to interact with a specific target. If Entry is set to zero and Interact Type is set to NPC then this action will interact with current target. 'Interact Delay' is a time in milliseconds to wait before interacting with target. This can be also used to go to objects like forge/anvil or NPCs that are within 100 feet</Action_InteractAction_Help>
   <Action_InteractAction_InteractDelay>Interact Delay</Action_InteractAction_InteractDelay>
   <Action_InteractAction_InteractType>Interact Type</Action_InteractAction_InteractType>
   <Action_InteractAction_GameobjectType>Game object Type</Action_InteractAction_GameobjectType>

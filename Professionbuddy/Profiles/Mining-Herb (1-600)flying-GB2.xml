@@ -49,7 +49,7 @@
     <CustomAction Code="LowestMinLevel = (bool)Settings[&quot;Mining&quot;] &amp;&amp; (bool)Settings[&quot;Herb&quot;] ? (MiningMaxLevel &lt; HerbMaxLevel ? MiningMaxLevel : HerbMaxLevel):(bool)Settings[&quot;Mining&quot;] ? MiningMaxLevel :HerbMaxLevel;" />
     <CustomAction Code="FreeBagSlots = (int)Me.FreeNormalBagSlots;&#xD;&#xA;if(FreeBagSlots &lt; 4)&#xD;&#xA;  MyLog(&quot;FreeBagSlots: {0}&quot;,FreeBagSlots);" />
     <If Condition="(bool)Settings[&quot;Ignore grey nodes&quot;]" IgnoreCanRun="True">
-      <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    if (!requiredSkillLevel.HasValue) continue;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.Value + 100 &gt;= skillLevel)&#xD;&#xA;    {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;    }&#xD;&#xA;  }&#xD;&#xA;}" />
+      <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    if (!requiredSkillLevel.HasValue) continue;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.Value + 100 &gt;= skillLevel)&#xD;&#xA;    {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;          MyLog(&quot;My Skill: {0}, Required Skill: {1}&quot;,skillLevel ,requiredSkillLevel.Value);&#xD;&#xA;    } &#xD;&#xA;  }&#xD;&#xA;}" />
     </If>
     <!--Herb/Mining 1-300-->
     <If Condition=" LowestMinLevel &lt;=300" IgnoreCanRun="True">
@@ -436,7 +436,7 @@
     <FlyToAction Dismount="False" Location="-4982.075, -879.6846, 512.5381" />
     <FlyToAction Dismount="False" Location="-5021.301, -943.3182, 509.3302" />
     <FlyToAction Dismount="True" Location="-4908.107, -974.3073, 501.4522" />
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="False" Location="-4908.314, -975.7229, 501.4461" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MaxCODAmount="0g0s0c" MinFreeBagSlots="2" AutoFindMailBox="False" Location="-4908.314, -975.7229, 501.4461" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
@@ -450,7 +450,7 @@
     <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Emptying my bags in Stormwind&quot;);" />
     <!--Front of AH area-->
     <FlyToAction Dismount="True" Location="-8355.722, 641.4622, 95.28886" />
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MaxCODAmount="0g0s0c" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
@@ -480,7 +480,7 @@
   <SubRoutine SubRoutineName="EmptyBagsInUndercity">
     <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Emptying my bags in Undercity&quot;);" />
     <FlyToAction Dismount="True" Location="1688.531, 730.3077, 73.82889" />
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="False" Location="1644.13, 277.5082, -62.18286" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MaxCODAmount="0g0s0c" MinFreeBagSlots="2" AutoFindMailBox="False" Location="1644.13, 277.5082, -62.18286" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
@@ -507,7 +507,7 @@
     <CustomAction Code="Log(Colors.Green,&quot;Mine/Herb 1-600: &quot;,Colors.LightGreen,&quot;Emptying my bags in Org&quot;);" />
     <!--In front of AH area-->
     <FlyToAction Dismount="True" Location="2012.031, -4690.59, 28.64125" />
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MaxCODAmount="0g0s0c" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
@@ -546,7 +546,7 @@
       <MoveToAction Location="5888.19, 714.7673, 712.1321" MoveType="Location" Pathing="ClickToMove" Entry="0" />
       <FlyToAction Dismount="True" Location="5896.106, 719.2957, 640.5133" />
     </If>
-    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
+    <GetMailAction GetMailType="AllItems" ItemID="0" CheckNewMail="True" MaxCODAmount="0g0s0c" MinFreeBagSlots="2" AutoFindMailBox="True" Location="0, 0, 0" />
     <If Condition="(bool)Settings[&quot;AH Items&quot;]" IgnoreCanRun="True">
       <SellItemOnAhAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
       <SellItemOnAhAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" UseCategory="True" RunTime="_24_Hours" AmountType="Everything" ItemID="13466" MinBuyout="0g10s0c" MaxBuyout="60g0s0c" StackSize="20" IgnoreStackSizeBelow="1" Amount="10" BidPrecent="95" UndercutPrecent="0.001" AutoFindAh="True" PostIfBelowMinBuyout="True" Location="0, 0, 0" />
