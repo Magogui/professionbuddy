@@ -162,8 +162,8 @@ namespace HighVoltz
             var topIndex = (uint)table.NumRows;
             uint bomIndex = 0;
             uint half;
-            // var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility - 0x400000) + 0x14, true);
-            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility) + 0x14, true);
+            var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility - 0x400000) + 0x14, true);
+            // var firstRowPtr = StyxWoW.Memory.Read<uint>((IntPtr)((uint)ClientDb.SkillLineAbility) + 0x14, true);
             uint id;
             // optimized search
             do
@@ -681,31 +681,33 @@ namespace HighVoltz
             else
             {
                 // we need to iterate through ClientDb.ItemSubClass till we find matching
-                WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.ItemClass].GetInfoBlockById(CraftedItemID);
+                _header = "UNKNOWN";
+                // ToDO: uncomment this once HB devs add ClientDb.ItemSubClass back in.
+                //WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.ItemClass].GetInfoBlockById(CraftedItemID);
 
-                if (cache != null)
-                {
-                    dbTable = StyxWoW.Db[ClientDb.ItemSubClass];
-                    for (int i = dbTable.MinIndex; i <= dbTable.MaxIndex; i++)
-                    {
-                        dbRow = dbTable.GetRow((uint)i);
-                        var iSubClass1 = dbRow.GetField<int>(1);
-                        var iSubClass2 = dbRow.GetField<int>(2);
-                        if (iSubClass1 == cache.Item.ClassId && iSubClass2 == cache.Item.SubClassId)
-                        {
-                            var stringPtr = dbRow.GetField<uint>(12);
-                            // if pointer in field (12) is 0 or it points to null string then use field (11)
-                            if (stringPtr == 0 ||
-                                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8)))
-                            {
-                                stringPtr = dbRow.GetField<uint>(11);
-                                if (stringPtr != 0)
-                                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
-                            }
-                            break;
-                        }
-                    }
-                }
+                //if (cache != null)
+                //{
+                //    dbTable = StyxWoW.Db[ClientDb.ItemSubClass];
+                //    for (int i = dbTable.MinIndex; i <= dbTable.MaxIndex; i++)
+                //    {
+                //        dbRow = dbTable.GetRow((uint)i);
+                //        var iSubClass1 = dbRow.GetField<int>(1);
+                //        var iSubClass2 = dbRow.GetField<int>(2);
+                //        if (iSubClass1 == cache.Item.ClassId && iSubClass2 == cache.Item.SubClassId)
+                //        {
+                //            var stringPtr = dbRow.GetField<uint>(12);
+                //            // if pointer in field (12) is 0 or it points to null string then use field (11)
+                //            if (stringPtr == 0 ||
+                //                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8)))
+                //            {
+                //                stringPtr = dbRow.GetField<uint>(11);
+                //                if (stringPtr != 0)
+                //                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
+                //            }
+                //            break;
+                //        }
+                //    }
+                //}
             }
         }
 
