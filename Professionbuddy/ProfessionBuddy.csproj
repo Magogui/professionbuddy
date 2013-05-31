@@ -126,6 +126,7 @@
     <Compile Include="Dynamic\Helpers.cs" />
     <Compile Include="Dynamic\IDynamicProperty.cs" />
     <Compile Include="GlobalPBSettings.cs" />
+    <Compile Include="MultilineTextEditor.cs" />
     <Compile Include="SvnBase.cs" />
     <None Include="Guide.rtf" />
     <None Include="SVN.template" />
