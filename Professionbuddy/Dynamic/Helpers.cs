@@ -360,7 +360,7 @@ return 0";
                 var tableSize = Lua.GetReturnVal<int>(lua, 0);
                 for (int i = 1; i <= tableSize; i++)
                 {
-                    lua = string.Format("local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char then return char.Auctions[{1}] end return '' ", profile, i);
+                    lua = string.Format("local char=DataStore_AuctionsDB.global.Characters[\"{0}\"] if char then return char.Auctions[{1}] end return '' ", profile.ToFormatedUTF8(), i);
                     var aucStr = Lua.GetReturnVal<string>(lua, 0);
                     string[] strs = aucStr.Split('|');
                     int id = int.Parse(strs[1]);
