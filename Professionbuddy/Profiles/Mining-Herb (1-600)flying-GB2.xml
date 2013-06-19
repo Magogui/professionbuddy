@@ -608,7 +608,8 @@
         <WaitAction Condition="Me.MapId == 0" Timeout="600000" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="1662.198, -4132.378, 56.96952" />
+        <FlyToAction Dismount="False" Location="1732.68, -4210.92, 50.05256" />
+        <MoveToAction Location="1769.947, -4326.168, -8.294199" MoveType="Location" Pathing="Navigator" Entry="0" />
         <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
       </If>
