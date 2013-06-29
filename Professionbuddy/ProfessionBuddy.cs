@@ -217,14 +217,28 @@ namespace HighVoltz
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
 
-            try
+            // hackish fix for recovering from a GB2 startup error.
+            for (int i = 0; i < 2; i++)
             {
-                if (SecondaryBot != null)
-                    SecondaryBot.Start();
-            }
-            catch (Exception ex)
-            {
-                Logging.WriteDiagnostic(ex.ToString());
+                try
+                {
+                    if (SecondaryBot != null)
+                        SecondaryBot.Start();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is NullReferenceException && ex.StackTrace.Contains("Gatherbuddy.Profile"))
+                    {
+                        Log("Attempting to recover from Gatherbuddy startup error. ");
+                        PreLoadHbProfile();
+                    }
+                    else
+                    {
+                        Logging.WriteDiagnostic(ex.ToString());
+                        break;
+                    }
+                }
             }
         }
 
