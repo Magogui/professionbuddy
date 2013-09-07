@@ -158,8 +158,7 @@ namespace HighVoltz.Composites
             Properties["Withdraw"] = new MetaProp("Withdraw", typeof (DepositWithdrawAmount),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Withdraw"]));
 
-            Amount = new DynamicProperty<int>(this, "1");
-            RegisterDynamicProperty("Amount");
+            Amount = new DynamicProperty<int>("Amount", this, "1");
             ItemID = "";
             MinFreeBagSlots = 2u;
             GetItemfromBankType = BankWithdrawlItemType.SpecificItem;

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using HighVoltz.Composites;
 using Microsoft.CSharp;
 using Styx;
 using Styx.TreeSharp;
@@ -52,9 +53,9 @@ namespace HighVoltz.Dynamic
                 {
                     File.Delete(file);
                 }
-                    // ReSharper disable EmptyGeneralCatchClause
+                // ReSharper disable EmptyGeneralCatchClause
                 catch
-                    // ReSharper restore EmptyGeneralCatchClause
+                // ReSharper restore EmptyGeneralCatchClause
                 {
                 }
             }
@@ -64,9 +65,9 @@ namespace HighVoltz.Dynamic
                 {
                     Directory.Delete(dir);
                 }
-                    // ReSharper disable EmptyGeneralCatchClause
+                // ReSharper disable EmptyGeneralCatchClause
                 catch
-                    // ReSharper restore EmptyGeneralCatchClause
+                // ReSharper restore EmptyGeneralCatchClause
                 {
                 }
             }
@@ -90,15 +91,15 @@ namespace HighVoltz.Dynamic
                     {
                         if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.BoolExpression)
                             CsharpCodeDict[method.Name].CompiledMethod =
-                                Delegate.CreateDelegate(typeof (CanRunDecoratorDelegate), _codeDriverInstance,
+                                Delegate.CreateDelegate(typeof(CanRunDecoratorDelegate), _codeDriverInstance,
                                                         method.Name);
                         else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Statements)
                             CsharpCodeDict[method.Name].CompiledMethod = Delegate.CreateDelegate(
-                                typeof (Action<object>), _codeDriverInstance, method.Name);
+                                typeof(Action<object>), _codeDriverInstance, method.Name);
                         else if (CsharpCodeDict[method.Name].CodeType == CsharpCodeType.Expression)
                         {
                             Type gType =
-                                typeof (Func<,>).MakeGenericType(new[]
+                                typeof(Func<,>).MakeGenericType(new[]
                                                                      {
                                                                          typeof (object),
                                                                          ((IDynamicProperty) CsharpCodeDict[method.Name]).
@@ -122,8 +123,8 @@ namespace HighVoltz.Dynamic
             }
             // check for DynamicExpression proprerties
             List<IDynamicProperty> dynProps = (from prop in comp.GetType().GetProperties()
-                                               where typeof (IDynamicProperty).IsAssignableFrom(prop.PropertyType)
-                                               select (IDynamicProperty) prop.GetValue(comp, null)).ToList();
+                                               where typeof(IDynamicProperty).IsAssignableFrom(prop.PropertyType)
+                                               select (IDynamicProperty)prop.GetValue(comp, null)).ToList();
             foreach (IDynamicProperty dynProp in dynProps)
             {
                 CsharpCodeDict["Code" + Util.Rng.Next(int.MaxValue).ToString(CultureInfo.InvariantCulture)] = dynProp;
@@ -181,21 +182,28 @@ namespace HighVoltz.Dynamic
                                                          met.Value.Code.Replace(Environment.NewLine, ""));
                     else if (met.Value.CodeType == CsharpCodeType.Expression)
                     {
-                        Type retType = ((IDynamicProperty) met.Value).ReturnType;
-                        CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return {2};}}\n",
+                        Type retType = ((IDynamicProperty)met.Value).ReturnType;
+                        CsharpStringBuilder.AppendFormat("public {0} {1} (object context){{return ({0}){2};}}\n",
                                                          retType.Name, met.Key,
                                                          met.Value.Code.Replace(Environment.NewLine, ""));
                     }
                     met.Value.CodeLineNumber = currentLine++;
                 }
                 CsharpStringBuilder.Append(Postfix);
+
                 results = provider.CompileAssemblyFromSource(
                     options, CsharpStringBuilder.ToString());
             }
+
+            List<IPBComposite> compositesToRefreshList = CsharpCodeDict.Where(c => !string.IsNullOrEmpty(c.Value.CompileError)).Select(c => c.Value.AttachedComposite).Distinct().ToList();
+
             // clear all previous compile errors
             foreach (var code in CsharpCodeDict.Values)
             {
                 code.CompileError = string.Empty;
+                var dynamicProperty = code as IDynamicProperty;
+                if (dynamicProperty == null) continue;
+                dynamicProperty.AttachedComposite.HasErrors = false;
             }
 
             if (results.Errors.HasErrors)
@@ -205,10 +213,21 @@ namespace HighVoltz.Dynamic
                     foreach (CompilerError error in results.Errors)
                     {
                         ICSharpCode icsc = CsharpCodeDict.Values.FirstOrDefault(c => c.CodeLineNumber == error.Line);
+                        var dynamicProperty = icsc as IDynamicProperty;
+
                         if (icsc != null)
                         {
-                            Professionbuddy.Err("{0}\nCompile Error : {1}\n", icsc.AttachedComposite.Title,
-                                                error.ErrorText);
+                            if (dynamicProperty != null)
+                            {
+                                Professionbuddy.Err("{0}->{1}\nCompile Error : {2}\n", icsc.AttachedComposite.Name, dynamicProperty.Name, error.ErrorText);
+                                dynamicProperty.AttachedComposite.HasErrors = true;
+                            }
+                            else
+                            {
+                                Professionbuddy.Err("{0}\nCompile Error : {1}\n", icsc.AttachedComposite.Title, error.ErrorText);
+                            }
+                            if (!compositesToRefreshList.Contains(icsc.AttachedComposite))
+                                compositesToRefreshList.Add(icsc.AttachedComposite);
                             icsc.CompileError = error.ErrorText;
                         }
                         else
@@ -216,13 +235,20 @@ namespace HighVoltz.Dynamic
                             Professionbuddy.Err("Unable to link action that produced Error: {0}", error.ErrorText);
                         }
                     }
-                    if (MainForm.IsValid)
-                        MainForm.Instance.RefreshActionTree(typeof (ICSharpCode));
                 }
-                return null;
             }
+
+            if (MainForm.IsValid)
+            {
+                foreach (var pbComposite in compositesToRefreshList)
+                {
+                    MainForm.Instance.RefreshActionTree(pbComposite);
+                }
+                MainForm.Instance.ActionGrid.Refresh();
+            }
+
             CodeWasModified = false;
-            return results.CompiledAssembly.GetType("CodeDriver");
+            return results.Errors.HasErrors ? null : results.CompiledAssembly.GetType("CodeDriver");
         }
 
         #region Strings

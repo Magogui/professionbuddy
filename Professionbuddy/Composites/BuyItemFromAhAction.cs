@@ -104,8 +104,7 @@ namespace HighVoltz.Composites
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
             ItemID = "";
-            Amount = new DynamicProperty<int>(this, "1");
-            RegisterDynamicProperty("Amount");
+            Amount = new DynamicProperty<int>("Amount", this, "1");
             ItemListType = ItemType.Item;
             AutoFindAh = true;
             _loc = WoWPoint.Zero;

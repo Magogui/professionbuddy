@@ -84,8 +84,7 @@ namespace HighVoltz.Composites
                                                        new DisplayNameAttribute(
                                                            Pb.Strings["Action_Common_BuyAdditively"]));
             ItemID = "";
-            Count = new DynamicProperty<int>(this, "1"); // dynamic expression
-            RegisterDynamicProperty("Count");
+            Count = new DynamicProperty<int>("Count", this, "1"); // dynamic expression
             BuyItemType = BuyItemActionType.Material;
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Media;
 using HighVoltz.Composites;
 using HighVoltz.Dynamic;
 using Styx.Common;
@@ -49,19 +50,19 @@ namespace HighVoltz
 
             if (e.Data.GetDataPresent("System.Windows.Forms.TreeNode", false))
             {
-                Point pt = ((TreeView) sender).PointToClient(new Point(e.X, e.Y));
-                TreeNode dest = ((TreeView) sender).GetNodeAt(pt);
-                var newNode = (TreeNode) e.Data.GetData("System.Windows.Forms.TreeNode");
+                Point pt = ((TreeView)sender).PointToClient(new Point(e.X, e.Y));
+                TreeNode dest = ((TreeView)sender).GetNodeAt(pt);
+                var newNode = (TreeNode)e.Data.GetData("System.Windows.Forms.TreeNode");
                 PasteAction(newNode, dest);
             }
             else if (e.Data.GetDataPresent("System.Windows.Forms.DataGridViewRow", false))
             {
-                Point pt = ((TreeView) sender).PointToClient(new Point(e.X, e.Y));
-                TreeNode dest = ((TreeView) sender).GetNodeAt(pt);
-                var row = (DataGridViewRow) e.Data.GetData("System.Windows.Forms.DataGridViewRow");
+                Point pt = ((TreeView)sender).PointToClient(new Point(e.X, e.Y));
+                TreeNode dest = ((TreeView)sender).GetNodeAt(pt);
+                var row = (DataGridViewRow)e.Data.GetData("System.Windows.Forms.DataGridViewRow");
                 if (row.Tag.GetType().GetInterface("IPBComposite") != null)
                 {
-                    var pa = (IPBComposite) Activator.CreateInstance(row.Tag.GetType());
+                    var pa = (IPBComposite)Activator.CreateInstance(row.Tag.GetType());
                     AddToActionTree(pa, dest);
                 }
             }
@@ -71,9 +72,9 @@ namespace HighVoltz
         {
             if (dest != source && (!IsChildNode(source, dest) || dest == null))
             {
-                var gc = (GroupComposite) ((Composite) source.Tag).Parent;
+                var gc = (GroupComposite)((Composite)source.Tag).Parent;
                 if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy)
-                    gc.Children.Remove((Composite) source.Tag);
+                    gc.Children.Remove((Composite)source.Tag);
                 AddToActionTree(source, dest);
                 if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy) // ctrl key
                     source.Remove();
@@ -109,7 +110,7 @@ namespace HighVoltz
         {
             if (!IsValid)
                 return;
-            var comp = (IPBComposite) e.Node.Tag;
+            var comp = (IPBComposite)e.Node.Tag;
             if (comp != null && comp.Properties != null)
             {
                 Instance.ActionGrid.SelectedObject = comp.Properties;
@@ -159,11 +160,11 @@ namespace HighVoltz
 
         private void ActionGridPropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction) ActionGrid.SelectedObject).IsRecipe)
+            if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction)ActionGrid.SelectedObject).IsRecipe)
             {
                 _pb.UpdateMaterials();
                 RefreshTradeSkillTabs();
-                RefreshActionTree(typeof (CastSpellAction));
+                RefreshActionTree(typeof(CastSpellAction));
             }
             else
             {
@@ -174,7 +175,7 @@ namespace HighVoltz
 
             if (DynamicCodeCompiler.CodeWasModified)
             {
-                new Thread(DynamicCodeCompiler.GenorateDynamicCode) {IsBackground = true}.Start();
+                new Thread(DynamicCodeCompiler.GenorateDynamicCode) { IsBackground = true }.Start();
             }
         }
 
@@ -182,9 +183,9 @@ namespace HighVoltz
         {
             if (ActionTree.SelectedNode != null)
             {
-                var comp = (Composite) ActionTree.SelectedNode.Tag;
-                ((GroupComposite) comp.Parent).Children.Remove(comp);
-                if (comp is CastSpellAction && ((CastSpellAction) comp).IsRecipe)
+                var comp = (Composite)ActionTree.SelectedNode.Tag;
+                ((GroupComposite)comp.Parent).Children.Remove(comp);
+                if (comp is CastSpellAction && ((CastSpellAction)comp).IsRecipe)
                 {
                     _pb.UpdateMaterials();
                     RefreshTradeSkillTabs();
@@ -207,7 +208,7 @@ namespace HighVoltz
         private void ActionGridViewSelectionChanged(object sender, EventArgs e)
         {
             if (ActionGridView.SelectedRows.Count > 0)
-                HelpTextBox.Text = ((IPBComposite) ActionGridView.SelectedRows[0].Tag).Help;
+                HelpTextBox.Text = ((IPBComposite)ActionGridView.SelectedRows[0].Tag).Help;
         }
 
         private void ToolStripOpenClick(object sender, EventArgs e)
@@ -215,10 +216,10 @@ namespace HighVoltz
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ProfileManager.LoadNew(openFileDialog.FileName, true);
-              //  if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
-             //       AddProfileSettingsTab();
-              //  else
-              //      RemoveProfileSettingsTab();
+                //  if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+                //       AddProfileSettingsTab();
+                //  else
+                //      RemoveProfileSettingsTab();
             }
         }
 
@@ -271,7 +272,7 @@ namespace HighVoltz
                     DataGridViewSelectedRowCollection rowCollection = tv.TradeDataView.SelectedRows;
                     foreach (DataGridViewRow row in rowCollection)
                     {
-                        var cell = (TradeSkillRecipeCell) row.Cells[0].Value;
+                        var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
                         Recipe recipe = _pb.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
                         int repeat;
                         int.TryParse(toolStripAddNum.Text, out repeat);
@@ -294,7 +295,7 @@ namespace HighVoltz
             else if (MainTabControl.SelectedTab == ActionsTab)
             {
                 compositeList.AddRange(from DataGridViewRow row in ActionGridView.SelectedRows
-                                       select (IPBComposite) Activator.CreateInstance(row.Tag.GetType()));
+                                       select (IPBComposite)Activator.CreateInstance(row.Tag.GetType()));
             }
             _copyAction = CopyPasteOperactions.Copy;
             foreach (IPBComposite composite in compositeList)
@@ -313,8 +314,8 @@ namespace HighVoltz
 
         private void ToolStripHelpClick(object sender, EventArgs e)
         {
-            var helpWindow = new Form {Height = 600, Width = 600, Text = "ProfessionBuddy Guide"};
-            var helpView = new RichTextBox {Dock = DockStyle.Fill, ReadOnly = true};
+            var helpWindow = new Form { Height = 600, Width = 600, Text = "ProfessionBuddy Guide" };
+            var helpView = new RichTextBox { Dock = DockStyle.Fill, ReadOnly = true };
 
             helpView.LoadFile(Path.Combine(Professionbuddy.BotPath, "Guide.rtf"));
             helpWindow.Controls.Add(helpView);
@@ -351,7 +352,7 @@ namespace HighVoltz
                 foreach (Composite p in ps.Children)
                 {
                     // add alternating amount of spaces to the end of log entries to prevent spam filter from blocking it
-                    n = (n + 1)%2;
+                    n = (n + 1) % 2;
                     Logging.Write("[{0}] {1}", p.GetType(), new string(' ', n));
                 }
 
@@ -378,12 +379,12 @@ namespace HighVoltz
         {
             string name;
             if (comp is IPBComposite)
-                name = ((IPBComposite) comp).Title;
+                name = ((IPBComposite)comp).Title;
             else
                 name = comp.GetType().ToString();
             var pbComposite = comp as IPBComposite;
             if (pbComposite != null)
-                Logging.Write("{0}{1} IsDone:{2} LastStatus:{3}", new string(' ', cnt*4), name,
+                Logging.Write("{0}{1} IsDone:{2} LastStatus:{3}", new string(' ', cnt * 4), name,
                               (pbComposite).IsDone, comp.LastStatus);
             var groupComposite = comp as GroupComposite;
             if (groupComposite != null)
@@ -407,10 +408,10 @@ namespace HighVoltz
                 // Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
                 ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-               // if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
-               //     AddProfileSettingsTab();
-              //  else
-              //      RemoveProfileSettingsTab();
+                // if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+                //     AddProfileSettingsTab();
+                //  else
+                //      RemoveProfileSettingsTab();
             }
         }
 
@@ -424,7 +425,7 @@ namespace HighVoltz
         {
             try
             {
-                Professionbuddy.ChangeSecondaryBot((string) toolStripBotCombo.SelectedItem);
+                Professionbuddy.ChangeSecondaryBot((string)toolStripBotCombo.SelectedItem);
             }
             catch (Exception ex)
             {
@@ -500,8 +501,7 @@ namespace HighVoltz
                 LoadProfileButton.Text = _pb.Strings["UI_LoadProfile"];
 
                 saveFileDialog.InitialDirectory = _pb.ProfilePath;
-                _profileWatcher = new FileSystemWatcher(_pb.ProfilePath)
-                                      {NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName};
+                _profileWatcher = new FileSystemWatcher(_pb.ProfilePath) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
                 _profileWatcher.Changed += ProfileWatcherChanged;
                 _profileWatcher.Created += ProfileWatcherChanged;
                 _profileWatcher.Deleted += ProfileWatcherChanged;
@@ -577,45 +577,45 @@ namespace HighVoltz
             {
                 if (cloneActions)
                 {
-                    newNode = RecursiveCloning(((TreeNode) action));
+                    newNode = RecursiveCloning(((TreeNode)action));
                 }
                 else
-                    newNode = (TreeNode) ((TreeNode) action).Clone();
+                    newNode = (TreeNode)((TreeNode)action).Clone();
             }
             else if (action.GetType().GetInterface("IPBComposite") != null)
             {
-                var composite = (IPBComposite) action;
-                newNode = new TreeNode(composite.Title) {ForeColor = composite.Color, Tag = composite};
+                var composite = (IPBComposite)action;
+                newNode = new TreeNode(composite.Title) { ForeColor = composite.Color, Tag = composite };
             }
             else
                 return;
             ActionTree.SuspendLayout();
             if (dest != null)
             {
-                int treeIndex = action is TreeNode && ((TreeNode) action).Parent == dest.Parent &&
-                                ((TreeNode) action).Index <= dest.Index && !cloneActions
+                int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent &&
+                                ((TreeNode)action).Index <= dest.Index && !cloneActions
                                     ? dest.Index + 1
                                     : dest.Index;
                 GroupComposite gc;
                 // If, While and SubRoutines are Decorators...
                 if (!ignoreRoot && dest.Tag is GroupComposite)
-                    gc = (GroupComposite) dest.Tag;
+                    gc = (GroupComposite)dest.Tag;
                 else
-                    gc = (GroupComposite) ((Composite) dest.Tag).Parent;
+                    gc = (GroupComposite)((Composite)dest.Tag).Parent;
 
                 if ((dest.Tag is If || dest.Tag is SubRoutine) && !ignoreRoot)
                 {
                     dest.Nodes.Add(newNode);
-                    gc.AddChild((Composite) newNode.Tag);
+                    gc.AddChild((Composite)newNode.Tag);
                     if (!dest.IsExpanded)
                         dest.Expand();
                 }
                 else
                 {
                     if (dest.Index >= gc.Children.Count)
-                        gc.AddChild((Composite) newNode.Tag);
+                        gc.AddChild((Composite)newNode.Tag);
                     else
-                        gc.InsertChild(dest.Index, (Composite) newNode.Tag);
+                        gc.InsertChild(dest.Index, (Composite)newNode.Tag);
                     if (dest.Parent == null)
                     {
                         if (treeIndex >= ActionTree.Nodes.Count)
@@ -635,15 +635,15 @@ namespace HighVoltz
             else
             {
                 ActionTree.Nodes.Add(newNode);
-                _pb.PbBehavior.AddChild((Composite) newNode.Tag);
+                _pb.PbBehavior.AddChild((Composite)newNode.Tag);
             }
             ActionTree.ResumeLayout();
         }
 
         private TreeNode RecursiveCloning(TreeNode node)
         {
-            var newComp = (IPBComposite) (((IPBComposite) node.Tag).Clone());
-            var newNode = new TreeNode(newComp.Title) {ForeColor = newComp.Color, Tag = newComp};
+            var newComp = (IPBComposite)(((IPBComposite)node.Tag).Clone());
+            var newNode = new TreeNode(newComp.Title) { ForeColor = newComp.Color, Tag = newComp };
             foreach (TreeNode child in node.Nodes)
             {
                 // If, While and SubRoutine are Decorators.
@@ -653,7 +653,7 @@ namespace HighVoltz
                     GroupComposite gc = groupComposite;
 
                     TreeNode newChildNode = RecursiveCloning(child);
-                    gc.AddChild((Composite) newChildNode.Tag);
+                    gc.AddChild((Composite)newChildNode.Tag);
                     newNode.Nodes.Add(newChildNode);
                 }
             }
@@ -709,7 +709,7 @@ namespace HighVoltz
             }
             RightSideTab.TabPages.Add("ProfileSettings", _pb.Strings["UI_ProfileSettings"]);
 
-            _settingsPropertyGrid = new PropertyGrid {Dock = DockStyle.Fill};
+            _settingsPropertyGrid = new PropertyGrid { Dock = DockStyle.Fill };
             RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
             _profilePropertyBag = new PropertyBag();
@@ -719,8 +719,7 @@ namespace HighVoltz
                 {
                     _profilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
                                                                new DescriptionAttribute(kv.Value.Summary),
-                                                               new CategoryAttribute(kv.Value.Category))
-                                                      {Value = kv.Value.Value};
+                                                               new CategoryAttribute(kv.Value.Category)) { Value = kv.Value.Value };
                     _profilePropertyBag[kv.Key].PropertyChanged += ProfileSettingsPropertyChanged;
                 }
             }
@@ -756,7 +755,7 @@ namespace HighVoltz
 
         private void ProfileSettingsPropertyChanged(object sender, MetaPropArgs e)
         {
-            _pb.ProfileSettings[((MetaProp) sender).Name] = ((MetaProp) sender).Value;
+            _pb.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
         }
 
 
@@ -781,13 +780,14 @@ namespace HighVoltz
 
         private void UdateTreeNode(TreeNode node, IPBComposite pbComp, Type type, bool recursive)
         {
-            var comp = (IPBComposite) node.Tag;
+            var comp = (IPBComposite)node.Tag;
             if ((pbComp == null && type == null) ||
                 (pbComp != null && pbComp == node.Tag) ||
                 (type != null && type.IsInstanceOfType(node.Tag))
                 )
             {
-                node.ForeColor = comp.Color;
+                var pbAction = comp as PBAction;
+                node.ForeColor = pbAction != null && pbAction.HasErrors ? System.Drawing.Color.Red : comp.Color;
                 node.Text = comp.Title;
             }
             if (recursive)
@@ -803,7 +803,7 @@ namespace HighVoltz
         {
             foreach (IPBComposite child in ds.Children)
             {
-                var childNode = new TreeNode(child.Title) {ForeColor = child.Color, Tag = child};
+                var childNode = new TreeNode(child.Title) { ForeColor = child.Color, Tag = child };
                 // If, While and SubRoutine are Decorators.
                 var groupComposite = child as GroupComposite;
                 if (groupComposite != null)
@@ -818,15 +818,15 @@ namespace HighVoltz
         {
             ActionGridView.Rows.Clear();
             IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
-                                        where (typeof (IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
+                                        where (typeof(IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
                                         select t;
 
 
             foreach (Type type in pbTypes)
             {
-                var pa = (IPBComposite) Activator.CreateInstance(type);
+                var pa = (IPBComposite)Activator.CreateInstance(type);
                 var row = new DataGridViewRow();
-                var cell = new DataGridViewTextBoxCell {Value = pa.Name};
+                var cell = new DataGridViewTextBoxCell { Value = pa.Name };
                 row.Cells.Add(cell);
                 row.Tag = pa;
                 row.Height = 16;
@@ -984,10 +984,10 @@ namespace HighVoltz
             ActionTree.Nodes.Clear();
             foreach (IPBComposite composite in _pb.PbBehavior.Children)
             {
-                var node = new TreeNode(composite.Title) {ForeColor = composite.Color, Tag = composite};
+                var node = new TreeNode(composite.Title) { ForeColor = composite.Color, Tag = composite };
                 if (composite is GroupComposite)
                 {
-                    ActionTreeAddChildren((GroupComposite) composite, node);
+                    ActionTreeAddChildren((GroupComposite)composite, node);
                 }
                 ActionTree.Nodes.Add(node);
             }
@@ -1023,7 +1023,7 @@ namespace HighVoltz
                 tv.TradeDataView.SuspendLayout();
                 foreach (DataGridViewRow row in tv.TradeDataView.Rows)
                 {
-                    var cell = (TradeSkillRecipeCell) row.Cells[0].Value;
+                    var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
                     row.Cells[1].Value = Util.CalculateRecipeRepeat(cell.Recipe);
                     row.Cells[2].Value = cell.Recipe.Difficulty;
                 }
@@ -1073,5 +1073,5 @@ namespace HighVoltz
         #endregion
     }
 
-    #endregion
+        #endregion
 }

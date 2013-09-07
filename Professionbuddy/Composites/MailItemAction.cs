@@ -136,8 +136,7 @@ namespace HighVoltz.Composites
             UseCategory = true;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
-            Amount = new DynamicProperty<int>(this, "0");
-            RegisterDynamicProperty("Amount");
+            Amount = new DynamicProperty<int>("Amount", this, "0");
             Mail = DepositWithdrawAmount.All;
 
             Properties["Location"].Show = false;
@@ -485,6 +484,7 @@ namespace HighVoltz.Composites
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();
             }
+            base.OnProfileLoad(element);
         }
 
         public override void OnProfileSave(XElement element)
@@ -492,6 +492,7 @@ namespace HighVoltz.Composites
             element.Add(new XAttribute("Category", Category.ToString()));
             element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
             element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
+            base.OnProfileSave(element);
         }
     }
 

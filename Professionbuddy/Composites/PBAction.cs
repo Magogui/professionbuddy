@@ -77,6 +77,8 @@ namespace HighVoltz.Composites
 
         public virtual bool IsDone { get; protected set; }
 
+        public  bool HasErrors { get; internal set; }
+
         public virtual PropertyBag Properties { get; protected set; }
 
         public virtual object Clone()
@@ -108,23 +110,12 @@ namespace HighVoltz.Composites
             }
         }
 
-        protected void RegisterDynamicProperty(string propName)
-        {
-            Properties[propName].PropertyChanged += DynamicPropertyChanged;
-        }
-
         /// <summary>
         /// If overriding this method call base method or set HasRunOnce to false.
         /// </summary>
         protected virtual void RunOnce()
         {
             HasRunOnce = true;
-        }
-
-        private void DynamicPropertyChanged(object sender, MetaPropArgs e)
-        {
-            ((IDynamicProperty) e.Value).AttachedComposite = this;
-            DynamicCodeCompiler.CodeWasModified = true;
         }
     }
 

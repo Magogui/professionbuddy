@@ -110,8 +110,7 @@ namespace HighVoltz.Composites
             MinBuyout = new PropertyBag.GoldEditor("0g10s0c");
             MaxBuyout = new PropertyBag.GoldEditor("100g0s0c");
             RunTime = RunTimeType._24_Hours;
-            Amount = new DynamicProperty<int>(this, "10");
-            RegisterDynamicProperty("Amount");
+            Amount = new DynamicProperty<int>("Amount", this, "10");
             StackSize = 20u;
             IgnoreStackSizeBelow = 1u;
             AmountType = AmountBasedType.Everything;
@@ -560,6 +559,7 @@ namespace HighVoltz.Composites
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();
             }
+            base.OnProfileLoad(element);
         }
 
         public override void OnProfileSave(XElement element)
@@ -567,6 +567,7 @@ namespace HighVoltz.Composites
             element.Add(new XAttribute("Category", Category.ToString()));
             element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
             element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
+            base.OnProfileSave(element);
         }
 
         #region Auction House

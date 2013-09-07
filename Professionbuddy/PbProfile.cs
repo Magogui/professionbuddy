@@ -232,7 +232,7 @@ namespace HighVoltz
                         newElement.Name = rootAttr.ElementName;
                     pbComp.OnProfileSave(newElement);
                     List<PropertyInfo> piList = pbComp.GetType().GetProperties().
-                        Where(p => p.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true).
+                        Where(p =>  p.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true).
                                        Any()).ToList();
                     foreach (PropertyInfo pi in piList)
                     {
@@ -240,6 +240,8 @@ namespace HighVoltz
                             ((PbXmlAttributeAttribute[]) pi.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true))
                                 .ToList();
                         string name = pList.Any(a => a.AttributeName == null) ? pi.Name : pList[0].AttributeName;
+                        if (newElement.Attribute(name) != null)
+                            continue;
                         string value = "";
                         var typeConverterAttr =
                             (TypeConverterAttribute)

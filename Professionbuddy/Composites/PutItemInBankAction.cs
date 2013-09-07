@@ -133,8 +133,7 @@ namespace HighVoltz.Composites
             Properties["Deposit"] = new MetaProp("Deposit", typeof(DepositWithdrawAmount),
                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Deposit"]));
 
-            Amount = new DynamicProperty<int>(this, "0");
-            RegisterDynamicProperty("Amount");
+            Amount = new DynamicProperty<int>("Amount", this, "0");
             ItemID = "";
             Bank = BankType.Personal;
             AutoFindBank = true;
@@ -581,6 +580,7 @@ namespace HighVoltz.Composites
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();
             }
+            base.OnProfileLoad(element);
         }
 
         public override void OnProfileSave(XElement element)
@@ -588,6 +588,7 @@ namespace HighVoltz.Composites
             element.Add(new XAttribute("Category", Category.ToString()));
             element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
             element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
+            base.OnProfileSave(element);
         }
 
         #region GuildBank

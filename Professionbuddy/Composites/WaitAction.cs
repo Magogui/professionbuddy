@@ -26,7 +26,7 @@ namespace HighVoltz.Composites
                                                                        typeof (UITypeEditor)),
                                                    new DisplayNameAttribute(Pb.Strings["Action_WaitAction_Condition"]));
 
-            Timeout = new DynamicProperty<int>(this, "2000");
+            Timeout = new DynamicProperty<int>("Timeout", this, "2000");
 
             Condition = "false";
             CanRunDelegate = u => false;

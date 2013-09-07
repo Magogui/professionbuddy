@@ -55,7 +55,8 @@ namespace HighVoltz.Composites
                                                     typeof(DynamicProperty<int>.DynamivExpressionConverter)),
                                                 new DisplayNameAttribute(Pb.Strings["Action_Common_Repeat"]));
 
-            Properties["Entry"] = new MetaProp("Entry", typeof(uint),
+            Properties["Entry"] = new MetaProp("Entry", typeof(DynamicProperty<uint>),
+                new TypeConverterAttribute(typeof(DynamicProperty<uint>.DynamivExpressionConverter)),
                                                new DisplayNameAttribute(Pb.Strings["Action_Common_SpellEntry"]));
 
             Properties["CastOnItem"] = new MetaProp("CastOnItem", typeof(bool),
@@ -74,9 +75,8 @@ namespace HighVoltz.Composites
             // Properties["Recipe"] = new MetaProp("Recipe", typeof(Recipe), new TypeConverterAttribute(typeof(RecipeConverter)));
 
             Casted = 0;
-            Repeat = new DynamicProperty<int>(this, "1");
-            RegisterDynamicProperty("Repeat");
-            Entry = 0u;
+            Repeat = new DynamicProperty<int>("Repeat", this, "1");
+            Entry = new DynamicProperty<uint>("Entry", this, "0");
             RepeatType = RepeatCalculationType.Craftable;
             Recipe = null;
             CastOnItem = false;
@@ -98,8 +98,8 @@ namespace HighVoltz.Composites
             : this()
         {
             Recipe = recipe;
-            Repeat = new DynamicProperty<int>(this, repeat.ToString(CultureInfo.InvariantCulture));
-            Entry = recipe.SpellId;
+            Repeat = new DynamicProperty<int>("Repeat", this, repeat.ToString(CultureInfo.InvariantCulture));
+            Entry = new DynamicProperty<uint>("Entry", this, recipe.SpellId.ToString(CultureInfo.InvariantCulture));
             RepeatType = repeatType;
             //Properties["Recipe"].Show = true;
             Properties["SpellName"].Value = SpellName;
@@ -135,9 +135,10 @@ namespace HighVoltz.Composites
 
         // number of times repeated.
         [PbXmlAttribute]
-        public uint Entry
+        [TypeConverter(typeof(DynamicProperty<uint>.DynamivExpressionConverter))]
+        public DynamicProperty<uint> Entry
         {
-            get { return (uint)Properties["Entry"].Value; }
+            get { return (DynamicProperty<uint>)Properties["Entry"].Value; }
             set { Properties["Entry"].Value = value; }
         }
 
@@ -166,7 +167,7 @@ namespace HighVoltz.Composites
 
         public string SpellName
         {
-            get { return Recipe != null ? Recipe.Name : Entry.ToString(CultureInfo.InvariantCulture); }
+            get { return Recipe != null ? Recipe.Name : Entry.Value.ToString(CultureInfo.InvariantCulture); }
         }
 
         public bool IsRecipe
@@ -307,12 +308,12 @@ namespace HighVoltz.Composites
                             TreeRoot.StatusText = string.Format("Casting: {0}",
                                                                 IsRecipe
                                                                     ? Recipe.Name
-                                                                    : Entry.ToString(CultureInfo.InvariantCulture));
+                                                                    : Entry.ToString());
                         }
-                        WoWSpell spell = WoWSpell.FromId((int)Entry);
+                        WoWSpell spell = WoWSpell.FromId((int)Entry.Value);
                         if (spell == null)
                         {
-                            Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindSpellWithEntry"], Entry);
+                            Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindSpellWithEntry"], Entry.Value.ToString(CultureInfo.InvariantCulture));
                             return RunStatus.Failure;
                         }
                         _recastTime = spell.CastTime;
@@ -328,7 +329,7 @@ namespace HighVoltz.Composites
                                                     Pb.Strings["Error_UnableToFindItemToCastOn"],
                                                     IsRecipe
                                                         ? Recipe.Name
-                                                        : Entry.ToString(CultureInfo.InvariantCulture));
+                                                        : Entry.Value.ToString(CultureInfo.InvariantCulture));
                                 IsDone = true;
                             }
                         }
@@ -352,7 +353,7 @@ namespace HighVoltz.Composites
                 SpellManager.StopCasting();
             Lua.Events.DetachEvent("UNIT_SPELLCAST_SUCCEEDED", OnUnitSpellCastSucceeded);
             var reasonString = !string.IsNullOrEmpty(reason) ? string.Format(" Reason: {0}", reason) : "";
-            Professionbuddy.Debug("Done crafting {0}.{1}", IsRecipe ? SpellName : Entry.ToString(), reasonString);
+            Professionbuddy.Debug("Done crafting {0}.{1}", IsRecipe ? SpellName : Entry.Value.ToString(CultureInfo.InvariantCulture), reasonString);
             IsDone = true;
         }
 

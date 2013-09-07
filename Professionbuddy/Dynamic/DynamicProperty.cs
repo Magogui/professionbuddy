@@ -8,23 +8,43 @@ namespace HighVoltz.Dynamic
 {
     public class DynamicProperty<T> : IDynamicProperty
     {
-        private string _compileError;
         private Func<object, T> _expressionMethod;
+        private string _code;
 
-        public DynamicProperty() : this(null, "")
+        public DynamicProperty() : this("", null, "")
         {
         }
 
-        public DynamicProperty(string code) : this(null, code)
+        public DynamicProperty(string code) : this("",null, code)
         {
         }
 
-        public DynamicProperty(IPBComposite parent, string code)
+        public DynamicProperty(string name, PBAction parent, string code)
         {
             Code = code;
             _expressionMethod = context => default(T);
             AttachedComposite = parent;
-            _compileError = "";
+            Name = name;
+            if (parent != null && !string.IsNullOrEmpty(name))
+            {
+                parent.Properties[name].PropertyChanged -= DynamicPropertyChanged;
+                parent.Properties[name].PropertyChanged += DynamicPropertyChanged;
+            }
+            CompileError = "";
+        }
+
+        static private void DynamicPropertyChanged(object sender, MetaPropArgs e)
+        {
+            var dynamicProperty = e.Value as DynamicProperty<T>;
+            if (dynamicProperty == null) return;
+            var prevDynamicProperty = e.PreviousValue as DynamicProperty<T>;
+            if (prevDynamicProperty == null) return;
+            if (prevDynamicProperty.AttachedComposite != null)
+                dynamicProperty.AttachedComposite = prevDynamicProperty.AttachedComposite;
+            if (!string.IsNullOrEmpty(prevDynamicProperty.Name))
+                dynamicProperty.Name = prevDynamicProperty.Name;
+            if (!string.IsNullOrEmpty(prevDynamicProperty.CompileError))
+                dynamicProperty.CompileError = prevDynamicProperty.CompileError;
         }
 
         public T Value
@@ -34,33 +54,11 @@ namespace HighVoltz.Dynamic
 
         #region IDynamicProperty Members
 
+        public string Name { get;  private set; }
+
         public int CodeLineNumber { get; set; }
 
-        public string CompileError
-        {
-            get { return _compileError; }
-            set
-            {
-                if (value != "" || (value == "" && _compileError != ""))
-                {
-                    if (MainForm.IsValid)
-                    {
-                        if (AttachedComposite != null)
-                        {
-                            ((PBAction) AttachedComposite).Color = value != ""
-                                                                       ? Color.Red
-                                                                       : Color.Black;
-                   //         MainForm.Instance.RefreshActionTree(AttachedComposite);
-                        }
-                      //  else
-                     //       MainForm.Instance.RefreshActionTree();
-                    }
-                }
-                if (MainForm.IsValid)
-                    MainForm.Instance.ActionGrid.Refresh();
-                _compileError = value;
-            }
-        }
+        public string CompileError { get; set; }
 
         public CsharpCodeType CodeType
         {
@@ -73,9 +71,22 @@ namespace HighVoltz.Dynamic
             set { _expressionMethod = (Func<object, T>) value; }
         }
 
-        public IPBComposite AttachedComposite { get; set; }
+        public PBAction AttachedComposite { get; set; }
 
-        public string Code { get; set; }
+        IPBComposite ICSharpCode.AttachedComposite { get { return AttachedComposite; }}
+
+        object IDynamicProperty.Value { get { return AttachedComposite; } }
+
+        public string Code
+        {
+            get { return _code; }
+            set
+            {
+                if (value == _code) return;
+                _code = value;
+                DynamicCodeCompiler.CodeWasModified = true;
+            }
+        }
 
         public Type ReturnType
         {

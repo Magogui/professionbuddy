@@ -5,6 +5,7 @@ using System.Drawing.Design;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Styx;
 using Styx.CommonBot;
@@ -17,7 +18,7 @@ namespace HighVoltz
 
     public class MetaProp
     {
-        private object val;
+        private object _val;
 
         public MetaProp(string name, Type type, params Attribute[] attributes)
         {
@@ -38,11 +39,19 @@ namespace HighVoltz
 
         public object Value
         {
-            get { return val; }
+            get { return _val; }
             set
             {
-                val = value;
-                if (PropertyChanged != null) PropertyChanged(this, new MetaPropArgs(value));
+                if (_val == value) return;
+                var handler = PropertyChanged;
+                if (handler != null)
+                {
+                    var args = new MetaPropArgs(value, _val);
+                    _val = value;
+                    handler(this, args);
+                }
+                else
+                    _val = value;
             }
         }
 
@@ -51,11 +60,13 @@ namespace HighVoltz
 
     public class MetaPropArgs : EventArgs
     {
-        public MetaPropArgs(object val)
+        public MetaPropArgs(object val, object previousValue)
         {
             Value = val;
+            PreviousValue = previousValue;
         }
 
+        public object PreviousValue { get; private set; }
         public object Value { get; private set; }
     }
 
@@ -80,7 +91,7 @@ namespace HighVoltz
 
         public T GetValue<T>(string name)
         {
-            return (T) this[name].Value;
+            return (T)this[name].Value;
         }
 
         #region Nested type: PropertyBagDescriptor
@@ -118,7 +129,7 @@ namespace HighVoltz
 
             public override Type ComponentType
             {
-                get { return typeof (PropertyBag); }
+                get { return typeof(PropertyBag); }
             }
 
             public override bool SupportsChangeEvents
@@ -135,7 +146,7 @@ namespace HighVoltz
                         if (att is TypeConverterAttribute)
                         {
                             var tc = att as TypeConverterAttribute;
-                            return (TypeConverter) Activator.CreateInstance(Type.GetType(tc.ConverterTypeName));
+                            return (TypeConverter)Activator.CreateInstance(Type.GetType(tc.ConverterTypeName));
                         }
                     }
                     return base.Converter;
@@ -144,12 +155,12 @@ namespace HighVoltz
 
             public override object GetValue(object component)
             {
-                return ((PropertyBag) component)[Name].Value;
+                return ((PropertyBag)component)[Name].Value;
             }
 
             public override void SetValue(object component, object value)
             {
-                ((PropertyBag) component)[Name].Value = value;
+                ((PropertyBag)component)[Name].Value = value;
             }
 
             public override bool ShouldSerializeValue(object component)
@@ -219,7 +230,7 @@ namespace HighVoltz
 
         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
         {
-            return ((ICustomTypeDescriptor) this).GetProperties(new Attribute[0]);
+            return ((ICustomTypeDescriptor)this).GetProperties(new Attribute[0]);
         }
 
         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
@@ -326,7 +337,7 @@ namespace HighVoltz
             [Browsable(false)]
             public uint TotalCopper
             {
-                get { return Copper + (Silver*100) + (Gold*10000); }
+                get { return Copper + (Silver * 100) + (Gold * 10000); }
             }
 
             public event EventHandler OnChanged;
@@ -366,12 +377,12 @@ namespace HighVoltz
 
         #region Nested type: GoldEditorConverter
 
-        [TypeConverter(typeof (GoldEditorConverter))]
+        [TypeConverter(typeof(GoldEditorConverter))]
         public class GoldEditorConverter : ExpandableObjectConverter
         {
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             {
-                if (destinationType == typeof (GoldEditorConverter))
+                if (destinationType == typeof(GoldEditorConverter))
                     return true;
                 return base.CanConvertTo(context, destinationType);
             }
@@ -379,9 +390,9 @@ namespace HighVoltz
             public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value,
                                              Type destinationType)
             {
-                if (destinationType == typeof (String) && value is GoldEditor)
+                if (destinationType == typeof(String) && value is GoldEditor)
                 {
-                    var ge = (GoldEditor) value;
+                    var ge = (GoldEditor)value;
                     return ge.ToString();
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
@@ -389,7 +400,7 @@ namespace HighVoltz
 
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
-                if (sourceType == typeof (string))
+                if (sourceType == typeof(string))
                     return true;
                 return base.CanConvertFrom(context, sourceType);
             }
@@ -399,8 +410,8 @@ namespace HighVoltz
                 if (value is string)
                 {
                     var ge = new GoldEditor();
-                    if (!ge.SetValues((string) value))
-                        throw new ArgumentException("Can not convert '" + (string) value + "' to type GoldEditor");
+                    if (!ge.SetValues((string)value))
+                        throw new ArgumentException("Can not convert '" + (string)value + "' to type GoldEditor");
                     return ge;
                 }
                 return base.ConvertFrom(context, culture, value);
