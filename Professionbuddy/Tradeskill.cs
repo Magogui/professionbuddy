@@ -676,7 +676,7 @@ namespace HighVoltz
             {
                 dbTable = StyxWoW.Db[ClientDb.SkillLine];
                 dbRow = dbTable.GetRow((uint)Skill);
-                _header = StyxWoW.Memory.ReadString(new IntPtr(dbRow.GetField<uint>(5)), Encoding.UTF8);
+                _header = dbRow.GetStringField(5);
             }
             else
             {
@@ -694,14 +694,11 @@ namespace HighVoltz
                         var iSubClass2 = dbRow.GetField<int>(2);
                         if (iSubClass1 == cache.Item.ClassId && iSubClass2 == cache.Item.SubClassId)
                         {
-                            var stringPtr = dbRow.GetField<uint>(12);
+                            _header = dbRow.GetStringField(12);
                             // if pointer in field (12) is 0 or it points to null string then use field (11)
-                            if (stringPtr == 0 ||
-                                string.IsNullOrEmpty(_header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8)))
+                            if (string.IsNullOrEmpty(_header))
                             {
-                                stringPtr = dbRow.GetField<uint>(11);
-                                if (stringPtr != 0)
-                                    _header = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
+                                _header = dbRow.GetStringField(11);
                             }
                             break;
                         }
@@ -716,11 +713,7 @@ namespace HighVoltz
             string getName = null;
             WoWDb.DbTable t = StyxWoW.Db[ClientDb.Spell];
             WoWDb.Row r = t.GetRow(SpellId);
-            var stringPtr = r.GetField<uint>((uint)SpellDB.NamePtr);
-            if (stringPtr != 0)
-            {
-                getName = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
-            }
+            getName = r.GetStringField((uint) SpellDB.NamePtr);
             return getName;
         }
 
@@ -985,18 +978,17 @@ namespace HighVoltz
         private string GetName()
         {
             string name = null;
-            uint stringPtr = 0;
             switch (_toolType)
             {
                 case ToolType.SpellFocus:
                     WoWDb.DbTable t = StyxWoW.Db[ClientDb.SpellFocusObject];
                     WoWDb.Row r = t.GetRow(_index);
-                    stringPtr = r.GetField<uint>(1);
+                    name = r.GetStringField(1);
                     break;
                 case ToolType.AreaTable:
                     t = StyxWoW.Db[ClientDb.AreaTable];
                     r = t.GetRow(_index);
-                    stringPtr = r.GetField<uint>(13);
+                    name = r.GetStringField(13);
                     break;
                 case ToolType.Item:
                     name = Util.GetItemCacheName(_index);
@@ -1004,12 +996,8 @@ namespace HighVoltz
                 case ToolType.Totem:
                     t = StyxWoW.Db[ClientDb.TotemCategory];
                     r = t.GetRow(_index);
-                    stringPtr = r.GetField<uint>(1);
+                    name = r.GetStringField(1);
                     break;
-            }
-            if (stringPtr != 0)
-            {
-                name = StyxWoW.Memory.ReadString(new IntPtr(stringPtr), Encoding.UTF8);
             }
             return name;
         }
