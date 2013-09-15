@@ -414,7 +414,7 @@ namespace HighVoltz.Composites
 @"local A =GetNumAuctionItems('owner') 
 local cnt=0 
 for i=A,1,-1 do 
-    local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,sold,id=GetAuctionItemInfo('owner', i) 
+    local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) 
     if id == {0} and sold ~= 1 and ({1} > {2} or {1} == 0) and (buyout/cnt) > {2} then 
         CancelAuction(i) cnt=cnt+1 
     end 
@@ -492,9 +492,7 @@ return cnt";
                 {
                     List<string> luaRet =
                         Lua.GetReturnValues(
-                            string.Format(
-                                "local name,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', {0}) return id,name,sold",
-                                i));
+                            string.Format("local name,_,_,_,_,_,_,_,_,_,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', {0}) return id,name,sold",i));
                     if (luaRet != null && luaRet[2] != "1")
                     {
                         uint id = uint.Parse(luaRet[0]);
