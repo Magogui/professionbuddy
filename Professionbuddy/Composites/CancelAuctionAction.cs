@@ -412,14 +412,14 @@ namespace HighVoltz.Composites
         // Indexes are {0}=ItemID, {1}=MinBuyout, {2}=LowestBuyoutFound
         private const string CancelAuctionLuaFormat =
 @"local A =GetNumAuctionItems('owner') 
-local cnt=0 
+local soldCnt=0 
 for i=A,1,-1 do 
     local name,_,cnt,_,_,_,_,_,_,buyout,_,_,_,_,_,sold,id=GetAuctionItemInfo('owner', i) 
-    if id == {0} and sold ~= 1 and ({1} > {2} or {1} == 0) and (buyout/cnt) > {2} then 
-        CancelAuction(i) cnt=cnt+1 
+    if id == {0} and sold ~= 1 and ({1} <= {2} or {1} == 0) and (buyout/cnt) > {2} then 
+        CancelAuction(i) soldCnt=soldCnt+1 
     end 
 end 
-return cnt";
+return soldCnt";
 
         private readonly Stopwatch _queueTimer = new Stopwatch();
         private int _page;
