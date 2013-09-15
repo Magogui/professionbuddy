@@ -578,11 +578,11 @@ namespace HighVoltz.Composites
             local me = GetUnitName('player') 
             local auctionInfo = {{{0},{1}}} 
             for index=1, A do 
-                local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,owner,sold,id=GetAuctionItemInfo('list', index) 
-                if id == {2} and owner ~= me and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then 
+                local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,_,owner,ownerFullName,sold,id=GetAuctionItemInfo('list', index) 
+                if id == {2} and (owner ~= me or ownerFullName == nil) and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then 
                     auctionInfo[1] = floor(buyout/cnt) 
                 end 
-                if id == {2} and owner == me and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end 
+                if id == {2} and owner == me and ownerFullName == nil and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end 
             end 
             return unpack(auctionInfo)
 ";

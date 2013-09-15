@@ -97,10 +97,8 @@ namespace HighVoltz
         /// <returns> </returns>
         public static string GetItemCacheName(uint id)
         {
-            WoWCache.InfoBlock cache = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(id);
-            if (cache != null)
-                return StyxWoW.Memory.ReadString(cache.ItemSparse.Name, Encoding.UTF8);
-            return null;
+            var itemInfo = ItemInfo.FromId(id);
+            return itemInfo != null ? itemInfo.Name : null;
         }
 
         public static void MoveTo(WoWPoint point)

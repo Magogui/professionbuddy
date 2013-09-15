@@ -285,19 +285,19 @@ namespace HighVoltz.Composites
                     {
                         _mailbox =
                             ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
-                                o => o.SubType == WoWGameObjectType.Mailbox)
-                                .OrderBy(o => o.Distance).FirstOrDefault();
+                                o => o.SubType == WoWGameObjectType.Mailbox && o.CanUse())
+                                .OrderBy(o => o.DistanceSqr).FirstOrDefault();
                     }
                     else
                     {
                         _mailbox =
                             ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
                                 o => o.SubType == WoWGameObjectType.Mailbox
-                                     && o.Location.Distance(_loc) < 10)
-                                .OrderBy(o => o.Distance).FirstOrDefault();
+                                     && o.Location.Distance(_loc) < 10 && o.CanUse()) 
+                                .OrderBy(o => o.DistanceSqr).FirstOrDefault();
                     }
                     if (_mailbox != null)
-                        movetoPoint = WoWMathHelper.CalculatePointFrom(Me.Location, _mailbox.Location, 3);
+                        movetoPoint = _mailbox.Location;
 
                     if (movetoPoint == WoWPoint.Zero)
                     {
@@ -305,10 +305,14 @@ namespace HighVoltz.Composites
                         return RunStatus.Failure;
                     }
 
-                    if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
+                    if (_mailbox == null || !_mailbox.WithinInteractRange)
+                    {
                         Util.MoveTo(movetoPoint);
+                    }
                     else if (_mailbox != null)
                     {
+                        if (Me.IsMoving)
+                            WoWMovement.MoveStop();
                         _mailbox.Interact();
                     }
                     return RunStatus.Success;
