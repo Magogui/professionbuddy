@@ -690,6 +690,7 @@ namespace HighVoltz
                     {
                         // cache.Item.SubClassId
                         dbRow = dbTable.GetRow((uint)i);
+                        if (dbRow == null || !dbRow.IsValid) continue;
                         var iSubClass1 = dbRow.GetField<int>(1);
                         var iSubClass2 = dbRow.GetField<int>(2);
                         if (iSubClass1 == cache.Item.ClassId && iSubClass2 == cache.Item.SubClassId)

@@ -21,14 +21,14 @@ using Styx.MemoryManagement;
 namespace HighVoltz
 {
     /// <summary>
-    ///   Utility functions
+    ///     Utility functions
     /// </summary>
     public static class Util
     {
         private const int CacheSize = 0x500;
 
         /// <summary>
-        ///   Random Number Genorator
+        ///     Random Number Genorator
         /// </summary>
         public static Random Rng = new Random(Environment.TickCount);
 
@@ -44,7 +44,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Creates a random upper/lowercase string
+        ///     Creates a random upper/lowercase string
         /// </summary>
         /// <returns> Random String </returns>
         public static string RandomString
@@ -56,7 +56,7 @@ namespace HighVoltz
                 for (int i = 0; i < size; i++)
                 {
                     // random upper/lowercase character using ascii code
-                    sb.Append((char)(Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
+                    sb.Append((char) (Rng.Next(2) == 1 ? Rng.Next(65, 91) + 32 : Rng.Next(65, 91)));
                 }
                 return sb.ToString();
             }
@@ -72,7 +72,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Returns WoW's latency, refreshed every 30 seconds.
+        ///     Returns WoW's latency, refreshed every 30 seconds.
         /// </summary>
         public static uint WowWorldLatency
         {
@@ -91,7 +91,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Returns the localized name of an item that is cached
+        ///     Returns the localized name of an item that is cached
         /// </summary>
         /// <param name="id"> </param>
         /// <returns> </returns>
@@ -120,7 +120,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Converts a string of 3 numbers to a WoWPoint.
+        ///     Converts a string of 3 numbers to a WoWPoint.
         /// </summary>
         /// <param name="location"> </param>
         /// <returns> </returns>
@@ -139,7 +139,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Returns number items with a matching id that player has in personal bank
+        ///     Returns number items with a matching id that player has in personal bank
         /// </summary>
         /// <param name="itemID"> </param>
         /// <returns> </returns>
@@ -148,7 +148,7 @@ namespace HighVoltz
             try
             {
                 // number of items in objectmanger - (carriedItemCount + BuybackItemCount)
-                return (int)ObjectManager.GetObjectsOfType<WoWItem>().Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) -
+                return (int) ObjectManager.GetObjectsOfType<WoWItem>().Sum(i => i != null && i.IsValid && i.Entry == itemID ? i.StackCount : 0) -
                        (GetCarriedItemCount(itemID) + GetBuyBackItemCount(itemID));
             }
             catch
@@ -158,23 +158,23 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Returns number items with a matching id that player is carrying
+        ///     Returns number items with a matching id that player is carrying
         /// </summary>
         /// <param name="id"> Item ID </param>
         /// <returns> Number of items in player Inventory </returns>
         public static int GetCarriedItemCount(uint id)
         {
-            return (int)StyxWoW.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int) StyxWoW.Me.CarriedItems.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         /// <summary>
-        ///   Returns number items with a matching id that player is carrying
+        ///     Returns number items with a matching id that player is carrying
         /// </summary>
         /// <param name="id"> Item ID </param>
         /// <returns> Number of items in merchant buyback frame </returns>
         public static int GetBuyBackItemCount(uint id)
         {
-            return (int)StyxWoW.Me.Inventory.Buyback.Items.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
+            return (int) StyxWoW.Me.Inventory.Buyback.Items.Sum(i => i != null && i.IsValid && i.Entry == id ? i.StackCount : 0);
         }
 
         // credits Dfagan
@@ -218,10 +218,9 @@ namespace HighVoltz
         public static int CalculateRecipeRepeat(Recipe recipe)
         {
             int repeat = (from ingred in recipe.Ingredients
-                          let ingredCnt =
-                              (int)ingred.InBagItemCount -
-                              (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ? Professionbuddy.Instance.MaterialList[ingred.ID] : 0)
-                          select (int)Math.Floor(ingredCnt / (double)ingred.Required)).Min();
+                let ingredCnt =
+                    (int) ingred.InBagItemCount - (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ? Professionbuddy.Instance.MaterialList[ingred.ID] : 0)
+                select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Min();
             return repeat > 0 ? repeat : 0;
         }
 
@@ -246,10 +245,14 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is thrown
+        ///     Looks for a pattern in WoW's memory and returns the offset of pattern if found otherwise an InvalidDataException is
+        ///     thrown
         /// </summary>
         /// <param name="pattern"> the pattern to look for, in space delimited hex string format e.g. "DE AD BE EF" </param>
-        /// <param name="mask"> the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte, anthing else is not ignored </param>
+        /// <param name="mask">
+        ///     the mask specifies what bytes in pattern to ignore, The '?' character means ignore the byte,
+        ///     anthing else is not ignored
+        /// </param>
         /// <returns> The offset the first match of the pattern was found at. </returns>
         public static IntPtr FindPattern(string pattern, string mask)
         {
@@ -309,8 +312,8 @@ namespace HighVoltz
         public static void ScanForOffsets()
         {
             ProcessModule mod = StyxWoW.Memory.Process.MainModule;
-            var baseAddress = (uint)mod.BaseAddress;
-            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0 )
+            var baseAddress = (uint) mod.BaseAddress;
+            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0)
             {
                 Professionbuddy.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
                 try
@@ -344,7 +347,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Converts a string to a float using En-US based culture
+        ///     Converts a string to a float using En-US based culture
         /// </summary>
         /// <param name="str"> </param>
         /// <returns> </returns>
@@ -356,7 +359,8 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing names into lua that are UTF-16 or higher.
+        ///     Converts a string to a formated UTF-8 string using \ddd format where ddd is a 3 digit number. Useful when importing
+        ///     names into lua that are UTF-16 or higher.
         /// </summary>
         /// <param name="text"> </param>
         /// <returns> </returns>
@@ -372,7 +376,7 @@ namespace HighVoltz
         }
 
         /// <summary>
-        ///   This is a fix for WoWPoint.ToString using current cultures decimal separator.
+        ///     This is a fix for WoWPoint.ToString using current cultures decimal separator.
         /// </summary>
         /// <param name="text"> </param>
         /// <returns> </returns>
@@ -383,38 +387,17 @@ namespace HighVoltz
 
         public static int MinEnchantLevelReq(this WoWItem item)
         {
-            /* ToDO .. use this once bug where last row isn't returned is fixed.
-            foreach (var row in StyxWoW.Db[ClientDb.ItemDisenchantLoot])
+            foreach (var itemDe in ItemDisenchantLoot.Collection)
             {
-                var itemDe = row.GetStruct<ItemDisenchantLootStruct>();
-                if (item.ItemInfo.ItemClass == itemDe.ItemCLass && item.Quality == itemDe.ItemQuality && item.ItemInfo.Level >= itemDe.MinItemLevel &&
-                    item.ItemInfo.Level <= itemDe.MaxItemLevel)
-                {
-                    return itemDe.RequiredEnchantingLvl;
-                }
-            }*/
-
-            var table = StyxWoW.Db[ClientDb.ItemDisenchantLoot];
-            for (int i = table.MinIndex; i <= table.MaxIndex; i++ )
-            {
-                var row = table.GetRow((uint) i);
-                if (!row.IsValid) continue;
-                var itemDe = row.GetStruct<ItemDisenchantLootStruct>();
-                if (item.ItemInfo.ItemClass == itemDe.ItemCLass && item.Quality == itemDe.ItemQuality && item.ItemInfo.Level >= itemDe.MinItemLevel &&
-                    item.ItemInfo.Level <= itemDe.MaxItemLevel)
+                if (item.ItemInfo.ItemClass == itemDe.ItemCLass
+                    && item.Quality == itemDe.ItemQuality 
+                    && item.ItemInfo.Level >= itemDe.MinItemLevel 
+                    && item.ItemInfo.Level <= itemDe.MaxItemLevel)
                 {
                     return itemDe.RequiredEnchantingLvl;
                 }
             }
-                return -1;
-            /* No longer used.
-            WoWCache.InfoBlock infoBlock = StyxWoW.Cache[CacheDb.Item].GetInfoBlockById(item.Entry);
-
-            return
-                StyxWoW.Memory.Call<int>(
-                    StyxWoW.Memory.ImageBase + (int) GlobalPBSettings.Instance.MinEnchantSkillReqPtr,
-                    CallingConvention.ThisCall, (uint) infoBlock.Address);
-             */
+            return -1;
         }
 
         public static int MinInscriptionLevelReq(this WoWItem item)
@@ -434,16 +417,79 @@ namespace HighVoltz
         }
 
         #region Embedded Type - ItemDisenchantLootStruct
-        [StructLayout(LayoutKind.Sequential)]
-        private struct ItemDisenchantLootStruct
+
+        private class ItemDisenchantLoot
         {
-            public readonly uint Id;
-            public readonly WoWItemClass ItemCLass;
-            private readonly int _unk_8;
-            public readonly WoWItemQuality ItemQuality;
-            public readonly int MinItemLevel; // inclusive
-            public readonly int MaxItemLevel; // inclusive
-            public readonly int RequiredEnchantingLvl;
+            private ItemDisenchantLootStruct _internalData;
+
+            private ItemDisenchantLoot(ItemDisenchantLootStruct internalData)
+            {
+                _internalData = internalData;
+            }
+
+            public uint Id
+            {
+                get { return _internalData.Id; }
+            }
+
+            public WoWItemClass ItemCLass
+            {
+                get { return _internalData.ItemCLass; }
+            }
+
+            public WoWItemQuality ItemQuality
+            {
+                get { return _internalData.ItemQuality; }
+            }
+
+            public int MinItemLevel
+            {
+                get { return _internalData.MinItemLevel; }
+            }
+
+            public int MaxItemLevel
+            {
+                get { return _internalData.MaxItemLevel; }
+            }
+
+            public int RequiredEnchantingLvl
+            {
+                get { return _internalData.RequiredEnchantingLvl; }
+            }
+
+            #region Static
+
+            public static ItemDisenchantLoot FromId(uint id)
+            {
+                var table = StyxWoW.Db[ClientDb.ItemDisenchantLoot];
+                var row = table.GetRow(id);
+                if (row == null || !row.IsValid)
+                    return null;
+                return new ItemDisenchantLoot(row.GetStruct<ItemDisenchantLootStruct>());
+            }
+
+            public static IEnumerable<ItemDisenchantLoot> Collection
+            {
+                get
+                {
+                    return StyxWoW.Db[ClientDb.ItemDisenchantLoot].Select(row => new ItemDisenchantLoot(row.GetStruct<ItemDisenchantLootStruct>()));
+                }
+            }
+
+            #endregion
+
+
+            [StructLayout(LayoutKind.Sequential)]
+            private struct ItemDisenchantLootStruct
+            {
+                public readonly uint Id;
+                public readonly WoWItemClass ItemCLass;
+                private readonly int _unk_8;
+                public readonly WoWItemQuality ItemQuality;
+                public readonly int MinItemLevel; // inclusive
+                public readonly int MaxItemLevel; // inclusive
+                public readonly int RequiredEnchantingLvl;
+            }
         }
 
         #endregion
