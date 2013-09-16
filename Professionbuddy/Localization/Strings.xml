@@ -205,6 +205,7 @@
   <Action_SellItemOnAhAction_BidPercent>Bid Percent</Action_SellItemOnAhAction_BidPercent>
   <Action_SellItemOnAhAction_UndercutPercent>Undercut Percent</Action_SellItemOnAhAction_UndercutPercent>
   <Action_SellItemOnAhAction_PostIfBelowMinBuyout>Post If Below MinBuyout</Action_SellItemOnAhAction_PostIfBelowMinBuyout>
+  <Action_SellItemOnAhAction_PostPartialStacks>Post partial stacks</Action_SellItemOnAhAction_PostPartialStacks>
 	
   <!-- Settings -->
   <Action_Settings_Name>Settings</Action_Settings_Name>
