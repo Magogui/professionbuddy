@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using HighVoltz.Composites;
+using MainDev.RemoteASM;
 using Microsoft.CSharp;
 using Styx;
 using Styx.TreeSharp;
@@ -15,6 +16,14 @@ namespace HighVoltz.Dynamic
 {
     public class DynamicCodeCompiler
     {
+        private readonly static bool _usingHBLite = Assembly.GetEntryAssembly().GetType("Bots.Gatherbuddy.GatherbuddyBot") == null;
+
+        static DynamicCodeCompiler()
+        {
+            if (!_usingHBLite)
+                Prefix = String.Format("using Bots.Gatherbuddy;\r\n{0}",Prefix);
+        }
+
         private static readonly Dictionary<string, ICSharpCode> CsharpCodeDict = new Dictionary<string, ICSharpCode>();
 
         private static readonly IEnumerable<KeyValuePair<string, ICSharpCode>> Declarations = from dec in CsharpCodeDict
@@ -253,7 +262,7 @@ namespace HighVoltz.Dynamic
 
         #region Strings
 
-        private const string Prefix =
+        private static readonly string Prefix =
             @"using HighVoltz;
             using System;
             using System.Reflection;
@@ -283,8 +292,7 @@ namespace HighVoltz.Dynamic
             using Styx.WoWInternals.World;
             using System.Xml.Linq;
             using HighVoltz.Composites;
-            using HighVoltz.Dynamic;
-            using Bots.Gatherbuddy;
+            using HighVoltz.Dynamic;            
             using Color = System.Drawing.Color;
 
         public class CodeDriver
@@ -292,6 +300,7 @@ namespace HighVoltz.Dynamic
             static object var1,var2,var3,var4,var5,var6,var7,var8,var9;
 ";
 
+        
         private const string Postfix =
             @"
             static LocalPlayer Me = StyxWoW.Me;
