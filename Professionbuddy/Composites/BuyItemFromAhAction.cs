@@ -44,7 +44,7 @@ namespace HighVoltz.Composites
         local buyPrice=0  
         for index=1, A do  
            local name,_,cnt,_,_,_,_,minBid,minInc,buyout,bidNum,highBidder,highBidderFullName,owner,ownerFullName,sold,id=GetAuctionItemInfo('list', index) 
-           if useBid == 1 and buyout > each*cnt and (highBidder == nil or highBidder ~= me or highBidderFullName == nil) then  
+           if useBid == 1 and buyout > each*cnt and (highBidder == nil or highBidder ~= me or highBidderFullName ~= nil) then  
               if bidNum == nil then  
                  buyPrice = minBid + minInc  
               else  
