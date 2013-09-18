@@ -17,9 +17,9 @@ using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-    internal sealed class SellItemOnAhAction : PBAction
+    public sealed class SellItemOnAhAction : PBAction
     {
-        #region AmountBasedType enum
+        #region Embedded Type: AmountBasedType enum
 
         public enum AmountBasedType
         {
@@ -29,7 +29,7 @@ namespace HighVoltz.Composites
 
         #endregion
 
-        #region RunTimeType enum
+        #region Embedded Type: RunTimeType enum
 
         public enum RunTimeType
         {
@@ -40,69 +40,82 @@ namespace HighVoltz.Composites
 
         #endregion
 
+        #region Fields
+
         private WoWPoint _loc;
         private List<AuctionEntry> _toScanItemList;
         private List<AuctionEntry> _toSellItemList;
+        private readonly Stopwatch _queueTimer = new Stopwatch();
+        private int _leftOver;
+        private int _page;
+
+        private bool _posted;
+        private int _totalAuctions;
+
+
+        #endregion
+
+        #region Constructors
 
         public SellItemOnAhAction()
         {
-            Properties["ItemID"] = new MetaProp("ItemID", typeof(string), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
+            Properties["ItemID"] = new MetaProp("ItemID", typeof (string), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemEntries"]));
 
-            Properties["RunTime"] = new MetaProp("RunTime", typeof(RunTimeType), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_AuctionDuration"]));
+            Properties["RunTime"] = new MetaProp("RunTime", typeof (RunTimeType), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_AuctionDuration"]));
 
             Properties["MinBuyout"] = new MetaProp(
                 "MinBuyout",
-                typeof(PropertyBag.GoldEditor),
-                new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)),
+                typeof (PropertyBag.GoldEditor),
+                new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_MinBuyout"]));
 
             Properties["MaxBuyout"] = new MetaProp(
                 "MaxBuyout",
-                typeof(PropertyBag.GoldEditor),
-                new TypeConverterAttribute(typeof(PropertyBag.GoldEditorConverter)),
+                typeof (PropertyBag.GoldEditor),
+                new TypeConverterAttribute(typeof (PropertyBag.GoldEditorConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_MaxBuyout"]));
 
             Properties["Amount"] = new MetaProp(
                 "Amount",
-                typeof(DynamicProperty<int>),
-                new TypeConverterAttribute(typeof(DynamicProperty<int>.DynamivExpressionConverter)),
+                typeof (DynamicProperty<int>),
+                new TypeConverterAttribute(typeof (DynamicProperty<int>.DynamivExpressionConverter)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_Amount"]));
 
-            Properties["StackSize"] = new MetaProp("StackSize", typeof(uint), new DisplayNameAttribute(Pb.Strings["Action_Common_StackSize"]));
+            Properties["StackSize"] = new MetaProp("StackSize", typeof (uint), new DisplayNameAttribute(Pb.Strings["Action_Common_StackSize"]));
 
             Properties["IgnoreStackSizeBelow"] = new MetaProp(
                 "IgnoreStackSizeBelow",
-                typeof(uint),
+                typeof (uint),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_IgnoreStackSizeBelow"]));
 
-            Properties["AmountType"] = new MetaProp("AmountType", typeof(AmountBasedType), new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
+            Properties["AmountType"] = new MetaProp("AmountType", typeof (AmountBasedType), new DisplayNameAttribute(Pb.Strings["Action_Common_Sell"]));
 
-            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof(bool), new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
+            Properties["AutoFindAh"] = new MetaProp("AutoFindAh", typeof (bool), new DisplayNameAttribute(Pb.Strings["Action_Common_AutoFindAH"]));
 
             Properties["Location"] = new MetaProp(
                 "Location",
-                typeof(string),
-                new EditorAttribute(typeof(PropertyBag.LocationEditor), typeof(UITypeEditor)),
+                typeof (string),
+                new EditorAttribute(typeof (PropertyBag.LocationEditor), typeof (UITypeEditor)),
                 new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof(float), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_BidPercent"]));
+            Properties["BidPrecent"] = new MetaProp("BidPrecent", typeof (float), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_BidPercent"]));
 
-            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof(double), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_UndercutPercent"]));
+            Properties["UndercutPrecent"] = new MetaProp("UndercutPrecent", typeof (double), new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_UndercutPercent"]));
 
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof(bool), new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
+            Properties["UseCategory"] = new MetaProp("UseCategory", typeof (bool), new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
 
-            Properties["Category"] = new MetaProp("Category", typeof(WoWItemClass), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
+            Properties["Category"] = new MetaProp("Category", typeof (WoWItemClass), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
 
-            Properties["SubCategory"] = new MetaProp("SubCategory", typeof(WoWItemTradeGoodsClass), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
+            Properties["SubCategory"] = new MetaProp("SubCategory", typeof (WoWItemTradeGoodsClass), new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSubCategory"]));
 
             Properties["PostIfBelowMinBuyout"] = new MetaProp(
                 "PostIfBelowMinBuyout",
-                typeof(bool),
+                typeof (bool),
                 new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_PostIfBelowMinBuyout"]));
 
             Properties["PostPartialStacks"] = new MetaProp(
                 "PostPartialStacks",
-                typeof(bool),
+                typeof (bool),
                 new DisplayNameAttribute(Pb.Strings["Action_SellItemOnAhAction_PostPartialStacks"]));
 
             ItemID = "";
@@ -134,6 +147,8 @@ namespace HighVoltz.Composites
             Properties["Amount"].Show = false;
             Properties["Location"].Show = false;
         }
+
+        #endregion
 
         #region Callbacks
 
@@ -185,16 +200,18 @@ namespace HighVoltz.Composites
 
         #endregion
 
+        #region Properties
+
         [PbXmlAttribute]
         public bool UseCategory
         {
-            get { return (bool)Properties["UseCategory"].Value; }
+            get { return (bool) Properties["UseCategory"].Value; }
             set { Properties["UseCategory"].Value = value; }
         }
 
         public WoWItemClass Category
         {
-            get { return (WoWItemClass)Properties["Category"].Value; }
+            get { return (WoWItemClass) Properties["Category"].Value; }
             set { Properties["Category"].Value = value; }
         }
 
@@ -211,14 +228,14 @@ namespace HighVoltz.Composites
         [PbXmlAttribute]
         public RunTimeType RunTime
         {
-            get { return (RunTimeType)Properties["RunTime"].Value; }
+            get { return (RunTimeType) Properties["RunTime"].Value; }
             set { Properties["RunTime"].Value = value; }
         }
 
         [PbXmlAttribute]
         public AmountBasedType AmountType
         {
-            get { return (AmountBasedType)Properties["AmountType"].Value; }
+            get { return (AmountBasedType) Properties["AmountType"].Value; }
             set { Properties["AmountType"].Value = value; }
         }
 
@@ -226,87 +243,87 @@ namespace HighVoltz.Composites
         [PbXmlAttribute("ItemName")]
         public string ItemID
         {
-            get { return (string)Properties["ItemID"].Value; }
+            get { return (string) Properties["ItemID"].Value; }
             set { Properties["ItemID"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof(PropertyBag.GoldEditorConverter))]
+        [TypeConverter(typeof (PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MinBuyout
         {
-            get { return (PropertyBag.GoldEditor)Properties["MinBuyout"].Value; }
+            get { return (PropertyBag.GoldEditor) Properties["MinBuyout"].Value; }
             set { Properties["MinBuyout"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof(PropertyBag.GoldEditorConverter))]
+        [TypeConverter(typeof (PropertyBag.GoldEditorConverter))]
         public PropertyBag.GoldEditor MaxBuyout
         {
-            get { return (PropertyBag.GoldEditor)Properties["MaxBuyout"].Value; }
+            get { return (PropertyBag.GoldEditor) Properties["MaxBuyout"].Value; }
             set { Properties["MaxBuyout"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint StackSize
         {
-            get { return (uint)Properties["StackSize"].Value; }
+            get { return (uint) Properties["StackSize"].Value; }
             set { Properties["StackSize"].Value = value; }
         }
 
         [PbXmlAttribute]
         public uint IgnoreStackSizeBelow
         {
-            get { return (uint)Properties["IgnoreStackSizeBelow"].Value; }
+            get { return (uint) Properties["IgnoreStackSizeBelow"].Value; }
             set { Properties["IgnoreStackSizeBelow"].Value = value; }
         }
 
         [PbXmlAttribute]
-        [TypeConverter(typeof(DynamicProperty<int>.DynamivExpressionConverter))]
+        [TypeConverter(typeof (DynamicProperty<int>.DynamivExpressionConverter))]
         public DynamicProperty<int> Amount
         {
-            get { return (DynamicProperty<int>)Properties["Amount"].Value; }
+            get { return (DynamicProperty<int>) Properties["Amount"].Value; }
             set { Properties["Amount"].Value = value; }
         }
 
         [PbXmlAttribute]
         public float BidPrecent
         {
-            get { return (float)Properties["BidPrecent"].Value; }
+            get { return (float) Properties["BidPrecent"].Value; }
             set { Properties["BidPrecent"].Value = value; }
         }
 
         [PbXmlAttribute]
         public double UndercutPrecent
         {
-            get { return (double)Properties["UndercutPrecent"].Value; }
+            get { return (double) Properties["UndercutPrecent"].Value; }
             set { Properties["UndercutPrecent"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool AutoFindAh
         {
-            get { return (bool)Properties["AutoFindAh"].Value; }
+            get { return (bool) Properties["AutoFindAh"].Value; }
             set { Properties["AutoFindAh"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool PostPartialStacks
         {
-            get { return (bool)Properties["PostPartialStacks"].Value; }
+            get { return (bool) Properties["PostPartialStacks"].Value; }
             set { Properties["PostPartialStacks"].Value = value; }
         }
 
         [PbXmlAttribute]
         public bool PostIfBelowMinBuyout
         {
-            get { return (bool)Properties["PostIfBelowMinBuyout"].Value; }
+            get { return (bool) Properties["PostIfBelowMinBuyout"].Value; }
             set { Properties["PostIfBelowMinBuyout"].Value = value; }
         }
 
         [PbXmlAttribute]
         public string Location
         {
-            get { return (string)Properties["Location"].Value; }
+            get { return (string) Properties["Location"].Value; }
             set { Properties["Location"].Value = value; }
         }
 
@@ -332,6 +349,10 @@ namespace HighVoltz.Composites
         {
             get { return Pb.Strings["Action_SellItemOnAhAction_Help"]; }
         }
+
+        #endregion
+
+        #region PBAction Overrides
 
         protected override RunStatus Run(object context)
         {
@@ -367,8 +388,8 @@ namespace HighVoltz.Composites
                             else if (lowestBo < MinBuyout.TotalCopper)
                                 ae.Buyout = MinBuyout.TotalCopper;
                             else
-                                ae.Buyout = lowestBo - (uint)Math.Ceiling((lowestBo * UndercutPrecent / 100d));
-                            ae.Bid = (uint)(ae.Buyout * BidPrecent / 100d);
+                                ae.Buyout = lowestBo - (uint) Math.Ceiling((lowestBo*UndercutPrecent/100d));
+                            ae.Bid = (uint) (ae.Buyout*BidPrecent/100d);
                             bool enoughItemsPosted = AmountType == AmountBasedType.Amount && ae.MyAuctions >= Amount;
                             bool tooLowBuyout = !PostIfBelowMinBuyout && lowestBo < MinBuyout.TotalCopper;
 
@@ -413,6 +434,75 @@ namespace HighVoltz.Composites
             }
             return RunStatus.Failure;
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            _toScanItemList = null;
+            _toSellItemList = null;
+        }
+
+        public override object Clone()
+        {
+            return new SellItemOnAhAction
+                   {
+                       ItemID = ItemID,
+                       MinBuyout = new PropertyBag.GoldEditor(MinBuyout.ToString()),
+                       MaxBuyout = new PropertyBag.GoldEditor(MaxBuyout.ToString()),
+                       Amount = Amount,
+                       StackSize = StackSize,
+                       IgnoreStackSizeBelow = IgnoreStackSizeBelow,
+                       AmountType = AmountType,
+                       AutoFindAh = AutoFindAh,
+                       Location = Location,
+                       UndercutPrecent = UndercutPrecent,
+                       BidPrecent = BidPrecent,
+                       RunTime = RunTime,
+                       UseCategory = UseCategory,
+                       Category = Category,
+                       SubCategory = SubCategory,
+                       PostIfBelowMinBuyout = PostIfBelowMinBuyout,
+                   };
+        }
+
+        public override void OnProfileLoad(XElement element)
+        {
+            XAttribute cat = element.Attribute("Category");
+            XAttribute subCatAttr = element.Attribute("SubCategory");
+            XAttribute subCatTypeAttr = element.Attribute("SubCategoryType");
+            if (cat != null)
+            {
+                Category = (WoWItemClass) Enum.Parse(typeof (WoWItemClass), cat.Value);
+                cat.Remove();
+            }
+            if (subCatAttr != null && subCatTypeAttr != null)
+            {
+                Type subCategoryType;
+                if (subCatTypeAttr.Value != "SubCategoryType")
+                {
+                    string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
+                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                }
+                else
+                    subCategoryType = typeof (SubCategoryType);
+                SubCategory = Enum.Parse(subCategoryType, subCatAttr.Value);
+                subCatAttr.Remove();
+                subCatTypeAttr.Remove();
+            }
+            base.OnProfileLoad(element);
+        }
+
+        public override void OnProfileSave(XElement element)
+        {
+            element.Add(new XAttribute("Category", Category.ToString()));
+            element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
+            element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
+            base.OnProfileSave(element);
+        }
+
+        #endregion
+
+        #region Functions
 
         private void MoveToAh()
         {
@@ -487,6 +577,76 @@ namespace HighVoltz.Composites
             return tmpItemlist;
         }
 
+
+        private bool ScanAh(ref AuctionEntry ae)
+        {
+            bool scanned = false;
+            if (!_queueTimer.IsRunning)
+            {
+                string lua = string.Format("QueryAuctionItems(\"{0}\" ,nil,nil,nil,nil,nil,{1}) return 1", ae.Name.ToFormatedUTF8(), _page);
+                Lua.GetReturnVal<int>(lua, 0);
+                Professionbuddy.Debug("Searching AH for {0}", ae.Name);
+                _queueTimer.Start();
+            }
+            else if (_queueTimer.ElapsedMilliseconds <= 10000)
+            {
+                using (StyxWoW.Memory.AcquireFrame())
+                {
+                    if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) == 1)
+                    {
+                        _queueTimer.Reset();
+                        _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
+                        string lua = string.Format(ScanAhFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow, StackSize);
+                        List<string> retVals = Lua.GetReturnValues(lua);
+                        uint.TryParse(retVals[0], out ae.LowestBo);
+                        uint.TryParse(retVals[1], out ae.MyAuctions);
+                        if (++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
+                            scanned = true;
+                    }
+                }
+            }
+            else
+            {
+                scanned = true;
+            }
+            // reset to default values in preparations for next scan
+            if (scanned)
+            {
+                _queueTimer.Stop();
+                _queueTimer.Reset();
+                _totalAuctions = 0;
+                _page = 0;
+            }
+            return scanned;
+        }
+
+        private bool SellOnAh(AuctionEntry ae)
+        {
+            if (!_posted)
+            {
+                int subAmount = AmountType == AmountBasedType.Amount ? Amount - (int)ae.MyAuctions : Amount;
+                int amount = AmountType == AmountBasedType.Everything ? (_leftOver == 0 ? int.MaxValue : _leftOver) : (_leftOver == 0 ? subAmount : _leftOver);
+                string lua = string.Format(SellOnAhLuaFormat, ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int)RunTime, PostPartialStacks.ToString().ToLowerInvariant());
+                var ret = Lua.GetReturnVal<int>(lua, 0);
+                if (ret != -1) // returns -1 if waiting for auction to finish posting..
+                    _leftOver = ret;
+                if (_leftOver == 0)
+                    _posted = true;
+            }
+            //wait for auctions to finish listing before moving on
+            if (_posted)
+            {
+                bool ret = Lua.GetReturnVal<int>("if AuctionProgressFrame:IsVisible() == nil then return 1 else return 0 end ", 0) == 1;
+                if (ret) // we're done listing this item so reset to default values
+                {
+                    _posted = false;
+                    _leftOver = 0;
+                }
+                return ret;
+            }
+            return false;
+        }
+
         private bool SubCategoryCheck(WoWItem item)
         {
             int sub = Convert.ToInt32(SubCategory);
@@ -496,78 +656,16 @@ namespace HighVoltz.Composites
             if (prop != null)
             {
                 object val = prop.GetValue(item.ItemInfo, null);
-                if (val != null && (int)val == sub)
+                if (val != null && (int) val == sub)
                     return true;
             }
             return false;
         }
 
-        public override void Reset()
-        {
-            base.Reset();
-            _toScanItemList = null;
-            _toSellItemList = null;
-        }
 
-        public override object Clone()
-        {
-            return new SellItemOnAhAction
-                   {
-                       ItemID = ItemID,
-                       MinBuyout = new PropertyBag.GoldEditor(MinBuyout.ToString()),
-                       MaxBuyout = new PropertyBag.GoldEditor(MaxBuyout.ToString()),
-                       Amount = Amount,
-                       StackSize = StackSize,
-                       IgnoreStackSizeBelow = IgnoreStackSizeBelow,
-                       AmountType = AmountType,
-                       AutoFindAh = AutoFindAh,
-                       Location = Location,
-                       UndercutPrecent = UndercutPrecent,
-                       BidPrecent = BidPrecent,
-                       RunTime = RunTime,
-                       UseCategory = UseCategory,
-                       Category = Category,
-                       SubCategory = SubCategory,
-                       PostIfBelowMinBuyout = PostIfBelowMinBuyout,
-                   };
-        }
+        #endregion
 
-        public override void OnProfileLoad(XElement element)
-        {
-            XAttribute cat = element.Attribute("Category");
-            XAttribute subCatAttr = element.Attribute("SubCategory");
-            XAttribute subCatTypeAttr = element.Attribute("SubCategoryType");
-            if (cat != null)
-            {
-                Category = (WoWItemClass)Enum.Parse(typeof(WoWItemClass), cat.Value);
-                cat.Remove();
-            }
-            if (subCatAttr != null && subCatTypeAttr != null)
-            {
-                Type subCategoryType;
-                if (subCatTypeAttr.Value != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
-                    subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
-                }
-                else
-                    subCategoryType = typeof(SubCategoryType);
-                SubCategory = Enum.Parse(subCategoryType, subCatAttr.Value);
-                subCatAttr.Remove();
-                subCatTypeAttr.Remove();
-            }
-            base.OnProfileLoad(element);
-        }
-
-        public override void OnProfileSave(XElement element)
-        {
-            element.Add(new XAttribute("Category", Category.ToString()));
-            element.Add(new XAttribute("SubCategoryType", SubCategory.GetType().Name));
-            element.Add(new XAttribute("SubCategory", SubCategory.ToString()));
-            base.OnProfileSave(element);
-        }
-
-        #region Auction House
+        #region Strings
 
         // indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow, {4}=MaxStackSize
         public const string ScanAhFormatLua = @"
@@ -641,82 +739,13 @@ else
 end 
 ";
 
-        private readonly Stopwatch _queueTimer = new Stopwatch();
-        private int _leftOver;
-        private int _page;
+        #endregion
 
-        private bool _posted;
-        private int _totalAuctions;
+        #region Static Members
 
-        private bool ScanAh(ref AuctionEntry ae)
-        {
-            bool scanned = false;
-            if (!_queueTimer.IsRunning)
-            {
-                string lua = string.Format("QueryAuctionItems(\"{0}\" ,nil,nil,nil,nil,nil,{1}) return 1", ae.Name.ToFormatedUTF8(), _page);
-                Lua.GetReturnVal<int>(lua, 0);
-                Professionbuddy.Debug("Searching AH for {0}", ae.Name);
-                _queueTimer.Start();
-            }
-            else if (_queueTimer.ElapsedMilliseconds <= 10000)
-            {
-                using (StyxWoW.Memory.AcquireFrame())
-                {
-                    if (Lua.GetReturnVal<int>("if CanSendAuctionQuery('list') == 1 then return 1 else return 0 end ", 0) == 1)
-                    {
-                        _queueTimer.Reset();
-                        _totalAuctions = Lua.GetReturnVal<int>("return GetNumAuctionItems('list')", 1);
-                        string lua = string.Format(ScanAhFormatLua, ae.LowestBo, ae.MyAuctions, ae.Id, IgnoreStackSizeBelow, StackSize);
-                        List<string> retVals = Lua.GetReturnValues(lua);
-                        uint.TryParse(retVals[0], out ae.LowestBo);
-                        uint.TryParse(retVals[1], out ae.MyAuctions);
-                        if (++_page >= (int)Math.Ceiling((double)_totalAuctions / 50))
-                            scanned = true;
-                    }
-                }
-            }
-            else
-            {
-                scanned = true;
-            }
-            // reset to default values in preparations for next scan
-            if (scanned)
-            {
-                _queueTimer.Stop();
-                _queueTimer.Reset();
-                _totalAuctions = 0;
-                _page = 0;
-            }
-            return scanned;
-        }
-
-        private bool SellOnAh(AuctionEntry ae)
-        {
-            if (!_posted)
-            {
-                int subAmount = AmountType == AmountBasedType.Amount ? Amount - (int)ae.MyAuctions : Amount;
-                int amount = AmountType == AmountBasedType.Everything ? (_leftOver == 0 ? int.MaxValue : _leftOver) : (_leftOver == 0 ? subAmount : _leftOver);
-                string lua = string.Format(SellOnAhLuaFormat, ae.Id, amount, StackSize, ae.Bid, ae.Buyout, (int)RunTime, PostPartialStacks.ToString().ToLowerInvariant());
-                var ret = Lua.GetReturnVal<int>(lua, 0);
-                if (ret != -1) // returns -1 if waiting for auction to finish posting..
-                    _leftOver = ret;
-                if (_leftOver == 0)
-                    _posted = true;
-            }
-            //wait for auctions to finish listing before moving on
-            if (_posted)
-            {
-                bool ret = Lua.GetReturnVal<int>("if AuctionProgressFrame:IsVisible() == nil then return 1 else return 0 end ", 0) == 1;
-                if (ret) // we're done listing this item so reset to default values
-                {
-                    _posted = false;
-                    _leftOver = 0;
-                }
-                return ret;
-            }
-            return false;
-        }
+        public static Func<bool> AuctionFilter;
 
         #endregion
+
     }
 }
