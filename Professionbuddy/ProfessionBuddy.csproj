@@ -91,6 +91,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GreyMagic">
+      <HintPath>..\..\Honorbuddy\GreyMagic.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Honorbuddy">
       <HintPath>..\..\Honorbuddy\Honorbuddy.exe</HintPath>
       <Private>False</Private>

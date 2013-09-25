@@ -8,7 +8,6 @@ using System.Linq;
 using HighVoltz.Dynamic;
 using Styx;
 using Styx.Helpers;
-using Styx.MemoryManagement;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.TreeSharp;

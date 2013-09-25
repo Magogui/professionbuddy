@@ -16,7 +16,6 @@ using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
-using Styx.MemoryManagement;
 
 namespace HighVoltz
 {
