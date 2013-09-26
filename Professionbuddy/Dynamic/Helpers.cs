@@ -192,7 +192,7 @@ return 0";
         /// </summary>
         /// <param name="character"></param>
         /// <param name="server"></param>
-        /// <param name="botName">Name of bot to use on that character</param>
+        /// <param name="botName">Name of bot to use on that character. The bot class type name will also work.</param>
         public static void SwitchCharacter(string character, string server, string botName)
         {
             if (_isSwitchingToons)
@@ -211,7 +211,13 @@ return 0";
                     () =>
                         {
                             TreeRoot.Stop();
-                            BotBase bot = BotManager.Instance.Bots.FirstOrDefault(b => b.Key.IndexOf(botName, StringComparison.OrdinalIgnoreCase) >= 0).Value;
+                            // case insensitive partial bot name lookup.
+                            BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                            if (bot == null)
+                            {
+                                var typeName = botName.IndexOf("Gatherbuddy", StringComparison.InvariantCultureIgnoreCase) != -1 ? "GatherbuddyBot" : botName;
+                                bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName, StringComparison.InvariantCultureIgnoreCase));
+                            }
                             if (bot != null)
                             {
                                 if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)

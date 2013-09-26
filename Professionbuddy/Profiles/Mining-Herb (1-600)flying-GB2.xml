@@ -30,8 +30,8 @@
   <CustomAction Code="HerbMaxLevel = 0;" />
   <!--LowestMinLevel = lowestMaxLevel-->
   <CustomAction Code="LowestMinLevel = 0;" />
-  <If Condition="SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
-    <ChangeBotAction BotName="Gatherbuddy2" />
+  <If Condition="SecondaryBot.GetType().Name != &quot;GatherbuddyBot&quot;" IgnoreCanRun="True">
+    <ChangeBotAction BotName="GatherbuddyBot" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
     <CustomAction Code="MiningLevel = (int)Mining.Level;" />

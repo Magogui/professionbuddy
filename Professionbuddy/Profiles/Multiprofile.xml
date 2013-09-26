@@ -45,9 +45,9 @@
   <CallSubRoutine SubRoutineName="Init" />
   <CallSubRoutine SubRoutineName="LoadProfile" />
   <!--Check if GB is current bot and only when farmer is logged on.-->
-  <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
-    <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
-    <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+  <If Condition="OnFarmer &amp;&amp; SecondaryBot.GetType().Name != &quot;GatherbuddyBot&quot;" IgnoreCanRun="True">
+    <CustomAction Code="SwitchToBot(&quot;GatherbuddyBot&quot;);" />
+    <WaitAction Condition="SecondaryBot.GetType().Name == &quot;GatherbuddyBot&quot;" Timeout="20000" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
     <If Condition="OnFarmer == true" IgnoreCanRun="True">
@@ -206,7 +206,7 @@
       </If>
       <CustomAction Code="MyLog(&quot;Switching back to farmer&quot;);" />
       <!--Log on Farmer-->
-      <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],Realm,&quot;Gatherbuddy2&quot;);" />
+      <CustomAction Code="SwitchCharacter((string)Settings[&quot;FarmerName&quot;],Realm,&quot;GatherbuddyBot&quot;);" />
       <WaitAction Condition="!StyxWoW.IsInWorld" Timeout="20000" />
     </If>
   </While>
@@ -225,9 +225,9 @@
     <CustomAction Code="MyLog(&quot;Storing items in GBank&quot;);" />
     <PutItemInBankAction Category="TradeGoods" SubCategoryType="WoWItemTradeGoodsClass" SubCategory="None" Deposit="All" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
     <PutItemInBankAction Category="Gem" SubCategoryType="WoWItemGemClass" SubCategory="None" Deposit="All" UseCategory="True" Bank="Guild" ItemID="" GuildTab="0" NpcEntry="0" Amount="0" AutoFindBank="True" Location="0, 0, 0" />
-    <If Condition="OnFarmer &amp;&amp; SecondaryBot.Name != &quot;Gatherbuddy2&quot;" IgnoreCanRun="True">
-      <CustomAction Code="SwitchToBot(&quot;Gatherbuddy2&quot;);" />
-      <WaitAction Condition="SecondaryBot.Name == &quot;Gatherbuddy2&quot;" Timeout="20000" />
+    <If Condition="OnFarmer &amp;&amp; SecondaryBot.GetType().Name != &quot;GatherbuddyBot&quot;" IgnoreCanRun="True">
+      <CustomAction Code="SwitchToBot(&quot;GatherbuddyBot&quot;);" />
+      <WaitAction Condition="SecondaryBot.GetType().Name == &quot;GatherbuddyBot&quot;" Timeout="20000" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="WithdrawItemsInGbank">
