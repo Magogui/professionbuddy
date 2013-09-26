@@ -722,7 +722,7 @@ namespace HighVoltz
             if (bot == null)
             {
                 var typeName = botName.IndexOf("Gatherbuddy", StringComparison.InvariantCultureIgnoreCase) != -1 ? "GatherbuddyBot" : botName;
-                bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName));
+                bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName, StringComparison.InvariantCultureIgnoreCase));
             }
 
             if (bot != null)
