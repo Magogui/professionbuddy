@@ -166,7 +166,9 @@
         </If>
       </If>
       <If Condition="Me.MapId == 1 &amp;&amp; Me.IsHorde " IgnoreCanRun="True">
-        <FlyToAction Dismount="True" Location="1662.198, -4132.378, 56.96952" />
+        <FlyToAction Dismount="True" Location="1756.46, -4211.393, 46.52722" />
+        <MoveToAction Location="1790.162, -4331.615, -10.44903" MoveType="Location" Pathing="Navigator" Entry="0" />
+        <WaitAction Condition="false" Timeout="2000" />
         <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
       </If>
@@ -176,7 +178,8 @@
           <InteractionAction InteractType="GameObject" Entry="195141" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         </If>
         <If Condition="Me.IsHorde &amp;&amp; DistanceTo(1770.275, 62.06269, -46.32109) &lt; 2000" IgnoreCanRun="True">
-          <MoveToAction Location="1770.275, 62.06269, -46.32109" MoveType="Location" Pathing="Navigator" Entry="0" />
+          <MoveToAction Location="1790.162, -4331.615, -10.44903" MoveType="Location" Pathing="Navigator" Entry="0" />
+          <WaitAction Condition="false" Timeout="2000" />
           <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         </If>
         <FlyToAction Dismount="False" Location="-11895.9, -3206.984, -6.04731" />
@@ -608,8 +611,9 @@
         <WaitAction Condition="Me.MapId == 0" Timeout="600000" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <FlyToAction Dismount="False" Location="1732.68, -4210.92, 50.05256" />
-        <MoveToAction Location="1769.947, -4326.168, -8.294199" MoveType="Location" Pathing="Navigator" Entry="0" />
+        <FlyToAction Dismount="True" Location="1756.46, -4211.393, 46.52722" />
+        <MoveToAction Location="1790.162, -4331.615, -10.44903" MoveType="Location" Pathing="Navigator" Entry="0" />
+        <WaitAction Condition="false" Timeout="2000" />
         <InteractionAction InteractType="GameObject" Entry="195142" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
         <WaitAction Condition="Me.MapId == 0" Timeout="20000" />
       </If>

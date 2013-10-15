@@ -262,8 +262,12 @@
     <Content Include="Profiles\Mining %281-340%29%28Dalaran%29.xml" />
     <Content Include="Profiles\Mining %281-340%29%28org-Stormwind%29.xml" />
     <Content Include="Profiles\Mining-Herb %281-300%29ground.xml" />
-    <Content Include="Profiles\Mining-Herb %281-600%29flying-GB2.xml" />
-    <Content Include="Profiles\Multiprofile.xml" />
+    <Content Include="Profiles\Mining-Herb %281-600%29flying-GB2.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Profiles\Multiprofile.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Protected Items.xml">
       <SubType>Designer</SubType>
     </Content>
