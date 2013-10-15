@@ -214,7 +214,7 @@ namespace HighVoltz.Composites
                 if (!Me.IsCasting && (!_castTimer.IsRunning || _castTimer.ElapsedMilliseconds >= timeToWait))
                 {
                     List<WoWItem> itemList = BuildItemList();
-                    if (itemList == null || itemList.Count == 0)
+                    if (itemList == null || !itemList.Any())
                     {
                         IsDone = true;
                         Professionbuddy.Log("Done {0}ing", ActionType);

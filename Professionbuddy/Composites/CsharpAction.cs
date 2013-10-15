@@ -7,7 +7,7 @@ namespace HighVoltz.Composites
 {
     //this is a PBAction derived abstract class that adds functionallity for dynamically compiled Csharp expression/statement
 
-    public abstract class CsharpAction : PBAction, ICSharpCode
+    public abstract class CsharpAction : PBAction, HighVoltz.Dynamic.ICSharpCode
     {
         private string _lastError = "";
 

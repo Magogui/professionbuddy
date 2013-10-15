@@ -287,9 +287,14 @@ namespace HighVoltz
                     // load localized strings
                     LoadStrings();
                     BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
-                    if (bot != null)
-                        _root.SecondaryBot = bot;
+                    if (bot == null)
+                    {
+                        bot = BotManager.Instance.Bots.Values.FirstOrDefault();
+                        MySettings.LastBotBase = bot.Name;
+                        MySettings.Save();
+                    }
 
+                    _root.SecondaryBot = bot;
                     try
                     {
                         if (!string.IsNullOrEmpty(_profileToLoad))
