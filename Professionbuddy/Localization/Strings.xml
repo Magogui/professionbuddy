@@ -179,7 +179,7 @@
   <Action_LoadProfileAction_Name>Load Profile</Action_LoadProfileAction_Name>
   <Action_LoadProfileAction_Help>This action will load a profile, which can be either a Honorbuddy or Professionbuddy profile. Path needs to be relative to the currently loaded Professionbuddy profile and either in same folder or in a subfolder. If Path is empty and the profile type is Honorbuddy then an empty profile will be loaded.</Action_LoadProfileAction_Help>
   <Action_LoadProfileAction_ProfileType>Profile Type</Action_LoadProfileAction_ProfileType>
-	
+  <Action_LoadProfileAction_IsLocal>Is Local</Action_LoadProfileAction_IsLocal>
   <!-- MailItemAction -->
   <Action_MailItemAction_Name>Mail Item</Action_MailItemAction_Name>
   <Action_MailItemAction_Help>This action will mail either all items with matching entries found in 'Item Entries' or by item category. Setting Amount to 0 will mail all items that match Entry. Note: Amount = axact number, not stacks. This mails items to the 'Mail Recipient' from Honorbuddy settings</Action_MailItemAction_Help>

@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
+using System.Net;
 using Styx.CommonBot.Profiles;
 using Styx.TreeSharp;
 
@@ -29,10 +31,14 @@ namespace HighVoltz.Composites
                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Path"]));
 
             Properties["ProfileType"] = new MetaProp("ProfileType", typeof (LoadProfileType),
-                                                     new DisplayNameAttribute("Action_LoadProfileAction_ProfileType"));
+                                                     new DisplayNameAttribute(Pb.Strings["Action_LoadProfileAction_ProfileType"]));
+
+            Properties["IsLocal"] = new MetaProp("IsLocal", typeof(bool),
+                                         new DisplayNameAttribute(Pb.Strings["Action_LoadProfileAction_IsLocal"]));
 
             Path = "";
             ProfileType = LoadProfileType.Honorbuddy;
+            IsLocal = true;
         }
 
         [PbXmlAttribute]
@@ -47,6 +53,13 @@ namespace HighVoltz.Composites
         {
             get { return (string) Properties["Path"].Value; }
             set { Properties["Path"].Value = value; }
+        }
+
+        [PbXmlAttribute]
+        public bool IsLocal
+        {
+            get { return (bool)Properties["IsLocal"].Value; }
+            set { Properties["IsLocal"].Value = value; }
         }
 
         public override string Name
@@ -81,11 +94,23 @@ namespace HighVoltz.Composites
             {
                 try
                 {
-                    Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", absPath,
+                    Professionbuddy.Debug("Loading Profile :{0}, previous profile was {1}", Path,
                                           ProfileManager.XmlLocation);
                     if (string.IsNullOrEmpty(Path))
                     {
                         ProfileManager.LoadEmpty();
+                    }
+                    else if (!IsLocal)
+                    {
+                        var req = WebRequest.Create(Path);
+                        req.Proxy = null;
+                        using (WebResponse res = req.GetResponse())
+                        {
+                            using (var stream = res.GetResponseStream())
+                            {
+                                ProfileManager.LoadNew(stream);                                
+                            }
+                        }
                     }
                     else if (File.Exists(absPath))
                     {
@@ -96,15 +121,16 @@ namespace HighVoltz.Composites
                         Professionbuddy.Err("{0}: {1}", Pb.Strings["Error_UnableToFindProfile"], Path);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Professionbuddy.Err("{0}", ex);
                 }
             }
         }
 
         public override object Clone()
         {
-            return new LoadProfileAction {Path = Path, ProfileType = ProfileType};
+            return new LoadProfileAction { Path = Path, ProfileType = ProfileType, IsLocal = IsLocal };
         }
     }
 

@@ -33,17 +33,17 @@ namespace HighVoltz
         }
 
         /// <summary>
-        /// Path to a .xml or .package PB profile
+        ///     Path to a .xml or .package PB profile
         /// </summary>
         public string ProfilePath { get; protected set; }
 
         /// <summary>
-        /// Path to a .xml PB profile
+        ///     Path to a .xml PB profile
         /// </summary>
         public string XmlPath { get; protected set; }
 
         /// <summary>
-        /// Profile behavior.
+        ///     Profile behavior.
         /// </summary>
         //public PrioritySelector Branch { get; protected set; }
         public PbDecorator LoadFromFile(string path)
@@ -88,6 +88,24 @@ namespace HighVoltz
             }
         }
 
+        public PbDecorator LoadFromXElement(XElement element)
+        {
+            if (element == null)
+            {
+                Professionbuddy.Err("LoadFromXElement: element is null");
+                return null;
+            }
+            try
+            {
+                return (PbDecorator) Load(element, new PbDecorator());
+            }
+            catch (Exception ex)
+            {
+                Professionbuddy.Err(ex.ToString());
+                return null;
+            }
+        }
+
         private GroupComposite Load(XElement xml, GroupComposite comp)
         {
             foreach (XNode node in xml.Nodes())
@@ -103,30 +121,22 @@ namespace HighVoltz
                     if (type == null)
                     {
                         IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
-                                                    where (typeof (IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
-                                                    select t;
-                        type =
-                            pbTypes.FirstOrDefault(
-                                t =>
-                                t.GetCustomAttributes(typeof (XmlRootAttribute), true).Any(
-                                    a => ((XmlRootAttribute) a).ElementName == element.Name));
+                            where (typeof (IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
+                            select t;
+                        type = pbTypes.FirstOrDefault(t => t.GetCustomAttributes(typeof (XmlRootAttribute), true).Any(a => ((XmlRootAttribute) a).ElementName == element.Name));
                         if (type == null)
-                            throw new InvalidOperationException(
-                                string.Format("Unable to bind XML Element: {0} to a Type", element.Name));
+                            throw new InvalidOperationException(string.Format("Unable to bind XML Element: {0} to a Type", element.Name));
                     }
                     var pbComp = (IPBComposite) Activator.CreateInstance(type);
                     pbComp.OnProfileLoad(element);
                     var pbXmlAttrs = from pi in type.GetProperties()
-                                     from attr in
-                                         (PbXmlAttributeAttribute[])
-                                         pi.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true)
-                                     where attr != null
-                                     let name = attr.AttributeName ?? pi.Name
-                                     select new {name, pi};
+                        from attr in (PbXmlAttributeAttribute[]) pi.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true)
+                        where attr != null
+                        let name = attr.AttributeName ?? pi.Name
+                        select new {name, pi};
 
                     Dictionary<string, PropertyInfo> piDict = pbXmlAttrs.ToDictionary(kv => kv.name, kv => kv.pi);
-                    Dictionary<string, string> attributes = element.Attributes().ToDictionary(k => k.Name.ToString(),
-                                                                                              v => v.Value);
+                    Dictionary<string, string> attributes = element.Attributes().ToDictionary(k => k.Name.ToString(), v => v.Value);
                     // use legacy X,Y,Z location for backwards compatability
                     if (attributes.ContainsKey("X"))
                     {
@@ -142,38 +152,32 @@ namespace HighVoltz
                         {
                             PropertyInfo pi = piDict[attr.Key];
                             // check if there is a type converter attached
-                            var typeConverterAttr =
-                                (TypeConverterAttribute)
-                                pi.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
+                            var typeConverterAttr = (TypeConverterAttribute) pi.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
                             if (typeConverterAttr != null)
                             {
                                 try
                                 {
-                                    var typeConverter =
-                                        (TypeConverter)
-                                        Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
+                                    var typeConverter = (TypeConverter) Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
                                     if (typeConverter.CanConvertFrom(typeof (string)))
                                     {
-                                        pi.SetValue(pbComp,
-                                                    typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture,
-                                                                              attr.Value), null);
+                                        pi.SetValue(pbComp, typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture, attr.Value), null);
                                     }
                                     else
-                                        Professionbuddy.Err("The TypeConvert {0} can not convert from string.",
-                                                            typeConverterAttr.ConverterTypeName);
+                                        Professionbuddy.Err("The TypeConvert {0} can not convert from string.", typeConverterAttr.ConverterTypeName);
                                 }
                                 catch (Exception ex)
                                 {
-                                    Professionbuddy.Err("Type conversion for {0} has failed.\n{1}", type.Name + attr.Key,
-                                                        ex);
+                                    Professionbuddy.Err("Type conversion for {0} has failed.\n{1}", type.Name + attr.Key, ex);
                                 }
                             }
                             else
                             {
-                                pi.SetValue(pbComp,
-                                            pi.PropertyType.IsEnum
-                                                ? Enum.Parse(pi.PropertyType, attr.Value)
-                                                : Convert.ChangeType(attr.Value, pi.PropertyType, CultureInfo.InvariantCulture), null);
+                                pi.SetValue(
+                                    pbComp,
+                                    pi.PropertyType.IsEnum
+                                        ? Enum.Parse(pi.PropertyType, attr.Value)
+                                        : Convert.ChangeType(attr.Value, pi.PropertyType, CultureInfo.InvariantCulture),
+                                    null);
                             }
                         }
                         else
@@ -187,23 +191,19 @@ namespace HighVoltz
             return comp;
         }
 
-        internal static void GetHbprofiles(string pbProfilePath, Composite comp, Dictionary<string, Uri> dict)
+        internal static void GetHbprofiles(string pbProfilePath, Composite comp, List<LoadProfileAction> list)
         {
-            if (comp is LoadProfileAction && !string.IsNullOrEmpty(((LoadProfileAction) comp).Path) &&
-                ((LoadProfileAction) comp).ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
+            var loadProfileAction = comp as LoadProfileAction;
+            if (loadProfileAction != null && !string.IsNullOrEmpty(loadProfileAction.Path) && loadProfileAction.ProfileType == LoadProfileAction.LoadProfileType.Honorbuddy)
             {
-                Uri profileUri = PackUriHelper.CreatePartUri(new Uri(((LoadProfileAction) comp).Path, UriKind.Relative));
-                string pbProfileDirectory = Path.GetDirectoryName(pbProfilePath);
-                string profilePath = Path.Combine(pbProfileDirectory, ((LoadProfileAction) comp).Path);
-                if (!dict.ContainsKey(profilePath))
-                    dict.Add(profilePath, profileUri);
+                list.Add(loadProfileAction);
             }
             var groupComposite = comp as GroupComposite;
             if (groupComposite != null)
             {
                 foreach (Composite c in groupComposite.Children)
                 {
-                    GetHbprofiles(pbProfilePath, c, dict);
+                    GetHbprofiles(pbProfilePath, c, list);
                 }
             }
         }
@@ -225,46 +225,34 @@ namespace HighVoltz
                 else
                 {
                     var newElement = new XElement(pbComp.GetType().Name);
-                    var rootAttr =
-                        (XmlRootAttribute)
-                        pbComp.GetType().GetCustomAttributes(typeof (XmlRootAttribute), true).FirstOrDefault();
+                    var rootAttr = (XmlRootAttribute) pbComp.GetType().GetCustomAttributes(typeof (XmlRootAttribute), true).FirstOrDefault();
                     if (rootAttr != null)
                         newElement.Name = rootAttr.ElementName;
                     pbComp.OnProfileSave(newElement);
-                    List<PropertyInfo> piList = pbComp.GetType().GetProperties().
-                        Where(p =>  p.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true).
-                                       Any()).ToList();
+                    List<PropertyInfo> piList = pbComp.GetType().GetProperties().Where(p => p.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true).Any()).ToList();
                     foreach (PropertyInfo pi in piList)
                     {
-                        List<PbXmlAttributeAttribute> pList =
-                            ((PbXmlAttributeAttribute[]) pi.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true))
-                                .ToList();
+                        List<PbXmlAttributeAttribute> pList = ((PbXmlAttributeAttribute[]) pi.GetCustomAttributes(typeof (PbXmlAttributeAttribute), true)).ToList();
                         string name = pList.Any(a => a.AttributeName == null) ? pi.Name : pList[0].AttributeName;
                         if (newElement.Attribute(name) != null)
                             continue;
                         string value = "";
-                        var typeConverterAttr =
-                            (TypeConverterAttribute)
-                            pi.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
+                        var typeConverterAttr = (TypeConverterAttribute) pi.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
                         if (typeConverterAttr != null)
                         {
                             try
                             {
-                                var typeConverter =
-                                    (TypeConverter)
-                                    Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
+                                var typeConverter = (TypeConverter) Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
                                 if (typeConverter.CanConvertTo(typeof (string)))
                                 {
-                                    value = (string)typeConverter.ConvertTo(null, CultureInfo.InvariantCulture, pi.GetValue(pbComp, null), typeof(string));
+                                    value = (string) typeConverter.ConvertTo(null, CultureInfo.InvariantCulture, pi.GetValue(pbComp, null), typeof (string));
                                 }
                                 else
-                                    Professionbuddy.Err("The TypeConvert {0} can not convert to string.",
-                                                        typeConverterAttr.ConverterTypeName);
+                                    Professionbuddy.Err("The TypeConvert {0} can not convert to string.", typeConverterAttr.ConverterTypeName);
                             }
                             catch (Exception ex)
                             {
-                                Professionbuddy.Err("Type conversion for {0}->{1} has failed.\n{2}", comp.GetType().Name,
-                                                    pi.Name, ex);
+                                Professionbuddy.Err("Type conversion for {0}->{1} has failed.\n{2}", comp.GetType().Name, pi.Name, ex);
                             }
                         }
                         else
@@ -285,24 +273,29 @@ namespace HighVoltz
 
         private const string PackageRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/document";
 
-        private const string ResourceRelationshipType =
-            @"http://schemas.microsoft.com/opc/2006/sample/required-resource";
+        private const string ResourceRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/required-resource";
 
         public void CreatePackage(string path, string profilePath)
         {
             try
             {
-                Uri partUriProfile = PackUriHelper.CreatePartUri(
-                    new Uri(Path.GetFileName(profilePath), UriKind.Relative));
-                var hbProfileUrls = new Dictionary<string, Uri>();
-                GetHbprofiles(profilePath, Professionbuddy.Instance.PbBehavior, hbProfileUrls);
+                Uri partUriProfile = PackUriHelper.CreatePartUri(new Uri(Path.GetFileName(profilePath), UriKind.Relative));
+                var hbProfiles = new List<LoadProfileAction>();
+
+                GetHbprofiles(profilePath, Professionbuddy.Instance.PbBehavior, hbProfiles);
+                var hbProfileUrls = hbProfiles.ToDictionary(
+                    l =>
+                    {
+                        var pbProfileDirectory = Path.GetDirectoryName(profilePath);
+                        return Path.Combine(pbProfileDirectory, l.Path);
+                    },
+                    l => PackUriHelper.CreatePartUri(new Uri(l.Path, UriKind.Relative)));
+
                 using (Package package = Package.Open(path, FileMode.Create))
                 {
                     // Add the PB profile
-                    PackagePart packagePartDocument =
-                        package.CreatePart(partUriProfile, MediaTypeNames.Text.Xml, CompressionOption.Normal);
-                    using (var fileStream = new FileStream(
-                        profilePath, FileMode.Open, FileAccess.Read))
+                    PackagePart packagePartDocument = package.CreatePart(partUriProfile, MediaTypeNames.Text.Xml, CompressionOption.Normal);
+                    using (var fileStream = new FileStream(profilePath, FileMode.Open, FileAccess.Read))
                     {
                         CopyStream(fileStream, packagePartDocument.GetStream());
                     }
@@ -310,8 +303,7 @@ namespace HighVoltz
 
                     foreach (var kv in hbProfileUrls)
                     {
-                        PackagePart packagePartHbProfile =
-                            package.CreatePart(kv.Value, MediaTypeNames.Text.Xml, CompressionOption.Normal);
+                        PackagePart packagePartHbProfile = package.CreatePart(kv.Value, MediaTypeNames.Text.Xml, CompressionOption.Normal);
 
                         using (var fileStream = new FileStream(kv.Key, FileMode.Open, FileAccess.Read))
                         {
@@ -354,9 +346,7 @@ namespace HighVoltz
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public class PbXmlAttributeAttribute : Attribute
     {
-        public PbXmlAttributeAttribute()
-        {
-        }
+        public PbXmlAttributeAttribute() {}
 
         public PbXmlAttributeAttribute(string attributeName)
         {

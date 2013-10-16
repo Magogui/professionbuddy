@@ -444,16 +444,16 @@ namespace HighVoltz
                 {
                     if (_isChangingBot)
                         return;
-                    if (Instance.IsRunning)
+                    if (Instance.IsRunning && TreeRoot.IsRunning)
                     {
                         try
                         {
-                            Application.Current.Dispatcher.Invoke(
+                            Application.Current.Dispatcher.BeginInvoke(
                                 new Action(
                                     () =>
                                     {
                                         TreeRoot.Stop();
-                                        LoadPBProfile(ProfileManager.XmlLocation);
+                                        LoadPBProfile(ProfileManager.XmlLocation, args.NewProfile.XmlElement);
                                         if (MainForm.IsValid)
                                         {
                                             MainForm.Instance.ActionTree.SuspendLayout();
@@ -470,7 +470,7 @@ namespace HighVoltz
                     }
                     else
                     {
-                        LoadPBProfile(ProfileManager.XmlLocation);
+                        LoadPBProfile(ProfileManager.XmlLocation, args.NewProfile.XmlElement);
                         if (MainForm.IsValid)
                         {
                             if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
@@ -685,34 +685,46 @@ namespace HighVoltz
             }
         }
 
-        public static void LoadPBProfile(string path)
+        public static void LoadPBProfile(string path, XElement element = null)
         {
             bool preloadedHBProfile = false;
-            if (File.Exists(path))
+            PbDecorator idComp = null;
+            if (!string.IsNullOrEmpty(path))
             {
-                Log("Loading profile {0}", Path.GetFileName(path));
-                PbDecorator idComp = Instance.CurrentProfile.LoadFromFile(path);
-                if (idComp != null)
+                if (File.Exists(path))
                 {
-                    Instance.PbBehavior = idComp;
+                    Log("Loading profile {0} from file", Path.GetFileName(path));
+                    idComp = Instance.CurrentProfile.LoadFromFile(path);
                     Instance.MySettings.LastProfile = path;
-                    Instance.ProfileSettings.Load();
-                    DynamicCodeCompiler.GenorateDynamicCode();
-                    Instance.UpdateMaterials();
-                    preloadedHBProfile = PreLoadHbProfile();
-                    if (MainForm.IsValid)
-                    {
-                        MainForm.Instance.InitActionTree();
-                        MainForm.Instance.RefreshTradeSkillTabs();
-                    }
+                }
+                else
+                {
+                    Err("Profile: {0} does not exist", path);
+                    Instance.MySettings.LastProfile = path;
+                    return;
                 }
             }
-            else
+            else if (element != null)
             {
-                Err("Profile: {0} does not exist", path);
-                Instance.MySettings.LastProfile = path;
-                return;
+                Log("Loading profile from Xml element");
+                idComp = Instance.CurrentProfile.LoadFromXElement(element);
             }
+            if (idComp == null)
+                return;
+
+            Instance.PbBehavior = idComp;
+            Instance.MySettings.LastProfile = path;
+            Instance.ProfileSettings.Load();
+            DynamicCodeCompiler.GenorateDynamicCode();
+            Instance.UpdateMaterials();
+            preloadedHBProfile = PreLoadHbProfile();
+            if (MainForm.IsValid)
+            {
+                MainForm.Instance.InitActionTree();
+                MainForm.Instance.RefreshTradeSkillTabs();
+            }
+
+
             if (MainForm.IsValid)
                 MainForm.Instance.UpdateControls();
             if (!preloadedHBProfile && LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
@@ -770,25 +782,19 @@ namespace HighVoltz
         {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
             {
-                var dict = new Dictionary<string, Uri>();
-                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.PbBehavior, dict);
-                if (dict.Count > 0)
-                {
-                    foreach (var kv in dict)
-                    {
-                        if (!string.IsNullOrEmpty(kv.Key) && File.Exists(kv.Key))
-                        {
-                            Log("Preloading profile {0}", Path.GetFileName(kv.Key));
-                            // unhook event to prevent recursive loop
-                            BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-                            ProfileManager.LoadNew(kv.Key, true);
-                            BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
-                            return true;
-                        }
-                    }
-                }
+                var list = new List<LoadProfileAction>();
+
+                PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.PbBehavior, list);
+                var loadProfileAction = list.FirstOrDefault();
+                if (loadProfileAction == null) return false;
+                Log("Preloading profile {0}", Path.GetFileName(loadProfileAction.Path));
+                // unhook event to prevent recursive loop
+                BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
+                loadProfileAction.Load();
+                BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
+                return true;
             }
-            return false;
+            return true;
         }
 
         internal static List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
