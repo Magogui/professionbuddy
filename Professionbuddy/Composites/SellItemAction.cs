@@ -223,9 +223,13 @@ namespace HighVoltz.Composites
                         {
                             foreach (string entry in entries)
                             {
-                                uint temp;
-                                uint.TryParse(entry.Trim(), out temp);
-                                idList.Add(temp);
+                                uint itemID;
+                                if (!uint.TryParse(entry.Trim(), out itemID))
+                                {
+                                    Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+                                    continue;
+                                }
+                                idList.Add(itemID);
                             }
                         }
                         else

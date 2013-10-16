@@ -369,10 +369,14 @@ namespace HighVoltz.Composites
                     {
                         foreach (string entry in entries)
                         {
-                            uint id;
-                            uint.TryParse(entry.Trim(), out id);
-                            if (myAucs.ContainsKey(id))
-                                tmpItemlist.Add(new AuctionEntry(myAucs[id], id, 0, 0));
+                            uint itemID;
+                            if (!uint.TryParse(entry.Trim(), out itemID))
+                            {
+                                Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+                                continue;
+                            }
+                            if (myAucs.ContainsKey(itemID))
+                                tmpItemlist.Add(new AuctionEntry(myAucs[itemID], itemID, 0, 0));
                         }
                     }
                 }

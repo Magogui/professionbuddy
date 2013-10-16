@@ -560,9 +560,13 @@ namespace HighVoltz.Composites
                 {
                     foreach (string entry in entries)
                     {
-                        uint id;
-                        uint.TryParse(entry.Trim(), out id);
-                        List<WoWItem> itemList = StyxWoW.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == id).ToList();
+                        uint itemID;
+                        if (!uint.TryParse(entry.Trim(), out itemID))
+                        {
+                            Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+                            continue;
+                        }
+                        List<WoWItem> itemList = StyxWoW.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == itemID).ToList();
                         if (!itemList.Any() || !PostPartialStacks && itemList.Count < StackSize)
                             continue;
                         tmpItemlist.Add(new AuctionEntry(itemList[0].Name, itemList[0].Entry, 0, 0));

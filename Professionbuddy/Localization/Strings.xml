@@ -33,6 +33,7 @@
   <Error_UnableToFindMailbox>Unable To find Mailbox</Error_UnableToFindMailbox>
   <Error_UnableToFindProfile>Unable to find profile</Error_UnableToFindProfile>
   <Error_UnableToFindSpellWithEntry>Unable to find a spell that matches Entry</Error_UnableToFindSpellWithEntry>
+  <Error_NotAValidItemEntry>{0} is not a number thus it's not valid Item Entry</Error_NotAValidItemEntry>
 
   <!-- Common Action strings-->
   <Action_Common_ActionType>Action Type</Action_Common_ActionType>

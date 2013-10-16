@@ -347,15 +347,19 @@ namespace HighVoltz.Composites
 
         private List<uint> BuildItemList()
         {
-            var list = new List<uint>();
+            var idList = new List<uint>();
             string[] entries = ItemID.Split(',');
             if (entries.Length > 0)
             {
                 foreach (string entry in entries)
                 {
-                    uint temp;
-                    uint.TryParse(entry.Trim(), out temp);
-                    list.Add(temp);
+                    uint itemID;
+                    if (!uint.TryParse(entry.Trim(), out itemID))
+                    {
+                        Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+                        continue;
+                    }
+                    idList.Add(itemID);
                 }
             }
             else
@@ -363,7 +367,7 @@ namespace HighVoltz.Composites
                 Professionbuddy.Err(Pb.Strings["Error_NoItemEntries"]);
                 IsDone = true;
             }
-            return list;
+            return idList;
         }
 
         public override void Reset()

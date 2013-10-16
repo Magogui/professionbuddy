@@ -401,7 +401,11 @@ namespace HighVoltz.Composites
                     foreach (string entry in entries)
                     {
                         uint itemID;
-                        uint.TryParse(entry.Trim(), out itemID);
+                        if (!uint.TryParse(entry.Trim(), out itemID))
+                        {
+                            Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+                            continue;
+                        }
                         itemList.Add(itemID, Mail == DepositWithdrawAmount.Amount
                                                  ? Amount
                                                  : Util.GetCarriedItemCount(itemID));
