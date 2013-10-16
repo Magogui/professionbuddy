@@ -58,8 +58,8 @@
   <Action_Common_Hidden>Hidden</Action_Common_Hidden>
   <Action_Common_IgnoreStackSizeBelow>Ignore Stacksize Below</Action_Common_IgnoreStackSizeBelow>
   <Action_Common_ItemCategory>Item Category</Action_Common_ItemCategory>
-  <Action_Common_ItemEntries>Item Entries</Action_Common_ItemEntries>
-  <Action_Common_ItemEntry>Item Entry</Action_Common_ItemEntry>
+  <Action_Common_ItemEntries>Item IDs</Action_Common_ItemEntries>
+  <Action_Common_ItemEntry>Item ID</Action_Common_ItemEntry>
   <Action_Common_ItemQuality>Item Quality</Action_Common_ItemQuality>
   <Action_Common_ItemsToWithdraw>Items to Withdraw</Action_Common_ItemsToWithdraw>
   <Action_Common_ItemSubCategory>Item SubCategory</Action_Common_ItemSubCategory>
@@ -80,7 +80,7 @@
   <Action_Common_Sell>Sell</Action_Common_Sell>
   <Action_Common_Specific>Specific</Action_Common_Specific>
   <Action_Common_SpecificItem>Specific Item</Action_Common_SpecificItem>
-  <Action_Common_SpellEntry>Spell Entry</Action_Common_SpellEntry>
+  <Action_Common_SpellEntry>Spell ID</Action_Common_SpellEntry>
   <Action_Common_SpellName>Spell Name</Action_Common_SpellName>
   <Action_Common_StackSize>Stack Size</Action_Common_StackSize>
   <Action_Common_Summary>Summary</Action_Common_Summary>
