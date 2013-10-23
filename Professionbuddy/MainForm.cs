@@ -25,6 +25,7 @@ namespace HighVoltz
 
         private readonly Professionbuddy _pb;
         private readonly FileSystemWatcher _profileWatcher;
+        private IPBComposite[] _pbComposites;
         private PropertyBag _profilePropertyBag;
         private CopyPasteOperactions _copyAction = CopyPasteOperactions.Cut;
 
@@ -144,7 +145,7 @@ namespace HighVoltz
             }
             else
                 Initialize();
-            if (DynamicCodeCompiler.CodeWasModified)
+            if (DynamicCodeCompiler.CodeIsModified)
                 DynamicCodeCompiler.GenorateDynamicCode();
         }
 
@@ -173,7 +174,7 @@ namespace HighVoltz
                 ActionTree.ResumeLayout();
             }
 
-            if (DynamicCodeCompiler.CodeWasModified)
+            if (DynamicCodeCompiler.CodeIsModified)
             {
                 new Thread(DynamicCodeCompiler.GenorateDynamicCode) { IsBackground = true }.Start();
             }
@@ -817,21 +818,29 @@ namespace HighVoltz
         private void PopulateActionGridView()
         {
             ActionGridView.Rows.Clear();
-            IEnumerable<Type> pbTypes = from t in Assembly.GetExecutingAssembly().GetTypes()
-                                        where (typeof(IPBComposite)).IsAssignableFrom(t) && !t.IsAbstract
-                                        select t;
 
-
-            foreach (Type type in pbTypes)
+            if (_pbComposites == null)
             {
-                var pa = (IPBComposite)Activator.CreateInstance(type);
+                // cache the 'CodeIsModified' valuse because some IPBComposite types will set 'CodeIsModified' indirectly in thier constructor
+                // and then revert the orignal 'CodeIsModified' back after we are done creating instances 
+                var isModified = DynamicCodeCompiler.CodeIsModified;
+
+                _pbComposites = (from type in Assembly.GetExecutingAssembly().GetTypes()
+                                            where (typeof(IPBComposite)).IsAssignableFrom(type) && !type.IsAbstract
+                                            select (IPBComposite)Activator.CreateInstance(type)).ToArray();
+
+                DynamicCodeCompiler.CodeIsModified = isModified;
+            }
+
+            foreach (var pbComp in _pbComposites)
+            {
                 var row = new DataGridViewRow();
-                var cell = new DataGridViewTextBoxCell { Value = pa.Name };
+                var cell = new DataGridViewTextBoxCell { Value = pbComp.Name };
                 row.Cells.Add(cell);
-                row.Tag = pa;
+                row.Tag = pbComp;
                 row.Height = 16;
                 ActionGridView.Rows.Add(row);
-                row.DefaultCellStyle.ForeColor = pa.Color;
+                row.DefaultCellStyle.ForeColor = pbComp.Color;
             }
         }
 

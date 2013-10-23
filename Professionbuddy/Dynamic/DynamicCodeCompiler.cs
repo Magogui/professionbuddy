@@ -38,7 +38,7 @@ namespace HighVoltz.Dynamic
             select dec;
 
         private static object _codeDriverInstance;
-        public static bool CodeWasModified = true;
+        public static bool CodeIsModified = true;
 
         private static string _tempFolder;
 
@@ -255,7 +255,7 @@ namespace HighVoltz.Dynamic
                 MainForm.Instance.ActionGrid.Refresh();
             }
 
-            CodeWasModified = false;
+            CodeIsModified = false;
             return results.Errors.HasErrors ? null : results.CompiledAssembly.GetType("CodeDriver");
         }
 

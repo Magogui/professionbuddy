@@ -84,7 +84,7 @@ namespace HighVoltz.Dynamic
             {
                 if (value == _code) return;
                 _code = value;
-                DynamicCodeCompiler.CodeWasModified = true;
+                DynamicCodeCompiler.CodeIsModified = true;
             }
         }
 

@@ -56,7 +56,7 @@ namespace HighVoltz.Composites
 
         private void CustomAction_PropertyChanged(object sender, MetaPropArgs e)
         {
-            DynamicCodeCompiler.CodeWasModified = true;
+            DynamicCodeCompiler.CodeIsModified = true;
         }
 
         protected override RunStatus Run(object context)

@@ -208,7 +208,7 @@ namespace HighVoltz
             {
                 // reset all actions 
                 PbBehavior.Reset();
-                if (DynamicCodeCompiler.CodeWasModified)
+                if (DynamicCodeCompiler.CodeIsModified)
                 {
                     DynamicCodeCompiler.GenorateDynamicCode();
                 }

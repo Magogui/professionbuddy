@@ -184,7 +184,7 @@ namespace HighVoltz.Composites
 
         private void Condition_PropertyChanged(object sender, EventArgs e)
         {
-            DynamicCodeCompiler.CodeWasModified = true;
+            DynamicCodeCompiler.CodeIsModified = true;
         }
 
         private void CompileErrorPropertyChanged(object sender, EventArgs e)
