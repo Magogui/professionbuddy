@@ -6,12 +6,10 @@ namespace HighVoltz.Composites
 {
     public class PbRootComposite : PrioritySelector
     {
-        private BotBase _secondaryBot;
-
         public PbRootComposite(PbDecorator pbBotBase, BotBase secondaryBot)
             : base(pbBotBase, secondaryBot == null ? new PrioritySelector() : secondaryBot.Root)
         {
-            _secondaryBot = secondaryBot;
+            SecondaryBot = secondaryBot;
         }
 
         public PbDecorator PbBotBase
@@ -20,15 +18,7 @@ namespace HighVoltz.Composites
             set { Children[0] = value; }
         }
 
-        public BotBase SecondaryBot
-        {
-            get { return _secondaryBot; }
-            set
-            {
-                _secondaryBot = value;
-                //Children[1] = value.Root;
-            }
-        }
+        public BotBase SecondaryBot { get; set; }
 
         // hackish fix but needed.
         public void AddSecondaryBot()

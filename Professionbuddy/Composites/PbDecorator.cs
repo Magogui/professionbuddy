@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 using Styx;
+using Styx.Common.Helpers;
 using Styx.CommonBot;
+using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.TreeSharp;
@@ -15,8 +18,7 @@ namespace HighVoltz.Composites
     {
         public static bool EndOfWhileLoopReturn;
 
-        private static FieldInfo fi = typeof (Professionbuddy).GetField("\u0052",
-                                                                        BindingFlags.Static | BindingFlags.Public);
+        WaitTimer _antiAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
 
         public PbDecorator(params Composite[] children) : base(children)
         {
@@ -36,6 +38,12 @@ namespace HighVoltz.Composites
         {
             if (CanRun)
             {
+                // keep the bot from going afk.
+                if (_antiAfkTimer.IsFinished)
+                {
+                   KeyboardManager.AntiAfk();
+                    _antiAfkTimer.Reset();
+                }
                 bool shouldBreak = false;
                 EndOfWhileLoopReturn = false;
                 foreach (Composite child in Children.SkipWhile(c => Selection != null && c != Selection))
@@ -76,7 +84,7 @@ namespace HighVoltz.Composites
         public static bool ExitBehavior()
         {
             return ((Me.IsActuallyInCombat && !Me.Mounted) ||
-                    (Me.IsActuallyInCombat && Me.Mounted && !Me.IsFlying &&
+                    (Me.IsActuallyInCombat && !Me.IsFlying &&
                      Mount.ShouldDismount(Util.GetMoveToDestination()))) ||
                    !Me.IsAlive || Me.HealthPercent <= 40 ;
         }
