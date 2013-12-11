@@ -166,7 +166,7 @@ namespace HighVoltz.Composites
                 if (value != "SubCategoryType")
                 {
 					string typeName = string.Format("Styx.{0}", value);
-                    _subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
+                    _subCategoryType = Type.GetType(typeName);;
                 }
                 else
                     _subCategoryType = typeof (SubCategoryType);
