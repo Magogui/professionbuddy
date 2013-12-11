@@ -340,6 +340,8 @@ namespace HighVoltz
 			var type = Assembly.GetEntryAssembly().GetType(typeName);
 		    if (type == null)
 		    {
+				// force assembly to load... (only have this issue in internal HB builds)
+			    var a = WoWItemGlyphClass.DeathKnight;
 			    foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
 			    {
 				    if (asm.IsDynamic)
