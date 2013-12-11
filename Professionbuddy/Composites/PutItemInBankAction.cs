@@ -572,14 +572,7 @@ namespace HighVoltz.Composites
             }
             if (subCatAttr != null && subCatTypeAttr != null)
             {
-                Type subCategoryType;
-                if (subCatTypeAttr.Value != "SubCategoryType")
-                {
-                    string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
-                    subCategoryType = Util.GetSubCategoryType(typeName);;
-                }
-                else
-                    subCategoryType = typeof(SubCategoryType);
+	            Type subCategoryType = subCatTypeAttr.Value != "SubCategoryType" ? Util.GetSubCategoryType(subCatTypeAttr.Value) : typeof(SubCategoryType);
                 SubCategory = Enum.Parse(subCategoryType, subCatAttr.Value);
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();

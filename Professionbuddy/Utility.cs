@@ -338,10 +338,9 @@ namespace HighVoltz
 	    {
 			string typeName = string.Format("Styx.{0}", name);
 			var type = Assembly.GetEntryAssembly().GetType(typeName);
+			// try to find the type in other assemblies... (only have this issue in internal HB builds)
 		    if (type == null)
 		    {
-				// force assembly to load... (only have this issue in internal HB builds)
-			    var a = WoWItemGlyphClass.DeathKnight;
 			    foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
 			    {
 				    if (asm.IsDynamic)
