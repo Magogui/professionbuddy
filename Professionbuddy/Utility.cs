@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -332,6 +333,24 @@ namespace HighVoltz
                 }
             }
         }
+
+	    internal static Type GetSubCategoryType(string name)
+	    {
+			string typeName = string.Format("Styx.{0}", name);
+			var type = Assembly.GetEntryAssembly().GetType(typeName);
+		    if (type == null)
+		    {
+			    foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+			    {
+				    if (asm.IsDynamic)
+						continue;
+				    type = asm.GetType(typeName);
+					if (type != null)
+						break;
+			    }
+		    }
+		    return type;
+	    }
     }
 
     internal static class Exts

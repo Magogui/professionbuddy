@@ -481,8 +481,7 @@ namespace HighVoltz.Composites
                 if (subCatTypeAttr.Value != "SubCategoryType")
                 {
 					string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
-					subCategoryType = Type.GetType(typeName);
-                   // subCategoryType = Type.GetType(typeName);;
+					subCategoryType = Util.GetSubCategoryType(typeName);
                 }
                 else
                     subCategoryType = typeof (SubCategoryType);
