@@ -480,7 +480,7 @@ namespace HighVoltz.Composites
                 Type subCategoryType;
                 if (subCatTypeAttr.Value != "SubCategoryType")
                 {
-                    string typeName = string.Format("Styx.{0}", subCatTypeAttr.Value);
+					string typeName = string.Format("Styx.Enums.{0}", subCatTypeAttr.Value);
                     subCategoryType = Assembly.GetEntryAssembly().GetType(typeName);
                 }
                 else
