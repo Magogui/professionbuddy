@@ -25,7 +25,7 @@
   <While Condition="Fishing.Level &lt; 600" IgnoreCanRun="True">
     <!--Train if our fishing level is 25 or less from current max level -->
     <!--Or if max level is 0 or bags are full then we vendor-->
-    <If Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 525) || Me.BagsFull" IgnoreCanRun="True">
+    <If Condition="(Fishing.MaxLevel - Fishing.Level &lt;= 25 &amp;&amp; Fishing.MaxLevel != 600) || Me.BagsFull" IgnoreCanRun="True">
       <CallSubRoutine SubRoutineName="VenderAndTrain" />
     </If>
     <If Condition="DistanceTo(5700.02, 618.8751, 646.241) &gt;1.5" IgnoreCanRun="True">
