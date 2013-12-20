@@ -910,13 +910,18 @@ namespace HighVoltz
                     if (_rtbLog == null)
                         _rtbLog = (RichTextBox)Application.Current.MainWindow.FindName("rtbLog");
 
-                    var headerTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd) { Text = header };
-                    headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColor));
+					//var headerTR = new TextRange(_rtbLog.Document.Blocks[0], _rtbLog.Document.ContentEnd) { Text = header };
+					//headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColor));
 
-                    var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
-                    messageTR.Text = msg + Environment.NewLine;
-                    messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColor));
-                    _rtbLog.ScrollToEnd();
+					//var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
+					//messageTR.Text = msg + Environment.NewLine;
+					//messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColor));
+
+
+					 Paragraph para = (Paragraph) _rtbLog.Document.Blocks.FirstBlock;
+	                para.Inlines.Add(new Run(header) {Foreground = new SolidColorBrush(headerColor)});
+	                para.Inlines.Add(new Run(msg + Environment.NewLine) {Foreground = new SolidColorBrush(msgColor)});
+	                _rtbLog.ScrollToEnd();
                 }
                 try
                 {
