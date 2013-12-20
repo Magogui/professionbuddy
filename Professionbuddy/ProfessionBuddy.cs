@@ -748,7 +748,7 @@ namespace HighVoltz
                 {
                     Instance.IsRunning = false;
                     // execute from GUI thread since this thread will get aborted when switching bot
-                    Application.Current.Dispatcher.Invoke(
+                    Application.Current.Dispatcher.BeginInvoke(
                         new Action(
                             () =>
                             {
