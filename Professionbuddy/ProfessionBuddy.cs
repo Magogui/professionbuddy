@@ -734,50 +734,48 @@ namespace HighVoltz
 
         public static void ChangeSecondaryBot(string botName)
         {
-            // case insensitive partial bot name lookup.
-            BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
-            if (bot == null)
-            {
-                var typeName = botName.IndexOf("Gatherbuddy", StringComparison.InvariantCultureIgnoreCase) != -1 ? "GatherbuddyBot" : botName;
-                bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            if (bot != null)
-            {
-                if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name || Instance.SecondaryBot == null)
-                {
-                    Instance.IsRunning = false;
-                    // execute from GUI thread since this thread will get aborted when switching bot
-                    Application.Current.Dispatcher.BeginInvoke(
-                        new Action(
-                            () =>
-                            {
-                                _isChangingBot = true;
-                                bool isRunning = TreeRoot.IsRunning;
-                                if (isRunning)
-                                    TreeRoot.Stop();
-                                Instance.SecondaryBot = bot;
-                                if (!bot.Initialized)
-                                    bot.Initialize();
-                                if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
-                                {
-                                    ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
-                                    ProfessionBuddySettings.Instance.Save();
-                                }
-                                if (MainForm.IsValid)
-                                    MainForm.Instance.UpdateBotCombo();
-                                if (isRunning)
-                                    TreeRoot.Start();
-                                _isChangingBot = false;
-                            }));
-                    Log("Changing SecondaryBot to {0}", botName);
-                }
-            }
-            else
-                Err("Bot with name: {0} was not found", botName);
+	        BotBase bot = Util.GetBotByName(botName);
+	        if (bot != null)
+		        ChangeSecondaryBot(bot);
+	        else
+		        Err("Bot with name: {0} was not found", botName);
         }
 
-        // returns true if a profile was preloaded
+		public static void ChangeSecondaryBot(BotBase bot)
+		{
+			if (bot == null)
+				return;
+			if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name || Instance.SecondaryBot == null)
+			{
+				Instance.IsRunning = false;
+				// execute from GUI thread since this thread will get aborted when switching bot
+				Application.Current.Dispatcher.BeginInvoke(
+					new Action(
+						() =>
+						{
+							_isChangingBot = true;
+							bool isRunning = TreeRoot.IsRunning;
+							if (isRunning)
+								TreeRoot.Stop();
+							Instance.SecondaryBot = bot;
+							if (!bot.Initialized)
+								bot.Initialize();
+							if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+							{
+								ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+								ProfessionBuddySettings.Instance.Save();
+							}
+							if (MainForm.IsValid)
+								MainForm.Instance.UpdateBotCombo();
+							if (isRunning)
+								TreeRoot.Start();
+							_isChangingBot = false;
+						}));
+				Log("Changing SecondaryBot to {0}", bot.Name);
+			}
+		}
+
+	    // returns true if a profile was preloaded
         private static bool PreLoadHbProfile()
         {
             if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)

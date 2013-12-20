@@ -211,27 +211,23 @@ return 0";
                     () =>
                         {
                             TreeRoot.Stop();
-                            // case insensitive partial bot name lookup.
-                            BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
-                            if (bot == null)
-                            {
-                                var typeName = botName.IndexOf("Gatherbuddy", StringComparison.InvariantCultureIgnoreCase) != -1 ? "GatherbuddyBot" : botName;
-                                bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName, StringComparison.InvariantCultureIgnoreCase));
-                            }
-                            if (bot != null)
-                            {
-                                if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
-                                    Professionbuddy.Instance.SecondaryBot = bot;
-                                if (!bot.Initialized)
-                                    bot.Initialize();
-                                if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
-                                {
-                                    ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
-                                    ProfessionBuddySettings.Instance.Save();
-                                }
-                            }
-                            else
-                                Professionbuddy.Err("Could not find bot with name {0}", botName);
+							BotBase bot = Util.GetBotByName(botName);
+							if (bot != null)
+							{
+								if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
+									Professionbuddy.Instance.SecondaryBot = bot;
+								if (!bot.Initialized)
+									bot.Initialize();
+								if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+								{
+									ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+									ProfessionBuddySettings.Instance.Save();
+								}
+							}
+							else
+							{
+								Professionbuddy.Err("Could not find bot with name {0}", botName);
+							}
 
                             Lua.DoString("Logout()");
 

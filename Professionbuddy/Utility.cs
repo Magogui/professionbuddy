@@ -352,6 +352,18 @@ namespace HighVoltz
 		    }
 		    return type;
 	    }
+
+		internal static BotBase GetBotByName(string botName)
+		{
+			// case insensitive partial bot name lookup.
+			BotBase bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.Name.IndexOf(botName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+			if (bot == null)
+			{
+				var typeName = botName.IndexOf("Gatherbuddy", StringComparison.InvariantCultureIgnoreCase) != -1 ? "GatherbuddyBot" : botName;
+				bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().Name.Equals(typeName, StringComparison.InvariantCultureIgnoreCase));
+			}
+			return bot;
+		}
     }
 
     internal static class Exts

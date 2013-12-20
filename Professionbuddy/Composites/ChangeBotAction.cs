@@ -1,10 +1,16 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using Styx.Common.Helpers;
+using Styx.CommonBot;
 using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
     public sealed class ChangeBotAction : PBAction
     {
+		WaitTimer _changeBotTimer ;
+	    private BotBase _bot;
+
         public ChangeBotAction()
         {
             Properties["BotName"] = new MetaProp("BotName", typeof (string),
@@ -40,11 +46,22 @@ namespace HighVoltz.Composites
             {
                 try
                 {
-                    Professionbuddy.ChangeSecondaryBot(BotName);
+	                if (_changeBotTimer == null)
+	                {
+						_changeBotTimer = new WaitTimer(TimeSpan.FromSeconds(10));
+						_changeBotTimer.Reset();
+		                _bot = Util.GetBotByName(BotName);
+						if (_bot == null)
+							Professionbuddy.Err("No bot with name: {0} could be found", BotName);
+						else
+							Professionbuddy.ChangeSecondaryBot(BotName);
+	                }
                 }
                 finally
                 {
-                    IsDone = true;
+					// Wait until bot change completes or fails
+					if (_bot == null || _changeBotTimer != null && (_changeBotTimer.IsFinished || BotManager.Current == _bot))
+						IsDone = true;
                 }
             }
             return RunStatus.Failure;
