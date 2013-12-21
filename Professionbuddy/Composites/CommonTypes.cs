@@ -36,14 +36,14 @@ namespace HighVoltz.Composites
                 case WoWItemClass.Armor:
                     return WoWItemArmorClass.None;
                 case WoWItemClass.Container:
+		            return WoWItemContainerClass.None;
                 case WoWItemClass.Money:
-                case WoWItemClass.Projectile:
                 case WoWItemClass.Quest:
                 case WoWItemClass.Quiver:
                 case WoWItemClass.Reagent:
                     return SubCategoryType.None;
                 case WoWItemClass.Consumable:
-                    return WoWItemContainerClass.None;
+		            return WoWItemConsumableClass.None;
                 case WoWItemClass.Gem:
                     return WoWItemGemClass.None;
                 case WoWItemClass.Glyph:
@@ -52,6 +52,8 @@ namespace HighVoltz.Composites
                     return WoWItemKeyClass.None;
                 case WoWItemClass.Miscellaneous:
                     return WoWItemMiscClass.None;
+				case WoWItemClass.Projectile:
+					return WoWItemProjectileClass.None;
                 case WoWItemClass.Recipe:
                     return WoWItemRecipeClass.None;
                 case WoWItemClass.TradeGoods:

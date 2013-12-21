@@ -97,7 +97,6 @@
     </Reference>
     <Reference Include="Honorbuddy">
       <HintPath>..\..\Honorbuddy\Honorbuddy.exe</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
