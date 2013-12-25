@@ -206,11 +206,15 @@ return 0";
             Professionbuddy.Instance.IsRunning = false;
             Professionbuddy.Instance.PbBehavior.Reset();
 
-            Application.Current.Dispatcher.Invoke(
+            Application.Current.Dispatcher.BeginInvoke(
                 new Action(
                     () =>
                         {
-                            TreeRoot.Stop();
+							try
+							{
+								TreeRoot.Stop();
+							}
+							catch {}
 							BotBase bot = Util.GetBotByName(botName);
 							if (bot != null)
 							{
@@ -248,6 +252,7 @@ return 0";
                                         Professionbuddy.Instance.IsRunning = true;
                                     }) {IsBackground = true}.Start();
                         }));
+			TreeRoot.Stop();
         }
 
 

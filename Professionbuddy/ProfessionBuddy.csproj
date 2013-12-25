@@ -210,7 +210,9 @@
     <Content Include="Localization\Strings.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Profiles\AHBot.xml" />
+    <Content Include="Profiles\AHBot.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Profiles\Alchemist %281-500%29%28Dalaran AH%29.xml" />
     <Content Include="Profiles\Fishing1-600%28dalaran%29.xml">
       <SubType>Designer</SubType>
