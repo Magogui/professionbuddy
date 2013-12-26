@@ -105,7 +105,7 @@ namespace HighVoltz.Composites
 					}
 					_loadedProfile = true;
 				} // We need to wait for a profile to load because the profile might be loaded asynchronously
-				else if (_loadProfileTimer.IsFinished || ProfileManager.XmlLocation.Equals(AbsolutePath))
+				if (_loadProfileTimer.IsFinished || ProfileManager.XmlLocation.Equals(AbsolutePath))
 				{
 					IsDone = true;
 				}
