@@ -448,23 +448,27 @@ namespace HighVoltz
                     {
                         try
                         {
-                            Application.Current.Dispatcher.BeginInvoke(
-                                new Action(
-                                    () =>
-                                    {
-                                        TreeRoot.Stop();
-                                        LoadPBProfile(ProfileManager.XmlLocation, args.NewProfile.XmlElement);
-                                        if (MainForm.IsValid)
-                                        {
-                                            MainForm.Instance.ActionTree.SuspendLayout();
-                                            if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
-                                                MainForm.Instance.AddProfileSettingsTab();
-                                            else
-                                                MainForm.Instance.RemoveProfileSettingsTab();
-                                            MainForm.Instance.ActionTree.ResumeLayout();
-                                        }
-                                        TreeRoot.Start();
-                                    }));
+	                        var changeProfileAction = new Action(
+		                        () =>
+								{
+									TreeRoot.Stop("Changing profiles (Profile_OnNewOuterProfileLoaded)");
+									LoadPBProfile(ProfileManager.XmlLocation, args.NewProfile.XmlElement);
+									if (MainForm.IsValid)
+									{
+										MainForm.Instance.ActionTree.SuspendLayout();
+										if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
+											MainForm.Instance.AddProfileSettingsTab();
+										else
+											MainForm.Instance.RemoveProfileSettingsTab();
+										MainForm.Instance.ActionTree.ResumeLayout();
+									}
+									TreeRoot.Start();
+								});
+
+	                        if (!Application.Current.Dispatcher.CheckAccess())
+		                        Application.Current.Dispatcher.BeginInvoke(changeProfileAction);
+	                        else
+		                        changeProfileAction();
                         }
                         catch { }
                     }
