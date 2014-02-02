@@ -60,8 +60,11 @@ namespace HighVoltz.Composites
                 finally
                 {
 					// Wait until bot change completes or fails
-					if (_bot == null || _changeBotTimer != null && (_changeBotTimer.IsFinished || BotManager.Current == _bot))
-						IsDone = true;
+	                if (_bot == null || _changeBotTimer != null && (_changeBotTimer.IsFinished || BotManager.Current == _bot))
+	                {
+		                IsDone = true;
+		                _changeBotTimer = null;
+	                }
                 }
             }
             return RunStatus.Failure;
