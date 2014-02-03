@@ -436,8 +436,12 @@ namespace HighVoltz
 
         private void ToolStripBotConfigButtonClick(object sender, EventArgs e)
         {
-            if (_pb.SecondaryBot != null)
-                _pb.SecondaryBot.ConfigurationForm.ShowDialog();
+	        if (_pb.SecondaryBot != null)
+	        {
+		        var gui = _pb.SecondaryBot.ConfigurationForm;
+				if (gui != null)
+					gui.ShowDialog();
+	        }
         }
 
         private void ProfileListViewMouseDoubleClick(object sender, MouseEventArgs e)
