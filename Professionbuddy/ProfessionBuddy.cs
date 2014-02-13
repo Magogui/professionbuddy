@@ -42,6 +42,9 @@ namespace HighVoltz
 
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         public static readonly string BotPath = GetProfessionbuddyPath();
+	    
+		public static event EventHandler<EventArgs> OnConfigurationFormCreated;
+
         private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
 
@@ -169,10 +172,17 @@ namespace HighVoltz
             {
                 if (!_init)
                     Initialize();
-                if (!MainForm.IsValid)
-                    _gui = new MainForm();
-                else
-                    _gui.Activate();
+	            if (!MainForm.IsValid)
+	            {
+		            _gui = new MainForm();
+		            var handler = OnConfigurationFormCreated;
+		            if (handler != null)
+			            handler(this, new ConfigurationFormCreatedArg(_gui));
+	            }
+	            else
+	            {
+		            _gui.Activate();
+	            }
                 return _gui;
             }
         }
@@ -848,12 +858,7 @@ namespace HighVoltz
         {
             get
             {
-#if BETA
-                return _logHeader ?? (_logHeader = string.Format("PB Beta {0}: ", Instance.Version));
-
-#else
                 return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version));
-#endif
             }
         }
 
@@ -979,5 +984,19 @@ namespace HighVoltz
         }
 
         #endregion
+
+		#region Embedded Type - ConfigurationFormCreatedArg
+
+		public class ConfigurationFormCreatedArg : EventArgs
+		{
+			public ConfigurationFormCreatedArg(Form configurationForm)
+			{
+				ConfigurationForm = configurationForm;
+			}
+
+			public Form ConfigurationForm { get; private set; }
+		}
+
+		#endregion
     }
 }
