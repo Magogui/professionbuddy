@@ -43,7 +43,7 @@ namespace HighVoltz
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         public static readonly string BotPath = GetProfessionbuddyPath();
 	    
-		public static event EventHandler<ConfigurationFormCreatedArg> OnConfigurationFormCreated;
+		public static event EventHandler<ConfigurationFormCreatedArg> ConfigurationFormCreated;
 
         private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
@@ -175,7 +175,7 @@ namespace HighVoltz
 	            if (!MainForm.IsValid)
 	            {
 		            _gui = new MainForm();
-		            var handler = OnConfigurationFormCreated;
+		            var handler = ConfigurationFormCreated;
 		            if (handler != null)
 			            handler(this, new ConfigurationFormCreatedArg(_gui));
 	            }
