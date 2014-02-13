@@ -43,7 +43,7 @@ namespace HighVoltz
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         public static readonly string BotPath = GetProfessionbuddyPath();
 	    
-		public static event EventHandler<EventArgs> OnConfigurationFormCreated;
+		public static event EventHandler<ConfigurationFormCreatedArg> OnConfigurationFormCreated;
 
         private static readonly LocalPlayer Me = StyxWoW.Me;
         public static readonly Svn Svn = new Svn();
@@ -90,7 +90,7 @@ namespace HighVoltz
             }
         }
 
-        public ProfessionBuddySettings MySettings { get; private set; }
+	    public ProfessionBuddySettings MySettings { get; private set; }
 
         public List<TradeSkill> TradeSkillList
         {
