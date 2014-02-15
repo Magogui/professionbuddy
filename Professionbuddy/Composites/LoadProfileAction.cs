@@ -24,7 +24,7 @@ namespace HighVoltz.Composites
 
 		#endregion
 
-		private WaitTimer _loadProfileTimer = new WaitTimer(TimeSpan.FromSeconds(5));
+		private readonly WaitTimer _loadProfileTimer = new WaitTimer(TimeSpan.FromSeconds(5));
 		private bool _loadedProfile;
 
 		public LoadProfileAction()
@@ -75,7 +75,15 @@ namespace HighVoltz.Composites
 
 		public string AbsolutePath
 		{
-			get { return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Pb.CurrentProfile.XmlPath), Path); }
+			get
+			{
+				if (!IsLocal)
+					return Path;
+				
+				return string.IsNullOrEmpty(Pb.CurrentProfile.XmlPath)
+					? string.Empty 
+					: System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Pb.CurrentProfile.XmlPath), Path);
+			}
 		}
 
 		public override string Name
@@ -105,7 +113,7 @@ namespace HighVoltz.Composites
 					}
 					_loadedProfile = true;
 				} // We need to wait for a profile to load because the profile might be loaded asynchronously
-				if (_loadProfileTimer.IsFinished || ProfileManager.XmlLocation.Equals(AbsolutePath))
+				if (_loadProfileTimer.IsFinished || (!string.IsNullOrEmpty(ProfileManager.XmlLocation) && ProfileManager.XmlLocation.Equals(AbsolutePath)))
 				{
 					IsDone = true;
 				}
@@ -117,14 +125,14 @@ namespace HighVoltz.Composites
 		{
 			var absPath = AbsolutePath;
 
-			if (ProfileManager.XmlLocation.Equals(absPath, StringComparison.CurrentCultureIgnoreCase))
+			if (IsLocal && !string.IsNullOrEmpty( ProfileManager.XmlLocation) && ProfileManager.XmlLocation.Equals(absPath, StringComparison.CurrentCultureIgnoreCase))
 				return false;
 			try
 			{
 				Professionbuddy.Debug(
 					"Loading Profile :{0}, previous profile was {1}",
 					Path,
-					ProfileManager.XmlLocation);
+					ProfileManager.XmlLocation ?? "[No Profile]");
 				if (string.IsNullOrEmpty(Path))
 				{
 					ProfileManager.LoadEmpty();
