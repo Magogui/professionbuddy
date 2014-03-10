@@ -517,7 +517,6 @@ namespace HighVoltz
             {
                 try
                 {
-                    Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
                     Debug("Pulsing Tradeskills from OnSpellsChanged");
                     foreach (TradeSkill ts in TradeSkillList)
                     {
