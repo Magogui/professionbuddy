@@ -72,8 +72,8 @@
     <Hotspot X="2295.604" Y="-1756.223" Z="265.3916" />
     <Hotspot X="2278.173" Y="-1729.523" Z="217.492" />
     <Hotspot X="2318.913" Y="-1700.552" Z="353.0599" />
-    <Hotspot X="2367.533" Y="-1665.975" Z="215.407" />
-    <Hotspot X="2343.758" Y="-1643.165" Z="253.0159" />
+    <Hotspot X="2367.533" Y="-1665.975" Z="380.407" />
+    <Hotspot X="2343.758" Y="-1643.165" Z="400.0159" />
     <Hotspot X="2319.983" Y="-1620.354" Z="404.9292" />
     <Hotspot X="2296.208" Y="-1597.544" Z="387.3655" />
     <Hotspot X="2270.726" Y="-1573.097" Z="368.5415" />
@@ -1207,7 +1207,7 @@
     <Hotspot X="2278.3" Y="-2509.487" Z="166.0818" />
     <Hotspot X="2308.214" Y="-2508.015" Z="175.8694" />
     <Hotspot X="2341.12" Y="-2506.396" Z="186.6357" />
-    <Hotspot X="2361.948" Y="-2505.372" Z="35.71769" />
+    <Hotspot X="2361.948" Y="-2505.372" Z="186.71769" />
     <Hotspot X="2329.679" Y="-2482.587" Z="181.2066" />
     <Hotspot X="2310.697" Y="-2469.184" Z="182.5177" />
     <Hotspot X="2298.651" Y="-2460.678" Z="183.3498" />
@@ -1325,6 +1325,30 @@
   </Hotspots>
   <Blackspots>
     <!-- node is by a tower that bot can potentially get stuck at -->
-    <Blackspot X="-654.3871" Y="-1504.79" Z="3.753713" Radius="10" />
-  </Blackspots>
+        <Blackspot X="-654.3871" Y="-1504.79" Z="3.753713" Radius="10" />
+        <AerialBlackspot Faction="Horde" MapId="870" Name="Pearlfin Village" >           
+            <Spot X="72.08921" Y="-2726.648" />
+            <Spot X="-50.42627" Y="-2854.956" />
+            <Spot X="-444.4205" Y="-2926.466" />
+            <Spot X="-534.9421" Y="-2712.366" />
+            <Spot X="-361.6111" Y="-2507.487" />
+            <Spot X="-149.998" Y="-2431.187" />
+            <Spot X="17.01091" Y="-2422.111" />
+            <Spot X="126.9972" Y="-2559.23" />
+        </AerialBlackspot>
+        <AerialBlackspot Faction="Neutral" MapId="870" Name="Thunder Hold" >           
+            <Spot X="3105.753" Y="-874.9392" />
+            <Spot X="3105.753" Y="-874.9392" />
+            <Spot X="3105.753" Y="-874.9392" />
+            <Spot X="3105.753" Y="-874.9392" />
+        </AerialBlackspot>
+        <AerialBlackspot Faction="Alliance" MapId="870" Name="Camp Nooka Nooka" >           
+            <Spot X="2013.033" Y="-202.7656" />
+            <Spot X="2013.033" Y="-202.7656" />
+            <Spot X="2013.033" Y="-202.7656" />
+            <Spot X="2013.033" Y="-202.7656" />
+            <Spot X="2013.033" Y="-202.7656" />
+            <Spot X="2013.033" Y="-202.7656" />
+        </AerialBlackspot>       
+    </Blackspots>
 </HBProfile>
