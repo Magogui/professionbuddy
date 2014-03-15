@@ -210,29 +210,6 @@ return 0";
                 new Action(
                     () =>
                         {
-							try
-							{
-								TreeRoot.Stop();
-							}
-							catch {}
-							BotBase bot = Util.GetBotByName(botName);
-							if (bot != null)
-							{
-								if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
-									Professionbuddy.Instance.SecondaryBot = bot;
-								if (!bot.Initialized)
-									bot.Initialize();
-								if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
-								{
-									ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
-									ProfessionBuddySettings.Instance.Save();
-								}
-							}
-							else
-							{
-								Professionbuddy.Err("Could not find bot with name {0}", botName);
-							}
-
                             Lua.DoString("Logout()");
 
                             new Thread(
@@ -245,6 +222,23 @@ return 0";
                                             Lua.DoString(loginLua);
                                             Thread.Sleep(2000);
                                         }
+										BotBase bot = Util.GetBotByName(botName);
+										if (bot != null)
+										{
+											if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
+												Professionbuddy.Instance.SecondaryBot = bot;
+											if (!bot.Initialized)
+												bot.DoInitialize();
+											if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
+											{
+												ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+												ProfessionBuddySettings.Instance.Save();
+											}
+										}
+										else
+										{
+											Professionbuddy.Err("Could not find bot with name {0}", botName);
+										}
                                         TreeRoot.Start();
                                         Professionbuddy.Instance.OnTradeSkillsLoaded += Professionbuddy.Instance.Professionbuddy_OnTradeSkillsLoaded;
                                         Professionbuddy.Instance.LoadTradeSkills();

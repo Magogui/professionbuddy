@@ -22,8 +22,6 @@ namespace HighVoltz
     public partial class MainForm : Form
     {
         #region Callbacks
-
-        private readonly Professionbuddy _pb;
         private readonly FileSystemWatcher _profileWatcher;
         private IPBComposite[] _pbComposites;
         private PropertyBag _profilePropertyBag;
@@ -127,7 +125,7 @@ namespace HighVoltz
             {
                 HandleCreated += MainFormHandleCreated;
             }
-            _pb.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
+            Professionbuddy.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
         }
 
         private void MainFormHandleCreated(object sender, EventArgs e)
@@ -138,10 +136,10 @@ namespace HighVoltz
 
         private void MainFormLoad(object sender, EventArgs e)
         {
-            if (!_pb.IsTradeSkillsLoaded)
+            if (!Professionbuddy.Instance.IsTradeSkillsLoaded)
             {
-                _pb.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
-                _pb.OnTradeSkillsLoaded += OnTradeSkillsLoadedEventHandler;
+				Professionbuddy.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
+				Professionbuddy.Instance.OnTradeSkillsLoaded += OnTradeSkillsLoadedEventHandler;
             }
             else
                 Initialize();
@@ -163,7 +161,7 @@ namespace HighVoltz
         {
             if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction)ActionGrid.SelectedObject).IsRecipe)
             {
-                _pb.UpdateMaterials();
+                Professionbuddy.Instance.UpdateMaterials();
                 RefreshTradeSkillTabs();
                 RefreshActionTree(typeof(CastSpellAction));
             }
@@ -188,7 +186,7 @@ namespace HighVoltz
                 ((GroupComposite)comp.Parent).Children.Remove(comp);
                 if (comp is CastSpellAction && ((CastSpellAction)comp).IsRecipe)
                 {
-                    _pb.UpdateMaterials();
+                    Professionbuddy.Instance.UpdateMaterials();
                     RefreshTradeSkillTabs();
                 }
                 if (ActionTree.SelectedNode.Parent != null)
@@ -217,7 +215,7 @@ namespace HighVoltz
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ProfileManager.LoadNew(openFileDialog.FileName, true);
-                //  if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+                //  if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
                 //       AddProfileSettingsTab();
                 //  else
                 //      RemoveProfileSettingsTab();
@@ -228,8 +226,8 @@ namespace HighVoltz
         {
             saveFileDialog.DefaultExt = "xml";
             saveFileDialog.FilterIndex = 1;
-            saveFileDialog.FileName = _pb.CurrentProfile != null && _pb.CurrentProfile.XmlPath != null
-                                          ? _pb.CurrentProfile.XmlPath
+            saveFileDialog.FileName = Professionbuddy.Instance.CurrentProfile != null && Professionbuddy.Instance.CurrentProfile.XmlPath != null
+                                          ? Professionbuddy.Instance.CurrentProfile.XmlPath
                                           : "";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -238,24 +236,24 @@ namespace HighVoltz
                                                                  StringComparison.InvariantCultureIgnoreCase);
                 // if we are saving to a zip check if CurrentProfile.XmlPath is not blank/null and use it if not. 
                 // otherwise use the selected zipname with xml ext.
-                if (_pb.CurrentProfile != null)
+                if (Professionbuddy.Instance.CurrentProfile != null)
                 {
                     string xmlfile = zip
-                                         ? (_pb.CurrentProfile != null &&
-                                            string.IsNullOrEmpty(_pb.CurrentProfile.XmlPath)
+                                         ? (Professionbuddy.Instance.CurrentProfile != null &&
+                                            string.IsNullOrEmpty(Professionbuddy.Instance.CurrentProfile.XmlPath)
                                                 ? Path.ChangeExtension(saveFileDialog.FileName, ".xml")
-                                                : _pb.CurrentProfile.XmlPath)
+                                                : Professionbuddy.Instance.CurrentProfile.XmlPath)
                                          : saveFileDialog.FileName;
                     Professionbuddy.Log("Saving profile to {0}", saveFileDialog.FileName);
-                    if (_pb.CurrentProfile != null)
+                    if (Professionbuddy.Instance.CurrentProfile != null)
                     {
-                        _pb.CurrentProfile.SaveXml(xmlfile);
+                        Professionbuddy.Instance.CurrentProfile.SaveXml(xmlfile);
                         if (zip)
-                            _pb.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
+                            Professionbuddy.Instance.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
                     }
                 }
-                _pb.MySettings.LastProfile = saveFileDialog.FileName;
-                _pb.MySettings.Save();
+                Professionbuddy.Instance.MySettings.LastProfile = saveFileDialog.FileName;
+                Professionbuddy.Instance.MySettings.Save();
                 UpdateControls();
             }
         }
@@ -274,7 +272,7 @@ namespace HighVoltz
                     foreach (DataGridViewRow row in rowCollection)
                     {
                         var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
-                        Recipe recipe = _pb.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
+                        Recipe recipe = Professionbuddy.Instance.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
                         int repeat;
                         int.TryParse(toolStripAddNum.Text, out repeat);
                         CastSpellAction.RepeatCalculationType repeatType =
@@ -304,7 +302,7 @@ namespace HighVoltz
                 AddToActionTree(composite, ActionTree.SelectedNode);
             }
             // now update the CanRepeatCount. 
-            _pb.UpdateMaterials();
+            Professionbuddy.Instance.UpdateMaterials();
             RefreshTradeSkillTabs();
         }
 
@@ -362,7 +360,7 @@ namespace HighVoltz
             //    Logging.Write("{0} {1}", kv.Key, kv.Value);
 
             Logging.Write("** ActionSelector **");
-            printComposite(_pb.PbBehavior, 0);
+            printComposite(Professionbuddy.Instance.PbBehavior, 0);
 
             //Logging.Write("** Material List **");
             //foreach (var kv in PB.MaterialList)
@@ -407,9 +405,9 @@ namespace HighVoltz
             if (ProfileListView.SelectedItems.Count > 0)
             {
                 // Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
-                ProfileManager.LoadNew(Path.Combine(_pb.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
+				ProfileManager.LoadNew(Path.Combine(Professionbuddy.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
                 // check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-                // if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+                // if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
                 //     AddProfileSettingsTab();
                 //  else
                 //      RemoveProfileSettingsTab();
@@ -418,8 +416,8 @@ namespace HighVoltz
 
         private void ToolStripReloadBtnClick(object sender, EventArgs e)
         {
-            _pb.OnTradeSkillsLoaded += _pb.Professionbuddy_OnTradeSkillsLoaded;
-            _pb.LoadTradeSkills();
+            Professionbuddy.Instance.OnTradeSkillsLoaded += Professionbuddy.Instance.Professionbuddy_OnTradeSkillsLoaded;
+            Professionbuddy.Instance.LoadTradeSkills();
         }
 
         private void ToolStripBotComboSelectedIndexChanged(object sender, EventArgs e)
@@ -436,9 +434,9 @@ namespace HighVoltz
 
         private void ToolStripBotConfigButtonClick(object sender, EventArgs e)
         {
-	        if (_pb.SecondaryBot != null)
+	        if (Professionbuddy.Instance.SecondaryBot != null)
 	        {
-		        var gui = _pb.SecondaryBot.ConfigurationForm;
+		        var gui = Professionbuddy.Instance.SecondaryBot.ConfigurationForm;
 				if (gui != null)
 					gui.ShowDialog();
 	        }
@@ -482,31 +480,30 @@ namespace HighVoltz
             try
             {
                 Instance = this;
-                _pb = Professionbuddy.Instance;
                 InitializeComponent();
                 // assign the localized strings
-                toolStripOpen.Text = _pb.Strings["UI_FileOpen"];
-                toolStripSave.Text = _pb.Strings["UI_FileSave"];
-                toolStripHelp.Text = _pb.Strings["UI_Help"];
-                toolStripCopy.Text = _pb.Strings["UI_Copy"];
-                toolStripCut.Text = _pb.Strings["UI_Cut"];
-                toolStripPaste.Text = _pb.Strings["UI_Paste"];
-                toolStripDelete.Text = _pb.Strings["UI_Delete"];
-                toolStripBotConfigButton.Text = _pb.Strings["UI_Settings"];
-                ProfileTab.Text = _pb.Strings["UI_Profiles"];
-                ActionsColumn.HeaderText = ActionsTab.Text = _pb.Strings["UI_Actions"];
-                TradeSkillTab.Text = _pb.Strings["UI_Tradeskill"];
-                TabPageProfile.Text = _pb.Strings["UI_Profile"];
-                IngredientsColumn.HeaderText = _pb.Strings["UI_Ingredients"];
-                NeedColumn.HeaderText = _pb.Strings["UI_Need"];
-                BagsColumn.HeaderText = _pb.Strings["UI_Bags"];
-                BankColumn.HeaderText = _pb.Strings["UI_Bank"];
-                toolStripAddBtn.Text = _pb.Strings["UI_Add"];
-                toolStripReloadBtn.Text = _pb.Strings["UI_Reload"];
-                LoadProfileButton.Text = _pb.Strings["UI_LoadProfile"];
+                toolStripOpen.Text = Professionbuddy.Instance.Strings["UI_FileOpen"];
+                toolStripSave.Text = Professionbuddy.Instance.Strings["UI_FileSave"];
+                toolStripHelp.Text = Professionbuddy.Instance.Strings["UI_Help"];
+                toolStripCopy.Text = Professionbuddy.Instance.Strings["UI_Copy"];
+                toolStripCut.Text = Professionbuddy.Instance.Strings["UI_Cut"];
+                toolStripPaste.Text = Professionbuddy.Instance.Strings["UI_Paste"];
+                toolStripDelete.Text = Professionbuddy.Instance.Strings["UI_Delete"];
+                toolStripBotConfigButton.Text = Professionbuddy.Instance.Strings["UI_Settings"];
+                ProfileTab.Text = Professionbuddy.Instance.Strings["UI_Profiles"];
+                ActionsColumn.HeaderText = ActionsTab.Text = Professionbuddy.Instance.Strings["UI_Actions"];
+                TradeSkillTab.Text = Professionbuddy.Instance.Strings["UI_Tradeskill"];
+                TabPageProfile.Text = Professionbuddy.Instance.Strings["UI_Profile"];
+                IngredientsColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Ingredients"];
+                NeedColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Need"];
+                BagsColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Bags"];
+                BankColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Bank"];
+                toolStripAddBtn.Text = Professionbuddy.Instance.Strings["UI_Add"];
+                toolStripReloadBtn.Text = Professionbuddy.Instance.Strings["UI_Reload"];
+                LoadProfileButton.Text = Professionbuddy.Instance.Strings["UI_LoadProfile"];
 
-                saveFileDialog.InitialDirectory = _pb.ProfilePath;
-                _profileWatcher = new FileSystemWatcher(_pb.ProfilePath) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
+                saveFileDialog.InitialDirectory = Professionbuddy.ProfilePath;
+                _profileWatcher = new FileSystemWatcher(Professionbuddy.ProfilePath) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
                 _profileWatcher.Changed += ProfileWatcherChanged;
                 _profileWatcher.Created += ProfileWatcherChanged;
                 _profileWatcher.Deleted += ProfileWatcherChanged;
@@ -539,9 +536,9 @@ namespace HighVoltz
             InitActionTree();
             PopulateActionGridView();
             toolStripBotCombo.Items.AddRange(
-                BotManager.Instance.Bots.Where(kv => kv.Key != _pb.Name).Select(kv => kv.Key).ToArray());
+                BotManager.Instance.Bots.Where(kv => kv.Key != Professionbuddy.Instance.Name).Select(kv => kv.Key).ToArray());
             UpdateBotCombo();
-            if (_pb.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
+            if (Professionbuddy.Instance.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
                 toolStripAddCombo.Items.Add("Banker");
             toolStripAddCombo.SelectedIndex = 0;
 
@@ -555,7 +552,7 @@ namespace HighVoltz
             toolStripAddBtn.Image = Image.FromFile(imagePath + "112_RightArrowLong_Orange_32x32_72.png");
             toolStripHelp.Image = Image.FromFile(imagePath + "109_AllAnnotations_Help_32x32_72.png");
 
-            if (_pb.ProfileSettings.SettingsDictionary.Count > 0)
+            if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
                 AddProfileSettingsTab();
             else
                 RemoveProfileSettingsTab();
@@ -640,7 +637,7 @@ namespace HighVoltz
             else
             {
                 ActionTree.Nodes.Add(newNode);
-                _pb.PbBehavior.AddChild((Composite)newNode.Tag);
+                Professionbuddy.Instance.PbBehavior.AddChild((Composite)newNode.Tag);
             }
             ActionTree.ResumeLayout();
         }
@@ -712,13 +709,13 @@ namespace HighVoltz
             {
                 RightSideTab.TabPages.RemoveByKey("ProfileSettings");
             }
-            RightSideTab.TabPages.Add("ProfileSettings", _pb.Strings["UI_ProfileSettings"]);
+            RightSideTab.TabPages.Add("ProfileSettings", Professionbuddy.Instance.Strings["UI_ProfileSettings"]);
 
             _settingsPropertyGrid = new PropertyGrid { Dock = DockStyle.Fill };
             RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
             _profilePropertyBag = new PropertyBag();
-            foreach (var kv in _pb.ProfileSettings.SettingsDictionary)
+            foreach (var kv in Professionbuddy.Instance.ProfileSettings.SettingsDictionary)
             {
                 if (!kv.Value.Hidden)
                 {
@@ -745,7 +742,7 @@ namespace HighVoltz
 
         private void RefreshSettingsPropertyGridCallback()
         {
-            foreach (var kv in _pb.ProfileSettings.SettingsDictionary)
+            foreach (var kv in Professionbuddy.Instance.ProfileSettings.SettingsDictionary)
             {
                 MetaProp prop = _profilePropertyBag[kv.Key];
                 if (prop != null)
@@ -760,7 +757,7 @@ namespace HighVoltz
 
         private void ProfileSettingsPropertyChanged(object sender, MetaPropArgs e)
         {
-            _pb.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
+            Professionbuddy.Instance.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
         }
 
 
@@ -864,10 +861,10 @@ namespace HighVoltz
         {
             ProfileListView.SuspendLayout();
             ProfileListView.Clear();
-            string[] profiles = Directory.GetFiles(_pb.ProfilePath, "*.xml", SearchOption.TopDirectoryOnly).
-                Select(s => Path.GetFileName(s)).Union(Directory.GetFiles(_pb.ProfilePath, "*.package",
+			string[] profiles = Directory.GetFiles(Professionbuddy.ProfilePath, "*.xml", SearchOption.TopDirectoryOnly).
+				Select(Path.GetFileName).Union(Directory.GetFiles(Professionbuddy.ProfilePath, "*.package",
                                                                           SearchOption.TopDirectoryOnly)).
-                Select(s => Path.GetFileName(s)).ToArray();
+                Select(Path.GetFileName).ToArray();
             // remove all profile names from ListView that are not in the 'profile' array              
             for (int i = 0; i < ProfileListView.Items.Count; i++)
             {
@@ -900,13 +897,13 @@ namespace HighVoltz
         {
             TradeSkillTabControl.SuspendLayout();
             TradeSkillTabControl.TabPages.Clear();
-            for (int i = 0; i < _pb.TradeSkillList.Count; i++)
+            for (int i = 0; i < Professionbuddy.Instance.TradeSkillList.Count; i++)
             {
                 TradeSkillTabControl.TabPages.Add(new TradeSkillListView(i));
             }
             TradeSkillTabControl.ResumeLayout();
 
-            if (_pb.TradeSkillList.Count > 0)
+            if (Professionbuddy.Instance.TradeSkillList.Count > 0)
                 TradeSkillTabControl.Visible = true;
         }
 
@@ -956,7 +953,7 @@ namespace HighVoltz
         public void RefreshActionTree(IPBComposite pbComp, Type type)
         {
             // Don't update ActionTree while PB is running to improve performance.
-            if (_pb.IsRunning || !IsValid)
+            if (Professionbuddy.Instance.IsRunning || !IsValid)
                 return;
             if (ActionTree.InvokeRequired)
                 ActionTree.BeginInvoke(new RefreshActionTreeDelegate(RefreshActionTreeCallback), pbComp, type);
@@ -995,7 +992,7 @@ namespace HighVoltz
             if (ActionTree.SelectedNode != null)
                 selectedIndex = ActionTree.Nodes.IndexOf(ActionTree.SelectedNode);
             ActionTree.Nodes.Clear();
-            foreach (IPBComposite composite in _pb.PbBehavior.Children)
+            foreach (IPBComposite composite in Professionbuddy.Instance.PbBehavior.Children)
             {
                 var node = new TreeNode(composite.Title) { ForeColor = composite.Color, Tag = composite };
                 if (composite is GroupComposite)
@@ -1061,20 +1058,20 @@ namespace HighVoltz
 
         private void UpdateControlsCallback()
         {
-            if (_pb.IsRunning)
+            if (Professionbuddy.Instance.IsRunning)
             {
                 DisableControls();
                 Text = string.Format("Profession Buddy - Running {0}",
-                                     !string.IsNullOrEmpty(_pb.MySettings.LastProfile)
-                                         ? "(" + Path.GetFileName(_pb.MySettings.LastProfile) + ")"
+                                     !string.IsNullOrEmpty(Professionbuddy.Instance.MySettings.LastProfile)
+                                         ? "(" + Path.GetFileName(Professionbuddy.Instance.MySettings.LastProfile) + ")"
                                          : "");
             }
             else
             {
                 EnableControls();
                 Text = string.Format("Profession Buddy - Stopped {0}",
-                                     !string.IsNullOrEmpty(_pb.MySettings.LastProfile)
-                                         ? "(" + Path.GetFileName(_pb.MySettings.LastProfile) + ")"
+                                     !string.IsNullOrEmpty(Professionbuddy.Instance.MySettings.LastProfile)
+                                         ? "(" + Path.GetFileName(Professionbuddy.Instance.MySettings.LastProfile) + ")"
                                          : "");
             }
         }
