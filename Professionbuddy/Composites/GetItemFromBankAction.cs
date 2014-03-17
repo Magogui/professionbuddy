@@ -114,6 +114,7 @@ namespace HighVoltz.Composites
         private Dictionary<uint, int> _itemList;
         private Stopwatch _itemsSW;
         private WoWPoint _loc;
+	    private int _withdrawCnt;
 
         public GetItemfromBankAction()
         {
@@ -350,8 +351,10 @@ namespace HighVoltz.Composites
                     {
                         uint itemID = _itemList.Keys.FirstOrDefault();
                         bool done;
-                        if (Bank == BankType.Personal)
-                            done = GetItemFromBank(itemID, _itemList[itemID]);
+	                    if (Bank == BankType.Personal)
+	                    {
+		                    done = GetItemFromBank(itemID, _itemList[itemID]);
+	                    }
                         else
                         {
                             // throttle the amount of items being withdrawn from gbank per sec
@@ -363,10 +366,10 @@ namespace HighVoltz.Composites
                             int ret = GetItemFromGBank(itemID, _itemList[itemID]);
                             if (ret >= 0)
                             {
-                                _gbankItemThrottleSW.Reset();
-                                _gbankItemThrottleSW.Start();
+                                _gbankItemThrottleSW.Restart();
+	                            _withdrawCnt += ret;
                             }
-                            _itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
+							_itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
                             done = _itemList[itemID] <= 0;
                         }
                         if (done)
@@ -374,8 +377,9 @@ namespace HighVoltz.Composites
                             if (itemID == 0)
                                 Professionbuddy.Log("Done withdrawing all items from {0} Bank", Bank);
                             else
-                                Professionbuddy.Log("Done withdrawing itemID:{0} from {1} Bank", itemID, Bank);
+                                Professionbuddy.Log("Done withdrawing {0} itemID:{1} from {2} Bank", _withdrawCnt, itemID, Bank);
                             _itemList.Remove(itemID);
+	                        _withdrawCnt = 0;
                         }
                     }
                     _itemsSW.Reset();
@@ -511,11 +515,6 @@ namespace HighVoltz.Composites
             }
             string lua = string.Format(WithdrawItemFromGBankLuaFormat, id, amount);
             var retVal = Lua.GetReturnVal<int>(lua, 0);
-            // -1 means no item was found.
-            if (retVal == -1)
-            {
-                Professionbuddy.Log("No items with entry {0} could be found in gbank", id);
-            }
             return retVal;
         }
 
@@ -534,6 +533,7 @@ namespace HighVoltz.Composites
             _queueServerSW = null;
             _itemList = null;
             _itemsSW = null;
+	        _withdrawCnt = 0;
         }
 
         public override object Clone()
