@@ -12,112 +12,103 @@ using Action = Styx.TreeSharp.Action;
 
 namespace HighVoltz.Composites
 {
-    public interface IPBComposite : ICloneable
-    {
-        PropertyBag Properties { get; }
-        string Name { get; }
-        string Title { get; }
-        Color Color { get; }
-        string Help { get; }
-        bool IsDone { get; }
-        void Reset();
-        void OnProfileLoad(XElement element);
-        void OnProfileSave(XElement element);
-    }
+	public interface IPBComposite : ICloneable
+	{
+		PropertyBag Properties { get; }
+		string Name { get; }
+		string Title { get; }
+		Color Color { get; }
+		string Help { get; }
+		bool IsDone { get; }
+		void Reset();
+		void OnProfileLoad(XElement element);
+		void OnProfileSave(XElement element);
+	}
 
-    #region PBAction
+	#region PBAction
 
-    public abstract class PBAction : Action, IPBComposite
-    {
-        protected LocalPlayer Me = StyxWoW.Me;
-        protected Professionbuddy Pb;
-        [XmlIgnore] private Color _color = Color.Black;
+	public abstract class PBAction : Action, IPBComposite
+	{
+		[XmlIgnore]
+		private Color _color = Color.Black;
 
-        protected PBAction()
-        {
-            HasRunOnce = false;
-            Pb = Professionbuddy.Instance;
-// ReSharper disable DoNotCallOverridableMethodsInConstructor
-            Properties = new PropertyBag();
-// ReSharper restore DoNotCallOverridableMethodsInConstructor
-            Expressions = new ListDictionary();
-        }
+		protected PBAction()
+		{
+			// ReSharper disable DoNotCallOverridableMethodsInConstructor
+			Properties = new PropertyBag();
+			// ReSharper restore DoNotCallOverridableMethodsInConstructor
+			Expressions = new ListDictionary();
+		}
 
-        public virtual ListDictionary Expressions { get; private set; }
+		public virtual ListDictionary Expressions { get; private set; }
 
-        protected PropertyGrid PropertyGrid
-        {
-            get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; }
-        }
+		protected LocalPlayer Me { get { return StyxWoW.Me; } }
 
-        protected bool HasRunOnce { get; set; }
+		protected Professionbuddy Pb { get { return Professionbuddy.Instance; } }
 
-        #region IPBComposite Members
+		protected PropertyGrid PropertyGrid
+		{
+			get { return MainForm.IsValid ? MainForm.Instance.ActionGrid : null; }
+		}
 
-        public virtual string Help
-        {
-            get { return ""; }
-        }
+		#region IPBComposite Members
 
-        public virtual string Name
-        {
-            get { return "PBAction"; }
-        }
+		public virtual string Help
+		{
+			get { return ""; }
+		}
 
-        public virtual string Title
-        {
-            get { return string.Format("({0})", Name); }
-        }
+		public virtual string Name
+		{
+			get { return "PBAction"; }
+		}
 
-        public virtual Color Color
-        {
-            get { return _color; }
-            set { _color = value; }
-        }
+		public virtual string Title
+		{
+			get { return string.Format("({0})", Name); }
+		}
 
-        public virtual bool IsDone { get; protected set; }
+		public virtual Color Color
+		{
+			get { return _color; }
+			set { _color = value; }
+		}
 
-        public  bool HasErrors { get; internal set; }
+		public virtual bool IsDone { get; protected set; }
 
-        public virtual PropertyBag Properties { get; protected set; }
+		public bool HasErrors { get; internal set; }
 
-        public virtual object Clone()
-        {
-            return this;
-        }
+		public virtual PropertyBag Properties { get; protected set; }
 
-        public virtual void Reset()
-        {
-            IsDone = false;
-            HasRunOnce = false;
-        }
+		public virtual object Clone()
+		{
+			return this;
+		}
 
-        public virtual void OnProfileLoad(XElement element)
-        {
-        }
+		public virtual void Reset()
+		{
+			IsDone = false;
+		}
 
-        public virtual void OnProfileSave(XElement element)
-        {
-        }
+		public virtual void OnProfileLoad(XElement element)
+		{
+		}
 
-        #endregion
+		public virtual void OnProfileSave(XElement element)
+		{
+		}
 
-        protected void RefreshPropertyGrid()
-        {
-            if (PropertyGrid != null)
-            {
-                PropertyGrid.Refresh();
-            }
-        }
+		#endregion
 
-        /// <summary>
-        /// If overriding this method call base method or set HasRunOnce to false.
-        /// </summary>
-        protected virtual void RunOnce()
-        {
-            HasRunOnce = true;
-        }
-    }
+		protected void RefreshPropertyGrid()
+		{
+			if (PropertyGrid != null)
+			{
+				PropertyGrid.Refresh();
+			}
+		}
 
-    #endregion
+	}
+
+	#endregion
 }

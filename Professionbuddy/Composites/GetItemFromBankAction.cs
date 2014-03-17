@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using HighVoltz.Dynamic;
 using Styx;
+using Styx.Common.Helpers;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -115,6 +118,7 @@ namespace HighVoltz.Composites
         private Stopwatch _itemsSW;
         private WoWPoint _loc;
 	    private int _withdrawCnt;
+	    private WaitTimer _initializingTimer;
 
         public GetItemfromBankAction()
         {
@@ -324,10 +328,23 @@ namespace HighVoltz.Composites
             get { return Pb.Strings["Action_GetItemFromBankAction_Help"]; }
         }
 
-        protected override RunStatus Run(object context)
+	    protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
+				// make sure the bank frame is close when starting behavior to make sure Util.IsGBankFrameOpen 
+				// and Util.IsBankFrameOpen are in sync with actual frame status in game and wait a short 
+				// period to allow game to update before continueing.
+	            if (_initializingTimer == null)
+	            {
+		            _initializingTimer = new WaitTimer(TimeSpan.FromSeconds(1));
+					_initializingTimer.Reset();
+					ForceCloseBankFrame();
+	            }
+
+				if (!_initializingTimer.IsFinished)
+					return RunStatus.Success;
+				
                 if ((Bank == BankType.Guild && !Util.IsGBankFrameOpen) ||
                     (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
@@ -341,12 +358,18 @@ namespace HighVoltz.Composites
                         _itemsSW.Start();
                     }
                     else if (_itemsSW.ElapsedMilliseconds < Util.WowWorldLatency*3)
-                        return RunStatus.Success;
+                    {
+	                    return RunStatus.Success;
+                    }
                     if (_itemList == null)
                         _itemList = BuildItemList();
                     // no bag space... 
-                    if (Util.BagRoomLeft(_itemList.Keys.FirstOrDefault()) <= MinFreeBagSlots || _itemList.Count == 0)
-                        IsDone = true;
+	                if (Util.BagRoomLeft(_itemList.Keys.FirstOrDefault()) <= MinFreeBagSlots || !_itemList.Any())
+	                {
+		                IsDone = true;
+						// make sure bank frame is closed when done since it can cause problems like Util.IsGBankFrameOpen going out of sync
+		                ForceCloseBankFrame();
+	                }
                     else
                     {
                         uint itemID = _itemList.Keys.FirstOrDefault();
@@ -382,8 +405,7 @@ namespace HighVoltz.Composites
 	                        _withdrawCnt = 0;
                         }
                     }
-                    _itemsSW.Reset();
-                    _itemsSW.Start();
+                    _itemsSW.Restart();
                 }
                 return RunStatus.Success;
             }
@@ -395,20 +417,24 @@ namespace HighVoltz.Composites
             WoWObject bank = null;
             List<WoWObject> bankers;
             if (Bank == BankType.Guild)
-                bankers = (from banker in ObjectManager.ObjectList
+			{
+				bankers = (from banker in ObjectManager.ObjectList
                            where
                                (banker is WoWGameObject &&
                                 ((WoWGameObject) banker).SubType == WoWGameObjectType.GuildBank) ||
                                (banker is WoWUnit && ((WoWUnit) banker).IsGuildBanker && ((WoWUnit) banker).IsAlive &&
                                 ((WoWUnit) banker).CanSelect)
                            select banker).ToList();
+			}
             else
-                bankers = (from banker in ObjectManager.ObjectList
+			{
+				bankers = (from banker in ObjectManager.ObjectList
                            where (banker is WoWUnit &&
                                   ((WoWUnit) banker).IsBanker &&
                                   ((WoWUnit) banker).IsAlive &&
                                   ((WoWUnit) banker).CanSelect)
                            select banker).ToList();
+			}
 
             if (!AutoFindBank && NpcEntry != 0)
                 bank = bankers.Where(b => b.Entry == NpcEntry).OrderBy(o => o.Distance).FirstOrDefault();
@@ -458,7 +484,13 @@ namespace HighVoltz.Composites
             }
         }
 
-        private Dictionary<uint, int> BuildItemList()
+
+	    void ForceCloseBankFrame()
+	    {
+		    Lua.DoString(Bank == BankType.Guild ? "CloseGuildBankFrame()" : "CloseBankFrame()");
+	    }
+
+	    private Dictionary<uint, int> BuildItemList()
         {
             var items = new Dictionary<uint, int>();
             switch (GetItemfromBankType)
@@ -534,6 +566,7 @@ namespace HighVoltz.Composites
             _itemList = null;
             _itemsSW = null;
 	        _withdrawCnt = 0;
+	        _initializingTimer = null;
         }
 
         public override object Clone()

@@ -227,21 +227,25 @@ namespace HighVoltz
         internal static void OnGBankFrameOpened(object obj, LuaEventArgs args)
         {
             IsGBankFrameOpen = true;
+			Professionbuddy.Debug("Guildbank opened");
         }
 
         internal static void OnGBankFrameClosed(object obj, LuaEventArgs args)
         {
             IsGBankFrameOpen = false;
+			Professionbuddy.Debug("Guildbank closed");
         }
 
         internal static void OnBankFrameOpened(object obj, LuaEventArgs args)
         {
             IsBankFrameOpen = true;
+			Professionbuddy.Debug("Personal bank opened");
         }
 
         internal static void OnBankFrameClosed(object obj, LuaEventArgs args)
         {
             IsBankFrameOpen = false;
+			Professionbuddy.Debug("Personal bank closed");
         }
 
         /// <summary>
