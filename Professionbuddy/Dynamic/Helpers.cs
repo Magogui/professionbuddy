@@ -124,6 +124,7 @@ return 0";
             Leatherworking = new TradeskillHelper(SkillLine.Leatherworking);
             Mining = new TradeskillHelper(SkillLine.Mining);
             Tailoring = new TradeskillHelper(SkillLine.Tailoring);
+			Skinning = new TradeskillHelper(SkillLine.Skinning);
         }
 
         // lazy load the HBRelogApi class.
@@ -151,6 +152,7 @@ return 0";
         public static TradeskillHelper Leatherworking { get; private set; }
         public static TradeskillHelper Mining { get; private set; }
         public static TradeskillHelper Tailoring { get; private set; }
+		public static TradeskillHelper Skinning { get; private set; }
 
         public static void Log(string f, params object[] args)
         {

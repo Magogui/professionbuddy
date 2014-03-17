@@ -301,7 +301,7 @@ namespace HighVoltz.Dynamic
 
         
         private const string Postfix =
-            @"
+			@"
             static LocalPlayer Me = StyxWoW.Me;
             static PbProfileSettings Settings = Professionbuddy.Instance.ProfileSettings;
             public static Helpers.TradeskillHelper Alchemy { get { return Helpers.Alchemy;} }
@@ -318,6 +318,7 @@ namespace HighVoltz.Dynamic
             public static Helpers.TradeskillHelper Leatherworking { get { return Helpers.Leatherworking;} }
             public static Helpers.TradeskillHelper Mining { get { return Helpers.Mining;} }
             public static Helpers.TradeskillHelper Tailoring { get { return Helpers.Tailoring;} }
+			public static Helpers.TradeskillHelper Skinning { get { return Helpers.Skinning;} }
             public static DataStore DataStore {get{return Professionbuddy.Instance.DataStore;}}
             uint CanRepeatNum (uint id){  return Helpers.TradeskillHelper.CanRepeatNum(id);}
             bool CanCraft (uint id){  return Helpers.TradeskillHelper.CanCraft(id);}
