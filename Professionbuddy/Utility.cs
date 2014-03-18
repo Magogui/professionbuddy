@@ -71,6 +71,11 @@ namespace HighVoltz
             get { return Lua.GetReturnVal<int>("if GuildBankFrame and GuildBankFrame:IsVisible() then return 1 else return 0 end ", 0) == 1; }
         }
 
+		public static void CloseBankFrames()
+		{
+			Lua.DoString("CloseGuildBankFrame(); CloseBankFrame();");
+		}
+
         /// <summary>
         ///     Returns WoW's latency, refreshed every 30 seconds.
         /// </summary>

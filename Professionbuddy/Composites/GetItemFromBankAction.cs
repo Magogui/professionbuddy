@@ -118,7 +118,6 @@ namespace HighVoltz.Composites
         private Stopwatch _itemsSW;
         private WoWPoint _loc;
 	    private int _withdrawCnt;
-	    private WaitTimer _initializingTimer;
 
         public GetItemfromBankAction()
         {
@@ -331,20 +330,7 @@ namespace HighVoltz.Composites
 	    protected override RunStatus Run(object context)
         {
             if (!IsDone)
-            {
-				// make sure the bank frame is close when starting behavior to make sure Util.IsGBankFrameOpen 
-				// and Util.IsBankFrameOpen are in sync with actual frame status in game and wait a short 
-				// period to allow game to update before continueing.
-	            if (_initializingTimer == null)
-	            {
-		            _initializingTimer = new WaitTimer(TimeSpan.FromSeconds(1));
-					_initializingTimer.Reset();
-					ForceCloseBankFrame();
-	            }
-
-				if (!_initializingTimer.IsFinished)
-					return RunStatus.Success;
-				
+            {				
                 if ((Bank == BankType.Guild && !Util.IsGBankFrameOpen) ||
                     (Bank == BankType.Personal && !Util.IsBankFrameOpen))
                 {
@@ -367,8 +353,6 @@ namespace HighVoltz.Composites
 	                if (Util.BagRoomLeft(_itemList.Keys.FirstOrDefault()) <= MinFreeBagSlots || !_itemList.Any())
 	                {
 		                IsDone = true;
-						// make sure bank frame is closed when done since it can cause problems like Util.IsGBankFrameOpen going out of sync
-		                ForceCloseBankFrame();
 	                }
                     else
                     {
@@ -484,12 +468,6 @@ namespace HighVoltz.Composites
             }
         }
 
-
-	    void ForceCloseBankFrame()
-	    {
-		    Lua.DoString(Bank == BankType.Guild ? "CloseGuildBankFrame()" : "CloseBankFrame()");
-	    }
-
 	    private Dictionary<uint, int> BuildItemList()
         {
             var items = new Dictionary<uint, int>();
@@ -566,7 +544,6 @@ namespace HighVoltz.Composites
             _itemList = null;
             _itemsSW = null;
 	        _withdrawCnt = 0;
-	        _initializingTimer = null;
         }
 
         public override object Clone()

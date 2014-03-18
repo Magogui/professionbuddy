@@ -227,6 +227,8 @@ namespace HighVoltz
 
 			Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
 			Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
+			Util.CloseBankFrames();
 
 			// _botBeingChangedTo not null whenever SecondaryBot is being switched.
 			if (_botChangeInfo == null)
