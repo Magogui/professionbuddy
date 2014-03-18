@@ -469,10 +469,10 @@ namespace HighVoltz
 					return;
 				if (_init)
 				{
-					if (_botChangeInfo != null)
-					{
-						return;
-					}
+					//if (_botChangeInfo != null)
+					//{
+					//	return;
+					//}
 					if (Instance.IsRunning && TreeRoot.IsRunning)
 					{
 						BotEvents.OnBotStopped += OnNewOuterProfileLoaded_OnBotStopped;
