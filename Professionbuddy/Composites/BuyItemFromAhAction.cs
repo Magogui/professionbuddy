@@ -394,15 +394,11 @@ namespace HighVoltz.Composites
             switch (ItemListType)
             {
                 case ItemType.Item:
-                    list.AddRange(idList.Select(id => new BuyItemEntry
-                                                          {
-                                                              Id = id,
-                                                              BuyAmount =
-                                                                  (uint)
-                                                                  (!BuyAdditively
-                                                                       ? Amount - Util.GetCarriedItemCount(id)
-                                                                       : Amount)
-                                                          }));
+		            list.AddRange(
+			            from id in idList
+			            let amount = !BuyAdditively ? Amount - Util.GetCarriedItemCount(id) : Amount
+			            where amount > 0
+			            select new BuyItemEntry {BuyAmount = (uint) amount, Id = id});
                     break;
                 case ItemType.MaterialList:
                     list.AddRange(

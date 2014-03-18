@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
@@ -258,7 +259,7 @@ namespace HighVoltz.Composites
                             }
                             foreach (uint id in idList)
                             {
-                                int count = !BuyAdditively ? Count - Util.GetCarriedItemCount(id) : Count;
+                                int count = !BuyAdditively ? Math.Max(Count - Util.GetCarriedItemCount(id), 0) : Count;
                                 if (count > 0)
                                     BuyItem(id, (uint) count);
                             }
