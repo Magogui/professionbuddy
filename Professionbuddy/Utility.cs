@@ -38,11 +38,6 @@ namespace HighVoltz
         private static readonly Stopwatch PingSW = new Stopwatch();
         private static readonly Dictionary<uint, int> BagStorageTypes = new Dictionary<uint, int>();
 
-        static Util()
-        {
-            IsBankFrameOpen = false;
-        }
-
         /// <summary>
         ///     Creates a random upper/lowercase string
         /// </summary>
@@ -62,9 +57,9 @@ namespace HighVoltz
             }
         }
 
-        public static bool IsBankFrameOpen { get; internal set; }
+		public static bool IsBankFrameOpen { get; private set; }
 
-        public static bool IsGBankFrameOpen { get; internal set; }
+        public static bool IsGBankFrameOpen { get; private set; }
 
         public static bool IsGbankFrameVisible
         {
@@ -73,6 +68,7 @@ namespace HighVoltz
 
 		public static void CloseBankFrames()
 		{
+			IsGBankFrameOpen = IsBankFrameOpen = false;
 			Lua.DoString("CloseGuildBankFrame(); CloseBankFrame();");
 		}
 

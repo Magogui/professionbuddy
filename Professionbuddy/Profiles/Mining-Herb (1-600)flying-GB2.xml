@@ -607,7 +607,8 @@
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
         <FlyToAction Dismount="False" Location="-3994.829, -4719.628, 4.139777" />
         <WaitAction Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-4016.39, -4740.588, -0.04110325)) &lt; 1" Timeout="6000000" />
-        <CustomAction Code="CTM(-4010.385, -4735.384, 6.06652);" />
+        <!--<CustomAction Code="CTM(-4010.385, -4735.384, 6.06652);" />-->
+        <MoveToAction Location="-4009.237, -4736.01, 6.142319" MoveType="Location" Pathing="Navigator" Entry="0" />
         <WaitAction Condition="Me.MapId == 0" Timeout="600000" />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
