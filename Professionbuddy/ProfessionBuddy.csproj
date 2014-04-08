@@ -266,6 +266,7 @@
     <Content Include="Profiles\Mining-Herb %281-600%29flying-GB2.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Profiles\Mining-Herb %281-600%29GB2 in Pandaria.xml" />
     <Content Include="Profiles\Multiprofile.xml">
       <SubType>Designer</SubType>
     </Content>

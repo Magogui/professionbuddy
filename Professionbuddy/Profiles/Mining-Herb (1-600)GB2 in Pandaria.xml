@@ -52,7 +52,7 @@
       <CustomAction Code="using (StyxWoW.Memory.AcquireFrame())&#xD;&#xA;{&#xD;&#xA;  foreach (var node in ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().Where( g =&gt; (g.IsMineral &amp;&amp; (bool)Settings[&quot;Mining&quot;] || g.IsHerb &amp;&amp; (bool)Settings[&quot;Herb&quot;]) &amp;&amp; !Blacklist.Contains(g)))&#xD;&#xA;  {&#xD;&#xA;    var requiredSkillLevel = node.RequiredSkill;&#xD;&#xA;    if (!requiredSkillLevel.HasValue) continue;&#xD;&#xA;    var skillLevel =  node.IsHerb ? HerbLevel : MiningLevel;&#xD;&#xA;    if (requiredSkillLevel.Value + 150 &lt; skillLevel)&#xD;&#xA;    {&#xD;&#xA;          Blacklist.Add(node, TimeSpan.FromDays(365));&#xD;&#xA;           MyLog(&quot;Blacklisting {0} because it's grey&quot;, node.Name);&#xD;&#xA;          MyLog(&quot;My Skill: {0}, Required Skill: {1}&quot;,skillLevel ,requiredSkillLevel.Value);&#xD;&#xA;    } &#xD;&#xA;  }&#xD;&#xA;}" />
     </If>
     <!--Train skills-->
-    <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 ) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 )" IgnoreCanRun="True">
+    <If Condition="((bool)Settings[&quot;Mining&quot;] &amp;&amp; MiningMaxLevel-MiningLevel &lt;=25 &amp;&amp; HerbMaxLevel &lt; 600) || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; HerbMaxLevel - HerbLevel &lt;= 25 &amp;&amp; HerbMaxLevel &lt; 600 )" IgnoreCanRun="True">
       <If Condition="Me.IsAlliance &amp;&amp; Me.MapId == 870" IgnoreCanRun="True">
         <CallSubRoutine SubRoutineName="TrainInPawDonVillage" />
       </If>
