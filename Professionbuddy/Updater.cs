@@ -11,13 +11,8 @@ namespace HighVoltz
 {
     public static class Updater
     {
-#if BETA
-        private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/branches/beta";
-        private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r="; 
-#else
         private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
         private const string PbChangeLogUrl = "http://code.google.com/p/professionbuddy/source/detail?r=";
-#endif
 
         private static readonly Regex _linkPattern = new Regex(@"<li><a href="".+"">(?<ln>.+(?:..))</a></li>",
                                                                RegexOptions.CultureInvariant);
@@ -68,42 +63,51 @@ namespace HighVoltz
             throw new Exception("Unable to retreive revision");
         }
 
-        private static void DownloadFilesFromSvn(WebClient client, string url)
+        private static bool DownloadFilesFromSvn(WebClient client, string url)
         {
-            string html = client.DownloadString(url);
-            MatchCollection results = _linkPattern.Matches(html);
+	        try
+	        {
+		        string html = client.DownloadString(url);
+		        MatchCollection results = _linkPattern.Matches(html);
 
-            IEnumerable<Match> matches = from match in results.OfType<Match>()
-                                         where match.Success && match.Groups["ln"].Success
-                                         select match;
-            foreach (Match match in matches)
-            {
-                string file = RemoveXmlEscapes(match.Groups["ln"].Value);
-                string newUrl = url + file;
-                if (newUrl[newUrl.Length - 1] == '/') // it's a directory...
-                {
-                    DownloadFilesFromSvn(client, newUrl);
-                }
-                else // its a file.
-                {
-                    string filePath, dirPath;
-                    if (url.Length > PbSvnUrl.Length)
-                    {
-                        string relativePath = url.Substring(PbSvnUrl.Length);
-                        dirPath = Path.Combine(Professionbuddy.BotPath, relativePath);
-                        filePath = Path.Combine(dirPath, file);
-                    }
-                    else
-                    {
-                        dirPath = Environment.CurrentDirectory;
-                        filePath = Path.Combine(Professionbuddy.BotPath, file);
-                    }
-                    Professionbuddy.Debug("Downloading {0}", file);
-                    if (!Directory.Exists(dirPath))
-                        Directory.CreateDirectory(dirPath);
-                    client.DownloadFile(newUrl, filePath);
-                }
-            }
+		        IEnumerable<Match> matches = from match in results.OfType<Match>()
+			        where match.Success && match.Groups["ln"].Success
+			        select match;
+		        foreach (Match match in matches)
+		        {
+			        string file = RemoveXmlEscapes(match.Groups["ln"].Value);
+			        string newUrl = url + file;
+			        if (newUrl[newUrl.Length - 1] == '/') // it's a directory...
+			        {
+				        DownloadFilesFromSvn(client, newUrl);
+			        }
+			        else // its a file.
+			        {
+				        string filePath, dirPath;
+				        if (url.Length > PbSvnUrl.Length)
+				        {
+					        string relativePath = url.Substring(PbSvnUrl.Length);
+					        dirPath = Path.Combine(Professionbuddy.BotPath, relativePath);
+					        filePath = Path.Combine(dirPath, file);
+				        }
+				        else
+				        {
+					        dirPath = Environment.CurrentDirectory;
+					        filePath = Path.Combine(Professionbuddy.BotPath, file);
+				        }
+				        Professionbuddy.Debug("Downloading {0}", file);
+				        if (!Directory.Exists(dirPath))
+					        Directory.CreateDirectory(dirPath);
+				        client.DownloadFile(newUrl, filePath);
+			        }
+		        }
+	        }
+	        catch (Exception ex)
+	        {
+				Professionbuddy.Err(ex.ToString());
+				return false;
+	        }
+	        return true;
         }
 
         private static string RemoveXmlEscapes(string xml)
@@ -115,12 +119,19 @@ namespace HighVoltz
 
         private static string GetChangeLog(int revision)
         {
-            var client = new WebClient();
-            string html = client.DownloadString(PbChangeLogUrl + revision);
-            Match match = _changelogPattern.Match(html);
-            if (match.Success && match.Groups["log"].Success)
-                return RemoveXmlEscapes(match.Groups["log"].Value);
-            return null;
+			try
+			{
+				var client = new WebClient();
+				string html = client.DownloadString(PbChangeLogUrl + revision);
+				Match match = _changelogPattern.Match(html);
+				if (match.Success && match.Groups["log"].Success)
+					return RemoveXmlEscapes(match.Groups["log"].Value);				        
+			}
+	        catch (Exception ex)
+	        {
+				Professionbuddy.Err(ex.ToString());
+	        }
+			return null;
         }
     }
 }

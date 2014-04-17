@@ -31,7 +31,7 @@
         <!-- Camp Nooka Nooka -->
         <Blackspot X="1900.861" Y="-313.9324" Z="402.049" Radius="97.35584" />
         <!-- Pearlfin Village -->
-        <Blackspot X="-204.1518" Y="-2667.767" Z="18.46221" Radius="314.0383" Height="22.02605" />
+        <Blackspot X="-204.1518" Y="-2667.767" Z="18.46221" Radius="350.0383" Height="70.02605" />
         <AerialBlackspot Faction="Horde" MapId="870" Name="Peralfin Village Blackspot" >
             <Spot X="72.08921" Y="-2726.648" />
             <Spot X="-50.42627" Y="-2854.956" />
