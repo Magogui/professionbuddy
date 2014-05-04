@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Media;
+using Bots.BGBuddy.Helpers;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.TreeSharp;
@@ -52,7 +54,14 @@ namespace HighVoltz.Composites
 			        _changeBotTimer.Reset();
 			        _bot = Util.GetBotByName(BotName);
 			        if (_bot != null)
+			        {
+				        if (Professionbuddy.Instance.SecondaryBot == _bot)
+				        {
+					        IsDone = true;
+					        return RunStatus.Failure;
+				        }
 				        Professionbuddy.ChangeSecondaryBot(BotName);
+			        }
 		        }
 	        }
 	        finally
@@ -60,21 +69,19 @@ namespace HighVoltz.Composites
 		        // Wait until bot change completes or fails
 		        if (_bot == null || _changeBotTimer != null && (_changeBotTimer.IsFinished || Professionbuddy.Instance.SecondaryBot == _bot))
 		        {
-			        if (_bot == null)
-			        {
-				        Professionbuddy.Err("No bot with name: {0} could be found", BotName);
-			        }
-					else if (Professionbuddy.Instance.SecondaryBot == _bot)
-					{
-						Professionbuddy.Log("Successfuly changed secondary bot to: {0}", BotName);
-					}
-					else
-					{
-						Professionbuddy.Err("Unable to switch secondary bot to: {0}", BotName);
-					}
 			        IsDone = true;
 			        _changeBotTimer = null;
 		        }
+	        }
+
+	        if (IsDone)
+	        {
+		        if (_bot == null)
+			        Professionbuddy.Err("No bot with name: {0} could be found", BotName);
+		        else if (Professionbuddy.Instance.SecondaryBot == _bot)
+			        Professionbuddy.Log("Successfuly changed secondary bot to: {0}", BotName);
+		        else
+			        Professionbuddy.Err("Unable to switch secondary bot to: {0}", BotName);
 	        }
 	        return RunStatus.Success;
         }

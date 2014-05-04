@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HighVoltz</RootNamespace>
     <AssemblyName>ProfessionBuddy</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,6 +43,7 @@
     <DefineConstants>TRACE;DLL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -50,6 +52,7 @@
     <OutputPath>bin\x86\Dll\</OutputPath>
     <DefineConstants>DLL</DefineConstants>
     <Optimize>true</Optimize>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -77,9 +80,11 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Beta - Debug|x86'">
     <OutputPath>bin\x86\Beta - Debug\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Beta|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -89,6 +94,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreyMagic">
@@ -279,14 +285,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist excludes.txt echo _ReSharper.Professionbuddy &gt; excludes.txt
-xcopy "$(ProjectDir)*.cs"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D /EXCLUDE:excludes.txt
-xcopy "$(ProjectDir)*.png"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)*.bmp"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Guide.rtf"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D
-xcopy "$(ProjectDir)Profiles\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Profiles\" /I /S /Y
-xcopy "$(ProjectDir)Localization\*.xml"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)\Localization\" /I /S /Y /D
-xcopy  "$(ProjectDir)ChangeLog.txt"  "$(ProjectDir)..\..\Honorbuddy\Bots\$(TargetName)" /I /S /Y /D</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs</PreBuildEvent>
