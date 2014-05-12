@@ -198,12 +198,12 @@
     </If>
     <CustomAction Code="MyLog(&quot;Training in Honeydew Village&quot;);" />
     <If Condition="(bool)Settings[&quot;Herb&quot;]" IgnoreCanRun="True">
-      <!-- Name="Grower Miao" Entry="66980" Type="Repair" X="2929.392" Y="-488.8871" Z="268.8559" -->
+      <FlyToAction Dismount="True" Location="2930.438, -488.7503, 268.8557" />
       <TrainSkillAction NpcEntry="66980" Location="2930.438, -488.7503, 268.8557" />
       <WaitAction Condition="Herbalism.MaxLevel-Herbalism.Level &gt; 25" Timeout="3000" />
     </If>
     <If Condition="(bool)Settings[&quot;Mining&quot;]" IgnoreCanRun="True">
-      <!-- Name="Stonebreaker Ruian" Entry="66979" Type="Repair" X="2961.801" Y="-490.6736" Z="268.856" -->
+      <FlyToAction Dismount="True" Location="2961.12, -491.3701, 268.8554" />
       <TrainSkillAction NpcEntry="66979" Location="2961.12, -491.3701, 268.8554" />
       <WaitAction Condition="Mining.MaxLevel-Mining.Level &gt; 25" Timeout="3000" />
     </If>
