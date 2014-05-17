@@ -63,28 +63,6 @@ namespace HighVoltz
 		public Professionbuddy()
 		{
 			Instance = this;
-			new Thread(
-				() =>
-				{
-					try
-					{
-						ProcessModule mod = Process.GetCurrentProcess().MainModule;
-						using (HashAlgorithm hashAlg = new SHA1CryptoServiceProvider())
-						{
-							using (Stream file = new FileStream(mod.FileName, FileMode.Open, FileAccess.Read))
-							{
-								byte[] hash = hashAlg.ComputeHash(file);
-								Logging.WriteDiagnostic("H: {0}", BitConverter.ToString(hash));
-							}
-						}
-						FileVersionInfo vInfo = mod.FileVersionInfo;
-						Logging.WriteDiagnostic("V: {0}", vInfo.FileVersion);
-					}
-					catch (Exception ex)
-					{
-						Err(ex.ToString());
-					}
-				}).Start();
 			// Initialize is called when bot is started.. we need to hook these events before that.
 			if (!_ctorRunOnce)
 			{
@@ -282,7 +260,6 @@ namespace HighVoltz
 			if (SecondaryBot != null)
 				SecondaryBot.Stop();
 		}
-
 
 		public override void Pulse()
 		{

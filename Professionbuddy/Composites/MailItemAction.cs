@@ -321,9 +321,11 @@ namespace HighVoltz.Composites
                 // item split in proceess
                 if (_itemSplitSW.IsRunning && _itemSplitSW.ElapsedMilliseconds <= 2000)
                     return RunStatus.Success;
+
                 if (_itemList == null)
                     _itemList = BuildItemList();
-                if (_itemList.Count == 0)
+
+                if (!_itemList.Any())
                 {
                     //Professionbuddy.Debug("Sending any remaining items already in SendMail item slots. Mail subject will be: {0} ",_mailSubject);
                     Lua.DoString(
@@ -342,18 +344,24 @@ namespace HighVoltz.Composites
                 if (string.IsNullOrEmpty(_mailSubject))
                     _mailSubject = " ";
                 Professionbuddy.Debug("MailItem: sending {0}", itemID);
+
+				// format indexs are MailRecipient=0, Mail subject=1
+				string mailToLua = string.Format(MailItemsFormat,
+												 CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(),
+												 _mailSubject.ToFormatedUTF8());
+
+	            if (Lua.GetReturnVal<int>(mailToLua, 0) == 1)
+	            {
+		            _itemSplitSW.Restart();
+		            return RunStatus.Success;
+	            }
+
                 int ret = MailItem(itemID, _itemList[itemID]);
-                // we need to wait for item split to finish if ret == 0
-                // format indexs are MailRecipient=0, Mail subject=1
-                string mailToLua = string.Format(MailItemsFormat,
-                                                 CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(),
-                                                 _mailSubject.ToFormatedUTF8());
-                var mailItemsRet = Lua.GetReturnVal<int>(mailToLua, 0);
-                if (ret == 0 || mailItemsRet == 1)
+                // we need to wait for item split to finish if ret >= 0
+
+                if (ret >= 0 )
                 {
-                    _itemSplitSW.Reset();
-                    _itemSplitSW.Start();
-                    return RunStatus.Success;
+                    _itemSplitSW.Restart();
                 }
                 _itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
 
@@ -362,16 +370,21 @@ namespace HighVoltz.Composites
                 {
                     _itemList.Remove(itemID);
                 }
-                if (IsDone)
-                {
-                    Professionbuddy.Log("Done sending {0} via mail",
-                                        UseCategory
-                                            ? string.Format("Items that belong to category {0} and subcategory {1}",
-                                                            Category, SubCategory)
-                                            : string.Format("Items that match Id of {0}", ItemID));
-                }
-                else
-                    return RunStatus.Success;
+	            if (IsDone)
+	            {
+		            Professionbuddy.Log(
+			            "Done sending {0} via mail",
+			            UseCategory
+				            ? string.Format(
+					            "Items that belong to category {0} and subcategory {1}",
+					            Category,
+					            SubCategory)
+				            : string.Format("Items that match Id of {0}", ItemID));
+	            }
+	            else
+	            {
+		            return RunStatus.Success;
+	            }
             }
             return RunStatus.Failure;
         }
