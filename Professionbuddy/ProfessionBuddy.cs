@@ -119,8 +119,6 @@ namespace HighVoltz
 
 		// <itemId,count>
 		public DataStore DataStore { get; private set; }
-
-		public List<uint> ProtectedItems { get; private set; }
 		public bool IsTradeSkillsLoaded { get; private set; }
 
 		// ReSharper disable InconsistentNaming
@@ -288,7 +286,6 @@ namespace HighVoltz
 								string.Format(@"Settings\{0}\{0}[{1}-{2}].xml", Name, Me.Name, Lua.GetReturnVal<string>("return GetRealmName()", 0))));
 
 					IsTradeSkillsLoaded = false;
-					LoadProtectedItems();
 					LoadTradeSkills();
 					DataStore = new DataStore();
 					DataStore.ImportDataStore();
@@ -867,23 +864,6 @@ namespace HighVoltz
 				}
 			}
 			return list;
-		}
-
-		private void LoadProtectedItems()
-		{
-			List<uint> tempList = null;
-			string path = Path.Combine(BotPath, "Protected Items.xml");
-			if (File.Exists(path))
-			{
-				XElement xml = XElement.Load(path);
-				tempList = xml.Elements("Item").Select(
-					x =>
-					{
-						XAttribute xAttribute = x.Attribute("Entry");
-						return xAttribute != null ? xAttribute.Value.ToUint() : 0;
-					}).Distinct().ToList();
-			}
-			ProtectedItems = tempList ?? new List<uint>();
 		}
 
 		#endregion

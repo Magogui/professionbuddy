@@ -285,7 +285,7 @@ namespace HighVoltz.Composites
 
                 IEnumerable<WoWItem> itemQuery = from item in StyxWoW.Me.BagItems
                                                  where !IsBlackListed(item) &&
-                                                       !Pb.ProtectedItems.Contains(item.Entry) &&
+                                                       !ProtectedItemsManager.Contains(item.Entry) &&
                                                        ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
                                                         ItemTarget == ItemTargetType.All)
                                                  select item;

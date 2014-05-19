@@ -398,7 +398,7 @@ namespace HighVoltz.Composites
             if (UseCategory)
                 foreach (WoWItem item in tmpItemlist)
                 {
-                    if (!Pb.ProtectedItems.Contains(item.Entry) && item.ItemInfo.ItemClass == Category &&
+                    if (item.ItemInfo.ItemClass == Category &&
                         SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
                     {
                         itemList.Add(item.Entry, Mail == DepositWithdrawAmount.Amount

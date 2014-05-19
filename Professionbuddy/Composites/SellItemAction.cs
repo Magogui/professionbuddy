@@ -7,6 +7,7 @@ using HighVoltz.Dynamic;
 using Styx;
 using Styx.CommonBot.Database;
 using Styx.CommonBot.Frames;
+using Styx.CommonBot.Profiles;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Styx.TreeSharp;
@@ -250,7 +251,7 @@ namespace HighVoltz.Composites
                     {
                         List<WoWItem> itemList = null;
                         IEnumerable<WoWItem> itemQuery = from item in Me.BagItems
-                                                         where !Pb.ProtectedItems.Contains(item.Entry)
+                                                         where !ProtectedItemsManager.Contains(item.Entry)
                                                          select item;
                         switch (SellItemType)
                         {
