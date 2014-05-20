@@ -285,7 +285,6 @@ namespace HighVoltz.Composites
 
                 IEnumerable<WoWItem> itemQuery = from item in StyxWoW.Me.BagItems
                                                  where !IsBlackListed(item) &&
-                                                       !ProtectedItemsManager.Contains(item.Entry) &&
                                                        ((ItemTarget == ItemTargetType.Specific && item.Entry == ItemId) ||
                                                         ItemTarget == ItemTargetType.All)
                                                  select item;
@@ -293,7 +292,8 @@ namespace HighVoltz.Composites
                 switch (ActionType)
                 {
                     case DeActionType.Disenchant:
-                        return itemQuery.Where(i => i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
+                        return itemQuery.Where(i => !ProtectedItemsManager.Contains(i.Entry) 
+							&& i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
                     case DeActionType.Mill:
                         return itemQuery.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
                     case DeActionType.Prospect:
