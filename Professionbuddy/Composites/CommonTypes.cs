@@ -4,6 +4,13 @@
 
 namespace HighVoltz.Composites
 {
+	public enum ItemSelectionType
+	{
+		IDs,
+		Category,
+		Quality
+	}
+
     public enum SubCategoryType
     {
         None

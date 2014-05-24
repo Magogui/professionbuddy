@@ -111,9 +111,6 @@ namespace HighVoltz.Composites
                                                                       typeof (UITypeEditor)),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["UseCategory"] = new MetaProp("UseCategory", typeof (bool),
-                                                     new DisplayNameAttribute(Pb.Strings["Action_Common_UseCategory"]));
-
             Properties["Category"] = new MetaProp("Category", typeof (WoWItemClass),
                                                   new DisplayNameAttribute(Pb.Strings["Action_Common_ItemCategory"]));
 
@@ -129,30 +126,38 @@ namespace HighVoltz.Composites
             Properties["Mail"] = new MetaProp("Mail", typeof (DepositWithdrawAmount),
                                               new DisplayNameAttribute(Pb.Strings["Action_Common_Mail"]));
 
+			Properties["ItemQuality"] = new MetaProp("ItemQuality", typeof(WoWItemQuality),
+										 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemQuality"]));
+
+			Properties["ItemSelection"] = new MetaProp("ItemSelection", typeof(ItemSelectionType),
+							 new DisplayNameAttribute(Pb.Strings["Action_Common_ItemSelection"]));
+
             ItemID = "";
             AutoFindMailBox = true;
             _loc = WoWPoint.Zero;
             Location = _loc.ToInvariantString();
-            UseCategory = true;
             Category = WoWItemClass.TradeGoods;
             SubCategory = WoWItemTradeGoodsClass.None;
             Amount = new DynamicProperty<int>("Amount", this, "0");
             Mail = DepositWithdrawAmount.All;
+			ItemQuality = WoWItemQuality.Uncommon;
+			ItemSelection = ItemSelectionType.Category;
 
             Properties["Location"].Show = false;
             Properties["ItemID"].Show = false;
+			Properties["ItemQuality"].Show = false;
             Properties["AutoFindMailBox"].PropertyChanged += AutoFindMailBoxChanged;
             Properties["Location"].PropertyChanged += LocationChanged;
-            Properties["UseCategory"].PropertyChanged += UseCategoryChanged;
             Properties["Category"].PropertyChanged += CategoryChanged;
             Properties["Mail"].PropertyChanged += MailChanged;
+			Properties["ItemSelection"].PropertyChanged += ItemSelectionChanged;
         }
 
-        #region Callbacks
+	    #region Callbacks
 
         private void MailChanged(object sender, MetaPropArgs e)
         {
-            Properties["Mail"].Show = Mail == DepositWithdrawAmount.Amount;
+			Properties["Amount"].Show = Mail == DepositWithdrawAmount.Amount;
             RefreshPropertyGrid();
         }
 
@@ -165,20 +170,29 @@ namespace HighVoltz.Composites
             RefreshPropertyGrid();
         }
 
-        private void UseCategoryChanged(object sender, MetaPropArgs e)
+		private void ItemSelectionChanged(object sender, MetaPropArgs e)
         {
-            if (UseCategory)
-            {
-                Properties["ItemID"].Show = false;
-                Properties["Category"].Show = true;
-                Properties["SubCategory"].Show = true;
-            }
-            else
-            {
-                Properties["ItemID"].Show = true;
-                Properties["Category"].Show = false;
-                Properties["SubCategory"].Show = false;
-            }
+			switch (ItemSelection)
+			{
+				case ItemSelectionType.IDs:
+					Properties["ItemID"].Show = true;
+					Properties["Category"].Show = false;
+					Properties["SubCategory"].Show = false;
+					Properties["ItemQuality"].Show = false;
+					break;
+				case ItemSelectionType.Category:
+					Properties["ItemID"].Show = false;
+					Properties["Category"].Show = true;
+					Properties["SubCategory"].Show = true;
+					Properties["ItemQuality"].Show = false;
+					break;
+				case ItemSelectionType.Quality:
+					Properties["ItemID"].Show = false;
+					Properties["Category"].Show = false;
+					Properties["SubCategory"].Show = false;
+					Properties["ItemQuality"].Show = true;
+					break;
+			}
             RefreshPropertyGrid();
         }
 
@@ -204,13 +218,6 @@ namespace HighVoltz.Composites
         {
             get { return (DepositWithdrawAmount) Properties["Mail"].Value; }
             set { Properties["Mail"].Value = value; }
-        }
-
-        [PbXmlAttribute]
-        public bool UseCategory
-        {
-            get { return (bool) Properties["UseCategory"].Value; }
-            set { Properties["UseCategory"].Value = value; }
         }
 
         public WoWItemClass Category
@@ -255,6 +262,20 @@ namespace HighVoltz.Composites
             set { Properties["Location"].Value = value; }
         }
 
+		[PbXmlAttribute]
+		public WoWItemQuality ItemQuality
+        {
+			get { return (WoWItemQuality)Properties["ItemQuality"].Value; }
+			set { Properties["ItemQuality"].Value = value; }
+        }
+
+		[PbXmlAttribute]
+		public ItemSelectionType ItemSelection
+        {
+			get { return (ItemSelectionType)Properties["ItemSelection"].Value; }
+			set { Properties["ItemSelection"].Value = value; }
+        }
+
         public override string Name
         {
             get { return Pb.Strings["Action_MailItemAction_Name"]; }
@@ -265,7 +286,9 @@ namespace HighVoltz.Composites
             get
             {
                 return string.Format("{0}: to:{1} {2} ", Name, CharacterSettings.Instance.MailRecipient,
-                                     UseCategory ? string.Format("{0} {1}", Category, SubCategory) : ItemID);
+                                     ItemSelection == ItemSelectionType.Category 
+									 ? string.Format("{0} {1}", Category, SubCategory) 
+									 : (ItemSelection == ItemSelectionType.Quality ? ItemQuality.ToString() : ItemID));
             }
         }
 
@@ -374,12 +397,14 @@ namespace HighVoltz.Composites
 	            {
 		            Professionbuddy.Log(
 			            "Done sending {0} via mail",
-			            UseCategory
+			            ItemSelection == ItemSelectionType.Category
 				            ? string.Format(
 					            "Items that belong to category {0} and subcategory {1}",
 					            Category,
 					            SubCategory)
-				            : string.Format("Items that match Id of {0}", ItemID));
+							: (ItemSelection == ItemSelectionType.IDs 
+							? string.Format("Items that match Id of {0}", ItemID):
+							string.Format("Items of quality {0}",ItemQuality)));
 	            }
 	            else
 	            {
@@ -395,41 +420,56 @@ namespace HighVoltz.Composites
             IEnumerable<WoWItem> tmpItemlist = from item in Me.BagItems
                                                where !item.IsConjured && !item.IsSoulbound && !item.IsDisabled
                                                select item;
-            if (UseCategory)
-                foreach (WoWItem item in tmpItemlist)
-                {
-                    if (item.ItemInfo.ItemClass == Category &&
-                        SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
-                    {
-                        itemList.Add(item.Entry, Mail == DepositWithdrawAmount.Amount
-                                                     ? Amount
-                                                     : Util.GetCarriedItemCount(item.Entry));
-                    }
-                }
-            else
-            {
-                string[] entries = ItemID.Split(',');
-                if (entries.Length > 0)
-                {
-                    foreach (string entry in entries)
-                    {
-                        uint itemID;
-                        if (!uint.TryParse(entry.Trim(), out itemID))
-                        {
-                            Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
-                            continue;
-                        }
-                        itemList.Add(itemID, Mail == DepositWithdrawAmount.Amount
-                                                 ? Amount
-                                                 : Util.GetCarriedItemCount(itemID));
-                    }
-                }
-                else
-                {
-                    Professionbuddy.Err("No ItemIDs are specified");
-                    IsDone = true;
-                }
-            }
+	        switch (ItemSelection)
+	        {
+				case ItemSelectionType.Category:
+					foreach (WoWItem item in tmpItemlist)
+					{
+						if (item.ItemInfo.ItemClass == Category &&
+							SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
+						{
+							itemList.Add(item.Entry, Mail == DepositWithdrawAmount.Amount
+															? Amount
+															: Util.GetCarriedItemCount(item.Entry));
+						}
+					}
+				break;
+				case ItemSelectionType.IDs:
+					string[] entries = ItemID.Split(',');
+					if (entries.Length > 0)
+					{
+						foreach (string entry in entries)
+						{
+							uint itemID;
+							if (!uint.TryParse(entry.Trim(), out itemID))
+							{
+								Professionbuddy.Err(Pb.Strings["Error_NotAValidItemEntry"], entry.Trim());
+								continue;
+							}
+							itemList.Add(itemID, Mail == DepositWithdrawAmount.Amount
+														? Amount
+														: Util.GetCarriedItemCount(itemID));
+						}
+					}
+					else
+					{
+						Professionbuddy.Err("No ItemIDs are specified");
+						IsDone = true;
+					}
+					break;
+				case ItemSelectionType.Quality:
+					foreach (WoWItem item in tmpItemlist)
+					{
+						if (item.Quality == ItemQuality)
+						{
+							itemList.Add(item.Entry, 
+								Mail == DepositWithdrawAmount.Amount
+									? Amount
+									: Util.GetCarriedItemCount(item.Entry));
+						}
+					}
+					break;
+	        }
             return itemList;
         }
 
@@ -468,17 +508,18 @@ namespace HighVoltz.Composites
         public override object Clone()
         {
             return new MailItemAction
-                       {
-                           ItemID = ItemID,
-                           _loc = _loc,
-                           AutoFindMailBox = AutoFindMailBox,
-                           Location = Location,
-                           UseCategory = UseCategory,
-                           Category = Category,
-                           SubCategory = SubCategory,
-                           Amount = Amount,
-                           Mail = Mail
-                       };
+            {
+                ItemID = ItemID,
+                _loc = _loc,
+                AutoFindMailBox = AutoFindMailBox,
+                Location = Location,
+                ItemQuality = ItemQuality,
+				ItemSelection = ItemSelection,
+                Category = Category,
+                SubCategory = SubCategory,
+                Amount = Amount,
+                Mail = Mail
+            };
         }
 
         public override void OnProfileLoad(XElement element)
@@ -498,6 +539,14 @@ namespace HighVoltz.Composites
                 subCatAttr.Remove();
                 subCatTypeAttr.Remove();
             }
+
+			// add backwards compatibility for the UseCategory attribute
+			XAttribute useCategoryAttr = element.Attribute("UseCategory");
+	        if (useCategoryAttr != null)
+	        {
+		        var value = bool.Parse(useCategoryAttr.Value);
+		        ItemSelection = value ? ItemSelectionType.Category : ItemSelectionType.IDs;
+	        }
             base.OnProfileLoad(element);
         }
 

@@ -282,8 +282,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /Q /Y /I /E "$(ProjectDir)*" "C:\Buddy\Projects\Honorbuddy\Honorbuddy\bin\Debug\Bots\Professionbuddy"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs</PreBuildEvent>
