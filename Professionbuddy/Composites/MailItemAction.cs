@@ -425,6 +425,9 @@ namespace HighVoltz.Composites
 				case ItemSelectionType.Category:
 					foreach (WoWItem item in tmpItemlist)
 					{
+						// skip tradeskill tools. If tools need to be mailed then they should be selected by ID
+						if (Professionbuddy.Instance.TradeskillTools.Contains(item.Entry))
+							continue;
 						if (item.ItemInfo.ItemClass == Category &&
 							SubCategoryCheck(item) && !itemList.ContainsKey(item.Entry))
 						{
@@ -460,6 +463,9 @@ namespace HighVoltz.Composites
 				case ItemSelectionType.Quality:
 					foreach (WoWItem item in tmpItemlist)
 					{
+						// skip tradeskill tools. If tools need to be mailed then they should be selected by ID
+						if (Professionbuddy.Instance.TradeskillTools.Contains(item.Entry))
+							continue;
 						if (item.Quality == ItemQuality)
 						{
 							itemList.Add(item.Entry, 

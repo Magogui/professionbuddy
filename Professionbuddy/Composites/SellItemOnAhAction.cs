@@ -537,6 +537,9 @@ namespace HighVoltz.Composites
 						i => !i.IsSoulbound && !i.IsConjured && !i.IsDisabled && !i.IsGiftWrapped && i.ItemInfo.ItemClass == Category && SubCategoryCheck(i)).ToList();
 				foreach (var item in itemList)
 				{
+					// skip tradeskill tools. If tools need to be mailed then they should be selected by ID
+					if (Professionbuddy.Instance.TradeskillTools.Contains(item.Entry))
+						continue;
 					// don't add same item id multiple times.
 					if (tmpItemlist.Any(ae => ae.Id == item.Entry))
 						continue;

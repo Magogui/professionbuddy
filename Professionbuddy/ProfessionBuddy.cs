@@ -89,6 +89,8 @@ namespace HighVoltz
 
 		public ProfessionBuddySettings MySettings { get; private set; }
 
+		internal List<uint> TradeskillTools { get; private set; }
+
 		public bool IsRunning { get; internal set; }
 
 		public List<TradeSkill> TradeSkillList
@@ -246,6 +248,7 @@ namespace HighVoltz
 					LoadTradeSkills();
 					DataStore = new DataStore();
 					DataStore.ImportDataStore();
+					LoadTradeskillTools();
 					// load localized strings
 					LoadStrings();
 					// load the previous 
@@ -732,6 +735,24 @@ namespace HighVoltz
 			if (LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
 				ProfileManager.LoadNew(_lastProfilePath, true);
 			Instance.MySettings.Save();
+		}
+
+		// list of tradeskill tools
+		private void LoadTradeskillTools()
+		{
+			List<uint> tempList = null;
+			string path = Path.Combine(BotPath, "Tradeskill Tools.xml");
+			if (File.Exists(path))
+			{
+				XElement xml = XElement.Load(path);
+				tempList = xml.Elements("Item").Select(
+					x =>
+					{
+						XAttribute xAttribute = x.Attribute("Entry");
+						return xAttribute != null ? xAttribute.Value.ToUint() : 0;
+					}).Distinct().ToList();
+			}
+			TradeskillTools = tempList ?? new List<uint>();
 		}
 
 		public static void ChangeSecondaryBot(string botName)

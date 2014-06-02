@@ -293,7 +293,8 @@ namespace HighVoltz.Composites
                 {
                     case DeActionType.Disenchant:
                         return itemQuery.Where(i => !ProtectedItemsManager.Contains(i.Entry) 
-							&& i.CanDisenchant(skillLevel) && CheckItemQuality(i)).ToList();
+							&& i.CanDisenchant(skillLevel) && CheckItemQuality(i)
+							&& !Professionbuddy.Instance.TradeskillTools.Contains(i.Entry)).ToList();
                     case DeActionType.Mill:
                         return itemQuery.Where(i => i.CanMill(skillLevel) && i.StackCount >= 5).ToList();
                     case DeActionType.Prospect:

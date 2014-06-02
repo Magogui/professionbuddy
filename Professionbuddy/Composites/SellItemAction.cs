@@ -252,6 +252,7 @@ namespace HighVoltz.Composites
                         List<WoWItem> itemList = null;
                         IEnumerable<WoWItem> itemQuery = from item in Me.BagItems
                                                          where !ProtectedItemsManager.Contains(item.Entry)
+														 && !Professionbuddy.Instance.TradeskillTools.Contains(item.Entry)
                                                          select item;
                         switch (SellItemType)
                         {
