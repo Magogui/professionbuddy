@@ -76,12 +76,16 @@ namespace HighVoltz.Composites
         }
 
         readonly WaitTimer _trainWaitTimer = new WaitTimer(TimeSpan.FromSeconds(2));
+		readonly WaitTimer _interactTimer = new WaitTimer(TimeSpan.FromSeconds(2));
+
         protected override RunStatus Run(object context)
         {
             if (!IsDone)
             {
-                if (TrainerFrame.Instance == null || !TrainerFrame.Instance.IsVisible || !StyxWoW.Me.GotTarget ||
-                    (StyxWoW.Me.GotTarget && StyxWoW.Me.CurrentTarget.Entry != NpcEntry))
+				if (!_interactTimer.IsFinished)
+					return RunStatus.Success;
+
+                if ( !TrainerFrame.Instance.IsVisible || !StyxWoW.Me.GotTarget || StyxWoW.Me.CurrentTarget.Entry != NpcEntry)
                 {
                     WoWPoint movetoPoint = _loc;
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
@@ -94,19 +98,30 @@ namespace HighVoltz.Composites
                     {
 	                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
                     }
+
                     if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
                     {
                         Util.MoveTo(movetoPoint);
                     }
-                    else if (unit != null)
+					else if (!TrainerFrame.Instance.IsVisible)
                     {
-                        if (Me.IsMoving)
-                            WoWMovement.MoveStop();
-                        unit.Target();
-                        unit.Interact();
+	                    if (Me.IsMoving)
+	                    {
+		                    WoWMovement.MoveStop();
+		                    return RunStatus.Success;
+	                    }
+	                    if (unit != null)
+	                    {
+		                    if (Me.CurrentTargetGuid != unit.Guid)
+		                    {
+			                    unit.Target();
+			                    return RunStatus.Success;
+		                    }
+							_interactTimer.Reset();
+		                    unit.Interact();
+	                    }
                     }
-                    if (GossipFrame.Instance != null && GossipFrame.Instance.IsVisible &&
-                        GossipFrame.Instance.GossipOptionEntries != null)
+                    else if (GossipFrame.Instance.GossipOptionEntries != null)
                     {
                         foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
                         {

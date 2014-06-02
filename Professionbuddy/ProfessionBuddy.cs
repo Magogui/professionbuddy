@@ -182,27 +182,7 @@ namespace HighVoltz
 			Debug("Start Called");
 			IsRunning = true;
 			_root.AddSecondaryBot();
-
-			// reattach lua events on bot start in case it they get destroyed from loging out of game
-			Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
-			Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-			Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
-
-			Lua.Events.DetachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
-			Lua.Events.DetachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
-
-			Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
-			Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
-
-			Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
-			Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
-			Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
-
-			Lua.Events.AttachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
-			Lua.Events.AttachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
-
-			Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
-			Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+			AttachEvents();
 			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
 			Util.CloseBankFrames();
 
@@ -220,38 +200,15 @@ namespace HighVoltz
 			if (MainForm.IsValid)
 				MainForm.Instance.UpdateControls();
 
-			// hackish fix for recovering from a GB2 startup error.
-			for (int i = 0; i < 2; i++)
-			{
-				try
-				{
-					if (SecondaryBot != null)
-					{
-						if (!SecondaryBot.Initialized)
-							SecondaryBot.DoInitialize();
-						SecondaryBot.Start();
-					}
-					break;
-				}
-				catch (Exception ex)
-				{
-					if (ex is NullReferenceException && ex.StackTrace.Contains("Gatherbuddy.Profile"))
-					{
-						Log("Attempting to recover from Gatherbuddy startup error. ");
-						PreLoadHbProfile();
-					}
-					else
-					{
-						Logging.WriteDiagnostic(ex.ToString());
-						break;
-					}
-				}
-			}
+			if (!SecondaryBot.Initialized)
+				SecondaryBot.DoInitialize();
 		}
 
 		public override void Stop()
 		{
 			IsRunning = false;
+			DetachEvents();
+
 			Debug("Stop Called");
 			if (MainForm.IsValid)
 				MainForm.Instance.UpdateControls();
@@ -291,12 +248,16 @@ namespace HighVoltz
 					DataStore.ImportDataStore();
 					// load localized strings
 					LoadStrings();
+					// load the previous 
 					BotBase bot =
 						BotManager.Instance.Bots.Values.FirstOrDefault(
 							b => b.Name.IndexOf(MySettings.LastBotBase, StringComparison.InvariantCultureIgnoreCase) >= 0);
+
 					if (bot == null)
 					{
-						bot = BotManager.Instance.Bots.Values.FirstOrDefault();
+						// look for combat bot, otherwise select first bot if combat bot is not found
+						bot = BotManager.Instance.Bots.Values.FirstOrDefault(b => b.GetType().ToString() == "CombatBot") 
+							?? BotManager.Instance.Bots.Values.FirstOrDefault();
 						MySettings.LastBotBase = bot.Name;
 						MySettings.Save();
 					}
@@ -622,6 +583,32 @@ namespace HighVoltz
 			}
 		}
 
+		void AttachEvents()
+		{
+			Lua.Events.AttachEvent("BAG_UPDATE", OnBagUpdate);
+			Lua.Events.AttachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
+			Lua.Events.AttachEvent("SPELLS_CHANGED", OnSpellsChanged);
+
+			Lua.Events.AttachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
+			Lua.Events.AttachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
+
+			Lua.Events.AttachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
+			Lua.Events.AttachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+		}
+
+		void DetachEvents()
+		{
+			Lua.Events.DetachEvent("BAG_UPDATE", OnBagUpdate);
+			Lua.Events.DetachEvent("SKILL_LINES_CHANGED", OnSkillUpdate);
+			Lua.Events.DetachEvent("SPELLS_CHANGED", OnSpellsChanged);
+
+			Lua.Events.DetachEvent("GUILDBANKFRAME_OPENED", Util.OnGBankFrameOpened);
+			Lua.Events.DetachEvent("GUILDBANKFRAME_CLOSED", Util.OnGBankFrameClosed);
+
+			Lua.Events.DetachEvent("BANKFRAME_OPENED", Util.OnBankFrameOpened);
+			Lua.Events.DetachEvent("BANKFRAME_CLOSED", Util.OnBankFrameClosed);
+		}
+
 		public void LoadTradeSkills()
 		{
 			var newTradeSkills = new List<TradeSkill>();
@@ -702,7 +689,7 @@ namespace HighVoltz
 
 		public static void LoadPBProfile(string path, XElement element = null)
 		{
-			bool preloadedHBProfile = false;
+			//bool preloadedHBProfile = false;
 			PbDecorator idComp = null;
 			if (!string.IsNullOrEmpty(path))
 			{
@@ -732,7 +719,6 @@ namespace HighVoltz
 			Instance.ProfileSettings.Load();
 			DynamicCodeCompiler.GenorateDynamicCode();
 			Instance.UpdateMaterials();
-			preloadedHBProfile = PreLoadHbProfile();
 			if (MainForm.IsValid)
 			{
 				MainForm.Instance.InitActionTree();
@@ -742,7 +728,8 @@ namespace HighVoltz
 
 			if (MainForm.IsValid)
 				MainForm.Instance.UpdateControls();
-			if (!preloadedHBProfile && LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
+
+			if (LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
 				ProfileManager.LoadNew(_lastProfilePath, true);
 			Instance.MySettings.Save();
 		}
@@ -828,7 +815,7 @@ namespace HighVoltz
 		}
 
 		// returns true if a profile was preloaded
-		private static bool PreLoadHbProfile()
+		internal static bool PreLoadHbProfile()
 		{
 			if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
 			{
@@ -865,6 +852,7 @@ namespace HighVoltz
 			}
 			return list;
 		}
+
 
 		#endregion
 
