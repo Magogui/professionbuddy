@@ -398,6 +398,8 @@ namespace HighVoltz
 		}
 
 		private static XElement _newOuterProfileElement;
+		private static string _newXmlPath;
+
 		private static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
 		{
 			if (args.NewProfile.XmlElement == null)
@@ -409,14 +411,11 @@ namespace HighVoltz
 					return;
 				if (_init)
 				{
-					//if (_botChangeInfo != null)
-					//{
-					//	return;
-					//}
 					if (Instance.IsRunning && TreeRoot.IsRunning)
 					{
 						BotEvents.OnBotStopped += OnNewOuterProfileLoaded_OnBotStopped;
 						_newOuterProfileElement = args.NewProfile.XmlElement;
+						_newXmlPath = ProfileManager.XmlLocation;
 						TreeRoot.Stop("Changing profiles (Profile_OnNewOuterProfileLoaded)");
 					}
 					else
@@ -448,7 +447,7 @@ namespace HighVoltz
 		{
 			try
 			{
-				LoadPBProfile(ProfileManager.XmlLocation, _newOuterProfileElement);
+				LoadPBProfile(_newXmlPath, _newOuterProfileElement);
 				if (MainForm.IsValid)
 				{
 					MainForm.Instance.ActionTree.SuspendLayout();
@@ -465,6 +464,7 @@ namespace HighVoltz
 				Application.Current.Dispatcher.BeginInvoke(new Action(TreeRoot.Start));
 				BotEvents.OnBotStopped -= OnNewOuterProfileLoaded_OnBotStopped;
 				_newOuterProfileElement = null;
+				_newXmlPath = null;
 			}
 		}
 
