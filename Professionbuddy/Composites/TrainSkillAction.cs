@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using Styx;
 using Styx.Common.Helpers;
+using Styx.CommonBot;
 using Styx.CommonBot.Frames;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -90,50 +91,54 @@ namespace HighVoltz.Composites
                     WoWPoint movetoPoint = _loc;
                     WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
                         OrderBy(o => o.Distance).FirstOrDefault();
-	                if (unit != null)
-	                {
+
+					if (unit != null)
 		                movetoPoint = unit.Location;
-	                }
                     else if (movetoPoint == WoWPoint.Zero)
-                    {
 	                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
-                    }
 
                     if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
                     {
                         Util.MoveTo(movetoPoint);
+						return RunStatus.Success;
                     }
-					else if (!TrainerFrame.Instance.IsVisible)
-                    {
-	                    if (Me.IsMoving)
-	                    {
-		                    WoWMovement.MoveStop();
-		                    return RunStatus.Success;
-	                    }
-	                    if (unit != null)
-	                    {
-		                    if (Me.CurrentTargetGuid != unit.Guid)
-		                    {
-			                    unit.Target();
-			                    return RunStatus.Success;
-		                    }
-							_interactTimer.Reset();
-		                    unit.Interact();
-	                    }
-                    }
-                    else if (GossipFrame.Instance.GossipOptionEntries != null)
-                    {
-                        foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
-                        {
-                            if (ge.Type == GossipEntry.GossipEntryType.Trainer)
-                            {
-                                GossipFrame.Instance.SelectGossipOption(ge.Index);
-                                return RunStatus.Success;
-                            }
-                        }
-                    }
+
+	                if (GossipFrame.Instance.IsVisible)
+	                {
+						foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
+						{
+							if (ge.Type == GossipEntry.GossipEntryType.Trainer)
+							{
+								GossipFrame.Instance.SelectGossipOption(ge.Index);
+								return RunStatus.Success;
+							}
+						}
+						Professionbuddy.Err("NPC does not provide a train gossip option");
+						// we should not continue at this point.
+						TreeRoot.Stop();
+						return RunStatus.Success;
+	                }
+
+					if (Me.IsMoving)
+					{
+						WoWMovement.MoveStop();
+						return RunStatus.Success;
+					}
+
+					if (unit != null)
+					{
+						if (Me.CurrentTargetGuid != unit.Guid)
+						{
+							unit.Target();
+							return RunStatus.Success;
+						}
+						_interactTimer.Reset();
+						unit.Interact();
+					}
+
                     return RunStatus.Success;
                 }
+
                 if (_trainWaitTimer.IsFinished)
                 {
                     using (StyxWoW.Memory.AcquireFrame())
