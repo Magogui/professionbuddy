@@ -24,6 +24,7 @@ namespace HighVoltz.Composites
             Greys,
             Whites,
             Greens,
+            Blues,
         }
 
         #endregion
@@ -264,6 +265,9 @@ namespace HighVoltz.Composites
                                 break;
                             case SellItemActionType.Greens:
                                 itemList = itemQuery.Where(i => i.Quality == WoWItemQuality.Uncommon).ToList();
+                                break;
+                            case SellItemActionType.Blues:
+                                itemList = itemQuery.Where(i => i.Quality == WoWItemQuality.Rare).ToList();
                                 break;
                         }
                         if (itemList != null)
