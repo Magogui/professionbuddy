@@ -669,17 +669,17 @@ namespace HighVoltz.Composites
 
 		// indexes are {0}=LowestBuyout ,{1}=MyAuctionNum ,{2}=ItemID, {3}=IgnoreStackSizeBelow, {4}=MaxStackSize
 		public const string ScanAhFormatLua = @"
-            local A,totalA= GetNumAuctionItems('list')
-            local me = GetUnitName('player') 
-            local auctionInfo = {{{0},{1}}} 
-            for index=1, A do 
-                local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,_,owner,ownerFullName,sold,id=GetAuctionItemInfo('list', index) 
-                if id == {2} and (owner ~= me or ownerFullName ~= nil) and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then 
-                    auctionInfo[1] = floor(buyout/cnt) 
-                end 
-                if id == {2} and owner == me and ownerFullName == nil and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end 
-            end 
-            return unpack(auctionInfo)
+			local A,totalA= GetNumAuctionItems('list')
+			local me = GetUnitName('player') 
+			local auctionInfo = {{{0},{1}}} 
+			for index=1, A do 
+				local name,_,cnt,_,_,_,_,minBid,_,buyout,_,_,_,owner,ownerFullName,sold,id=GetAuctionItemInfo('list', index) 
+				if id == {2} and (owner ~= me or ownerFullName ~= nil) and cnt >= {3} and buyout > 0 and buyout/cnt <  auctionInfo[1] then 
+					auctionInfo[1] = floor(buyout/cnt) 
+				end 
+				if id == {2} and owner == me and ownerFullName == nil and cnt <= {4} then auctionInfo[2] = auctionInfo[2] + 1 end 
+			end 
+			return unpack(auctionInfo)
 ";
 
 		// indexes are {0}=itemId, {1}=amount,stack={2}, {3}=bid, {4}=buyout, {5}=runtime, {6}=postPartialStacks
@@ -696,12 +696,12 @@ local leftovers = 0
 local inbagCount = function (itemId)
    local cnt = 0
    for bag = 0,4 do  
-      for slot =1, GetContainerNumSlots(bag) do
-         if GetContainerItemID(bag, slot) == itemId then
-            _,count= GetContainerItemInfo(bag, slot)
-            cnt = cnt + count   
-         end
-      end  
+	  for slot =1, GetContainerNumSlots(bag) do
+		 if GetContainerItemID(bag, slot) == itemId then
+			_,count= GetContainerItemInfo(bag, slot)
+			cnt = cnt + count   
+		 end
+	  end  
    end 
    return cnt
 end
@@ -709,33 +709,33 @@ local numItems = inbagCount(itemID)
 ClearCursor()
 if numItems == 0 then return -1 end  
 if AuctionProgressFrame:IsVisible() == nil then  
-    AuctionFrameTab3:Click()  
-    local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID)  
-    if maxStack < stack then stack = maxStack end  
-    if amount * stack > numItems then          
-        amount = floor(numItems/stack)
-        if amount <= 0 then  
-            if postPartialStacks == false then return 0 end
-            amount = 1  
-            stack = numItems  
-        elseif postPartialStacks == true then
-            leftovers = numItems-(amount*stack)  
-        end 
-    end  
-    for bag = 0,4 do  
-        for slot=GetContainerNumSlots(bag),1,-1 do  
-            local id = GetContainerItemID(bag,slot)  
-            local _,c,l = GetContainerItemInfo(bag, slot)  
-            if id == itemID and l == nil then  
-                PickupContainerItem(bag, slot)  
-                ClickAuctionSellItemButton()  
-                StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
-                return leftovers  
-            end  
-        end 
-    end 
+	AuctionFrameTab3:Click()  
+	local _,_,_,_,_,_,_,maxStack= GetItemInfo(itemID)  
+	if maxStack < stack then stack = maxStack end  
+	if amount * stack > numItems then          
+		amount = floor(numItems/stack)
+		if amount <= 0 then  
+			if postPartialStacks == false then return 0 end
+			amount = 1  
+			stack = numItems  
+		elseif postPartialStacks == true then
+			leftovers = numItems-(amount*stack)  
+		end 
+	end  
+	for bag = 0,4 do  
+		for slot=GetContainerNumSlots(bag),1,-1 do  
+			local id = GetContainerItemID(bag,slot)  
+			local _,c,l = GetContainerItemInfo(bag, slot)  
+			if id == itemID and l == nil then  
+				PickupContainerItem(bag, slot)  
+				ClickAuctionSellItemButton()  
+				StartAuction(bid*stack, bo*stack, runtime,stack,amount)  
+				return leftovers  
+			end  
+		end 
+	end 
 else
-    return -1 
+	return -1 
 end 
 ";
 

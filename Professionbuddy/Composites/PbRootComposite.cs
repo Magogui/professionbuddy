@@ -7,32 +7,32 @@ using Action = Styx.TreeSharp.Action;
 
 namespace HighVoltz.Composites
 {
-    public class PbRootComposite : PrioritySelector
-    {
-	    private bool _calledStart;
-        public PbRootComposite(PbDecorator pbBotBase, BotBase secondaryBot)
-            : base(pbBotBase, secondaryBot == null ? new PrioritySelector() : secondaryBot.Root)
-        {
-            SecondaryBot = secondaryBot;
-        }
+	public class PbRootComposite : PrioritySelector
+	{
+		private bool _calledStart;
+		public PbRootComposite(PbDecorator pbBotBase, BotBase secondaryBot)
+			: base(pbBotBase, secondaryBot == null ? new PrioritySelector() : secondaryBot.Root)
+		{
+			SecondaryBot = secondaryBot;
+		}
 
-        public PbDecorator PbBotBase
-        {
-            get { return Children[0] as PbDecorator; }
-            set { Children[0] = value; }
-        }
+		public PbDecorator PbBotBase
+		{
+			get { return Children[0] as PbDecorator; }
+			set { Children[0] = value; }
+		}
 
-        public BotBase SecondaryBot { get; set; }
+		public BotBase SecondaryBot { get; set; }
 
-        // hackish fix but needed.
-        public void AddSecondaryBot()
-        {
-	        _calledStart = false;
-	        Children[1] = CreateSeondaryBotBehavior();
-        }
+		// hackish fix but needed.
+		public void AddSecondaryBot()
+		{
+			_calledStart = false;
+			Children[1] = CreateSeondaryBotBehavior();
+		}
 
-	    Composite CreateSeondaryBotBehavior()
-	    {
+		Composite CreateSeondaryBotBehavior()
+		{
 			return new PrioritySelector(
 				new Decorator(ctx => !_calledStart, 
 					new Action(
@@ -60,6 +60,6 @@ namespace HighVoltz.Composites
 							}})
 				),
 				SecondaryBot.Root);
-	    }
-    }
+		}
+	}
 }

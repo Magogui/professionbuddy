@@ -4,14 +4,14 @@
 
 namespace HighVoltz
 {
-    public partial class Svn
-    {
-        protected override string RevString
-        {
-            get
-            {
-                return "671";
-            }
-        }
-    }
+	public partial class Svn
+	{
+		protected override string RevString
+		{
+			get
+			{
+				return "671";
+			}
+		}
+	}
 }

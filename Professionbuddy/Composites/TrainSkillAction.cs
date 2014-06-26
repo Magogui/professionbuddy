@@ -15,96 +15,96 @@ using Styx.TreeSharp;
 
 namespace HighVoltz.Composites
 {
-    internal sealed class TrainSkillAction : PBAction
-    {
-        private WoWPoint _loc;
+	internal sealed class TrainSkillAction : PBAction
+	{
+		private WoWPoint _loc;
 
-        public TrainSkillAction()
-        {
-            Properties["Location"] = new MetaProp("Location", typeof(string),
-                                                  new EditorAttribute(typeof(PropertyBag.LocationEditor),
-                                                                      typeof(UITypeEditor)),
-                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
+		public TrainSkillAction()
+		{
+			Properties["Location"] = new MetaProp("Location", typeof(string),
+												  new EditorAttribute(typeof(PropertyBag.LocationEditor),
+																	  typeof(UITypeEditor)),
+												  new DisplayNameAttribute(Pb.Strings["Action_Common_Location"]));
 
-            Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
-                                                  new EditorAttribute(typeof(PropertyBag.EntryEditor),
-                                                                      typeof(UITypeEditor)),
-                                                  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
+			Properties["NpcEntry"] = new MetaProp("NpcEntry", typeof(uint),
+												  new EditorAttribute(typeof(PropertyBag.EntryEditor),
+																	  typeof(UITypeEditor)),
+												  new DisplayNameAttribute(Pb.Strings["Action_Common_NpcEntry"]));
 
-            _loc = WoWPoint.Zero;
-            Location = _loc.ToInvariantString();
-            NpcEntry = 0u;
+			_loc = WoWPoint.Zero;
+			Location = _loc.ToInvariantString();
+			NpcEntry = 0u;
 
-            Properties["Location"].PropertyChanged += LocationChanged;
-        }
+			Properties["Location"].PropertyChanged += LocationChanged;
+		}
 
-        [PbXmlAttribute]
-        public uint NpcEntry
-        {
-            get { return (uint)Properties["NpcEntry"].Value; }
-            set { Properties["NpcEntry"].Value = value; }
-        }
+		[PbXmlAttribute]
+		public uint NpcEntry
+		{
+			get { return (uint)Properties["NpcEntry"].Value; }
+			set { Properties["NpcEntry"].Value = value; }
+		}
 
-        [PbXmlAttribute]
-        public string Location
-        {
-            get { return (string)Properties["Location"].Value; }
-            set { Properties["Location"].Value = value; }
-        }
+		[PbXmlAttribute]
+		public string Location
+		{
+			get { return (string)Properties["Location"].Value; }
+			set { Properties["Location"].Value = value; }
+		}
 
-        public override string Name
-        {
-            get { return Pb.Strings["Action_TrainSkillAction_Name"]; }
-        }
+		public override string Name
+		{
+			get { return Pb.Strings["Action_TrainSkillAction_Name"]; }
+		}
 
-        public override string Title
-        {
-            get { return string.Format("{0}: {1}", Name, NpcEntry); }
-        }
+		public override string Title
+		{
+			get { return string.Format("{0}: {1}", Name, NpcEntry); }
+		}
 
-        public override string Help
-        {
-            get { return Pb.Strings["Action_TrainSkillAction_Help"]; }
-        }
+		public override string Help
+		{
+			get { return Pb.Strings["Action_TrainSkillAction_Help"]; }
+		}
 
-        private void LocationChanged(object sender, MetaPropArgs e)
-        {
-            _loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
-            Properties["Location"].PropertyChanged -= LocationChanged;
-            Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
-            Properties["Location"].PropertyChanged += LocationChanged;
-            RefreshPropertyGrid();
-        }
+		private void LocationChanged(object sender, MetaPropArgs e)
+		{
+			_loc = Util.StringToWoWPoint((string)((MetaProp)sender).Value);
+			Properties["Location"].PropertyChanged -= LocationChanged;
+			Properties["Location"].Value = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}", _loc.X, _loc.Y, _loc.Z);
+			Properties["Location"].PropertyChanged += LocationChanged;
+			RefreshPropertyGrid();
+		}
 
-        readonly WaitTimer _trainWaitTimer = new WaitTimer(TimeSpan.FromSeconds(2));
+		readonly WaitTimer _trainWaitTimer = new WaitTimer(TimeSpan.FromSeconds(2));
 		readonly WaitTimer _interactTimer = new WaitTimer(TimeSpan.FromSeconds(2));
 
-        protected override RunStatus Run(object context)
-        {
-            if (!IsDone)
-            {
+		protected override RunStatus Run(object context)
+		{
+			if (!IsDone)
+			{
 				if (!_interactTimer.IsFinished)
 					return RunStatus.Success;
 
-                if ( !TrainerFrame.Instance.IsVisible || !StyxWoW.Me.GotTarget || StyxWoW.Me.CurrentTarget.Entry != NpcEntry)
-                {
-                    WoWPoint movetoPoint = _loc;
-                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
-                        OrderBy(o => o.Distance).FirstOrDefault();
+				if ( !TrainerFrame.Instance.IsVisible || !StyxWoW.Me.GotTarget || StyxWoW.Me.CurrentTarget.Entry != NpcEntry)
+				{
+					WoWPoint movetoPoint = _loc;
+					WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().Where(o => o.Entry == NpcEntry).
+						OrderBy(o => o.Distance).FirstOrDefault();
 
 					if (unit != null)
-		                movetoPoint = unit.Location;
-                    else if (movetoPoint == WoWPoint.Zero)
-	                    movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
+						movetoPoint = unit.Location;
+					else if (movetoPoint == WoWPoint.Zero)
+						movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NpcByID, NpcEntry);
 
-                    if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
-                    {
-                        Util.MoveTo(movetoPoint);
+					if (movetoPoint != WoWPoint.Zero && StyxWoW.Me.Location.Distance(movetoPoint) > 4.5)
+					{
+						Util.MoveTo(movetoPoint);
 						return RunStatus.Success;
-                    }
+					}
 
-	                if (GossipFrame.Instance.IsVisible)
-	                {
+					if (GossipFrame.Instance.IsVisible)
+					{
 						foreach (GossipEntry ge in GossipFrame.Instance.GossipOptionEntries)
 						{
 							if (ge.Type == GossipEntry.GossipEntryType.Trainer)
@@ -117,7 +117,7 @@ namespace HighVoltz.Composites
 						// we should not continue at this point.
 						TreeRoot.Stop();
 						return RunStatus.Success;
-	                }
+					}
 
 					if (Me.IsMoving)
 					{
@@ -136,37 +136,37 @@ namespace HighVoltz.Composites
 						unit.Interact();
 					}
 
-                    return RunStatus.Success;
-                }
+					return RunStatus.Success;
+				}
 
-                if (_trainWaitTimer.IsFinished)
-                {
-                    using (StyxWoW.Memory.AcquireFrame())
-                    {
-                        Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
-                        // check if there is any abilities to that need training.
-                        var numOfAvailableAbilities =
-                            Lua.GetReturnVal<int>(
-                                "local a=0 for n=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(n)) == 'available' then a=a+1 end end return a ",
-                                0);
-                        if (numOfAvailableAbilities == 0)
-                        {
-                            IsDone = true;
-                            Professionbuddy.Log("Done training");
-                           return RunStatus.Failure;
-                        }
-                        Lua.DoString("BuyTrainerService(0) ");
-                        _trainWaitTimer.Reset();
-                    }
-                }
-                return RunStatus.Success;
-            }
-            return RunStatus.Failure;
-        }
+				if (_trainWaitTimer.IsFinished)
+				{
+					using (StyxWoW.Memory.AcquireFrame())
+					{
+						Lua.DoString("SetTrainerServiceTypeFilter('available', 1)");
+						// check if there is any abilities to that need training.
+						var numOfAvailableAbilities =
+							Lua.GetReturnVal<int>(
+								"local a=0 for n=GetNumTrainerServices(),1,-1 do if select(3,GetTrainerServiceInfo(n)) == 'available' then a=a+1 end end return a ",
+								0);
+						if (numOfAvailableAbilities == 0)
+						{
+							IsDone = true;
+							Professionbuddy.Log("Done training");
+						   return RunStatus.Failure;
+						}
+						Lua.DoString("BuyTrainerService(0) ");
+						_trainWaitTimer.Reset();
+					}
+				}
+				return RunStatus.Success;
+			}
+			return RunStatus.Failure;
+		}
 
-        public override object Clone()
-        {
-            return new TrainSkillAction { NpcEntry = NpcEntry, _loc = _loc, Location = Location };
-        }
-    }
+		public override object Clone()
+		{
+			return new TrainSkillAction { NpcEntry = NpcEntry, _loc = _loc, Location = Location };
+		}
+	}
 }
