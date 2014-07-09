@@ -25,6 +25,7 @@ namespace HighVoltz.Composites
 			Whites,
 			Greens,
 			Blues,
+			Epics
 		}
 
 		#endregion
