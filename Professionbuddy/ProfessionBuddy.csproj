@@ -49,12 +49,6 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Dll|x86'">
-    <OutputPath>bin\x86\Dll\</OutputPath>
-    <DefineConstants>DLL</DefineConstants>
-    <Optimize>true</Optimize>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
@@ -65,37 +59,15 @@
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'HighVoltz|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug - Highvoltz|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\HighVoltz\</OutputPath>
+    <OutputPath>bin\x86\Debug - Highvoltz\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug\ProfessionBuddy.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
-    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
-    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Beta - Debug|x86'">
-    <OutputPath>bin\x86\Beta - Debug\</OutputPath>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Beta|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Beta\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
+    <NoWarn>1998</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreyMagic">
@@ -303,10 +275,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Q /Y /I /E "$(ProjectDir)*" "C:\Buddy\Projects\Honorbuddy\Honorbuddy\bin\Debug\Bots\ProfessionbuddyBeta"</PostBuildEvent>
+    <PostBuildEvent>if "$(ConfigurationName)"=="Debug - Highvoltz" (
+  xcopy /Q /Y /I /E "$(ProjectDir)*" "C:\Buddy\Projects\Honorbuddy\Honorbuddy\bin\Debug\Bots\Professionbuddy"
+)</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>rem SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs</PreBuildEvent>
+    <PreBuildEvent>if "$(ConfigurationName)"=="Debug - Highvoltz" (
+  SubWCRev.exe $(ProjectDir) $(ProjectDir)SVN.template $(ProjectDir)SVN.cs
+)
+</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
