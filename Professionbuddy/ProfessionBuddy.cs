@@ -9,16 +9,22 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Linq;
-using HighVoltz.Composites;
-using HighVoltz.Dynamic;
+using CommonBehaviors.Actions;
+using HighVoltz.Professionbuddy.Components;
+using HighVoltz.Professionbuddy.Dynamic;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
+using Styx.CommonBot.Frames;
 using Styx.CommonBot.Profiles;
 using Styx.Helpers;
 using Styx.TreeSharp;
@@ -30,9 +36,9 @@ using Color = System.Drawing.Color;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using Vector3 = Tripper.Tools.Math.Vector3;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
-	public class Professionbuddy : BotBase
+	public class ProfessionbuddyBot : BotBase
 	{
 		#region Static Members.
 
@@ -41,7 +47,7 @@ namespace HighVoltz
 		public static readonly Svn Svn = new Svn();
 		public static readonly string ProfilePath = Path.Combine(BotPath, "Profiles");
 		// static instance
-		public static Professionbuddy Instance { get; private set; }
+		public static ProfessionbuddyBot Instance { get; private set; }
 		#endregion
 
 		#region Fields
@@ -60,7 +66,7 @@ namespace HighVoltz
 
 		#region Constructor
 
-		public Professionbuddy()
+		public ProfessionbuddyBot()
 		{
 			Instance = this;
 			// Initialize is called when bot is started.. we need to hook these events before that.
@@ -183,7 +189,6 @@ namespace HighVoltz
 		{
 			Debug("Start Called");
 			IsRunning = true;
-			_root.AddSecondaryBot();
 			AttachEvents();
 			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
 			Util.CloseBankFrames();
@@ -192,7 +197,7 @@ namespace HighVoltz
 			if (_botChangeInfo == null)
 			{
 				// reset all actions 
-				PbBehavior.Reset();
+				RootComposite.Reset();
 				if (DynamicCodeCompiler.CodeIsModified)
 				{
 					DynamicCodeCompiler.GenorateDynamicCode();
@@ -220,6 +225,7 @@ namespace HighVoltz
 
 		public override void Pulse()
 		{
+
 			if (SecondaryBot != null)
 				SecondaryBot.Pulse();
 		}
@@ -251,6 +257,7 @@ namespace HighVoltz
 					LoadTradeskillTools();
 					// load localized strings
 					LoadStrings();
+					
 					// load the previous 
 					BotBase bot =
 						BotManager.Instance.Bots.Values.FirstOrDefault(
@@ -264,9 +271,10 @@ namespace HighVoltz
 						MySettings.LastBotBase = bot.Name;
 						MySettings.Save();
 					}
+					RootComposite = new PBRootComposite(new PBBranch(),  bot);
 
-					SecondaryBot = bot;
 					bot.DoInitialize();
+
 					try
 					{
 						if (!string.IsNullOrEmpty(_profileToLoad))
@@ -281,7 +289,7 @@ namespace HighVoltz
 					}
 					catch (Exception ex)
 					{
-						Err(ex.ToString());
+						Warn(ex.ToString());
 					}
 
 					// check for Professionbuddy updates
@@ -325,7 +333,7 @@ namespace HighVoltz
 				}
 				catch (Exception ex)
 				{
-					Err(ex.ToString());
+					Warn(ex.ToString());
 				}
 				_onBagUpdateTimer.Reset();
 			}
@@ -374,7 +382,7 @@ namespace HighVoltz
 				}
 				catch (Exception ex)
 				{
-					Err(ex.ToString());
+					Warn(ex.ToString());
 				}
 				_onSkillUpdateTimer.Reset();
 			}
@@ -492,7 +500,7 @@ namespace HighVoltz
 				}
 				catch (Exception ex)
 				{
-					Err(ex.ToString());
+					Warn(ex.ToString());
 				}
 				_onSpellsChangedTimer.Reset();
 			}
@@ -506,7 +514,8 @@ namespace HighVoltz
 
 		private readonly PbProfile _currentProfile = new PbProfile();
 
-		private readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
+		//	private readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
+		private Composite _root;
 
 		public PbProfile CurrentProfile
 		{
@@ -515,20 +524,20 @@ namespace HighVoltz
 
 		public override Composite Root
 		{
-			get { return _root; }
+			get { return _root ?? (_root = new ActionRunCoroutine(ctx => RootComposite)); }
 		}
 
-		public PbDecorator PbBehavior
+		public PBRootComposite RootComposite { get; private set; }
+
+		public PBBranch Branch
 		{
-			get { return _root.PbBotBase; }
-			private set { _root.PbBotBase = value; }
+			get { return RootComposite.Branch; }
+			set { RootComposite.Branch = value; }
 		}
-
-
 		public BotBase SecondaryBot
 		{
-			get { return _root.SecondaryBot; }
-			set { _root.SecondaryBot = value; }
+			get { return RootComposite.SecondaryBot; }
+			set { RootComposite.SecondaryBot = value; }
 		}
 
 		#endregion
@@ -665,7 +674,7 @@ namespace HighVoltz
 				lock (materialLocker)
 				{
 					_materialList.Clear();
-					List<CastSpellAction> castSpellList = CastSpellAction.GetCastSpellActionList(PbBehavior);
+					List<CastSpellAction> castSpellList = CastSpellAction.GetCastSpellActionList(RootComposite);
 					if (castSpellList != null)
 					{
 						foreach (CastSpellAction ca in castSpellList)
@@ -686,25 +695,24 @@ namespace HighVoltz
 			}
 			catch (Exception ex)
 			{
-				Err(ex.ToString());
+				Warn(ex.ToString());
 			}
 		}
 
 		public static void LoadPBProfile(string path, XElement element = null)
 		{
-			//bool preloadedHBProfile = false;
-			PbDecorator idComp = null;
+			PBBranch branch = null;
 			if (!string.IsNullOrEmpty(path))
 			{
 				if (File.Exists(path))
 				{
 					Log("Loading profile {0} from file", Path.GetFileName(path));
-					idComp = Instance.CurrentProfile.LoadFromFile(path);
+					branch = Instance.CurrentProfile.LoadFromFile(path);
 					Instance.MySettings.LastProfile = path;
 				}
 				else
 				{
-					Err("Profile: {0} does not exist", path);
+					Warn("Profile: {0} does not exist", path);
 					Instance.MySettings.LastProfile = path;
 					return;
 				}
@@ -712,12 +720,12 @@ namespace HighVoltz
 			else if (element != null)
 			{
 				Log("Loading profile from Xml element");
-				idComp = Instance.CurrentProfile.LoadFromXElement(element);
+				branch = Instance.CurrentProfile.LoadFromXml(element);
 			}
-			if (idComp == null)
+			if (branch == null)
 				return;
 
-			Instance.PbBehavior = idComp;
+			Instance.Branch = branch;
 			Instance.MySettings.LastProfile = path;
 			Instance.ProfileSettings.Load();
 			DynamicCodeCompiler.GenorateDynamicCode();
@@ -761,7 +769,7 @@ namespace HighVoltz
 			if (bot != null)
 				ChangeSecondaryBot(bot);
 			else
-				Err("Bot with name: {0} was not found", botName);
+				Warn("Bot with name: {0} was not found", botName);
 		}
 
 		public static void ChangeSecondaryBot(BotBase bot)
@@ -838,11 +846,11 @@ namespace HighVoltz
 		// returns true if a profile was preloaded
 		internal static bool PreLoadHbProfile()
 		{
-			if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.PbBehavior != null)
+			if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.Branch != null)
 			{
 				var list = new List<LoadProfileAction>();
 
-				PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.PbBehavior, list);
+				PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.Branch, list);
 				LoadProfileAction loadProfileAction = list.FirstOrDefault();
 				if (loadProfileAction == null) return false;
 				Log("Preloading profile {0}", Path.GetFileName(loadProfileAction.Path));
@@ -881,6 +889,7 @@ namespace HighVoltz
 
 		#region Logging
 
+		// ToDO Move these into a PBLog class.
 		private static string _logHeader;
 		private static RichTextBox _rtbLog;
 
@@ -889,9 +898,15 @@ namespace HighVoltz
 			get { return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version)); }
 		}
 
-		public static void Err(string format, params object[] args)
+		public static void Warn(string format, params object[] args)
 		{
-			Logging.Write(Colors.Red, "Err: " + format, args);
+			Logging.Write(Colors.DarkOrange, "Warning: " + format, args);
+		}
+
+		public static void Fatal(string format, params object[] args)
+		{
+			Logging.Write(Colors.Red, "Fatal: " + format, args);
+			TreeRoot.Stop();
 		}
 
 		public static void Log(string format, params object[] args)

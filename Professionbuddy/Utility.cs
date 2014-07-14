@@ -18,7 +18,7 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
 	/// <summary>
 	///     Utility functions
@@ -215,38 +215,38 @@ namespace HighVoltz
 			return freeSlots;
 		}
 
-		// this factors in the material list
-		public static int CalculateRecipeRepeat(Recipe recipe)
-		{
-			int repeat = (from ingred in recipe.Ingredients
-				let ingredCnt =
-					(int) ingred.InBagItemCount - (Professionbuddy.Instance.MaterialList.ContainsKey(ingred.ID) ? Professionbuddy.Instance.MaterialList[ingred.ID] : 0)
-				select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Min();
-			return repeat > 0 ? repeat : 0;
-		}
+        // this factors in the material list
+        public static int CalculateRecipeRepeat(Recipe recipe)
+        {
+            int repeat = (from ingred in recipe.Ingredients
+                let ingredCnt =
+                    (int) ingred.InBagItemCount - (ProfessionbuddyBot.Instance.MaterialList.ContainsKey(ingred.ID) ? ProfessionbuddyBot.Instance.MaterialList[ingred.ID] : 0)
+                select (int) Math.Floor(ingredCnt/(double) ingred.Required)).Min();
+            return repeat > 0 ? repeat : 0;
+        }
 
 		internal static void OnGBankFrameOpened(object obj, LuaEventArgs args)
 		{
 			IsGBankFrameOpen = true;
-			Professionbuddy.Debug("Guildbank opened");
+			ProfessionbuddyBot.Debug("Guildbank opened");
 		}
 
 		internal static void OnGBankFrameClosed(object obj, LuaEventArgs args)
 		{
 			IsGBankFrameOpen = false;
-			Professionbuddy.Debug("Guildbank closed");
+			ProfessionbuddyBot.Debug("Guildbank closed");
 		}
 
 		internal static void OnBankFrameOpened(object obj, LuaEventArgs args)
 		{
 			IsBankFrameOpen = true;
-			Professionbuddy.Debug("Personal bank opened");
+			ProfessionbuddyBot.Debug("Personal bank opened");
 		}
 
 		internal static void OnBankFrameClosed(object obj, LuaEventArgs args)
 		{
 			IsBankFrameOpen = false;
-			Professionbuddy.Debug("Personal bank closed");
+			ProfessionbuddyBot.Debug("Personal bank closed");
 		}
 
 		/// <summary>
@@ -314,30 +314,30 @@ namespace HighVoltz
 			return !mask.Where((t, i) => t && pattern[i] != data[dataOffset + i]).Any();
 		}
 
-		public static void ScanForOffsets()
-		{
-			ProcessModule mod = StyxWoW.Memory.Process.MainModule;
-			var baseAddress = (uint) mod.BaseAddress;
-			if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0)
-			{
-				Professionbuddy.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
-				try
-				{
-					IntPtr pointer = FindPattern("00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3", "????xxxxxxxxxxxxxx");
+        public static void ScanForOffsets()
+        {
+            ProcessModule mod = StyxWoW.Memory.Process.MainModule;
+            var baseAddress = (uint) mod.BaseAddress;
+            if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0)
+            {
+                ProfessionbuddyBot.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
+                try
+                {
+                    IntPtr pointer = FindPattern("00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3", "????xxxxxxxxxxxxxx");
 
-					GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
-					Professionbuddy.Log("Found KnownSpellsPtr offset 0x{0:X}", GlobalPBSettings.Instance.KnownSpellsPtr);
+                    GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
+                    ProfessionbuddyBot.Log("Found KnownSpellsPtr offset 0x{0:X}", GlobalPBSettings.Instance.KnownSpellsPtr);
 
 					GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
 
-					GlobalPBSettings.Instance.Save();
-				}
-				catch (InvalidDataException)
-				{
-					Professionbuddy.Err("There was a problem scanning for offsets");
-				}
-			}
-		}
+                    GlobalPBSettings.Instance.Save();
+                }
+                catch (InvalidDataException)
+                {
+                    ProfessionbuddyBot.Warn("There was a problem scanning for offsets");
+                }
+            }
+        }
 
 		internal static Type GetSubCategoryType(string name)
 		{

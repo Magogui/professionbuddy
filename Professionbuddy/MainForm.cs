@@ -9,23 +9,27 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Media;
-using HighVoltz.Composites;
-using HighVoltz.Dynamic;
+using HighVoltz.Professionbuddy.ComponentBase;
+using HighVoltz.Professionbuddy.Components;
+using HighVoltz.Professionbuddy.Dynamic;
+using HighVoltz.Professionbuddy.PropertyGridUtilities;
+using HighVoltz.UberBehaviorTree;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Styx.TreeSharp;
+using Component = HighVoltz.UberBehaviorTree.Component;
+using PBAction = HighVoltz.Professionbuddy.ComponentBase.PBAction;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
 	public partial class MainForm : Form
 	{
 		#region Callbacks
+
 		private readonly FileSystemWatcher _profileWatcher;
-		private IPBComposite[] _pbComposites;
 		private PropertyBag _profilePropertyBag;
 		private CopyPasteOperactions _copyAction = CopyPasteOperactions.Cut;
+		private IPBComponent[] _pbComponents;
 
 		private TreeNode _copySource;
 
@@ -49,19 +53,19 @@ namespace HighVoltz
 
 			if (e.Data.GetDataPresent("System.Windows.Forms.TreeNode", false))
 			{
-				Point pt = ((TreeView)sender).PointToClient(new Point(e.X, e.Y));
-				TreeNode dest = ((TreeView)sender).GetNodeAt(pt);
-				var newNode = (TreeNode)e.Data.GetData("System.Windows.Forms.TreeNode");
+				Point pt = ((TreeView) sender).PointToClient(new Point(e.X, e.Y));
+				TreeNode dest = ((TreeView) sender).GetNodeAt(pt);
+				var newNode = (TreeNode) e.Data.GetData("System.Windows.Forms.TreeNode");
 				PasteAction(newNode, dest);
 			}
 			else if (e.Data.GetDataPresent("System.Windows.Forms.DataGridViewRow", false))
 			{
-				Point pt = ((TreeView)sender).PointToClient(new Point(e.X, e.Y));
-				TreeNode dest = ((TreeView)sender).GetNodeAt(pt);
-				var row = (DataGridViewRow)e.Data.GetData("System.Windows.Forms.DataGridViewRow");
-				if (row.Tag.GetType().GetInterface("IPBComposite") != null)
+				Point pt = ((TreeView) sender).PointToClient(new Point(e.X, e.Y));
+				TreeNode dest = ((TreeView) sender).GetNodeAt(pt);
+				var row = (DataGridViewRow) e.Data.GetData("System.Windows.Forms.DataGridViewRow");
+				if (row.Tag.GetType().GetInterface("IPBComponent") != null)
 				{
-					var pa = (IPBComposite)Activator.CreateInstance(row.Tag.GetType());
+					var pa = (IPBComponent) Activator.CreateInstance(row.Tag.GetType());
 					AddToActionTree(pa, dest);
 				}
 			}
@@ -71,9 +75,9 @@ namespace HighVoltz
 		{
 			if (dest != source && (!IsChildNode(source, dest) || dest == null))
 			{
-				var gc = (GroupComposite)((Composite)source.Tag).Parent;
+				var gc = (Composite) ((Component) source.Tag).Parent;
 				if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy)
-					gc.Children.Remove((Composite)source.Tag);
+					gc.Children.Remove((Composite) source.Tag);
 				AddToActionTree(source, dest);
 				if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy) // ctrl key
 					source.Remove();
@@ -109,7 +113,7 @@ namespace HighVoltz
 		{
 			if (!IsValid)
 				return;
-			var comp = (IPBComposite)e.Node.Tag;
+			var comp = (IPBComponent) e.Node.Tag;
 			if (comp != null && comp.Properties != null)
 			{
 				Instance.ActionGrid.SelectedObject = comp.Properties;
@@ -125,7 +129,7 @@ namespace HighVoltz
 			{
 				HandleCreated += MainFormHandleCreated;
 			}
-			Professionbuddy.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
+			ProfessionbuddyBot.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
 		}
 
 		private void MainFormHandleCreated(object sender, EventArgs e)
@@ -136,10 +140,10 @@ namespace HighVoltz
 
 		private void MainFormLoad(object sender, EventArgs e)
 		{
-			if (!Professionbuddy.Instance.IsTradeSkillsLoaded)
+			if (!ProfessionbuddyBot.Instance.IsTradeSkillsLoaded)
 			{
-				Professionbuddy.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
-				Professionbuddy.Instance.OnTradeSkillsLoaded += OnTradeSkillsLoadedEventHandler;
+				ProfessionbuddyBot.Instance.OnTradeSkillsLoaded -= OnTradeSkillsLoadedEventHandler;
+				ProfessionbuddyBot.Instance.OnTradeSkillsLoaded += OnTradeSkillsLoadedEventHandler;
 			}
 			else
 				Initialize();
@@ -159,11 +163,11 @@ namespace HighVoltz
 
 		private void ActionGridPropertyValueChanged(object s, PropertyValueChangedEventArgs e)
 		{
-			if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction)ActionGrid.SelectedObject).IsRecipe)
+			if (ActionGrid.SelectedObject is CastSpellAction && ((CastSpellAction) ActionGrid.SelectedObject).IsRecipe)
 			{
-				Professionbuddy.Instance.UpdateMaterials();
+				ProfessionbuddyBot.Instance.UpdateMaterials();
 				RefreshTradeSkillTabs();
-				RefreshActionTree(typeof(CastSpellAction));
+				RefreshActionTree(typeof (CastSpellAction));
 			}
 			else
 			{
@@ -174,7 +178,7 @@ namespace HighVoltz
 
 			if (DynamicCodeCompiler.CodeIsModified)
 			{
-				new Thread(DynamicCodeCompiler.GenorateDynamicCode) { IsBackground = true }.Start();
+				new Thread(DynamicCodeCompiler.GenorateDynamicCode) {IsBackground = true}.Start();
 			}
 		}
 
@@ -182,11 +186,11 @@ namespace HighVoltz
 		{
 			if (ActionTree.SelectedNode != null)
 			{
-				var comp = (Composite)ActionTree.SelectedNode.Tag;
-				((GroupComposite)comp.Parent).Children.Remove(comp);
-				if (comp is CastSpellAction && ((CastSpellAction)comp).IsRecipe)
+				var comp = (Component) ActionTree.SelectedNode.Tag;
+				((Composite) ((Component) comp).Parent).Children.Remove(comp);
+				if (comp is CastSpellAction && ((CastSpellAction) comp).IsRecipe)
 				{
-					Professionbuddy.Instance.UpdateMaterials();
+					ProfessionbuddyBot.Instance.UpdateMaterials();
 					RefreshTradeSkillTabs();
 				}
 				if (ActionTree.SelectedNode.Parent != null)
@@ -207,7 +211,7 @@ namespace HighVoltz
 		private void ActionGridViewSelectionChanged(object sender, EventArgs e)
 		{
 			if (ActionGridView.SelectedRows.Count > 0)
-				HelpTextBox.Text = ((IPBComposite)ActionGridView.SelectedRows[0].Tag).Help;
+				HelpTextBox.Text = ((IPBComponent) ActionGridView.SelectedRows[0].Tag).Help;
 		}
 
 		private void ToolStripOpenClick(object sender, EventArgs e)
@@ -215,7 +219,7 @@ namespace HighVoltz
 			if (openFileDialog.ShowDialog() == DialogResult.OK)
 			{
 				ProfileManager.LoadNew(openFileDialog.FileName, true);
-				//  if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
+				//  if (ProfessionbuddyBot.Instance.ProfileSettings.SettingsDictionary.Count > 0)
 				//       AddProfileSettingsTab();
 				//  else
 				//      RemoveProfileSettingsTab();
@@ -226,41 +230,43 @@ namespace HighVoltz
 		{
 			saveFileDialog.DefaultExt = "xml";
 			saveFileDialog.FilterIndex = 1;
-			saveFileDialog.FileName = Professionbuddy.Instance.CurrentProfile != null && Professionbuddy.Instance.CurrentProfile.XmlPath != null
-										  ? Professionbuddy.Instance.CurrentProfile.XmlPath
-										  : "";
+			saveFileDialog.FileName = ProfessionbuddyBot.Instance.CurrentProfile != null &&
+									ProfessionbuddyBot.Instance.CurrentProfile.XmlPath != null
+				? ProfessionbuddyBot.Instance.CurrentProfile.XmlPath
+				: "";
 			if (saveFileDialog.ShowDialog() == DialogResult.OK)
 			{
 				string extension = Path.GetExtension(saveFileDialog.FileName);
-				bool zip = extension != null && extension.Equals(".package",
-																 StringComparison.InvariantCultureIgnoreCase);
+				bool zip = extension != null && extension.Equals(
+					".package",
+					StringComparison.InvariantCultureIgnoreCase);
 				// if we are saving to a zip check if CurrentProfile.XmlPath is not blank/null and use it if not. 
 				// otherwise use the selected zipname with xml ext.
-				if (Professionbuddy.Instance.CurrentProfile != null)
+				if (ProfessionbuddyBot.Instance.CurrentProfile != null)
 				{
 					string xmlfile = zip
-										 ? (Professionbuddy.Instance.CurrentProfile != null &&
-											string.IsNullOrEmpty(Professionbuddy.Instance.CurrentProfile.XmlPath)
-												? Path.ChangeExtension(saveFileDialog.FileName, ".xml")
-												: Professionbuddy.Instance.CurrentProfile.XmlPath)
-										 : saveFileDialog.FileName;
-					Professionbuddy.Log("Saving profile to {0}", saveFileDialog.FileName);
-					if (Professionbuddy.Instance.CurrentProfile != null)
+						? (ProfessionbuddyBot.Instance.CurrentProfile != null &&
+							string.IsNullOrEmpty(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
+							? Path.ChangeExtension(saveFileDialog.FileName, ".xml")
+							: ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
+						: saveFileDialog.FileName;
+					ProfessionbuddyBot.Log("Saving profile to {0}", saveFileDialog.FileName);
+					if (ProfessionbuddyBot.Instance.CurrentProfile != null)
 					{
-						Professionbuddy.Instance.CurrentProfile.SaveXml(xmlfile);
+						ProfessionbuddyBot.Instance.CurrentProfile.SaveXml(xmlfile);
 						if (zip)
-							Professionbuddy.Instance.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
+							ProfessionbuddyBot.Instance.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
 					}
 				}
-				Professionbuddy.Instance.MySettings.LastProfile = saveFileDialog.FileName;
-				Professionbuddy.Instance.MySettings.Save();
+				ProfessionbuddyBot.Instance.MySettings.LastProfile = saveFileDialog.FileName;
+				ProfessionbuddyBot.Instance.MySettings.Save();
 				UpdateControls();
 			}
 		}
 
 		private void ToolStripAddBtnClick(object sender, EventArgs e)
 		{
-			var compositeList = new List<IPBComposite>();
+			var compositeList = new List<IPBComponent>();
 			// if the tradeskill tab is selected
 			if (MainTabControl.SelectedTab == TradeSkillTab)
 			{
@@ -271,8 +277,8 @@ namespace HighVoltz
 					DataGridViewSelectedRowCollection rowCollection = tv.TradeDataView.SelectedRows;
 					foreach (DataGridViewRow row in rowCollection)
 					{
-						var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
-						Recipe recipe = Professionbuddy.Instance.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
+						var cell = (TradeSkillRecipeCell) row.Cells[0].Value;
+						Recipe recipe = ProfessionbuddyBot.Instance.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
 						int repeat;
 						int.TryParse(toolStripAddNum.Text, out repeat);
 						CastSpellAction.RepeatCalculationType repeatType =
@@ -286,6 +292,7 @@ namespace HighVoltz
 								repeatType = CastSpellAction.RepeatCalculationType.Banker;
 								break;
 						}
+
 						var ca = new CastSpellAction(recipe, repeat, repeatType);
 						compositeList.Add(ca);
 					}
@@ -293,16 +300,17 @@ namespace HighVoltz
 			}
 			else if (MainTabControl.SelectedTab == ActionsTab)
 			{
-				compositeList.AddRange(from DataGridViewRow row in ActionGridView.SelectedRows
-									   select (IPBComposite)Activator.CreateInstance(row.Tag.GetType()));
+				compositeList.AddRange(
+					from DataGridViewRow row in ActionGridView.SelectedRows
+					select (IPBComponent) Activator.CreateInstance(row.Tag.GetType()));
 			}
 			_copyAction = CopyPasteOperactions.Copy;
-			foreach (IPBComposite composite in compositeList)
+			foreach (IPBComponent composite in compositeList)
 			{
 				AddToActionTree(composite, ActionTree.SelectedNode);
 			}
 			// now update the CanRepeatCount. 
-			Professionbuddy.Instance.UpdateMaterials();
+			ProfessionbuddyBot.Instance.UpdateMaterials();
 			RefreshTradeSkillTabs();
 		}
 
@@ -313,10 +321,10 @@ namespace HighVoltz
 
 		private void ToolStripHelpClick(object sender, EventArgs e)
 		{
-			var helpWindow = new Form { Height = 600, Width = 600, Text = "ProfessionBuddy Guide" };
-			var helpView = new RichTextBox { Dock = DockStyle.Fill, ReadOnly = true };
+			var helpWindow = new Form {Height = 600, Width = 600, Text = "ProfessionBuddy Guide"};
+			var helpView = new RichTextBox {Dock = DockStyle.Fill, ReadOnly = true};
 
-			helpView.LoadFile(Path.Combine(Professionbuddy.BotPath, "Guide.rtf"));
+			helpView.LoadFile(Path.Combine(ProfessionbuddyBot.BotPath, "Guide.rtf"));
 			helpWindow.Controls.Add(helpView);
 			helpWindow.Show();
 		}
@@ -343,54 +351,29 @@ namespace HighVoltz
 
 		private void ToolStripSecretButtonClick(object sender, EventArgs e)
 		{
-			var ps = TreeRoot.Current.Root as PrioritySelector;
-			int n = 0;
-
-			Logging.Write("** BotBase **");
-			if (ps != null)
-				foreach (Composite p in ps.Children)
-				{
-					// add alternating amount of spaces to the end of log entries to prevent spam filter from blocking it
-					n = (n + 1) % 2;
-					Logging.Write("[{0}] {1}", p.GetType(), new string(' ', n));
-				}
-
-			//Logging.Write("** Profile Settings **");
-			//foreach (var kv in PB.ProfileSettings.Settings)
-			//    Logging.Write("{0} {1}", kv.Key, kv.Value);
-
 			Logging.Write("** ActionSelector **");
-			printComposite(Professionbuddy.Instance.PbBehavior, 0);
-
-			//Logging.Write("** Material List **");
-			//foreach (var kv in PB.MaterialList)
-			//    Logging.Write("Ingredient ID: {0} Amount required:{1}", kv.Key, kv.Value);
-
-			//Logging.Write("** DataStore **");
-			//foreach (var kv in PB.DataStore)
-			//    Logging.Write("item ID: {0} Amount in bag/bank/ah/alts:{1}", kv.Key, kv.Value);
-
-			//if (PB.CsharpStringBuilder != null)
-			//    Logging.Write(PB.CsharpStringBuilder.ToString());
+			PrintComposite(ProfessionbuddyBot.Instance.RootComposite, 0);
 		}
 
-		private void printComposite(Composite comp, int cnt)
+		private void PrintComposite(Component comp, int cnt)
 		{
-			string name;
-			if (comp is IPBComposite)
-				name = ((IPBComposite)comp).Title;
-			else
-				name = comp.GetType().ToString();
-			var pbComposite = comp as IPBComposite;
-			if (pbComposite != null)
-				Logging.Write("{0}{1} IsDone:{2} LastStatus:{3}", new string(' ', cnt * 4), name,
-							  (pbComposite).IsDone, comp.LastStatus);
-			var groupComposite = comp as GroupComposite;
-			if (groupComposite != null)
+			var composite = comp as Composite;
+
+			var pbComp = composite as IPBComponent;
+			if (pbComp != null)
 			{
-				foreach (Composite child in (groupComposite).Children)
+				string name = pbComp.Title;
+				Logging.Write(
+					"{0}{1} IsDone:{2}",
+					new string(' ', cnt*4),
+					name,
+					pbComp.IsDone);
+			}
+			if (composite != null)
+			{
+				foreach (var child in composite.Children)
 				{
-					printComposite(child, cnt + 1);
+					PrintComposite(child, cnt + 1);
 				}
 			}
 		}
@@ -404,39 +387,33 @@ namespace HighVoltz
 		{
 			if (ProfileListView.SelectedItems.Count > 0)
 			{
-				// Professionbuddy.LoadProfile(Path.Combine(PB.ProfilePath, ProfileListView.SelectedItems[0].Name));
-				ProfileManager.LoadNew(Path.Combine(Professionbuddy.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
-				// check for a LoadProfileAction and load the profile to stop all the crying from the lazy noobs 
-				// if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
-				//     AddProfileSettingsTab();
-				//  else
-				//      RemoveProfileSettingsTab();
+				ProfileManager.LoadNew(Path.Combine(ProfessionbuddyBot.ProfilePath, ProfileListView.SelectedItems[0].Name), true);
 			}
 		}
 
 		private void ToolStripReloadBtnClick(object sender, EventArgs e)
 		{
-			Professionbuddy.Instance.OnTradeSkillsLoaded += Professionbuddy.Instance.Professionbuddy_OnTradeSkillsLoaded;
-			Professionbuddy.Instance.LoadTradeSkills();
+			ProfessionbuddyBot.Instance.OnTradeSkillsLoaded += ProfessionbuddyBot.Instance.Professionbuddy_OnTradeSkillsLoaded;
+			ProfessionbuddyBot.Instance.LoadTradeSkills();
 		}
 
 		private void ToolStripBotComboSelectedIndexChanged(object sender, EventArgs e)
 		{
 			try
 			{
-				Professionbuddy.ChangeSecondaryBot((string)toolStripBotCombo.SelectedItem);
+				ProfessionbuddyBot.ChangeSecondaryBot((string) toolStripBotCombo.SelectedItem);
 			}
 			catch (Exception ex)
 			{
-				Professionbuddy.Err(ex.ToString());
+				ProfessionbuddyBot.Warn(ex.ToString());
 			}
 		}
 
 		private void ToolStripBotConfigButtonClick(object sender, EventArgs e)
 		{
-			if (Professionbuddy.Instance.SecondaryBot != null)
+			if (ProfessionbuddyBot.Instance.SecondaryBot != null)
 			{
-				var gui = Professionbuddy.Instance.SecondaryBot.ConfigurationForm;
+				var gui = ProfessionbuddyBot.Instance.SecondaryBot.ConfigurationForm;
 				if (gui != null)
 					gui.ShowDialog();
 			}
@@ -467,7 +444,7 @@ namespace HighVoltz
 
 		#region Nested type: refreshActionTreeDelegate
 
-		private delegate void RefreshActionTreeDelegate(IPBComposite pbComposite, Type type);
+		private delegate void RefreshActionTreeDelegate(IPBComponent pbComponent, Type type);
 
 		#endregion
 
@@ -482,28 +459,31 @@ namespace HighVoltz
 				Instance = this;
 				InitializeComponent();
 				// assign the localized strings
-				toolStripOpen.Text = Professionbuddy.Instance.Strings["UI_FileOpen"];
-				toolStripSave.Text = Professionbuddy.Instance.Strings["UI_FileSave"];
-				toolStripHelp.Text = Professionbuddy.Instance.Strings["UI_Help"];
-				toolStripCopy.Text = Professionbuddy.Instance.Strings["UI_Copy"];
-				toolStripCut.Text = Professionbuddy.Instance.Strings["UI_Cut"];
-				toolStripPaste.Text = Professionbuddy.Instance.Strings["UI_Paste"];
-				toolStripDelete.Text = Professionbuddy.Instance.Strings["UI_Delete"];
-				toolStripBotConfigButton.Text = Professionbuddy.Instance.Strings["UI_Settings"];
-				ProfileTab.Text = Professionbuddy.Instance.Strings["UI_Profiles"];
-				ActionsColumn.HeaderText = ActionsTab.Text = Professionbuddy.Instance.Strings["UI_Actions"];
-				TradeSkillTab.Text = Professionbuddy.Instance.Strings["UI_Tradeskill"];
-				TabPageProfile.Text = Professionbuddy.Instance.Strings["UI_Profile"];
-				IngredientsColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Ingredients"];
-				NeedColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Need"];
-				BagsColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Bags"];
-				BankColumn.HeaderText = Professionbuddy.Instance.Strings["UI_Bank"];
-				toolStripAddBtn.Text = Professionbuddy.Instance.Strings["UI_Add"];
-				toolStripReloadBtn.Text = Professionbuddy.Instance.Strings["UI_Reload"];
-				LoadProfileButton.Text = Professionbuddy.Instance.Strings["UI_LoadProfile"];
+				toolStripOpen.Text = ProfessionbuddyBot.Instance.Strings["UI_FileOpen"];
+				toolStripSave.Text = ProfessionbuddyBot.Instance.Strings["UI_FileSave"];
+				toolStripHelp.Text = ProfessionbuddyBot.Instance.Strings["UI_Help"];
+				toolStripCopy.Text = ProfessionbuddyBot.Instance.Strings["UI_Copy"];
+				toolStripCut.Text = ProfessionbuddyBot.Instance.Strings["UI_Cut"];
+				toolStripPaste.Text = ProfessionbuddyBot.Instance.Strings["UI_Paste"];
+				toolStripDelete.Text = ProfessionbuddyBot.Instance.Strings["UI_Delete"];
+				toolStripBotConfigButton.Text = ProfessionbuddyBot.Instance.Strings["UI_Settings"];
+				ProfileTab.Text = ProfessionbuddyBot.Instance.Strings["UI_Profiles"];
+				ActionsColumn.HeaderText = ActionsTab.Text = ProfessionbuddyBot.Instance.Strings["UI_Actions"];
+				TradeSkillTab.Text = ProfessionbuddyBot.Instance.Strings["UI_Tradeskill"];
+				TabPageProfile.Text = ProfessionbuddyBot.Instance.Strings["UI_Profile"];
+				IngredientsColumn.HeaderText = ProfessionbuddyBot.Instance.Strings["UI_Ingredients"];
+				NeedColumn.HeaderText = ProfessionbuddyBot.Instance.Strings["UI_Need"];
+				BagsColumn.HeaderText = ProfessionbuddyBot.Instance.Strings["UI_Bags"];
+				BankColumn.HeaderText = ProfessionbuddyBot.Instance.Strings["UI_Bank"];
+				toolStripAddBtn.Text = ProfessionbuddyBot.Instance.Strings["UI_Add"];
+				toolStripReloadBtn.Text = ProfessionbuddyBot.Instance.Strings["UI_Reload"];
+				LoadProfileButton.Text = ProfessionbuddyBot.Instance.Strings["UI_LoadProfile"];
 
-				saveFileDialog.InitialDirectory = Professionbuddy.ProfilePath;
-				_profileWatcher = new FileSystemWatcher(Professionbuddy.ProfilePath) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName };
+				saveFileDialog.InitialDirectory = ProfessionbuddyBot.ProfilePath;
+				_profileWatcher = new FileSystemWatcher(ProfessionbuddyBot.ProfilePath)
+								{
+									NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+								};
 				_profileWatcher.Changed += ProfileWatcherChanged;
 				_profileWatcher.Created += ProfileWatcherChanged;
 				_profileWatcher.Deleted += ProfileWatcherChanged;
@@ -518,7 +498,7 @@ namespace HighVoltz
 			}
 			catch (Exception ex)
 			{
-				Professionbuddy.Err(ex.ToString());
+				ProfessionbuddyBot.Warn(ex.ToString());
 			}
 		}
 
@@ -536,13 +516,13 @@ namespace HighVoltz
 			InitActionTree();
 			PopulateActionGridView();
 			toolStripBotCombo.Items.AddRange(
-				BotManager.Instance.Bots.Where(kv => kv.Key != Professionbuddy.Instance.Name).Select(kv => kv.Key).ToArray());
+				BotManager.Instance.Bots.Where(kv => kv.Key != ProfessionbuddyBot.Instance.Name).Select(kv => kv.Key).ToArray());
 			UpdateBotCombo();
-			if (Professionbuddy.Instance.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
+			if (ProfessionbuddyBot.Instance.HasDataStoreAddon && !toolStripAddCombo.Items.Contains("Banker"))
 				toolStripAddCombo.Items.Add("Banker");
 			toolStripAddCombo.SelectedIndex = 0;
 
-			string imagePath = Path.Combine(Professionbuddy.BotPath, "Icons\\");
+			string imagePath = Path.Combine(ProfessionbuddyBot.BotPath, "Icons\\");
 			toolStripOpen.Image = Image.FromFile(imagePath + "OpenPL.bmp");
 			toolStripSave.Image = Image.FromFile(imagePath + "SaveHL.bmp");
 			toolStripCopy.Image = Image.FromFile(imagePath + "copy.png");
@@ -552,7 +532,7 @@ namespace HighVoltz
 			toolStripAddBtn.Image = Image.FromFile(imagePath + "112_RightArrowLong_Orange_32x32_72.png");
 			toolStripHelp.Image = Image.FromFile(imagePath + "109_AllAnnotations_Help_32x32_72.png");
 
-			if (Professionbuddy.Instance.ProfileSettings.SettingsDictionary.Count > 0)
+			if (ProfessionbuddyBot.Instance.ProfileSettings.SettingsDictionary.Count > 0)
 				AddProfileSettingsTab();
 			else
 				RemoveProfileSettingsTab();
@@ -575,49 +555,54 @@ namespace HighVoltz
 			bool ignoreRoot = (_copyAction & CopyPasteOperactions.IgnoreRoot) == CopyPasteOperactions.IgnoreRoot;
 			bool cloneActions = (_copyAction & CopyPasteOperactions.Copy) == CopyPasteOperactions.Copy;
 			TreeNode newNode;
-			if (action is TreeNode)
+			var node = action as TreeNode;
+			if (node != null)
 			{
 				if (cloneActions)
 				{
-					newNode = RecursiveCloning(((TreeNode)action));
+					newNode = RecursiveCloning(node);
 				}
 				else
-					newNode = (TreeNode)((TreeNode)action).Clone();
-			}
-			else if (action.GetType().GetInterface("IPBComposite") != null)
-			{
-				var composite = (IPBComposite)action;
-				newNode = new TreeNode(composite.Title) { ForeColor = composite.Color, Tag = composite };
+					newNode = (TreeNode) node.Clone();
 			}
 			else
-				return;
+			{
+				var pbComponent = action as IPBComponent;
+				if (pbComponent != null)
+				{
+					var composite = pbComponent;
+					newNode = new TreeNode(composite.Title) {ForeColor = composite.Color, Tag = composite};
+				}
+				else
+					return;
+			}
 			ActionTree.SuspendLayout();
 			if (dest != null)
 			{
-				int treeIndex = action is TreeNode && ((TreeNode)action).Parent == dest.Parent &&
-								((TreeNode)action).Index <= dest.Index && !cloneActions
-									? dest.Index + 1
-									: dest.Index;
-				GroupComposite gc;
+				int treeIndex = action is TreeNode && ((TreeNode) action).Parent == dest.Parent &&
+								((TreeNode) action).Index <= dest.Index && !cloneActions
+					? dest.Index + 1
+					: dest.Index;
+				Composite gc;
 				// If, While and SubRoutines are Decorators...
-				if (!ignoreRoot && dest.Tag is GroupComposite)
-					gc = (GroupComposite)dest.Tag;
+				if (!ignoreRoot && dest.Tag is Composite)
+					gc = (Composite) dest.Tag;
 				else
-					gc = (GroupComposite)((Composite)dest.Tag).Parent;
+					gc = (Composite) ((Component) dest.Tag).Parent;
 
-				if ((dest.Tag is If || dest.Tag is SubRoutine) && !ignoreRoot)
+				if ((dest.Tag is IfComposite || dest.Tag is SubRoutineComposite) && !ignoreRoot)
 				{
 					dest.Nodes.Add(newNode);
-					gc.AddChild((Composite)newNode.Tag);
+					gc.AddChild((Component) newNode.Tag);
 					if (!dest.IsExpanded)
 						dest.Expand();
 				}
 				else
 				{
 					if (dest.Index >= gc.Children.Count)
-						gc.AddChild((Composite)newNode.Tag);
+						gc.AddChild((Component) newNode.Tag);
 					else
-						gc.InsertChild(dest.Index, (Composite)newNode.Tag);
+						gc.InsertChild(dest.Index, (Component) newNode.Tag);
 					if (dest.Parent == null)
 					{
 						if (treeIndex >= ActionTree.Nodes.Count)
@@ -637,25 +622,23 @@ namespace HighVoltz
 			else
 			{
 				ActionTree.Nodes.Add(newNode);
-				Professionbuddy.Instance.PbBehavior.AddChild((Composite)newNode.Tag);
+				ProfessionbuddyBot.Instance.Branch.AddChild((Component) newNode.Tag);
 			}
 			ActionTree.ResumeLayout();
 		}
 
 		private TreeNode RecursiveCloning(TreeNode node)
 		{
-			var newComp = (IPBComposite)(((IPBComposite)node.Tag).Clone());
-			var newNode = new TreeNode(newComp.Title) { ForeColor = newComp.Color, Tag = newComp };
+			var newComp = (((IPBComponent) node.Tag).DeepCopy());
+			var newNode = new TreeNode(newComp.Title) {ForeColor = newComp.Color, Tag = newComp};
 			foreach (TreeNode child in node.Nodes)
 			{
 				// If, While and SubRoutine are Decorators.
-				var groupComposite = newComp as GroupComposite;
-				if (groupComposite != null)
+				var composite = newComp as Composite;
+				if (composite != null)
 				{
-					GroupComposite gc = groupComposite;
-
 					TreeNode newChildNode = RecursiveCloning(child);
-					gc.AddChild((Composite)newChildNode.Tag);
+					composite.AddChild((Component) newChildNode.Tag);
 					newNode.Nodes.Add(newChildNode);
 				}
 			}
@@ -709,19 +692,21 @@ namespace HighVoltz
 			{
 				RightSideTab.TabPages.RemoveByKey("ProfileSettings");
 			}
-			RightSideTab.TabPages.Add("ProfileSettings", Professionbuddy.Instance.Strings["UI_ProfileSettings"]);
+			RightSideTab.TabPages.Add("ProfileSettings", ProfessionbuddyBot.Instance.Strings["UI_ProfileSettings"]);
 
-			_settingsPropertyGrid = new PropertyGrid { Dock = DockStyle.Fill };
+			_settingsPropertyGrid = new PropertyGrid() {Dock = DockStyle.Fill};
 			RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
 			_profilePropertyBag = new PropertyBag();
-			foreach (var kv in Professionbuddy.Instance.ProfileSettings.SettingsDictionary)
+			foreach (var kv in ProfessionbuddyBot.Instance.ProfileSettings.SettingsDictionary)
 			{
 				if (!kv.Value.Hidden)
 				{
-					_profilePropertyBag[kv.Key] = new MetaProp(kv.Key, kv.Value.Value.GetType(),
-															   new DescriptionAttribute(kv.Value.Summary),
-															   new CategoryAttribute(kv.Value.Category)) { Value = kv.Value.Value };
+					_profilePropertyBag[kv.Key] = new MetaProp(
+						kv.Key,
+						kv.Value.Value.GetType(),
+						new DescriptionAttribute(kv.Value.Summary),
+						new CategoryAttribute(kv.Value.Category)) {Value = kv.Value.Value};
 					_profilePropertyBag[kv.Key].PropertyChanged += ProfileSettingsPropertyChanged;
 				}
 			}
@@ -742,7 +727,7 @@ namespace HighVoltz
 
 		private void RefreshSettingsPropertyGridCallback()
 		{
-			foreach (var kv in Professionbuddy.Instance.ProfileSettings.SettingsDictionary)
+			foreach (var kv in ProfessionbuddyBot.Instance.ProfileSettings.SettingsDictionary)
 			{
 				MetaProp prop = _profilePropertyBag[kv.Key];
 				if (prop != null)
@@ -757,7 +742,7 @@ namespace HighVoltz
 
 		private void ProfileSettingsPropertyChanged(object sender, MetaPropArgs e)
 		{
-			Professionbuddy.Instance.ProfileSettings[((MetaProp)sender).Name] = ((MetaProp)sender).Value;
+			ProfessionbuddyBot.Instance.ProfileSettings[((MetaProp) sender).Name] = ((MetaProp) sender).Value;
 		}
 
 
@@ -780,16 +765,16 @@ namespace HighVoltz
 			}
 		}
 
-		private void UdateTreeNode(TreeNode node, IPBComposite pbComp, Type type, bool recursive)
+		private void UdateTreeNode(TreeNode node, IPBComponent pbComp, Type type, bool recursive)
 		{
-			var comp = (IPBComposite)node.Tag;
+			var comp = (IPBComponent) node.Tag;
 			if ((pbComp == null && type == null) ||
 				(pbComp != null && pbComp == node.Tag) ||
 				(type != null && type.IsInstanceOfType(node.Tag))
 				)
 			{
 				var pbAction = comp as PBAction;
-				node.ForeColor = pbAction != null && pbAction.HasErrors ? System.Drawing.Color.Red : comp.Color;
+				node.ForeColor = pbAction != null && pbAction.HasErrors ? Color.Red : comp.Color;
 				node.Text = comp.Title;
 			}
 			if (recursive)
@@ -801,13 +786,13 @@ namespace HighVoltz
 			}
 		}
 
-		private void ActionTreeAddChildren(GroupComposite ds, TreeNode node)
+		private void ActionTreeAddChildren(Composite composite, TreeNode node)
 		{
-			foreach (IPBComposite child in ds.Children)
+			foreach (var child in composite.Children.OfType<IPBComponent>())
 			{
-				var childNode = new TreeNode(child.Title) { ForeColor = child.Color, Tag = child };
+				var childNode = new TreeNode(child.Title) {ForeColor = child.Color, Tag = child};
 				// If, While and SubRoutine are Decorators.
-				var groupComposite = child as GroupComposite;
+				var groupComposite = child as PBComposite;
 				if (groupComposite != null)
 				{
 					ActionTreeAddChildren(groupComposite, childNode);
@@ -819,24 +804,28 @@ namespace HighVoltz
 		private void PopulateActionGridView()
 		{
 			ActionGridView.Rows.Clear();
-
-			if (_pbComposites == null)
+	
+			if (_pbComponents == null)
 			{
-				// cache the 'CodeIsModified' valuse because some IPBComposite types will set 'CodeIsModified' indirectly in thier constructor
+				// cache the 'CodeIsModified' valuse because some IPBComponent types will set 'CodeIsModified' indirectly in their constructor
 				// and then revert the orignal 'CodeIsModified' back after we are done creating instances 
 				var isModified = DynamicCodeCompiler.CodeIsModified;
-
-				_pbComposites = (from type in Assembly.GetExecutingAssembly().GetTypes()
-											where (typeof(IPBComposite)).IsAssignableFrom(type) && !type.IsAbstract
-											select (IPBComposite)Activator.CreateInstance(type)).ToArray();
-
-				DynamicCodeCompiler.CodeIsModified = isModified;
+				try 
+				{
+					_pbComponents = (from type in Assembly.GetExecutingAssembly().GetTypes()
+						where (typeof (IPBComponent)).IsAssignableFrom(type) && !type.IsAbstract
+						select ((IPBComponent) Activator.CreateInstance(type))).ToArray();
+				}
+				finally
+				{
+					DynamicCodeCompiler.CodeIsModified = isModified;
+				}
 			}
 
-			foreach (var pbComp in _pbComposites)
+			foreach (var pbComp in _pbComponents)
 			{
 				var row = new DataGridViewRow();
-				var cell = new DataGridViewTextBoxCell { Value = pbComp.Name };
+				var cell = new DataGridViewTextBoxCell {Value = pbComp.Name};
 				row.Cells.Add(cell);
 				row.Tag = pbComp;
 				row.Height = 16;
@@ -861,9 +850,12 @@ namespace HighVoltz
 		{
 			ProfileListView.SuspendLayout();
 			ProfileListView.Clear();
-			string[] profiles = Directory.GetFiles(Professionbuddy.ProfilePath, "*.xml", SearchOption.TopDirectoryOnly).
-				Select(Path.GetFileName).Union(Directory.GetFiles(Professionbuddy.ProfilePath, "*.package",
-																		  SearchOption.TopDirectoryOnly)).
+			string[] profiles = Directory.GetFiles(ProfessionbuddyBot.ProfilePath, "*.xml", SearchOption.TopDirectoryOnly).
+				Select(Path.GetFileName).Union(
+					Directory.GetFiles(
+						ProfessionbuddyBot.ProfilePath,
+						"*.package",
+						SearchOption.TopDirectoryOnly)).
 				Select(Path.GetFileName).ToArray();
 			// remove all profile names from ListView that are not in the 'profile' array              
 			for (int i = 0; i < ProfileListView.Items.Count; i++)
@@ -897,13 +889,13 @@ namespace HighVoltz
 		{
 			TradeSkillTabControl.SuspendLayout();
 			TradeSkillTabControl.TabPages.Clear();
-			for (int i = 0; i < Professionbuddy.Instance.TradeSkillList.Count; i++)
+			for (int i = 0; i < ProfessionbuddyBot.Instance.TradeSkillList.Count; i++)
 			{
 				TradeSkillTabControl.TabPages.Add(new TradeSkillListView(i));
 			}
 			TradeSkillTabControl.ResumeLayout();
 
-			if (Professionbuddy.Instance.TradeSkillList.Count > 0)
+			if (ProfessionbuddyBot.Instance.TradeSkillList.Count > 0)
 				TradeSkillTabControl.Visible = true;
 		}
 
@@ -936,7 +928,7 @@ namespace HighVoltz
 			RefreshActionTree(null, type);
 		}
 
-		public void RefreshActionTree(IPBComposite pbComp)
+		public void RefreshActionTree(IPBComponent pbComp)
 		{
 			RefreshActionTree(pbComp, null);
 		}
@@ -946,14 +938,10 @@ namespace HighVoltz
 			RefreshActionTree(null, null);
 		}
 
-		/// <summary>
-		/// Refreshes all actions of specified type in ActionTree or all if type is null
-		/// </summary>
-		/// <param name="type"></param>
-		public void RefreshActionTree(IPBComposite pbComp, Type type)
+		public void RefreshActionTree(IPBComponent pbComp, Type type)
 		{
 			// Don't update ActionTree while PB is running to improve performance.
-			if (Professionbuddy.Instance.IsRunning || !IsValid)
+			if (ProfessionbuddyBot.Instance.IsRunning || !IsValid)
 				return;
 			if (ActionTree.InvokeRequired)
 				ActionTree.BeginInvoke(new RefreshActionTreeDelegate(RefreshActionTreeCallback), pbComp, type);
@@ -961,7 +949,7 @@ namespace HighVoltz
 				RefreshActionTreeCallback(pbComp, type);
 		}
 
-		private void RefreshActionTreeCallback(IPBComposite pbComp, Type type)
+		private void RefreshActionTreeCallback(IPBComponent pbComp, Type type)
 		{
 			ActionTree.SuspendLayout();
 			foreach (TreeNode node in ActionTree.Nodes)
@@ -992,22 +980,22 @@ namespace HighVoltz
 			if (ActionTree.SelectedNode != null)
 				selectedIndex = ActionTree.Nodes.IndexOf(ActionTree.SelectedNode);
 			ActionTree.Nodes.Clear();
-			foreach (IPBComposite composite in Professionbuddy.Instance.PbBehavior.Children)
+			foreach (var comp in ProfessionbuddyBot.Instance.Branch.Children.OfType<IPBComponent>())
 			{
-				var node = new TreeNode(composite.Title) { ForeColor = composite.Color, Tag = composite };
-				if (composite is GroupComposite)
+				var node = new TreeNode(comp.Title) {ForeColor = comp.Color, Tag = comp};
+				var composite = comp as Composite;
+				if (composite != null)
 				{
-					ActionTreeAddChildren((GroupComposite)composite, node);
+					ActionTreeAddChildren(composite, node);
 				}
 				ActionTree.Nodes.Add(node);
 			}
 			//ActionTree.ExpandAll();
 			if (selectedIndex != -1)
 			{
-				if (selectedIndex < ActionTree.Nodes.Count)
-					ActionTree.SelectedNode = ActionTree.Nodes[selectedIndex];
-				else
-					ActionTree.SelectedNode = ActionTree.Nodes[ActionTree.Nodes.Count - 1];
+				ActionTree.SelectedNode = selectedIndex < ActionTree.Nodes.Count
+					? ActionTree.Nodes[selectedIndex]
+					: ActionTree.Nodes[ActionTree.Nodes.Count - 1];
 			}
 			ActionTree.ResumeLayout();
 		}
@@ -1033,7 +1021,7 @@ namespace HighVoltz
 				tv.TradeDataView.SuspendLayout();
 				foreach (DataGridViewRow row in tv.TradeDataView.Rows)
 				{
-					var cell = (TradeSkillRecipeCell)row.Cells[0].Value;
+					var cell = (TradeSkillRecipeCell) row.Cells[0].Value;
 					row.Cells[1].Value = Util.CalculateRecipeRepeat(cell.Recipe);
 					row.Cells[2].Value = cell.Recipe.Difficulty;
 				}
@@ -1058,21 +1046,23 @@ namespace HighVoltz
 
 		private void UpdateControlsCallback()
 		{
-			if (Professionbuddy.Instance.IsRunning)
+			if (ProfessionbuddyBot.Instance.IsRunning)
 			{
 				DisableControls();
-				Text = string.Format("Profession Buddy - Running {0}",
-									 !string.IsNullOrEmpty(Professionbuddy.Instance.MySettings.LastProfile)
-										 ? "(" + Path.GetFileName(Professionbuddy.Instance.MySettings.LastProfile) + ")"
-										 : "");
+				Text = string.Format(
+					"Profession Buddy - Running {0}",
+					!string.IsNullOrEmpty(ProfessionbuddyBot.Instance.MySettings.LastProfile)
+						? "(" + Path.GetFileName(ProfessionbuddyBot.Instance.MySettings.LastProfile) + ")"
+						: "");
 			}
 			else
 			{
 				EnableControls();
-				Text = string.Format("Profession Buddy - Stopped {0}",
-									 !string.IsNullOrEmpty(Professionbuddy.Instance.MySettings.LastProfile)
-										 ? "(" + Path.GetFileName(Professionbuddy.Instance.MySettings.LastProfile) + ")"
-										 : "");
+				Text = string.Format(
+					"Profession Buddy - Stopped {0}",
+					!string.IsNullOrEmpty(ProfessionbuddyBot.Instance.MySettings.LastProfile)
+						? "(" + Path.GetFileName(ProfessionbuddyBot.Instance.MySettings.LastProfile) + ")"
+						: "");
 			}
 		}
 
@@ -1083,5 +1073,5 @@ namespace HighVoltz
 		#endregion
 	}
 
-		#endregion
+	#endregion
 }

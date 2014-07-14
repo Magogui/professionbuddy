@@ -4,25 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Styx;
 using Styx.Common;
-using Styx.Common.Helpers;
 using Styx.CommonBot;
-using Styx.Helpers;
 using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
 
 	#region TradeSkill
@@ -269,24 +261,24 @@ namespace HighVoltz
 			if (!TreeRoot.IsRunning)
 				ObjectManager.Update();
 
-			WoWSkill = StyxWoW.Me.GetSkill(SkillLine);
-			Dictionary<uint, Recipe> oldList = KnownRecipes;
-			// cycle through entire recipe list and check update the 'HasRecipe' property
-			foreach (var recipe in Recipes)
-			{
-				recipe.Value.Update();
-			}
-			IEnumerable<KeyValuePair<uint, Recipe>> newRecipies = KnownRecipes.Except(oldList);
-			foreach (var kv in newRecipies)
-			{
-				Professionbuddy.Log("Leaned a new recipe {0}", kv.Value.Name);
-				using (StyxWoW.Memory.AcquireFrame())
-				{
-					kv.Value.UpdateHeader();
-				}
-			}
-			PulseBags();
-		}
+            WoWSkill = StyxWoW.Me.GetSkill(SkillLine);
+            Dictionary<uint, Recipe> oldList = KnownRecipes;
+            // cycle through entire recipe list and check update the 'HasRecipe' property
+            foreach (var recipe in Recipes)
+            {
+                recipe.Value.Update();
+            }
+            IEnumerable<KeyValuePair<uint, Recipe>> newRecipies = KnownRecipes.Except(oldList);
+            foreach (var kv in newRecipies)
+            {
+                ProfessionbuddyBot.Log("Leaned a new recipe {0}", kv.Value.Name);
+                using (StyxWoW.Memory.AcquireFrame())
+                {
+                    kv.Value.UpdateHeader();
+                }
+            }
+            PulseBags();
+        }
 
 		/// <summary>
 		/// Returns a list of recipes from selected skill
@@ -610,18 +602,18 @@ namespace HighVoltz
 			if (_ingredients != null)
 				return;
 
-			var spell = Spell;
-			if (spell == null)
-			{
-				Professionbuddy.Debug("{0} is not a valid spell. ", SpellId);
-				return;
-			}
-			var reagents = Spell.InternalInfo.SpellReagents;
-			if (reagents.Reagent == null)
-			{
-				return;
-			}
-			_ingredients = new List<Ingredient>();
+            var spell = Spell;
+            if (spell == null)
+            {
+                ProfessionbuddyBot.Debug("{0} is not a valid spell. ", SpellId);
+                return;
+            }
+            var reagents = Spell.InternalInfo.SpellReagents;
+            if (reagents.Reagent == null)
+            {
+                return;
+            }
+            _ingredients = new List<Ingredient>();
 
 			for (int i = 0; i < reagents.Reagent.Length; i++)
 			{

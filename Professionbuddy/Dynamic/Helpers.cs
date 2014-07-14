@@ -7,10 +7,9 @@ using System.Windows.Media;
 using Styx;
 using Styx.Common;
 using Styx.CommonBot;
-using Styx.Helpers;
 using Styx.WoWInternals;
 
-namespace HighVoltz.Dynamic
+namespace HighVoltz.Professionbuddy.Dynamic
 {
 	public class Helpers
 	{
@@ -189,24 +188,24 @@ return 0";
 			WoWMovement.ClickToMove(new WoWPoint(x, y, z));
 		}
 
-		/// <summary>
-		///     Switches to a different character on same account
-		/// </summary>
-		/// <param name="character"></param>
-		/// <param name="server"></param>
-		/// <param name="botName">Name of bot to use on that character. The bot class type name will also work.</param>
-		public static void SwitchCharacter(string character, string server, string botName)
-		{
-			if (_isSwitchingToons)
-			{
-				Professionbuddy.Log("Already switching characters");
-				return;
-			}
-			string loginLua = string.Format(LoginLua, character, server);
-			_isSwitchingToons = true;
-			// reset all actions 
-			Professionbuddy.Instance.IsRunning = false;
-			Professionbuddy.Instance.PbBehavior.Reset();
+        /// <summary>
+        ///     Switches to a different character on same account
+        /// </summary>
+        /// <param name="character"></param>
+        /// <param name="server"></param>
+        /// <param name="botName">Name of bot to use on that character. The bot class type name will also work.</param>
+        public static void SwitchCharacter(string character, string server, string botName)
+        {
+            if (_isSwitchingToons)
+            {
+                ProfessionbuddyBot.Log("Already switching characters");
+                return;
+            }
+            string loginLua = string.Format(LoginLua, character, server);
+            _isSwitchingToons = true;
+            // reset all actions 
+            ProfessionbuddyBot.Instance.IsRunning = false;
+            ProfessionbuddyBot.Instance.RootComposite.Reset();
 
 			Application.Current.Dispatcher.BeginInvoke(
 				new Action(
@@ -227,8 +226,8 @@ return 0";
 										BotBase bot = Util.GetBotByName(botName);
 										if (bot != null)
 										{
-											if (Professionbuddy.Instance.SecondaryBot.Name != bot.Name)
-												Professionbuddy.Instance.SecondaryBot = bot;
+											if (ProfessionbuddyBot.Instance.SecondaryBot.Name != bot.Name)
+												ProfessionbuddyBot.Instance.SecondaryBot = bot;
 											if (!bot.Initialized)
 												bot.DoInitialize();
 											if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
@@ -239,15 +238,15 @@ return 0";
 										}
 										else
 										{
-											Professionbuddy.Err("Could not find bot with name {0}", botName);
+											ProfessionbuddyBot.Warn("Could not find bot with name {0}", botName);
 										}
-										TreeRoot.Start();
-										Professionbuddy.Instance.OnTradeSkillsLoaded += Professionbuddy.Instance.Professionbuddy_OnTradeSkillsLoaded;
-										Professionbuddy.Instance.LoadTradeSkills();
-										_isSwitchingToons = false;
-										Professionbuddy.Instance.IsRunning = true;
-									}) {IsBackground = true}.Start();
-						}));
+                                        TreeRoot.Start();
+                                        ProfessionbuddyBot.Instance.OnTradeSkillsLoaded += ProfessionbuddyBot.Instance.Professionbuddy_OnTradeSkillsLoaded;
+                                        ProfessionbuddyBot.Instance.LoadTradeSkills();
+                                        _isSwitchingToons = false;
+                                        ProfessionbuddyBot.Instance.IsRunning = true;
+                                    }) {IsBackground = true}.Start();
+                        }));
 			TreeRoot.Stop();
 		}
 
@@ -432,38 +431,38 @@ return 0";
 				}
 			}
 
-			public static uint CanRepeatNum(uint recipeID)
-			{
-				return
-					(from ts in Professionbuddy.Instance.TradeSkillList where ts.KnownRecipes.ContainsKey(recipeID) select ts.KnownRecipes[recipeID].CanRepeatNum)
-						.FirstOrDefault();
-			}
+            public static uint CanRepeatNum(uint recipeID)
+            {
+                return
+                    (from ts in ProfessionbuddyBot.Instance.TradeSkillList where ts.KnownRecipes.ContainsKey(recipeID) select ts.KnownRecipes[recipeID].CanRepeatNum)
+                        .FirstOrDefault();
+            }
 
-			public static bool CanCraft(uint recipeID)
-			{
-				return (from ts in Professionbuddy.Instance.TradeSkillList
-						where ts.KnownRecipes.ContainsKey(recipeID)
-						select (ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count) && ts.KnownRecipes[recipeID].CanRepeatNum > 0)
-					.FirstOrDefault();
-			}
+            public static bool CanCraft(uint recipeID)
+            {
+                return (from ts in ProfessionbuddyBot.Instance.TradeSkillList
+                        where ts.KnownRecipes.ContainsKey(recipeID)
+                        select (ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count) && ts.KnownRecipes[recipeID].CanRepeatNum > 0)
+                    .FirstOrDefault();
+            }
 
 			public static bool HasMats(uint recipeID)
 			{
 				return CanRepeatNum(recipeID) > 0;
 			}
 
-			public static bool HasRecipe(uint recipeID)
-			{
-				return Professionbuddy.Instance.TradeSkillList.Any(ts => ts.KnownRecipes.ContainsKey(recipeID));
-			}
+            public static bool HasRecipe(uint recipeID)
+            {
+                return ProfessionbuddyBot.Instance.TradeSkillList.Any(ts => ts.KnownRecipes.ContainsKey(recipeID));
+            }
 
-			public static bool HasTools(uint recipeID)
-			{
-				return (from ts in Professionbuddy.Instance.TradeSkillList
-						where ts.KnownRecipes.ContainsKey(recipeID)
-						select ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count).FirstOrDefault();
-			}
-		}
+            public static bool HasTools(uint recipeID)
+            {
+                return (from ts in ProfessionbuddyBot.Instance.TradeSkillList
+                        where ts.KnownRecipes.ContainsKey(recipeID)
+                        select ts.KnownRecipes[recipeID].Tools.Count(t => t.HasTool) == ts.KnownRecipes[recipeID].Tools.Count).FirstOrDefault();
+            }
+        }
 
 		#endregion
 	}

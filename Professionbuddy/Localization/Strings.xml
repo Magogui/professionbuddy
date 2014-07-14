@@ -148,6 +148,10 @@
     <Action_DisenchantAction_Prospect>Prospect</Action_DisenchantAction_Prospect>
     <Action_DisenchantAction_Disenchant>Disenchant</Action_DisenchantAction_Disenchant>
 
+    <!-- FlowControl-->
+    <FlowControl_Condition>Condition</FlowControl_Condition>
+    <FlowControl_IgnoreCanRun>Ignore Condition until done</FlowControl_IgnoreCanRun>    
+    
     <!-- FlyToAction -->
     <Action_FlyToAction_Name>Fly To</Action_FlyToAction_Name>
     <Action_FlyToAction_Help>This action relies on Flightor, the 3d navigator used by Gatherbuddy2. This action will fly your character to the selected location and dismount on arrival if Dismount is set to true. Be sure to make the target location outdoors and not underneath any obsticles.</Action_FlyToAction_Help>
@@ -166,8 +170,6 @@
     <FlowControl_If_Name>If</FlowControl_If_Name>
     <FlowControl_If_LongName>If Condition</FlowControl_If_LongName>
     <FlowControl_If_Help>'If Condition' will execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running.If you need to repeat a set of actions then use 'While Condition' or nest this within a 'While Condition'</FlowControl_If_Help>
-    <FlowControl_If_Condition>Condition</FlowControl_If_Condition>
-    <FlowControl_If_IgnoreCanRun>Ignore Condition until done</FlowControl_If_IgnoreCanRun>
 	
     <!-- InteractAction -->
     <Action_InteractAction_Name>Interact</Action_InteractAction_Name>

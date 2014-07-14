@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using Styx.Common;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
 	public static class Updater
 	{
@@ -22,35 +22,35 @@ namespace HighVoltz
 				"<h4 style=\"margin-top:0\">Log message</h4>\r?\n?<pre class=\"wrap\" style=\"margin-left:1em\">(?<log>.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?.+\r?\n?)</pre>",
 				RegexOptions.CultureInvariant);
 
-		public static void CheckForUpdate()
-		{
-			try
-			{
-				Professionbuddy.Log("Checking for new version");
-				int remoteRev = GetRevision();
-				if (GlobalPBSettings.Instance.CurrentRevision != remoteRev &&
-					Professionbuddy.Svn.Revision < remoteRev)
-				{
-					Professionbuddy.Log("A new version was found.Downloading Update");
-					DownloadFilesFromSvn(new WebClient(), PbSvnUrl);
-					Professionbuddy.Log("Download complete.");
-					GlobalPBSettings.Instance.CurrentRevision = remoteRev;
-					GlobalPBSettings.Instance.Save();
-					Logging.Write(Colors.DodgerBlue, "************* Change Log ****************");
-					Logging.Write(Colors.SkyBlue, GetChangeLog(remoteRev));
-					Logging.Write(Colors.DodgerBlue, "*****************************************");
-					Logging.Write(Colors.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
-				}
-				else
-				{
-					Professionbuddy.Log("No updates found");
-				}
-			}
-			catch (Exception ex)
-			{
-				Professionbuddy.Err(ex.ToString());
-			}
-		}
+        public static void CheckForUpdate()
+        {
+            try
+            {
+                ProfessionbuddyBot.Log("Checking for new version");
+                int remoteRev = GetRevision();
+                if (GlobalPBSettings.Instance.CurrentRevision != remoteRev &&
+                    ProfessionbuddyBot.Svn.Revision < remoteRev)
+                {
+                    ProfessionbuddyBot.Log("A new version was found.Downloading Update");
+                    DownloadFilesFromSvn(new WebClient(), PbSvnUrl);
+                    ProfessionbuddyBot.Log("Download complete.");
+                    GlobalPBSettings.Instance.CurrentRevision = remoteRev;
+                    GlobalPBSettings.Instance.Save();
+                    Logging.Write(Colors.DodgerBlue, "************* Change Log ****************");
+                    Logging.Write(Colors.SkyBlue, GetChangeLog(remoteRev));
+                    Logging.Write(Colors.DodgerBlue, "*****************************************");
+                    Logging.Write(Colors.Red, "A new version of ProfessionBuddy was installed. Please restart Honorbuddy");
+                }
+                else
+                {
+                    ProfessionbuddyBot.Log("No updates found");
+                }
+            }
+            catch (Exception ex)
+            {
+                ProfessionbuddyBot.Warn(ex.ToString());
+            }
+        }
 
 		private static int GetRevision()
 		{
@@ -70,41 +70,41 @@ namespace HighVoltz
 				string html = client.DownloadString(url);
 				MatchCollection results = _linkPattern.Matches(html);
 
-				IEnumerable<Match> matches = from match in results.OfType<Match>()
-					where match.Success && match.Groups["ln"].Success
-					select match;
-				foreach (Match match in matches)
-				{
-					string file = RemoveXmlEscapes(match.Groups["ln"].Value);
-					string newUrl = url + file;
-					if (newUrl[newUrl.Length - 1] == '/') // it's a directory...
-					{
-						DownloadFilesFromSvn(client, newUrl);
-					}
-					else // its a file.
-					{
-						string filePath, dirPath;
-						if (url.Length > PbSvnUrl.Length)
-						{
-							string relativePath = url.Substring(PbSvnUrl.Length);
-							dirPath = Path.Combine(Professionbuddy.BotPath, relativePath);
-							filePath = Path.Combine(dirPath, file);
-						}
-						else
-						{
-							dirPath = Environment.CurrentDirectory;
-							filePath = Path.Combine(Professionbuddy.BotPath, file);
-						}
-						Professionbuddy.Debug("Downloading {0}", file);
-						if (!Directory.Exists(dirPath))
-							Directory.CreateDirectory(dirPath);
-						client.DownloadFile(newUrl, filePath);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Professionbuddy.Err(ex.ToString());
+		        IEnumerable<Match> matches = from match in results.OfType<Match>()
+			        where match.Success && match.Groups["ln"].Success
+			        select match;
+		        foreach (Match match in matches)
+		        {
+			        string file = RemoveXmlEscapes(match.Groups["ln"].Value);
+			        string newUrl = url + file;
+			        if (newUrl[newUrl.Length - 1] == '/') // it's a directory...
+			        {
+				        DownloadFilesFromSvn(client, newUrl);
+			        }
+			        else // its a file.
+			        {
+				        string filePath, dirPath;
+				        if (url.Length > PbSvnUrl.Length)
+				        {
+					        string relativePath = url.Substring(PbSvnUrl.Length);
+							dirPath = Path.Combine(ProfessionbuddyBot.BotPath, relativePath);
+					        filePath = Path.Combine(dirPath, file);
+				        }
+				        else
+				        {
+					        dirPath = Environment.CurrentDirectory;
+					        filePath = Path.Combine(ProfessionbuddyBot.BotPath, file);
+				        }
+				        ProfessionbuddyBot.Debug("Downloading {0}", file);
+				        if (!Directory.Exists(dirPath))
+					        Directory.CreateDirectory(dirPath);
+				        client.DownloadFile(newUrl, filePath);
+			        }
+		        }
+	        }
+	        catch (Exception ex)
+	        {
+				ProfessionbuddyBot.Warn(ex.ToString());
 				return false;
 			}
 			return true;
@@ -129,7 +129,7 @@ namespace HighVoltz
 			}
 			catch (Exception ex)
 			{
-				Professionbuddy.Err(ex.ToString());
+				ProfessionbuddyBot.Warn(ex.ToString());
 			}
 			return null;
 		}

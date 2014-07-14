@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace HighVoltz.Dynamic
+namespace HighVoltz.Professionbuddy.Dynamic
 {
 	public enum ProfileStatus
 	{

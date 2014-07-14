@@ -2,12 +2,11 @@
 using Styx;
 using Styx.WoWInternals;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
-	public class DataStore : Dictionary<uint, int>
-	{
-		private readonly GlobalPBSettings _settings = GlobalPBSettings.Instance;
-		private Professionbuddy _pb = Professionbuddy.Instance;
+    public class DataStore : Dictionary<uint, int>
+    {
+        private readonly GlobalPBSettings _settings = GlobalPBSettings.Instance;
 
 		public DataStore()
 		{
@@ -96,47 +95,47 @@ namespace HighVoltz
 				"end " +
 				"return 0 ";
 
-			using (StyxWoW.Memory.AcquireFrame())
-			{
-				List<string> retVals = Lua.GetReturnValues(storeInTableLua);
-				if (retVals != null && retVals[0] != "0")
-				{
-					HasDataStoreAddon = true;
-					int tableSize;
-					int.TryParse(retVals[0], out tableSize);
-					while (true)
-					{
-						string getTableDataLua =
-							"local retVals = {" + tableIndex + "} " +
-							"for i=retVals[1], #" + _settings.DataStoreTable + " do " +
-							"table.insert(retVals," + _settings.DataStoreTable + "[i]) " +
-							"if #retVals >= 501 then " +
-							"retVals[1] = i +1 " +
-							"return unpack(retVals) " +
-							"end " +
-							"end " +
-							"retVals[1] = #" + _settings.DataStoreTable + " " +
-							"return unpack(retVals) ";
-						retVals = Lua.GetReturnValues(getTableDataLua);
-						int.TryParse(retVals[0], out tableIndex);
-						for (int i = 2; i < retVals.Count; i += 2)
-						{
-							uint id, num;
-							uint.TryParse(retVals[i - 1], out id);
-							uint.TryParse(retVals[i], out num);
-							this[id] = (int) num;
-						}
-						if (tableIndex >= tableSize)
-							break;
-					}
-					Lua.DoString(_settings.DataStoreTable + "={}");
-					Professionbuddy.Debug("DataStore Imported");
-				}
-				else
-				{
-					Professionbuddy.Debug("No DataStore Addon found");
-				}
-			}
-		}
-	}
+            using (StyxWoW.Memory.AcquireFrame())
+            {
+                List<string> retVals = Lua.GetReturnValues(storeInTableLua);
+                if (retVals != null && retVals[0] != "0")
+                {
+                    HasDataStoreAddon = true;
+                    int tableSize;
+                    int.TryParse(retVals[0], out tableSize);
+                    while (true)
+                    {
+                        string getTableDataLua =
+                            "local retVals = {" + tableIndex + "} " +
+                            "for i=retVals[1], #" + _settings.DataStoreTable + " do " +
+                            "table.insert(retVals," + _settings.DataStoreTable + "[i]) " +
+                            "if #retVals >= 501 then " +
+                            "retVals[1] = i +1 " +
+                            "return unpack(retVals) " +
+                            "end " +
+                            "end " +
+                            "retVals[1] = #" + _settings.DataStoreTable + " " +
+                            "return unpack(retVals) ";
+                        retVals = Lua.GetReturnValues(getTableDataLua);
+                        int.TryParse(retVals[0], out tableIndex);
+                        for (int i = 2; i < retVals.Count; i += 2)
+                        {
+                            uint id, num;
+                            uint.TryParse(retVals[i - 1], out id);
+                            uint.TryParse(retVals[i], out num);
+                            this[id] = (int) num;
+                        }
+                        if (tableIndex >= tableSize)
+                            break;
+                    }
+                    Lua.DoString(_settings.DataStoreTable + "={}");
+                    ProfessionbuddyBot.Debug("DataStore Imported");
+                }
+                else
+                {
+                    ProfessionbuddyBot.Debug("No DataStore Addon found");
+                }
+            }
+        }
+    }
 }

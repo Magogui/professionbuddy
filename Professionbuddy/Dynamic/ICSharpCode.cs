@@ -1,23 +1,24 @@
 ﻿using System;
-using HighVoltz.Composites;
+using HighVoltz.Professionbuddy.ComponentBase;
 
-namespace HighVoltz.Dynamic
+namespace HighVoltz.Professionbuddy.Dynamic
 {
 	public enum CsharpCodeType
 	{
 		BoolExpression,
 		Statements,
 		Declaration,
-		Expression
+		Expression,
+		Coroutine
 	}
 
-	public interface ICSharpCode
+	public interface IDynamicallyCompiledCode
 	{
 		int CodeLineNumber { get; set; }
 		string CompileError { get; set; }
 		CsharpCodeType CodeType { get; }
 		string Code { get; }
 		Delegate CompiledMethod { get; set; }
-		IPBComposite AttachedComposite { get; }
+		IPBComponent AttachedComponent { get; }
 	}
 }

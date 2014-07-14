@@ -2,7 +2,7 @@
 // Build Date: $WCDATE$
 // SVN url: $WCURL$
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
     public partial class Svn
     {

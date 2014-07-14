@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
-using HighVoltz.Composites;
+using HighVoltz.Professionbuddy.ComponentBase;
+using HighVoltz.Professionbuddy.Components;
+using HighVoltz.Professionbuddy.PropertyGridUtilities;
 
-namespace HighVoltz.Dynamic
+namespace HighVoltz.Professionbuddy.Dynamic
 {
 	public class DynamicProperty<T> : IDynamicProperty
 	{
@@ -73,7 +74,7 @@ namespace HighVoltz.Dynamic
 
 		public PBAction AttachedComposite { get; set; }
 
-		IPBComposite ICSharpCode.AttachedComposite { get { return AttachedComposite; }}
+		IPBComponent IDynamicallyCompiledCode.AttachedComponent { get { return AttachedComposite; } }
 
 		object IDynamicProperty.Value { get { return AttachedComposite; } }
 

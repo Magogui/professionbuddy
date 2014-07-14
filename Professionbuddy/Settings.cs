@@ -5,14 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
+using HighVoltz.UberBehaviorTree;
 using Styx;
 using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
-using Styx.TreeSharp;
-using ObjectManager = Styx.WoWInternals.ObjectManager;
 
-namespace HighVoltz
+namespace HighVoltz.Professionbuddy
 {
 	public class ProfessionBuddySettings : Settings
 	{
@@ -50,30 +49,30 @@ namespace HighVoltz
 
 		public Dictionary<string, PbProfileSettingEntry> SettingsDictionary { get;private set; }
 
-		public object this[string name]
-		{
-			get { return SettingsDictionary.ContainsKey(name) ? SettingsDictionary[name].Value : null; }
-			set
-			{
-				SettingsDictionary[name].Value = value;
-				if (Professionbuddy.Instance.CurrentProfile != null)
-				{
-					Save();
-					if (MainForm.IsValid)
-						MainForm.Instance.RefreshSettingsPropertyGrid();
-				}
-			}
-		}
+        public object this[string name]
+        {
+            get { return SettingsDictionary.ContainsKey(name) ? SettingsDictionary[name].Value : null; }
+            set
+            {
+                SettingsDictionary[name].Value = value;
+                if (ProfessionbuddyBot.Instance.CurrentProfile != null)
+                {
+                    Save();
+                    if (MainForm.IsValid)
+                        MainForm.Instance.RefreshSettingsPropertyGrid();
+                }
+            }
+        }
 
-		private string ProfileName
-		{
-			get
-			{
-				return Professionbuddy.Instance.CurrentProfile != null
-						   ? Path.GetFileNameWithoutExtension(Professionbuddy.Instance.CurrentProfile.XmlPath)
-						   : "";
-			}
-		}
+        private string ProfileName
+        {
+            get
+            {
+                return ProfessionbuddyBot.Instance.CurrentProfile != null
+                           ? Path.GetFileNameWithoutExtension(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
+                           : "";
+            }
+        }
 
 		private string CharacterSettingsPath
 		{
@@ -95,18 +94,18 @@ namespace HighVoltz
 			}
 		}
 
-		public void Save()
-		{
-			if (Professionbuddy.Instance.CurrentProfile != null)
-			{
-				bool hasGlobalSettings = SettingsDictionary.Any(setting => setting.Value.Global);
-				bool hasCharacterSettings = SettingsDictionary.Any(setting => !setting.Value.Global);
-				if (hasGlobalSettings)
-					SaveGlobalSettings();
-				if (hasCharacterSettings)
-					SaveCharacterSettings();
-			}
-		}
+        public void Save()
+        {
+            if (ProfessionbuddyBot.Instance.CurrentProfile != null)
+            {
+                bool hasGlobalSettings = SettingsDictionary.Any(setting => setting.Value.Global);
+                bool hasCharacterSettings = SettingsDictionary.Any(setting => !setting.Value.Global);
+                if (hasGlobalSettings)
+                    SaveGlobalSettings();
+                if (hasCharacterSettings)
+                    SaveCharacterSettings();
+            }
+        }
 
 		private void SaveCharacterSettings()
 		{
@@ -132,86 +131,86 @@ namespace HighVoltz
 			}
 		}
 
-		public void Load()
-		{
-			if (Professionbuddy.Instance.CurrentProfile != null)
-			{
-				SettingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
-				LoadCharacterSettings();
-				LoadGlobalSettings();
-				LoadDefaultValues();
-			}
-		}
+        public void Load()
+        {
+            if (ProfessionbuddyBot.Instance.CurrentProfile != null)
+            {
+                SettingsDictionary = new Dictionary<string, PbProfileSettingEntry>();
+                LoadCharacterSettings();
+                LoadGlobalSettings();
+                LoadDefaultValues();
+            }
+        }
 
-		private void LoadCharacterSettings()
-		{
-			if (File.Exists(CharacterSettingsPath))
-			{
-				using (XmlReader reader = XmlReader.Create(CharacterSettingsPath))
-				{
-					try
-					{
-						var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
-						var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
-						if (temp != null)
-						{
-							foreach (var kv in temp)
-							{
-								SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						Professionbuddy.Err(ex.ToString());
-					}
-				}
-			}
-		}
+        private void LoadCharacterSettings()
+        {
+            if (File.Exists(CharacterSettingsPath))
+            {
+                using (XmlReader reader = XmlReader.Create(CharacterSettingsPath))
+                {
+                    try
+                    {
+                        var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
+                        if (temp != null)
+                        {
+                            foreach (var kv in temp)
+                            {
+                                SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ProfessionbuddyBot.Warn(ex.ToString());
+                    }
+                }
+            }
+        }
 
-		private void LoadGlobalSettings()
-		{
-			if (File.Exists(GlobalSettingsPath))
-			{
-				using (XmlReader reader = XmlReader.Create(GlobalSettingsPath))
-				{
-					try
-					{
-						var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
-						var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
-						if (temp != null)
-						{
-							foreach (var kv in temp)
-							{
-								SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						Professionbuddy.Err(ex.ToString());
-					}
-				}
-			}
-		}
+        private void LoadGlobalSettings()
+        {
+            if (File.Exists(GlobalSettingsPath))
+            {
+                using (XmlReader reader = XmlReader.Create(GlobalSettingsPath))
+                {
+                    try
+                    {
+                        var serializer = new DataContractSerializer(typeof (Dictionary<string, object>));
+                        var temp = (Dictionary<string, object>) serializer.ReadObject(reader);
+                        if (temp != null)
+                        {
+                            foreach (var kv in temp)
+                            {
+                                SettingsDictionary[kv.Key] = new PbProfileSettingEntry { Value = kv.Value };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ProfessionbuddyBot.Warn(ex.ToString());
+                    }
+                }
+            }
+        }
 
-		public void LoadDefaultValues()
-		{
-			List<Composites.Settings> settingsList = GetDefaultSettings(Professionbuddy.Instance.PbBehavior);
-			foreach (Composites.Settings setting in settingsList)
-			{
-				if (!SettingsDictionary.ContainsKey(setting.SettingName))
-					SettingsDictionary[setting.SettingName] = new PbProfileSettingEntry
-														{Value = GetValue(setting.Type, setting.DefaultValue)};
-				SettingsDictionary[setting.SettingName].Summary = setting.Summary;
-				SettingsDictionary[setting.SettingName].Category = setting.Category;
-				SettingsDictionary[setting.SettingName].Global = setting.Global;
-				SettingsDictionary[setting.SettingName].Hidden = setting.Hidden;
-			}
-			// remove unused settings..
-			SettingsDictionary = SettingsDictionary.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
-																										 kv => kv.Value);
-		}
+        public void LoadDefaultValues()
+        {
+			List<Components.SettingsAction> settingsList = GetDefaultSettings(ProfessionbuddyBot.Instance.Branch);
+            foreach (Components.SettingsAction setting in settingsList)
+            {
+                if (!SettingsDictionary.ContainsKey(setting.SettingName))
+                    SettingsDictionary[setting.SettingName] = new PbProfileSettingEntry
+                                                        {Value = GetValue(setting.Type, setting.DefaultValue)};
+                SettingsDictionary[setting.SettingName].Summary = setting.Summary;
+                SettingsDictionary[setting.SettingName].Category = setting.Category;
+                SettingsDictionary[setting.SettingName].Global = setting.Global;
+                SettingsDictionary[setting.SettingName].Hidden = setting.Hidden;
+            }
+            // remove unused settings..
+            SettingsDictionary = SettingsDictionary.Where(kv => settingsList.Any(s => s.SettingName == kv.Key)).ToDictionary(kv => kv.Key,
+                                                                                                         kv => kv.Value);
+        }
 
 		private object GetValue(TypeCode code, string value)
 		{
@@ -260,24 +259,24 @@ namespace HighVoltz
 			}
 		}
 
-		public List<Composites.Settings> GetDefaultSettings(Composite comp)
-		{
-			var list = new List<Composites.Settings>();
-			GetProfileSettings(comp, ref list);
-			return list;
-		}
+        public List<Components.SettingsAction> GetDefaultSettings(Component comp)
+        {
+            var list = new List<Components.SettingsAction>();
+            GetProfileSettings(comp, ref list);
+            return list;
+        }
 
-		// recursively get all profile settings
-		private void GetProfileSettings(Composite comp, ref List<Composites.Settings> list)
-		{
-			if (comp is Composites.Settings)
-				list.Add(comp as Composites.Settings);
-			if (comp is GroupComposite)
-			{
-				foreach (Composite child in ((GroupComposite) comp).Children)
-					GetProfileSettings(child, ref list);
-			}
-		}
+        // recursively get all profile settings
+        private void GetProfileSettings(Component comp, ref List<Components.SettingsAction> list)
+        {
+            if (comp is Components.SettingsAction)
+                list.Add(comp as Components.SettingsAction);
+            if (comp is Composite)
+            {
+                foreach (var child in ((Composite) comp).Children)
+                    GetProfileSettings(child, ref list);
+            }
+        }
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
