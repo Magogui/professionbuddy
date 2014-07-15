@@ -292,8 +292,6 @@ namespace HighVoltz.Professionbuddy
 						Warn(ex.ToString());
 					}
 
-					// check for Professionbuddy updates
-					new Thread(Updater.CheckForUpdate) { IsBackground = true }.Start();
 					_init = true;
 				}
 			}

@@ -25,8 +25,5 @@ namespace HighVoltz.Professionbuddy
 
         [Setting, DefaultValue("")]
         public string WowVersion { get; set; }
-
-		[Setting, DefaultValue(true)]
-		public bool AutoUpdate { get; set; }
     }
 }
