@@ -75,9 +75,10 @@ namespace HighVoltz.Professionbuddy
 		{
 			if (dest != source && (!IsChildNode(source, dest) || dest == null))
 			{
-				var gc = (Composite) ((Component) source.Tag).Parent;
+				var srcComponent = (Component) source.Tag;
+				var gc = (Composite)srcComponent.Parent;
 				if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy)
-					gc.Children.Remove((Composite) source.Tag);
+					gc.Children.Remove(srcComponent);
 				AddToActionTree(source, dest);
 				if ((_copyAction & CopyPasteOperactions.Copy) != CopyPasteOperactions.Copy) // ctrl key
 					source.Remove();
