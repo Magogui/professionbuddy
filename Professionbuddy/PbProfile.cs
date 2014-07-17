@@ -117,10 +117,7 @@ namespace HighVoltz.Professionbuddy
 				}
 
 				if (node.NodeType != XmlNodeType.Element)
-				{
-					ProfessionbuddyBot.Debug("Encountered a {0} node type");
 					continue;
-				}
 
 				var element = (XElement) node;
 				var elementName = element.Name.ToString();

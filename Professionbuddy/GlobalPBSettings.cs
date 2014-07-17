@@ -13,7 +13,6 @@ namespace HighVoltz.Professionbuddy
             Load();
         }
 
-
 		[Setting, DefaultValue(0)]
 		public int CurrentRevision { get; set; }
 
