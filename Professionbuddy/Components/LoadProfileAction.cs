@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
 using HighVoltz.Professionbuddy.PropertyGridUtilities.Editors;
-using Styx.Common.Helpers;
 using Styx.CommonBot.Profiles;
 
 namespace HighVoltz.Professionbuddy.Components
@@ -21,9 +20,7 @@ namespace HighVoltz.Professionbuddy.Components
 	[PBXmlElement("LoadProfile", new []{"LoadProfileAction"})]
 	public sealed class LoadProfileAction : PBAction
 	{
-
-		private readonly WaitTimer _loadProfileTimer = new WaitTimer(TimeSpan.FromSeconds(5));
-		private bool _loadedProfile;
+		private volatile bool _loadingProfile;
 
 		public LoadProfileAction()
 		{
@@ -71,19 +68,6 @@ namespace HighVoltz.Professionbuddy.Components
 			set { Properties["IsLocal"].Value = value; }
 		}
 
-		public string AbsolutePath
-		{
-			get
-			{
-				if (!IsLocal)
-					return Path;
-
-				return string.IsNullOrEmpty(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
-					? string.Empty
-					: System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath), Path);
-			}
-		}
-
 		public override string Name
 		{
 			get { return ProfessionbuddyBot.Instance.Strings["Action_LoadProfileAction_Name"]; }
@@ -101,67 +85,74 @@ namespace HighVoltz.Professionbuddy.Components
 
 		protected async override Task Run()
 		{
-			if (!_loadedProfile)
-			{
-				if (Load())
-				{
-					_loadProfileTimer.Reset();
-				}
-				_loadedProfile = true;
-			} 
-			// We need to wait for a profile to load because the profile might be loaded asynchronously
-			if (_loadProfileTimer.IsFinished ||
-				(!string.IsNullOrEmpty(ProfileManager.XmlLocation) && ProfileManager.XmlLocation.Equals(AbsolutePath)))
-			{
-				IsDone = true;
-			}
-		}
+			if (_loadingProfile)
+				return;
 
-		public bool Load()
-		{
-			var absPath = AbsolutePath;
+			var absPath = GetAbsolutePath();
 
-			if (IsLocal && !string.IsNullOrEmpty(ProfileManager.XmlLocation) &&
-				ProfileManager.XmlLocation.Equals(absPath, StringComparison.CurrentCultureIgnoreCase))
-				return false;
-			try
+			bool emptyProfile = string.IsNullOrEmpty(Path);
+
+			if (IsLocal)
 			{
-				ProfessionbuddyBot.Debug(
-					"Loading Profile :{0}, previous profile was {1}",
-					Path,
-					ProfileManager.XmlLocation ?? "[No Profile]");
-				if (string.IsNullOrEmpty(Path))
+				// check if profile is already loaded.
+				if (!string.IsNullOrEmpty(ProfileManager.XmlLocation)
+					&& ProfileManager.XmlLocation.Equals(absPath, StringComparison.CurrentCultureIgnoreCase))
 				{
-					ProfileManager.LoadEmpty();
+					IsDone = true;
+					return;
 				}
-				else if (!IsLocal)
-				{
-					var req = WebRequest.Create(Path);
-					req.Proxy = null;
-					using (WebResponse res = req.GetResponse())
-					{
-						using (var stream = res.GetResponseStream())
-						{
-							ProfileManager.LoadNew(stream);
-						}
-					}
-				}
-				else if (File.Exists(absPath))
-				{
-					ProfileManager.LoadNew(absPath, true);
-				}
-				else
+				// check if profile exists
+				if (!emptyProfile && !File.Exists(absPath))
 				{
 					ProfessionbuddyBot.Warn("{0}: {1}", ProfessionbuddyBot.Instance.Strings["Error_UnableToFindProfile"], Path);
-					return false;
+					IsDone = true;
+					return;
 				}
 			}
-			catch (Exception ex)
-			{
-				ProfessionbuddyBot.Warn("{0}", ex);
-				return false;
-			}
-			return true;
+
+			ProfessionbuddyBot.Debug(
+				"Loading Profile: {0}, previous profile was {1}",
+				emptyProfile ? "(Empty Profile)" : Path,
+				ProfileManager.XmlLocation ?? "[No Profile]");
+
+			var path = emptyProfile || !IsLocal ? Path : absPath;
+
+			Util.ExecuteActionWhileBotIsStopped(
+				() =>
+				{
+					try
+					{
+						if (string.IsNullOrEmpty(path))
+						{
+							ProfileManager.LoadEmpty();
+						}
+						else if (!IsLocal)
+						{
+							var req = WebRequest.Create(path);
+							req.Proxy = null;
+							using (WebResponse res = req.GetResponse())
+							{
+								using (var stream = res.GetResponseStream())
+								{
+									ProfileManager.LoadNew(stream);
+								}
+							}
+						}
+						else if (File.Exists(path))
+						{
+							ProfileManager.LoadNew(path);
+						}
+						IsDone = true;
+						ProfessionbuddyBot.Debug("Successfully loaded profile:{0}", emptyProfile ? "(Empty Profile)" : Path);
+					}
+					catch (Exception ex)
+					{
+						// if ex is not null there was a problem loading profile.
+						ProfessionbuddyBot.Fatal("Failed to load profile.\n{0}", ex);
+					}
+				},
+				"Loading a new profile");
+			_loadingProfile = true;
 		}
 
 		public override IPBComponent DeepCopy()
@@ -171,9 +162,18 @@ namespace HighVoltz.Professionbuddy.Components
 
 		public override void Reset()
 		{
-			_loadedProfile = false;
+			_loadingProfile = false;
 			base.Reset();
 		}
+		
+		public string GetAbsolutePath()
+		{
+			if (!IsLocal)
+				return Path;
 
+			return string.IsNullOrEmpty(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
+				? string.Empty
+				: System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ProfessionbuddyBot.Instance.CurrentProfile.XmlPath), Path);
+		}
 	}
 }

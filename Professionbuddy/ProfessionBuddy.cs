@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
@@ -60,7 +61,6 @@ namespace HighVoltz.Professionbuddy
 		// Used as a fix when profile is loaded before Inititialize is called
 		private static string _profileToLoad = "";
 		private static string _lastProfilePath = "";
-		internal static bool LastProfileIsHBProfile;
 
 		#endregion
 
@@ -98,6 +98,9 @@ namespace HighVoltz.Professionbuddy
 		internal List<uint> TradeskillTools { get; private set; }
 
 		public bool IsRunning { get; internal set; }
+		
+		// used when changing a profile or botbase
+		internal static bool DontResetBranchOnStartup { get; set; }
 
 		public List<TradeSkill> TradeSkillList
 		{
@@ -193,8 +196,12 @@ namespace HighVoltz.Professionbuddy
 			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
 			Util.CloseBankFrames();
 
-			// _botBeingChangedTo not null whenever SecondaryBot is being switched.
-			if (_botChangeInfo == null)
+			if (DontResetBranchOnStartup)
+			{
+				DontResetBranchOnStartup = false;
+				RootComposite.ResetSecondaryBot();
+			}
+			else
 			{
 				// reset all actions 
 				RootComposite.Reset();
@@ -280,7 +287,6 @@ namespace HighVoltz.Professionbuddy
 						if (!string.IsNullOrEmpty(_profileToLoad))
 						{
 							LoadPBProfile(_profileToLoad);
-							LastProfileIsHBProfile = false;
 						}
 						else if (!string.IsNullOrEmpty(MySettings.LastProfile))
 						{
@@ -403,77 +409,49 @@ namespace HighVoltz.Professionbuddy
 			}
 		}
 
-		private static XElement _newOuterProfileElement;
-		private static string _newXmlPath;
-
 		private static void Profile_OnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)
 		{
-			if (args.NewProfile.XmlElement == null)
+			var xmlElement = args.NewProfile.XmlElement;
+
+			if (xmlElement == null || xmlElement.Name != "Professionbuddy")
 				return;
-			if (args.NewProfile.XmlElement.Name == "Professionbuddy")
+
+			// prevents HB from reloading current profile when bot is started.
+			if (!Instance.IsRunning && ProfileManager.XmlLocation == Instance.CurrentProfile.XmlPath)
+				return;
+
+			if (_init)
 			{
-				// prevents HB from reloading current profile when bot is started.
-				if (!Instance.IsRunning && ProfileManager.XmlLocation == Instance.CurrentProfile.XmlPath)
-					return;
-				if (_init)
-				{
-					if (Instance.IsRunning && TreeRoot.IsRunning)
-					{
-						BotEvents.OnBotStopped += OnNewOuterProfileLoaded_OnBotStopped;
-						_newOuterProfileElement = args.NewProfile.XmlElement;
-						_newXmlPath = ProfileManager.XmlLocation;
-						TreeRoot.Stop("Changing profiles (Profile_OnNewOuterProfileLoaded)");
-					}
-					else
+				var loadProfile = new Action(
+					() =>
 					{
 						LoadPBProfile(ProfileManager.XmlLocation, args.NewProfile.XmlElement);
 						if (MainForm.IsValid)
 						{
+							MainForm.Instance.ActionTree.SuspendLayout();
 							if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
 								MainForm.Instance.AddProfileSettingsTab();
 							else
 								MainForm.Instance.RemoveProfileSettingsTab();
+							MainForm.Instance.ActionTree.ResumeLayout();
 						}
-					}
-					LastProfileIsHBProfile = false;
+					});
+
+				if (Instance.IsRunning && TreeRoot.IsRunning)
+				{
+					Util.ExecuteActionWhileBotIsStopped(loadProfile,
+						"Changing profiles (Profile_OnNewOuterProfileLoaded)");
 				}
 				else
 				{
-					_profileToLoad = ProfileManager.XmlLocation;
+					loadProfile();
 				}
 			}
-			else if (args.NewProfile.XmlElement.Name == "HBProfile")
+			else
 			{
-				LastProfileIsHBProfile = true;
-				_lastProfilePath = ProfileManager.XmlLocation;
+				_profileToLoad = ProfileManager.XmlLocation;
 			}
 		}
-
-		static void OnNewOuterProfileLoaded_OnBotStopped(EventArgs args)
-		{
-			try
-			{
-				LoadPBProfile(_newXmlPath, _newOuterProfileElement);
-				if (MainForm.IsValid)
-				{
-					MainForm.Instance.ActionTree.SuspendLayout();
-					if (Instance.ProfileSettings.SettingsDictionary.Count > 0)
-						MainForm.Instance.AddProfileSettingsTab();
-					else
-						MainForm.Instance.RemoveProfileSettingsTab();
-					MainForm.Instance.ActionTree.ResumeLayout();
-				}
-			}
-			finally
-			{
-				// start bot from anther thread to prevent dead lock
-				Application.Current.Dispatcher.BeginInvoke(new Action(TreeRoot.Start));
-				BotEvents.OnBotStopped -= OnNewOuterProfileLoaded_OnBotStopped;
-				_newOuterProfileElement = null;
-				_newXmlPath = null;
-			}
-		}
-
 
 		#region OnSpellsChanged
 
@@ -485,7 +463,6 @@ namespace HighVoltz.Professionbuddy
 			{
 				try
 				{
-					Debug("Pulsing Tradeskills from OnSpellsChanged");
 					foreach (TradeSkill ts in TradeSkillList)
 					{
 						ts.PulseSkill();
@@ -543,7 +520,6 @@ namespace HighVoltz.Professionbuddy
 		#region Misc
 
 		private static bool _init;
-		private static BotChangeInfo _botChangeInfo;
 		private static readonly object tradeSkillLocker = new object();
 		private static readonly object materialLocker = new object();
 
@@ -738,8 +714,6 @@ namespace HighVoltz.Professionbuddy
 			if (MainForm.IsValid)
 				MainForm.Instance.UpdateControls();
 
-			if (LastProfileIsHBProfile && !string.IsNullOrEmpty(_lastProfilePath))
-				ProfileManager.LoadNew(_lastProfilePath, true);
 			Instance.MySettings.Save();
 		}
 
@@ -774,91 +748,24 @@ namespace HighVoltz.Professionbuddy
 		{
 			if (bot == null)
 				return;
-			if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name != bot.Name || Instance.SecondaryBot == null)
-			{
-				Instance.IsRunning = false;
-				bool isBotRunning = TreeRoot.IsRunning;
-				_botChangeInfo = new BotChangeInfo(bot, isBotRunning);
-				// execute from GUI thread since this thread will get aborted when switching bot
-				if (isBotRunning)
-				{
-					BotEvents.OnBotStopped += ChangeSecondaryBot_OnBotStopped;
-					TreeRoot.Stop("Changing SecondaryBot");
-				}
-				else
-				{
-					FinalizeSecondaryBotChange();
-				}
-				Log("Changing SecondaryBot to {0}", bot.Name);
-			}
-		}
 
-		static void ChangeSecondaryBot_OnBotStopped(EventArgs e)
-		{
-			if (_botChangeInfo == null)
-				throw new InvalidOperationException("ChangeSecondaryBot_OnBotStopped called when _botChangeInfo is null");
-			try
-			{
-				FinalizeSecondaryBotChange();
-			}
-			finally
-			{
-				BotEvents.OnBotStopped -= ChangeSecondaryBot_OnBotStopped;
-			}
-		}
+			if (Instance.SecondaryBot != null && Instance.SecondaryBot.Name == bot.Name) 
+				return;
 
-		static void FinalizeSecondaryBotChange()
-		{
-			Instance.SecondaryBot = _botChangeInfo.Bot;
-			if (!_botChangeInfo.Bot.Initialized)
-				_botChangeInfo.Bot.DoInitialize();
-			if (ProfessionBuddySettings.Instance.LastBotBase != _botChangeInfo.Bot.Name)
-			{
-				ProfessionBuddySettings.Instance.LastBotBase = _botChangeInfo.Bot.Name;
-				ProfessionBuddySettings.Instance.Save();
-			}
-			if (MainForm.IsValid)
-				MainForm.Instance.UpdateBotCombo();
-			// start bot from anther thread to prevent dead lock
-			if (_botChangeInfo.StartHb)
-			{
-				Application.Current.Dispatcher.BeginInvoke(new Action(
-					() =>
+			Util.ExecuteActionWhileBotIsStopped(
+				() =>
+				{
+					Instance.SecondaryBot = bot;
+					if (!bot.Initialized)
+						bot.DoInitialize();
+					if (ProfessionBuddySettings.Instance.LastBotBase != bot.Name)
 					{
-						try
-						{
-							TreeRoot.Start();
-						}
-						finally
-						{
-							_botChangeInfo = null;
-						}
-					}));
-			}
-			else
-			{
-				_botChangeInfo = null;
-			}
-		}
-
-		// returns true if a profile was preloaded
-		internal static bool PreLoadHbProfile()
-		{
-			if (!string.IsNullOrEmpty(Instance.CurrentProfile.ProfilePath) && Instance.Branch != null)
-			{
-				var list = new List<LoadProfileAction>();
-
-				PbProfile.GetHbprofiles(Instance.CurrentProfile.ProfilePath, Instance.Branch, list);
-				LoadProfileAction loadProfileAction = list.FirstOrDefault();
-				if (loadProfileAction == null) return false;
-				Log("Preloading profile {0}", Path.GetFileName(loadProfileAction.Path));
-				// unhook event to prevent recursive loop
-				BotEvents.Profile.OnNewOuterProfileLoaded -= Profile_OnNewOuterProfileLoaded;
-				loadProfileAction.Load();
-				BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
-				return true;
-			}
-			return true;
+						ProfessionBuddySettings.Instance.LastBotBase = bot.Name;
+						ProfessionBuddySettings.Instance.Save();
+					}
+					if (MainForm.IsValid)
+						MainForm.Instance.UpdateBotCombo();
+				},"Changing SecondaryBot");
 		}
 
 		internal static List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
@@ -1079,16 +986,6 @@ namespace HighVoltz.Professionbuddy
 			public Form ConfigurationForm { get; private set; }
 		}
 
-		private class BotChangeInfo
-		{
-			public BotChangeInfo(BotBase bot, bool startHb)
-			{
-				Bot = bot;
-				StartHb = startHb;
-			}
-			public BotBase Bot { get; private set; }
-			public bool StartHb { get; private set; }
-		}
 		#endregion
 	}
 }

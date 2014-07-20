@@ -4,13 +4,16 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
+using Styx.CommonBot.Profiles;
 using Styx.Helpers;
 using Styx.Patchables;
 using Styx.Pathing;
@@ -369,6 +372,48 @@ namespace HighVoltz.Professionbuddy
 			}
 			return bot;
 		}
+
+		/// <summary>
+		/// Executes the action asynchronously while bot is stopped.
+		/// If Bot was running then it is started up again after executing action.
+		/// Also Profesionbuddy's behavior tree is not reseted unlike when bot is restarted manaully
+		/// </summary>
+		/// <param name="action">The action.</param>
+		/// <param name="reason">The reason.</param>
+		public static void ExecuteActionWhileBotIsStopped(Action action, string reason = null)
+		{
+			if (TreeRoot.IsRunning)
+			{
+				BotEvents.OnBotStopDelegate handler = null;
+				handler = args =>
+				{
+					try
+					{
+						// We perform the action in a new thread since action can be take a few seconds
+						// and we don't want to hang the main thread.
+						Task.Run(() =>
+						{
+							action();
+							TreeRoot.Start();
+						});
+					}
+					finally
+					{
+						BotEvents.OnBotStopped -= handler;
+					}
+				};
+
+				// we need to wait for bot to actually stop after calling TreeRoot.Stop, 
+				// it doesn't stop synchronously
+				BotEvents.OnBotStopped += handler;
+				ProfessionbuddyBot.DontResetBranchOnStartup = true;
+				TreeRoot.Stop(reason);
+			}
+			else
+			{
+				Task.Run(action);
+			}
+		}
 	}
 
 	internal static class Exts
@@ -450,7 +495,7 @@ namespace HighVoltz.Professionbuddy
 			if ((itemSparse.Flags & 0x40000) > 0)
 				return itemSparse.RequiredSkillLevel;
 			return -1;
-		}
+		}		
 
 		#region Embedded Type - ItemDisenchantLootStruct
 

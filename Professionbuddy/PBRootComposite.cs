@@ -55,7 +55,17 @@ namespace HighVoltz.Professionbuddy
 
 		public void Reset()
 		{
+			ResetBranch();
+			ResetSecondaryBot();
+		}
+
+		public void ResetBranch()
+		{
 			Branch.Reset();
+		}
+
+		public void ResetSecondaryBot()
+		{
 			SecondaryBotExecutor.Reset();
 		}
 
@@ -88,18 +98,6 @@ namespace HighVoltz.Professionbuddy
 				try
 				{
 					_botbase.Start();
-				}
-				catch (NullReferenceException ex)
-				{
-					if (ex.StackTrace.Contains("Gatherbuddy.Profile"))
-					{
-						ProfessionbuddyBot.Log("Attempting to recover from Gatherbuddy startup error. ");
-						ProfessionbuddyBot.PreLoadHbProfile();
-					}
-					else
-					{
-						throw;
-					}
 				}
 				finally
 				{
