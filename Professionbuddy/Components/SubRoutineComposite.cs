@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
+using HighVoltz.UberBehaviorTree;
 
 namespace HighVoltz.Professionbuddy.Components
 {
@@ -75,5 +76,25 @@ namespace HighVoltz.Professionbuddy.Components
 		}
 
 	    #endregion
-    }
+
+
+		public static bool GetSubRoutineMyName(string subRoutineName, out SubRoutineComposite subRoutine)
+		{
+			subRoutine = GetSubRoutineMyNameInternal(subRoutineName, ProfessionbuddyBot.Instance.Branch);
+			return subRoutine != null;
+		}
+
+		private static SubRoutineComposite GetSubRoutineMyNameInternal(string subRoutineName, UberBehaviorTree.Component comp)
+		{
+			if (comp is SubRoutineComposite && ((SubRoutineComposite)comp).SubRoutineName == subRoutineName)
+				return (SubRoutineComposite)comp;
+			var composite = comp as Composite;
+			if (composite != null)
+			{
+				return composite.Children.Select(c => GetSubRoutineMyNameInternal(subRoutineName, c)).
+					FirstOrDefault(temp => temp != null);
+			}
+			return null;
+		}
+	}
 }

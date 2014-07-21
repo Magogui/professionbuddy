@@ -53,6 +53,7 @@ namespace HighVoltz.Professionbuddy
 
 		#region Fields
 
+		private Version _version;
 		private readonly bool _ctorRunOnce;
 		private readonly Dictionary<uint, int> _materialList = new Dictionary<uint, int>();
 		private readonly PbProfileSettings _profileSettings = new PbProfileSettings();
@@ -98,9 +99,12 @@ namespace HighVoltz.Professionbuddy
 		internal List<uint> TradeskillTools { get; private set; }
 
 		public bool IsRunning { get; internal set; }
-		
-		// used when changing a profile or botbase
-		internal static bool DontResetBranchOnStartup { get; set; }
+
+		/// <summary>
+		/// Gets a value indicating whether [skip branch reset on startup]. This is used when Honorbudy is stopped 
+		/// to execute a action that can only be safely executed while not running
+		/// </summary>
+		public static bool IsExecutingActionWhileHonorbuddyIsStopped { get; internal set; }
 
 		public List<TradeSkill> TradeSkillList
 		{
@@ -139,16 +143,14 @@ namespace HighVoltz.Professionbuddy
 			get { return DataStore != null && DataStore.HasDataStoreAddon; }
 		}
 
-		// profile Settings.
-
 		public PbProfileSettings ProfileSettings
 		{
 			get { return _profileSettings; }
 		}
 
-		private Version Version
+		public Version Version
 		{
-			get { return new Version(1, Svn.Revision); }
+			get { return _version ?? (_version = new Version(1, Svn.Revision)); }
 		}
 
 		#endregion
@@ -196,9 +198,9 @@ namespace HighVoltz.Professionbuddy
 			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
 			Util.CloseBankFrames();
 
-			if (DontResetBranchOnStartup)
+			if (IsExecutingActionWhileHonorbuddyIsStopped)
 			{
-				DontResetBranchOnStartup = false;
+				IsExecutingActionWhileHonorbuddyIsStopped = false;
 				RootComposite.ResetSecondaryBot();
 			}
 			else
@@ -413,7 +415,7 @@ namespace HighVoltz.Professionbuddy
 		{
 			var xmlElement = args.NewProfile.XmlElement;
 
-			if (xmlElement == null || xmlElement.Name != "Professionbuddy")
+			if (!Util.IsProfessionbuddyProfile(xmlElement))
 				return;
 
 			// prevents HB from reloading current profile when bot is started.
@@ -803,33 +805,31 @@ namespace HighVoltz.Professionbuddy
 			get { return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version)); }
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Warn(string format, params object[] args)
 		{
-			Logging.Write(Colors.DarkOrange, "Warning: " + format, args);
+			PBLog.Warn(format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Fatal(string format, params object[] args)
 		{
-			Logging.Write(Colors.Red, "Fatal: " + format, args);
-			TreeRoot.Stop();
+			PBLog.Fatal(format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Log(string format, params object[] args)
 		{
-			LogInvoker(LogLevel.Normal, Colors.DodgerBlue, Header, Colors.LightSteelBlue, format, args);
+			PBLog.Log(format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Log(Color headerColor, string header, Color msgColor, string format, params object[] args)
 		{
-			LogInvoker(
-				LogLevel.Normal,
-				System.Windows.Media.Color.FromArgb(headerColor.A, headerColor.R, headerColor.G, headerColor.B),
-				header,
-				System.Windows.Media.Color.FromArgb(msgColor.A, msgColor.R, msgColor.G, msgColor.B),
-				format,
-				args);
+			PBLog.Log(headerColor, header, msgColor,format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Log(
 			System.Windows.Media.Color headerColor,
 			string header,
@@ -837,9 +837,10 @@ namespace HighVoltz.Professionbuddy
 			string format,
 			params object[] args)
 		{
-			LogInvoker(LogLevel.Normal, headerColor, header, msgColor, format, args);
+			PBLog.Log(headerColor, header, msgColor, format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Log(
 			LogLevel logLevel,
 			System.Windows.Media.Color headerColor,
@@ -848,112 +849,14 @@ namespace HighVoltz.Professionbuddy
 			string format,
 			params object[] args)
 		{
-			LogInvoker(logLevel, headerColor, header, msgColor, format, args);
+			PBLog.Log(logLevel, headerColor, header, msgColor, format, args);
 		}
 
+		[Obsolete("Use the PBLog class functions instead")]
 		public static void Debug(string format, params object[] args)
 		{
-			Logging.WriteDiagnostic(Colors.DodgerBlue, string.Format("PB {0}: ", Instance.Version) + format, args);
-		}
-
-		private static void LogInvoker(
-			LogLevel level,
-			System.Windows.Media.Color headerColor,
-			string header,
-			System.Windows.Media.Color msgColor,
-			string format,
-			params object[] args)
-		{
-			if (Application.Current.Dispatcher.Thread == Thread.CurrentThread)
-				LogInternal(level, headerColor, header, msgColor, format, args);
-			else
-				Application.Current.Dispatcher.BeginInvoke(
-					new LogDelegate(LogInternal),
-					level,
-					headerColor,
-					header,
-					msgColor,
-					format,
-					args);
-		}
-
-		// modified by Ingrego.
-		private static void LogInternal(
-			LogLevel level,
-			System.Windows.Media.Color headerColor,
-			string header,
-			System.Windows.Media.Color msgColor,
-			string format,
-			params object[] args)
-		{
-			if (level == LogLevel.None)
-				return;
-			try
-			{
-				string msg = String.Format(format, args);
-				if (GlobalSettings.Instance.LogLevel >= level)
-				{
-					if (_rtbLog == null)
-						_rtbLog = (RichTextBox)Application.Current.MainWindow.FindName("rtbLog");
-
-					//var headerTR = new TextRange(_rtbLog.Document.Blocks[0], _rtbLog.Document.ContentEnd) { Text = header };
-					//headerTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(headerColor));
-
-					//var messageTR = new TextRange(_rtbLog.Document.ContentEnd, _rtbLog.Document.ContentEnd);
-					//messageTR.Text = msg + Environment.NewLine;
-					//messageTR.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(msgColor));
-
-
-					var para = (Paragraph)_rtbLog.Document.Blocks.FirstBlock;
-					para.Inlines.Add(new Run(header) { Foreground = new SolidColorBrush(headerColor) });
-					para.Inlines.Add(new Run(msg + Environment.NewLine) { Foreground = new SolidColorBrush(msgColor) });
-					_rtbLog.ScrollToEnd();
-				}
-				try
-				{
-					char abbr;
-					switch (level)
-					{
-						case LogLevel.Normal:
-							abbr = 'N';
-							break;
-						case LogLevel.Quiet:
-							abbr = 'Q';
-							break;
-						case LogLevel.Diagnostic:
-							abbr = 'D';
-							break;
-						case LogLevel.Verbose:
-							abbr = 'V';
-							break;
-						default:
-							abbr = 'N';
-							break;
-					}
-					string logMsg = string.Format(
-						"[{0} {4}]{1}{2}{3}",
-						DateTime.Now.ToString("HH:mm:ss.fff"),
-						header,
-						msg,
-						Environment.NewLine,
-						abbr);
-					File.AppendAllText(Logging.LogFilePath, logMsg);
-				}
-				catch { }
-			}
-			catch
-			{
-				Logging.Write(header + format, args);
-			}
-		}
-
-		private delegate void LogDelegate(
-			LogLevel level,
-			System.Windows.Media.Color headerColor,
-			string header,
-			System.Windows.Media.Color msgColor,
-			string format,
-			params object[] args);
+			PBLog.Debug(format, args);
+		}		
 
 		#endregion
 

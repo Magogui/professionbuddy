@@ -20,7 +20,7 @@ namespace HighVoltz.Professionbuddy.Components
 			    "SubRoutineName",
 				    typeof (string),
 				    new DisplayNameAttribute(
-					    ProfessionbuddyBot.Instance.Strings["Action_CallSubRoutine_SubRoutineName"]));
+						ProfessionbuddyBot.Instance.Strings["Action_Common_SubRoutineName"]));
 		    SubRoutineName = "";
 	    }
 
@@ -48,7 +48,7 @@ namespace HighVoltz.Professionbuddy.Components
 
 		protected async override Task Run()
 		{
-			if (_sub == null && !GetSubRoutine(out _sub))
+			if (_sub == null && !SubRoutineComposite.GetSubRoutineMyName(SubRoutineName, out _sub))
 			{
 				ProfessionbuddyBot.Warn("{0}: {1}.", 
 					ProfessionbuddyBot.Instance.Strings["Error_SubroutineNotFound"], SubRoutineName);
@@ -85,24 +85,5 @@ namespace HighVoltz.Professionbuddy.Components
 			return new CallSubRoutineAction { SubRoutineName = SubRoutineName };
 	    }
 
-	    private bool GetSubRoutine(out SubRoutineComposite subRoutine)
-        {
-			subRoutine = FindSubRoutineByName(SubRoutineName, ProfessionbuddyBot.Instance.Branch);
-			return subRoutine != null;
-        }
-
-        private SubRoutineComposite FindSubRoutineByName(string subName, UberBehaviorTree.Component comp)
-        {
-            if (comp is SubRoutineComposite && ((SubRoutineComposite) comp).SubRoutineName == subName)
-                return (SubRoutineComposite) comp;
-            var composite = comp as Composite;
-            if (composite != null)
-            {
-                return composite.Children.Select(c => FindSubRoutineByName(subName, c)).
-                    FirstOrDefault(temp => temp != null);
-            }
-            return null;
-        }
-
-    }
+	}
 }

@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentBase\PBAction.cs" />
+    <Compile Include="Components\AttachToTreeHookAction.cs" />
     <Compile Include="Components\CalSubRoutineAction.cs" />
     <Compile Include="ComponentBase\DynamicallyCompiledCodeComposite.cs" />
     <Compile Include="ComponentBase\FlowControlComposite.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="ComponentBase\PBComposite.cs" />
     <Compile Include="Components\CancelAuctionAction.cs" />
     <Compile Include="Components\DeclarationAction.cs" />
+    <Compile Include="PBLog.cs" />
     <Compile Include="PBRootComposite.cs" />
     <Compile Include="DataStore.cs" />
     <Compile Include="Dynamic\DynamicProperty.cs" />

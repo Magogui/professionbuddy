@@ -84,6 +84,7 @@
     <Action_Common_SpellEntry>Spell ID</Action_Common_SpellEntry>
     <Action_Common_SpellName>Spell Name</Action_Common_SpellName>
     <Action_Common_StackSize>Stack Size</Action_Common_StackSize>
+    <Action_Common_SubRoutineName>Subroutine Name</Action_Common_SubRoutineName>
     <Action_Common_Summary>Summary</Action_Common_Summary>
     <Action_Common_Timeout>Timeout</Action_Common_Timeout>
     <Action_Common_Type>Type</Action_Common_Type>
@@ -93,6 +94,11 @@
     <Action_Common_Withdraw>Withdraw</Action_Common_Withdraw>
     <Action_Common_WithdrawAdditively>Withdraw Additively</Action_Common_WithdrawAdditively>
 
+    <!-- AttachToTreehook -->
+    <Action_AttachToTreehook_TreeHookName>TreeHook Name</Action_AttachToTreehook_TreeHookName>
+    <Action_AttachToTreehook_Name>Attach to Treehook</Action_AttachToTreehook_Name>
+    <Action_AttachToTreehook_Help>This action will attach a SubRoutine to a Treehook. The Subroutine is automatically detached from the TreeHook when bot is stopped or a new Professionbuddy profile is loaded. Calling this action more than once has no effect, the TreeHook is only attached the first time it is executed.</Action_AttachToTreehook_Help>
+    
     <!-- BuyItemAction-->
     <Action_BuyItemAction_Help>This action will buy items from a merchant, either a specific item or any materials the merchant has that are needed for recipes in the action tree. If 'Buy Additively' is set to true this will buy the axact amount of items regardless of the item count player has in bags</Action_BuyItemAction_Help>
     <Action_BuyItemAction_Name>Buy Item</Action_BuyItemAction_Name>
@@ -103,7 +109,6 @@
     <Action_BuyItemFromAhAction_BidOnItem>Bid On Items</Action_BuyItemFromAhAction_BidOnItem>
 
     <!-- CallSubRoutine -->
-    <Action_CallSubRoutine_SubRoutineName>Subroutine Name</Action_CallSubRoutine_SubRoutineName>
     <Action_CallSubRoutine_Name>Call SubRoutine</Action_CallSubRoutine_Name>
     <Action_CallSubRoutine_Help>This action will execute a SubRoutine</Action_CallSubRoutine_Help>
 
@@ -241,5 +246,6 @@
     <FlowControl_While_Name>While</FlowControl_While_Name>
     <FlowControl_While_LongName>While Condition</FlowControl_While_LongName>
     <FlowControl_While_Help>'While Condition' will repeatedly execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running. The difference between this and the 'If Condition' is that this will auto reset all actions within it and all nested 'If/While' Conditions</FlowControl_While_Help>
+
 
 </Localization>

@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
@@ -406,7 +407,7 @@ namespace HighVoltz.Professionbuddy
 				// we need to wait for bot to actually stop after calling TreeRoot.Stop, 
 				// it doesn't stop synchronously
 				BotEvents.OnBotStopped += handler;
-				ProfessionbuddyBot.DontResetBranchOnStartup = true;
+				ProfessionbuddyBot.IsExecutingActionWhileHonorbuddyIsStopped = true;
 				TreeRoot.Stop(reason);
 			}
 			else
@@ -414,6 +415,12 @@ namespace HighVoltz.Professionbuddy
 				Task.Run(action);
 			}
 		}
+
+		public static bool IsProfessionbuddyProfile(XElement rootElement)
+		{
+			return rootElement != null && rootElement.Name == "Professionbuddy";
+		}
+
 	}
 
 	internal static class Exts
