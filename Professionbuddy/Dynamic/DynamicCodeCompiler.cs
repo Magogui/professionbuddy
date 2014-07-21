@@ -361,15 +361,15 @@ namespace HighVoltz.Professionbuddy.Dynamic
             void Log (string f,params object[] args) {Helpers.Log(f,args); }
             void Log(System.Windows.Media.Color headerColor, string header, System.Windows.Media.Color msgColor, string format, params object[] args) 
             {
-                ProfessionbuddyBot.Log(headerColor, header, msgColor, format, args);
+                PBLog.Log(headerColor, header, msgColor, format, args);
             }
             void Log(Styx.Common.LogLevel logLevel, System.Windows.Media.Color headerColor, string header, System.Windows.Media.Color msgColor, string format, params object[] args) 
             {
-                ProfessionbuddyBot.Log(logLevel, headerColor, header, msgColor, format, args);
+                PBLog.Log(logLevel, headerColor, header, msgColor, format, args);
             }
             void Log(System.Drawing.Color headerColor, string header, System.Drawing.Color msgColor, string format, params object[] args) 
             {
-                ProfessionbuddyBot.Log(headerColor, header, msgColor, format, args);
+                PBLog.Log(headerColor, header, msgColor, format, args);
             }
             float DistanceTo(double x,double y,double z) {return Helpers.DistanceTo(x,y,z); }
             float DistanceTo(WoWPoint p) {return Helpers.DistanceTo(p.X,p.Y,p.Z); }

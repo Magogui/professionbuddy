@@ -69,7 +69,10 @@ namespace HighVoltz.Professionbuddy.Components
 		protected async override Task Run()
 		{
 			if (_ranonce)
+			{
+				IsDone = true;
 				return;
+			}
 
 			if (!SubRoutineComposite.GetSubRoutineMyName(SubRoutineName, out _sub))
 			{
@@ -84,6 +87,7 @@ namespace HighVoltz.Professionbuddy.Components
 			BotEvents.OnBotStopped += BotEvents_OnBotStopped;
 			PBLog.Debug("Attached the '{0}' SubRoutine to the {1} TreeHook", SubRoutineName, TreeHookName);
 			_ranonce = true;
+			IsDone = true;
 		}
 
 		private async Task<bool> SubRoutineExecutor()

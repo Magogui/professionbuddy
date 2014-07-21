@@ -198,7 +198,7 @@ return 0";
         {
             if (_isSwitchingToons)
             {
-                ProfessionbuddyBot.Log("Already switching characters");
+                PBLog.Log("Already switching characters");
                 return;
             }
             string loginLua = string.Format(LoginLua, character, server);
@@ -238,7 +238,7 @@ return 0";
 										}
 										else
 										{
-											ProfessionbuddyBot.Warn("Could not find bot with name {0}", botName);
+											PBLog.Warn("Could not find bot with name {0}", botName);
 										}
                                         TreeRoot.Start();
                                         ProfessionbuddyBot.Instance.OnTradeSkillsLoaded += ProfessionbuddyBot.Instance.Professionbuddy_OnTradeSkillsLoaded;
