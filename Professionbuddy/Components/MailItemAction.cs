@@ -74,7 +74,7 @@ namespace HighVoltz.Professionbuddy.Components
                end  
                if bagged >= amount then return -1 end  
                mailItemI = mailItemI + 1  
-               if mailItemI >= ATTACHMENTS_MAX_SEND then  
+               if mailItemI > ATTACHMENTS_MAX_SEND then  
                   return bagged  
                end  
             end  
