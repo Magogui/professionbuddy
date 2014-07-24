@@ -11,7 +11,6 @@ namespace HighVoltz.Professionbuddy.Components
 	[PBXmlElement("CallSubRoutine")]
     public sealed class CallSubRoutineAction : PBAction
     {
-        private bool _ranonce;
         private SubRoutineComposite _sub;
 
 	    public CallSubRoutineAction()
@@ -50,35 +49,25 @@ namespace HighVoltz.Professionbuddy.Components
 		{
 			if (_sub == null && !SubRoutineComposite.GetSubRoutineMyName(SubRoutineName, out _sub))
 			{
-				ProfessionbuddyBot.Warn("{0}: {1}.", 
-					ProfessionbuddyBot.Instance.Strings["Error_SubroutineNotFound"], SubRoutineName);
+				PBLog.Warn("{0}: {1}.", ProfessionbuddyBot.Instance.Strings["Error_SubroutineNotFound"], SubRoutineName);
 				IsDone = true;
 				return;
 			}
 
-			if (!_ranonce)
+			using(SubRoutineComposite.Activate(_sub))
 			{
-				// make sure all actions within the subroutine are reset before we start.
-				if (_sub != null)
-					_sub.Reset();
-				_ranonce = true;
-			}
-
-			try 
-			{
-				await _sub.Execute();
-			}
-			finally
-			{
-				IsDone = _sub.IsDone;
+				try 
+				{
+					if (_sub.IsDone)
+						_sub.Reset();
+					await _sub;
+				}
+				finally
+				{
+					IsDone = _sub.IsDone;
+				}
 			}
 		}
-
-        public override void Reset()
-        {
-            base.Reset();
-            _ranonce = false;
-        }
 
 	    public override IPBComponent DeepCopy()
 	    {

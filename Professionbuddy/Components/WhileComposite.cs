@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Buddy.Coroutines;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.UberBehaviorTree;
@@ -33,24 +35,18 @@ namespace HighVoltz.Professionbuddy.Components
 			get { return ProfessionbuddyBot.Instance.Strings["FlowControl_While_Help"]; }
 		}
 
+		public override bool IsDone { get { return (!IsRunning || !IgnoreCanRun) && !CanRun(); } }
+
 		public override async Task<bool> Run()
 		{
-			if (IsDone)
-				return false;
-
-			if ((!IsRunning || !IgnoreCanRun) && !CanRun())
-			{
-				IsDone = true;
-				return false;
-			}
-
 			IsRunning = true;
 
-			foreach (var child in Children)
+			foreach (var child in Children.SkipWhile(c => Selection != null && c != Selection))
 			{
 				var pbComp = child as IPBComponent;
 				if (pbComp == null || pbComp.IsDone)
 					continue;
+				Selection = pbComp;
 
 				var coroutine = new Coroutine(async () => await child.Run());
 				try
@@ -64,7 +60,10 @@ namespace HighVoltz.Professionbuddy.Components
 
 						await Coroutine.Yield();
 						if (!IgnoreCanRun && !CanRun())
+						{
+							Reset();
 							return false;
+						}
 					}
 
 					if ((bool) coroutine.Result)
@@ -77,7 +76,6 @@ namespace HighVoltz.Professionbuddy.Components
 			}
 
 			Reset();
-			IsRunning = false;
 
 			if (CanRun())
 			{

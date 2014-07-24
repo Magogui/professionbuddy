@@ -106,10 +106,12 @@ namespace HighVoltz.Professionbuddy
 			return itemInfo != null ? itemInfo.Name : null;
 		}
 
+		[Obsolete("Use Navigator.MoveTo instead")]
 		public static void MoveTo(WoWPoint point)
 		{
 			if (BotPoi.Current.Type != PoiType.None)
 				BotPoi.Clear();
+
 			if (CharacterSettings.Instance.UseMount && !StyxWoW.Me.Mounted && Mount.CanMount() && Mount.ShouldMount(point))
 				Mount.MountUp(() => point);
 			_lastPoint = point;
@@ -117,12 +119,6 @@ namespace HighVoltz.Professionbuddy
 			Navigator.MoveTo(point);
 		}
 
-		public static WoWPoint GetMoveToDestination()
-		{
-			if (DateTime.Now.Subtract(_lastMove).TotalSeconds < 4 && _lastPoint != WoWPoint.Zero)
-				return _lastPoint;
-			return StyxWoW.Me.Location;
-		}
 
 		/// <summary>
 		///     Converts a string of 3 numbers to a WoWPoint.

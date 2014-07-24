@@ -43,12 +43,15 @@ namespace HighVoltz.Professionbuddy.ComponentBase
 		public virtual void Reset()
 		{
 			Children.OfType<IPBComponent>().ForEach(c => c.Reset());
+			Selection = null;
 			IsDone = false;
 		}
 
 		public abstract IPBComponent DeepCopy();
 
 		#endregion
+
+		protected IPBComponent Selection { get; set; }
 
 		#region Utility
 

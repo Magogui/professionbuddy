@@ -591,7 +591,7 @@ namespace HighVoltz.Professionbuddy
 				else
 					gc = (Composite) ((Component) dest.Tag).Parent;
 
-				if ((dest.Tag is IfComposite || dest.Tag is SubRoutineComposite) && !ignoreRoot)
+				if ((dest.Tag is PBComposite) && !ignoreRoot)
 				{
 					dest.Nodes.Add(newNode);
 					gc.AddChild((Component) newNode.Tag);

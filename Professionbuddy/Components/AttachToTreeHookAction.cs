@@ -1,15 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
-using Bots.BGBuddy.Helpers;
 using CommonBehaviors.Actions;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
 using Styx.Common;
 using Styx.CommonBot;
-using Styx.CommonBot.Profiles;
 
 namespace HighVoltz.Professionbuddy.Components
 {
@@ -92,9 +88,12 @@ namespace HighVoltz.Professionbuddy.Components
 
 		private async Task<bool> SubRoutineExecutor()
 		{
-			if (_sub.IsDone)
-				_sub.Reset();
-			return await _sub.Execute();
+			using (SubRoutineComposite.Activate(_sub))
+			{
+				if (_sub.IsDone)
+					_sub.Reset();
+				return await _sub;
+			}
 		}
 
 		private void ProfileOnOnNewOuterProfileLoaded(BotEvents.Profile.NewProfileLoadedEventArgs args)

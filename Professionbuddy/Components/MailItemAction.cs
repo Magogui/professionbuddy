@@ -8,11 +8,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Buddy.Coroutines;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.Dynamic;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
 using HighVoltz.Professionbuddy.PropertyGridUtilities.Editors;
 using Styx;
+using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -79,24 +81,9 @@ namespace HighVoltz.Professionbuddy.Components
             return bagged 
         ";
 
-		// format indexs are MailRecipient=0, Mail subject=1
-		private const string MailItemsFormat = @"
-            local cnt = 0  
-            for i=1,ATTACHMENTS_MAX_SEND do  
-               if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end  
-            end  
-            if cnt >= ATTACHMENTS_MAX_SEND - 1 then  
-               SendMail (""{0}"",""{1}"",'')  
-               return 1  
-            end  
-            return 0 
-    ";
-
-		private readonly Stopwatch _itemSplitSW = new Stopwatch();
 		private Dictionary<uint, int> _itemList;
 		private WoWPoint _loc;
 		private string _mailSubject;
-		private WoWGameObject _mailbox;
 
 		public MailItemAction()
 		{
@@ -323,103 +310,25 @@ namespace HighVoltz.Professionbuddy.Components
 
 		protected override async Task Run()
 		{
-			WoWPoint movetoPoint = _loc;
-			if (MailFrame.Instance == null || !MailFrame.Instance.IsVisible)
+			if (!MailFrame.Instance.IsVisible)
 			{
-				if (AutoFindMailBox || movetoPoint == WoWPoint.Zero)
-				{
-					_mailbox =
-						ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
-							o => o.SubType == WoWGameObjectType.Mailbox && o.CanUse())
-							.OrderBy(o => o.DistanceSqr).FirstOrDefault();
-				}
-				else
-				{
-					_mailbox =
-						ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
-							o => o.SubType == WoWGameObjectType.Mailbox
-								&& o.Location.Distance(_loc) < 10 && o.CanUse())
-							.OrderBy(o => o.DistanceSqr).FirstOrDefault();
-				}
-				if (_mailbox != null)
-					movetoPoint = _mailbox.Location;
-
-				if (movetoPoint == WoWPoint.Zero)
-				{
-					ProfessionbuddyBot.Warn(Strings["Error_UnableToFindMailbox"]);
-					return;
-				}
-
-				if (_mailbox == null || !_mailbox.WithinInteractRange)
-				{
-					Util.MoveTo(movetoPoint);
-				}
-				else if (_mailbox != null)
-				{
-					if (Me.IsMoving)
-						WoWMovement.MoveStop();
-					_mailbox.Interact();
-				}
+				await OpenMailbox();
 				return;
 			}
-			// Mail Frame is open..
-			// item split in proceess
-			if (_itemSplitSW.IsRunning && _itemSplitSW.ElapsedMilliseconds <= 2000)
-				return;
 
 			if (_itemList == null)
 				_itemList = BuildItemList();
 
-			if (!_itemList.Any())
-			{
-				//ProfessionbuddyBot.Debug("Sending any remaining items already in SendMail item slots. Mail subject will be: {0} ",_mailSubject);
-				Lua.DoString(
-					"for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then SendMail (\"{0}\",\"{1}\",'') end end ",
-					CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(),
-					_mailSubject != null ? _mailSubject.ToFormatedUTF8() : " ");
-				//ProfessionbuddyBot.Debug("Done sending mail");
-				IsDone = true;
-				return;
-			}
-
-			MailFrame.Instance.SwitchToSendMailTab();
-			uint itemID = _itemList.Keys.FirstOrDefault();
-			WoWItem item = Me.BagItems.FirstOrDefault(i => i.Entry == itemID);
-			_mailSubject = item != null ? item.Name : " ";
 			if (string.IsNullOrEmpty(_mailSubject))
 				_mailSubject = " ";
-			ProfessionbuddyBot.Debug("MailItem: sending {0}", itemID);
 
-
-			// format indexs are MailRecipient=0, Mail subject=1
-			string mailToLua = string.Format(
-				MailItemsFormat,
-				CharacterSettings.Instance.MailRecipient.ToFormatedUTF8(),
-				_mailSubject.ToFormatedUTF8());
-
-			if (Lua.GetReturnVal<int>(mailToLua, 0) == 1)
+			if (!_itemList.Any())
 			{
-				_itemSplitSW.Restart();
-				return;
-			}
+				if (NumberOfSlotsUsedInSendMail > 0)
+					await MailItems(CharacterSettings.Instance.MailRecipient, _mailSubject);
 
-			int ret = MailItem(itemID, _itemList[itemID]);
-			// we need to wait for item split to finish if ret >= 0
-
-			if (ret >= 0)
-			{
-				_itemSplitSW.Restart();
-			}
-			_itemList[itemID] = ret < 0 ? 0 : _itemList[itemID] - ret;
-
-			bool done = _itemList[itemID] <= 0;
-			if (done)
-			{
-				_itemList.Remove(itemID);
-			}
-			if (IsDone)
-			{
-				ProfessionbuddyBot.Log(
+				IsDone = true;
+				PBLog.Log(
 					"Done sending {0} via mail",
 					ItemSelection == ItemSelectionType.Category
 						? string.Format(
@@ -429,7 +338,89 @@ namespace HighVoltz.Professionbuddy.Components
 						: (ItemSelection == ItemSelectionType.IDs
 							? string.Format("Items that match Id of {0}", ItemID)
 							: string.Format("Items of quality {0}", ItemQuality)));
+				return;
 			}
+
+			MailFrame.Instance.SwitchToSendMailTab();
+			uint itemID = _itemList.Keys.FirstOrDefault();
+			WoWItem item = Me.BagItems.FirstOrDefault(i => i.Entry == itemID);
+			_mailSubject = item != null ? item.Name : " ";
+
+			PBLog.Debug("MailItem: sending {0}", itemID);
+
+			if (NumberOfSlotsUsedInSendMail >= 12)
+				await MailItems(CharacterSettings.Instance.MailRecipient, _mailSubject);
+
+			int amountPlaced = PlaceItemInMail(itemID, _itemList[itemID]);
+			if (amountPlaced >= 0)
+			{
+				// we need to wait for item split to finish if ret >= 0
+				await CommonCoroutines.SleepForLagDuration();
+			}
+
+			_itemList[itemID] = amountPlaced < 0 ? 0 : _itemList[itemID] - amountPlaced;
+
+			bool doneWithItem = _itemList[itemID] <= 0;
+			if (doneWithItem)
+				_itemList.Remove(itemID);
+		}
+
+		private int NumberOfSlotsUsedInSendMail
+		{
+			get
+			{
+				return
+					Lua.GetReturnVal<int>(
+						"local cnt = 0 for i=1,ATTACHMENTS_MAX_SEND do if GetSendMailItem(i) ~= nil then cnt = cnt + 1 end end return cnt",
+						0);
+			}
+		}
+
+		private async Task MailItems(string recipient, string subject)
+		{
+			var lua = string.Format("SendMail ('{0}', '{1}' ,'');  ",
+				recipient.ToFormatedUTF8(), subject.ToFormatedUTF8());
+			Lua.DoString(lua);
+			await CommonCoroutines.SleepForLagDuration();
+		}
+
+		private async Task OpenMailbox()
+		{
+			WoWPoint movetoPoint = _loc;
+			WoWGameObject mailbox;
+			if (AutoFindMailBox || movetoPoint == WoWPoint.Zero)
+			{
+				mailbox =
+					ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
+						o => o.SubType == WoWGameObjectType.Mailbox && o.CanUse())
+						.OrderBy(o => o.DistanceSqr).FirstOrDefault();
+			}
+			else
+			{
+				mailbox =
+					ObjectManager.GetObjectsOfType<WoWGameObject>().Where(
+						o => o.SubType == WoWGameObjectType.Mailbox
+							&& o.Location.Distance(_loc) < 10 && o.CanUse())
+						.OrderBy(o => o.DistanceSqr).FirstOrDefault();
+			}
+			if (mailbox != null)
+				movetoPoint = mailbox.Location;
+
+			if (movetoPoint == WoWPoint.Zero)
+			{
+				PBLog.Warn(Strings["Error_UnableToFindMailbox"]);
+				return;
+			}
+
+			if (mailbox == null || !mailbox.WithinInteractRange)
+			{
+				await CommonCoroutines.MoveTo(movetoPoint);
+				return;
+			}
+
+			if (Me.IsMoving)
+				await CommonCoroutines.StopMoving();
+			mailbox.Interact();
 		}
 
 		private Dictionary<uint, int> BuildItemList()
@@ -520,8 +511,8 @@ namespace HighVoltz.Professionbuddy.Components
 
 		// format indexs are ItemID=0, Amount=1
 
-		// return -1 if done,0 if spliting item else the amount of items placed in mail.
-		private int MailItem(uint id, int amount)
+		// return -1 if done, 0 if spliting item else the amount of items placed in mail.
+		private int PlaceItemInMail(uint id, int amount)
 		{
 			// format indexs are ItemID=0, Amount=1, MailRecipient=2
 			string lua = string.Format(MailItemLuaFormat, id, amount);

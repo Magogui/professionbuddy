@@ -11,7 +11,7 @@ namespace HighVoltz.Professionbuddy.Components
 {
 	[PBXmlElement("SubRoutine")]
     public sealed class SubRoutineComposite : PBComposite
-    {
+	{
 		public SubRoutineComposite() : this(new UberBehaviorTree.Component[0]) { }
         public SubRoutineComposite(params UberBehaviorTree.Component[] children): base(children)
         {		
@@ -28,17 +28,6 @@ namespace HighVoltz.Professionbuddy.Components
             get { return Properties.GetValue<string>("SubRoutineName"); }
             set { Properties["SubRoutineName"].Value = value; }
         }
-
-		public async Task<bool> Execute()
-		{
-			foreach (var child in Children.Where(c => !((IPBComponent)c).IsDone))
-			{
-				if (await child)
-					return true;
-			}
-			IsDone = true;
-			return false;
-		}
 
 		#region PBComposite Members
 
@@ -72,11 +61,45 @@ namespace HighVoltz.Professionbuddy.Components
 
 		public async override Task<bool> Run()
 		{
+			if (!IsActive)
+				return false;
+
+			foreach (var child in Children.SkipWhile(c => Selection != null && c != Selection))
+			{
+				var pbComp = child as IPBComponent;
+				if (pbComp == null || pbComp.IsDone)
+					continue;
+				Selection = (IPBComponent)child;				
+				if (await child)
+					return true;
+			}
+
+			base.IsDone = true;
 			return false;
 		}
 
-	    #endregion
+		// Subroutines should only be executed via an action such as 'CallSubroutine' action so in-order to force 
+		// it to be skipped by the behavior tree we need to have IsDone always return true whenever subroutine is not active.
+		public override bool IsDone { get { return !IsActive || base.IsDone; } }
 
+		public override void Reset()
+		{
+			if (!IsActive)
+				return;
+			base.Reset();
+		}
+
+		#endregion
+
+		private bool IsActive { get; set; }
+		/// <summary>
+		/// Activates the specified sub routine. A subroutine needs to be activated before it can be executed
+		/// </summary>
+		/// <param name="subRoutine">The sub routine.</param>
+		public static IDisposable Activate(SubRoutineComposite subRoutine)
+		{
+			return new SubRoutineExecutor(subRoutine);
+		}
 
 		public static bool GetSubRoutineMyName(string subRoutineName, out SubRoutineComposite subRoutine)
 		{
@@ -95,6 +118,20 @@ namespace HighVoltz.Professionbuddy.Components
 					FirstOrDefault(temp => temp != null);
 			}
 			return null;
+		}
+
+		private class SubRoutineExecutor : IDisposable
+		{
+			private readonly SubRoutineComposite _subroutine;
+			public SubRoutineExecutor(SubRoutineComposite subroutine)
+			{
+				_subroutine = subroutine;
+				subroutine.IsActive = true;
+			}
+			public void Dispose()
+			{
+				_subroutine.IsActive = false;
+			}
 		}
 	}
 }
