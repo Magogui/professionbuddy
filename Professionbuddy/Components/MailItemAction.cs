@@ -346,7 +346,7 @@ namespace HighVoltz.Professionbuddy.Components
 			WoWItem item = Me.BagItems.FirstOrDefault(i => i.Entry == itemID);
 			_mailSubject = item != null ? item.Name : " ";
 
-			PBLog.Debug("MailItem: sending {0}", itemID);
+			PBLog.Debug("MailItem: placing {0} into a Send Mail slot", item != null ? item.Name:itemID.ToString());
 
 			if (NumberOfSlotsUsedInSendMail >= 12)
 				await MailItems(CharacterSettings.Instance.MailRecipient, _mailSubject);
@@ -380,6 +380,7 @@ namespace HighVoltz.Professionbuddy.Components
 		{
 			var lua = string.Format("SendMail ('{0}', '{1}' ,'');  ",
 				recipient.ToFormatedUTF8(), subject.ToFormatedUTF8());
+			PBLog.Debug("MailItem: Sending mail");
 			Lua.DoString(lua);
 			await CommonCoroutines.SleepForLagDuration();
 		}
