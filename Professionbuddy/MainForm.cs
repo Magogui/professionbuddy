@@ -560,9 +560,7 @@ namespace HighVoltz.Professionbuddy
 			if (node != null)
 			{
 				if (cloneActions)
-				{
 					newNode = RecursiveCloning(node);
-				}
 				else
 					newNode = (TreeNode) node.Clone();
 			}
@@ -631,6 +629,7 @@ namespace HighVoltz.Professionbuddy
 		private TreeNode RecursiveCloning(TreeNode node)
 		{
 			var newComp = (((IPBComponent) node.Tag).DeepCopy());
+
 			var newNode = new TreeNode(newComp.Title) {ForeColor = newComp.Color, Tag = newComp};
 			foreach (TreeNode child in node.Nodes)
 			{
@@ -639,7 +638,6 @@ namespace HighVoltz.Professionbuddy
 				if (composite != null)
 				{
 					TreeNode newChildNode = RecursiveCloning(child);
-					composite.AddChild((Component) newChildNode.Tag);
 					newNode.Nodes.Add(newChildNode);
 				}
 			}
@@ -787,19 +785,21 @@ namespace HighVoltz.Professionbuddy
 			}
 		}
 
-		private void ActionTreeAddChildren(Composite composite, TreeNode node)
+		private TreeNode GenerateTreeViewFromBehaviorTree(IPBComponent component, TreeNode node)
 		{
-			foreach (var child in composite.Children.OfType<IPBComponent>())
+			var newNode = new TreeNode(component.Title) { ForeColor = component.Color, Tag = component };
+			if (node != null)
+				node.Nodes.Add(newNode);
+
+			var composite = component as PBComposite;
+			if (composite != null)
 			{
-				var childNode = new TreeNode(child.Title) {ForeColor = child.Color, Tag = child};
-				// If, While and SubRoutine are Decorators.
-				var groupComposite = child as PBComposite;
-				if (groupComposite != null)
+				foreach (var child in composite.Children.OfType<IPBComponent>())
 				{
-					ActionTreeAddChildren(groupComposite, childNode);
+					GenerateTreeViewFromBehaviorTree(child, newNode);
 				}
-				node.Nodes.Add(childNode);
 			}
+			return newNode;
 		}
 
 		private void PopulateActionGridView()
@@ -983,13 +983,7 @@ namespace HighVoltz.Professionbuddy
 			ActionTree.Nodes.Clear();
 			foreach (var comp in ProfessionbuddyBot.Instance.Branch.Children.OfType<IPBComponent>())
 			{
-				var node = new TreeNode(comp.Title) {ForeColor = comp.Color, Tag = comp};
-				var composite = comp as Composite;
-				if (composite != null)
-				{
-					ActionTreeAddChildren(composite, node);
-				}
-				ActionTree.Nodes.Add(node);
+				ActionTree.Nodes.Add(GenerateTreeViewFromBehaviorTree(comp, null));
 			}
 			//ActionTree.ExpandAll();
 			if (selectedIndex != -1)
