@@ -34,10 +34,11 @@
     <ChangeBot BotName="GatherbuddyBot" />
   </If>
   <While Condition="true" IgnoreCanRun="True">
-    <Custom Code="MiningLevel = (int)Mining.Level;" />
-    <Custom Code="MiningMaxLevel = (int)Mining.MaxLevel;" />
-    <Custom Code="HerbLevel = (int)Herbalism.Level;" />
-    <Custom Code="HerbMaxLevel =  (int)Herbalism.MaxLevel;" />
+    <!--AppDomain.CurrentDomain.GetData values are used to 'fake' skill levels when debuging-->
+    <Custom Code="MiningLevel = AppDomain.CurrentDomain.GetData(&quot;MiningLevel&quot;) != null ? (int)AppDomain.CurrentDomain.GetData(&quot;MiningLevel&quot;) : (int)Mining.Level;" />
+    <Custom Code="MiningMaxLevel = AppDomain.CurrentDomain.GetData(&quot;MiningMaxLevel&quot;) != null ? (int)AppDomain.CurrentDomain.GetData(&quot;MiningMaxLevel&quot;) : (int)Mining.MaxLevel;" />
+    <Custom Code="HerbLevel = AppDomain.CurrentDomain.GetData(&quot;HerbLevel&quot;) != null ? (int)AppDomain.CurrentDomain.GetData(&quot;HerbLevel&quot;) : (int)Herbalism.Level;" />
+    <Custom Code="HerbMaxLevel = AppDomain.CurrentDomain.GetData(&quot;HerbMaxLevel&quot;) != null ? (int)AppDomain.CurrentDomain.GetData(&quot;HerbMaxLevel&quot;) : (int)Herbalism.MaxLevel;" />
     <!--disable gathering of mines-->
     <Custom Code="if (((bool)Settings[&quot;Mining&quot;] &amp;&amp;&#xD;&#xA;   (MiningLevel == MiningMaxLevel || ((bool)Settings[&quot;Herb&quot;] &amp;&amp; MiningMaxLevel &gt; HerbMaxLevel ))) ||&#xD;&#xA; !(bool)Settings[&quot;Mining&quot;])&#xD;&#xA;{&#xD;&#xA;    mining = Bots.Gatherbuddy.GatherbuddySettings.Instance.GatherMinerals = false;&#xD;&#xA;}" />
     <!--enable gathering of mines-->
@@ -585,20 +586,13 @@
     <If Condition="Me.MapId == 0" IgnoreCanRun="True">
       <Custom Code="MyLog(&quot;Heading to Northrend from Eastern Kingdoms&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyTo Dismount="False" Location="-3689.26, -602.9856, 4.345168" />
-        <Wait Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181688 ).Location.Distance(new WoWPoint(-3674.43, -586.774, 0.04286573)) &lt; 1" Timeout="6000000" />
-        <Custom Code="CTM(-3674.097, -593.0407, 9.392573);" />
-        <Wait Condition="Me.MapId == 571" Timeout="600000" />
+        <Custom Code="await TakeTransport(&#xD;&#xA;    0, /* startMapId */&#xD;&#xA;    571, /* endMapId */&#xD;&#xA;    181688, /* transportId */&#xD;&#xA;    new WoWPoint(-3674.43, -586.774, -0.01122873), /* transportStartLoc */&#xD;&#xA;    new WoWPoint(584.0138, -5118.855, 0.04852793), /* transportEndLoc */&#xD;&#xA;    new WoWPoint(-3687.151, -602.0034, 4.411057), /* transportStartWaitLoc */&#xD;&#xA;    new WoWPoint(-3673.075, -592.2197, 9.549741), /* transportStartBoardLoc */&#xD;&#xA;    new WoWPoint(593.3073, -5101.547, 5.262175) /* transportEndExitLoc */ ); " />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt;1000" IgnoreCanRun="True">
+        <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt;900 &amp;&amp; Me.Z &lt; 50" IgnoreCanRun="True">
           <MoveTo Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
         </If>
-        <FlyTo Dismount="False" Location="2062.034, 358.3257, 82.47099" />
-        <Wait Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 181689 ).Location.Distance(new WoWPoint(2056.493, 381.6347, 100.362)) &lt; 1" Timeout="600000" />
-        <Custom Code="CTM(2058.573, 372.6453, 81.5169);" />
-        <Wait Condition="Me.MapId == 571" Timeout="600000" />
-        <Wait Condition="false" Timeout="10000" />
+        <Custom Code="await TakeTransport(&#xD;&#xA;    0, /* startMapId */&#xD;&#xA;    571, /* endMapId */&#xD;&#xA;    181689, /* transportId */&#xD;&#xA;    new WoWPoint(2056.493, 381.6347, 100.362), /* transportStartLoc */&#xD;&#xA;    new WoWPoint(1989.353, -6082.776, 85.59646), /* transportEndLoc */&#xD;&#xA;    new WoWPoint(2062.339, 360.9583, 82.49519), /* transportStartWaitLoc */&#xD;&#xA;    new WoWPoint(2059.97, 371.3128, 82.48405), /* transportStartBoardLoc */&#xD;&#xA;    new WoWPoint(1976.103, -6097.226, 67.15385) /* transportEndExitLoc */ ); " />
       </If>
     </If>
   </SubRoutine>
@@ -606,11 +600,7 @@
     <If Condition="Me.MapId == 1" IgnoreCanRun="True">
       <Custom Code="MyLog(&quot;Heading to Eastern Kingdoms from Kalimdor&quot;);" />
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
-        <FlyTo Dismount="False" Location="-3994.829, -4719.628, 4.139777" />
-        <Wait Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-4016.39, -4740.588, -0.04110325)) &lt; 1" Timeout="6000000" />
-        <!--<CustomAction Code="CTM(-4010.385, -4735.384, 6.06652);" />-->
-        <MoveTo Location="-4009.237, -4736.01, 6.142319" MoveType="Location" Pathing="Navigator" Entry="0" />
-        <Wait Condition="Me.MapId == 0" Timeout="600000" />
+        <Custom Code="await TakeTransport(&#xD;&#xA;    1, /* startMapId */&#xD;&#xA;    0, /* endMapId */&#xD;&#xA;    176231, /* transportId */&#xD;&#xA;    new WoWPoint(-4016.39, -4740.588, -0.03624965), /* transportStartLoc */&#xD;&#xA;    new WoWPoint(-3872.35, -639.944, -0.02897106), /* transportEndLoc */&#xD;&#xA;    new WoWPoint(-4003.641, -4728.91, 4.584957), /* transportStartWaitLoc */&#xD;&#xA;    new WoWPoint(-4008.761, -4734.658, 6.110915), /* transportStartBoardLoc */&#xD;&#xA;    new WoWPoint(-3862.292, -653.7484, 5.397657) /* transportEndExitLoc */ ); " />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
         <FlyTo Dismount="True" Location="1756.46, -4211.393, 46.52722" />
@@ -628,19 +618,11 @@
         <If Condition="DistanceTo(-5047.012, -800.6297, 495.1275) &lt; 500" IgnoreCanRun="True">
           <MoveTo Location="-5047.012, -800.6297, 495.1275" MoveType="Location" Pathing="Navigator" Entry="0" />
         </If>
-        <FlyTo Dismount="False" Location="-3859.199, -661.5073, 10.08274" />
-        <Wait Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 176231).Location.Distance(new WoWPoint(-3872.35, -639.9439, 0.04815831)) &lt; 1" Timeout="6000000" />
-        <Custom Code="CTM(-3866.837, -642.1938, 5.096432);" />
+        <Custom Code="await TakeTransport(&#xD;&#xA;    0, /* startMapId */&#xD;&#xA;    1, /* endMapId */&#xD;&#xA;    176231, /* transportId */&#xD;&#xA;    new WoWPoint(-3872.35, -639.944, -0.02897106), /* transportStartLoc */&#xD;&#xA;    new WoWPoint(-4016.39, -4740.588, -0.03624965), /* transportEndLoc */&#xD;&#xA;    new WoWPoint(-3862.292, -653.7484, 5.397657), /* transportStartWaitLoc */&#xD;&#xA;    new WoWPoint(-3866.538, -645.7814, 6.068954), /* transportStartBoardLoc */&#xD;&#xA;    new WoWPoint(-4003.641, -4728.91, 4.584957) /* transportEndExitLoc */ ); " />
       </If>
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
-        <If Condition="DistanceTo(1696.929, 731.7497, 68.85725) &lt; 500" IgnoreCanRun="True">
-          <MoveTo Location="1696.929, 731.7497, 68.85725" MoveType="Location" Pathing="Navigator" Entry="0" />
-        </If>
-        <FlyTo Dismount="False" Location="2067.27, 285.2988, 97.03257" />
-        <Wait Condition="ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871) != null &amp;&amp; ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(o =&gt; o.Entry == 164871).Location.Distance(new WoWPoint(2062.376, 292.998, 114.973)) &lt; 1" Timeout="6000000" />
-        <Custom Code="CTM(2068.119, 295.5195, 97.24951);" />
+        <Custom Code="await TakeTransport(&#xD;&#xA;    0, /* startMapId */&#xD;&#xA;    1, /* endMapId */&#xD;&#xA;    164871, /* transportId */&#xD;&#xA;    new WoWPoint(2062.376, 292.998, 114.973), /* transportStartLoc */&#xD;&#xA;    new WoWPoint(1833.509, -4391.543, 152.7679), /* transportEndLoc */&#xD;&#xA;    new WoWPoint(2067.064, 289.126, 97.03139), /* transportStartWaitLoc */&#xD;&#xA;    new WoWPoint(1834.894, -4385.91, 135.0183), /* transportStartBoardLoc */&#xD;&#xA;    new WoWPoint(1839.56, -4390.571, 135.233) /* transportEndExitLoc */ ); " />
       </If>
-      <Wait Condition="Me.MapId == 1" Timeout="6000000" />
     </If>
   </SubRoutine>
   <SubRoutine SubRoutineName="MoveToOrgrimmarFromDeepholm">
@@ -688,6 +670,7 @@
   <SubRoutine SubRoutineName="MoveToKalimdorFromNorthrend">
     <If Condition="Me.MapId == 571" IgnoreCanRun="True">
       <If Condition="Me.IsHorde" IgnoreCanRun="True">
+        <FlyTo Dismount="False" Location="5534.782, 643.0369, 752.1791" />
         <FlyTo Dismount="True" Location="5897.042, 562.7647, 639.48" />
         <Interact InteractType="GameObject" Entry="191009" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
@@ -697,10 +680,12 @@
   <SubRoutine SubRoutineName="MoveToEasternKingdomsFromNorthrend">
     <If Condition="Me.MapId == 571" IgnoreCanRun="True">
       <If Condition="Me.IsAlliance" IgnoreCanRun="True">
+        <FlyTo Dismount="False" Location="5534.782, 643.0369, 752.1791" />
         <FlyTo Dismount="True" Location="5768.25, 707.2867, 641.5833" />
         <Interact InteractType="GameObject" Entry="190960" InteractDelay="2000" GameObjectType="Transport" SpellFocus="Anvil" />
       </If>
       <Wait Condition="Me.MapId == 0" Timeout="20000" />
     </If>
   </SubRoutine>
+  <Declaration Code="private async Task TakeTransport(&#xD;&#xA;&#x9;&#x9;int startMapId,&#xD;&#xA;&#x9;&#x9;int endMapId,&#xD;&#xA;&#x9;&#x9;int transportId,&#xD;&#xA;&#x9;&#x9;WoWPoint transportStartLoc,&#xD;&#xA;&#x9;&#x9;WoWPoint transportEndLoc,&#xD;&#xA;&#x9;&#x9;WoWPoint transportStartWaitLoc,&#xD;&#xA;&#x9;&#x9;WoWPoint transportStartBoardLoc,&#xD;&#xA;&#x9;&#x9;WoWPoint transportEndExitLoc)&#xD;&#xA;{&#xD;&#xA;&#x9;if (Me.MapId != startMapId)&#xD;&#xA;&#x9;&#x9;return;&#xD;&#xA;&#x9;MyLog(&quot;Moving to wait location for transport&quot;);&#xD;&#xA;&#x9;while (Me.Location.DistanceSqr(transportStartWaitLoc) &gt; 4*4)&#xD;&#xA;&#x9;{&#xD;&#xA;&#x9;&#x9;Flightor.MoveTo(transportStartWaitLoc, true);&#xD;&#xA;&#x9;&#x9;await Coroutine.Yield();&#xD;&#xA;&#x9;}&#xD;&#xA;&#x9;TreeRoot.StatusText = &quot;Waiting for transport to dock at start location&quot;;&#xD;&#xA;&#xD;&#xA;&#x9;Func&lt;bool&gt; dockedAtStart = () =&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;var transport = ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(u =&gt; u.Entry == transportId);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;return transport != null &amp;&amp; transport.Location.DistanceSqr(transportStartLoc) &lt; 1*1;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;};&#xD;&#xA;&#xD;&#xA;&#x9;Func&lt;bool&gt; dockedAtEnd = () =&gt;&#xD;&#xA;&#x9;{&#xD;&#xA;&#x9;&#x9;var transport = ObjectManager.GetObjectsOfType&lt;WoWGameObject&gt;().FirstOrDefault(u =&gt; u.Entry == transportId);&#xD;&#xA;&#x9;&#x9;return transport != null &amp;&amp; transport.Location.DistanceSqr(transportEndLoc) &lt; 1 * 1;&#xD;&#xA;&#x9;};&#xD;&#xA;&#xD;&#xA;&#x9;try &#xD;&#xA;&#x9;{&#xD;&#xA;&#x9;&#x9;await Coroutine.Wait(600000, dockedAtStart);&#xD;&#xA;&#x9;&#x9;if (!dockedAtStart())&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;MyLog(&quot;Could not find a transport: {0}  docked at start for map {1}&quot;, transportId, startMapId);&#xD;&#xA;&#x9;&#x9;&#x9;return;&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;Logging.Write(&quot;Boarding transport&quot;);&#xD;&#xA;&#x9;&#x9;while (!Navigator.AtLocation(transportStartBoardLoc))&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;if (!(await CommonCoroutines.MoveTo(transportStartBoardLoc)).IsSuccessful())&#xD;&#xA;&#x9;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;MyLog(&quot;Could not navigate to board location&quot;);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;return;&#xD;&#xA;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;await Coroutine.Yield();&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;await CommonCoroutines.Dismount();&#xD;&#xA;&#x9;&#x9;await Coroutine.Sleep(1000);&#xD;&#xA;&#x9;&#x9;if (Me.TransportGuid == 0)&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;WoWMovement.Move(WoWMovement.MovementDirection.JumpAscend);&#xD;&#xA;&#x9;&#x9;&#x9;await Coroutine.Sleep(120);&#xD;&#xA;&#x9;&#x9;&#x9;WoWMovement.MoveStop(WoWMovement.MovementDirection.JumpAscend);&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;TreeRoot.StatusText = &quot;Waiting for transport to reach destination&quot;;&#xD;&#xA;&#x9;&#x9;await Coroutine.Wait(600000, () =&gt; StyxWoW.Me.MapId == endMapId);&#xD;&#xA;&#x9;&#x9;if (StyxWoW.Me.MapId != endMapId)&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;MyLog(&quot;Failed to switch map&quot;);&#xD;&#xA;&#x9;&#x9;&#x9;return;&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;await Coroutine.Wait(600000, dockedAtEnd);&#xD;&#xA;&#x9;&#x9;if (!dockedAtEnd())&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;MyLog(&quot;Transport failed to dock at end location&quot;);&#xD;&#xA;&#x9;&#x9;&#x9;return;&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;Logging.Write(&quot;Exiting transport&quot;);&#xD;&#xA;&#x9;&#x9;while (!Navigator.AtLocation(transportEndExitLoc))&#xD;&#xA;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;if (!(await CommonCoroutines.MoveTo(transportEndExitLoc)).IsSuccessful())&#xD;&#xA;&#x9;&#x9;&#x9;{&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;MyLog(&quot;Could not navigate to exit location&quot;);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;return;&#xD;&#xA;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;await Coroutine.Yield();&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;Logging.Write(&quot;Successfully took transport&quot;);&#xD;&#xA;&#x9;}&#xD;&#xA;&#x9;finally&#xD;&#xA;&#x9;{&#xD;&#xA;&#x9;&#x9;TreeRoot.StatusText = null;&#xD;&#xA;&#x9;}&#xD;&#xA;}" />
 </Professionbuddy>
