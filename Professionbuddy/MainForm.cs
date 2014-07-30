@@ -560,9 +560,14 @@ namespace HighVoltz.Professionbuddy
 			if (node != null)
 			{
 				if (cloneActions)
-					newNode = RecursiveCloning(node);
+				{
+					var newComp = (((IPBComponent)node.Tag).DeepCopy());
+					newNode = GenerateTreeViewFromBehaviorTree(newComp, null);
+				}
 				else
+				{
 					newNode = (TreeNode) node.Clone();
+				}
 			}
 			else
 			{
@@ -626,23 +631,6 @@ namespace HighVoltz.Professionbuddy
 			ActionTree.ResumeLayout();
 		}
 
-		private TreeNode RecursiveCloning(TreeNode node)
-		{
-			var newComp = (((IPBComponent) node.Tag).DeepCopy());
-
-			var newNode = new TreeNode(newComp.Title) {ForeColor = newComp.Color, Tag = newComp};
-			foreach (TreeNode child in node.Nodes)
-			{
-				// If, While and SubRoutine are Decorators.
-				var composite = newComp as Composite;
-				if (composite != null)
-				{
-					TreeNode newChildNode = RecursiveCloning(child);
-					newNode.Nodes.Add(newChildNode);
-				}
-			}
-			return newNode;
-		}
 
 		private void DisableControls()
 		{
