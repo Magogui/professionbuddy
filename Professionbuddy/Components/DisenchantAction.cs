@@ -260,7 +260,9 @@ namespace HighVoltz.Professionbuddy.Components
 							_castTimer.Start();
 						}
 						else
+						{
 							IsDone = true;
+						}
 					}
 				}
 			}

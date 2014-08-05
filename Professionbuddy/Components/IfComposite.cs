@@ -29,6 +29,7 @@ namespace HighVoltz.Professionbuddy.Components
 				Selection = pbComp;
 
 				var coroutine = new Coroutine(async () => await child.Run());
+
 				try
 				{
 					while (true)
@@ -39,7 +40,7 @@ namespace HighVoltz.Professionbuddy.Components
 						await Coroutine.Yield();
 						if (!IgnoreCanRun && !CanRun())
 						{
-							IsDone = false;
+							IsDone = true;
 							return false;
 						}
 					}

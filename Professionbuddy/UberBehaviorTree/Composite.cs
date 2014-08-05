@@ -14,6 +14,7 @@ namespace HighVoltz.UberBehaviorTree
 		}
 
 		public List<Component> Children { get; private set; }
+		protected Component Selection { get; set; }
 
 		public void AddChild(Component child)
 		{

@@ -20,9 +20,16 @@ namespace HighVoltz.Professionbuddy
 			if (!CanExecuteChildren())
 				return false;
 
+
 			YieldToSecondaryBot = false;
-			foreach (var child in Children.Where(c => !((IPBComponent)c).IsDone))
+			foreach (var child in Children.SkipWhile(c => Selection != null && c != Selection))
 			{
+				var pbComp = child as IPBComponent;
+				if (pbComp == null || pbComp.IsDone)
+					continue;
+
+				Selection = child;
+
 				var coroutine = new Coroutine(async () =>await child.Run());
 				try
 				{
@@ -55,6 +62,7 @@ namespace HighVoltz.Professionbuddy
 
 		public void Reset()
 		{
+			Selection = null;
 			YieldToSecondaryBot = false;
 			Children.OfType<IPBComponent>().ForEach(c => c.Reset());
 		}
