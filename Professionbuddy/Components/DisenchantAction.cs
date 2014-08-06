@@ -216,7 +216,7 @@ namespace HighVoltz.Professionbuddy.Components
 				if (itemList == null || !itemList.Any())
 				{
 					IsDone = true;
-					ProfessionbuddyBot.Log("Done {0}ing", ActionType);
+					PBLog.Log("Done {0}ing", ActionType);
 				}
 				else
 				{
@@ -233,7 +233,7 @@ namespace HighVoltz.Professionbuddy.Components
 						{
 							if (++_tries >= 3)
 							{
-								ProfessionbuddyBot.Log(
+								PBLog.Log(
 									"Unable to {0} {1}, BlackListing",
 									ActionType,
 									itemList[index].Name);
@@ -250,7 +250,7 @@ namespace HighVoltz.Professionbuddy.Components
 						if (spell != null)
 						{
 							TreeRoot.GoalText = string.Format("{0}: {1}", ActionType, itemList[index].Name);
-							ProfessionbuddyBot.Log(TreeRoot.GoalText);
+							PBLog.Log(TreeRoot.GoalText);
 							//Lua.DoString("CastSpellByID({0}) UseContainerItem({1}, {2})",
 							//    spellId, ItemList[index].BagIndex + 1, ItemList[index].BagSlot + 1);
 							spell.CastOnItem(itemList[index]);

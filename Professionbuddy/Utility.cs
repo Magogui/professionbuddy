@@ -320,13 +320,13 @@ namespace HighVoltz.Professionbuddy
             var baseAddress = (uint) mod.BaseAddress;
             if (GlobalPBSettings.Instance.WowVersion != mod.FileVersionInfo.FileVersion || GlobalPBSettings.Instance.KnownSpellsPtr == 0)
             {
-                ProfessionbuddyBot.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
+                PBLog.Log("Scanning for new offsets for WoW {0}", mod.FileVersionInfo.FileVersion);
                 try
                 {
                     IntPtr pointer = FindPattern("00 00 00 00 C1 EA 05 23 04 91 F7 D8 1B C0 F7 D8 5D C3", "????xxxxxxxxxxxxxx");
 
                     GlobalPBSettings.Instance.KnownSpellsPtr = StyxWoW.Memory.Read<uint>(true, pointer) - baseAddress;
-                    ProfessionbuddyBot.Log("Found KnownSpellsPtr offset 0x{0:X}", GlobalPBSettings.Instance.KnownSpellsPtr);
+                    PBLog.Log("Found KnownSpellsPtr offset 0x{0:X}", GlobalPBSettings.Instance.KnownSpellsPtr);
 
 					GlobalPBSettings.Instance.WowVersion = mod.FileVersionInfo.FileVersion;
 
@@ -334,7 +334,7 @@ namespace HighVoltz.Professionbuddy
                 }
                 catch (InvalidDataException)
                 {
-                    ProfessionbuddyBot.Warn("There was a problem scanning for offsets");
+                    PBLog.Warn("There was a problem scanning for offsets");
                 }
             }
         }

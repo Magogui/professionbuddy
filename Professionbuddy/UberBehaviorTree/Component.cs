@@ -4,7 +4,7 @@
 using System;
 using Styx.CommonBot.Coroutines;
 
-namespace HighVoltz.UberBehaviorTree
+namespace HighVoltz.BehaviorTree
 {
 	public abstract class Component : CoroutineTask<bool>
 	{

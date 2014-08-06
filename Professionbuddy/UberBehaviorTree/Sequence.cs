@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace HighVoltz.UberBehaviorTree
+namespace HighVoltz.BehaviorTree
 {
 	public class Sequence : Composite
 	{

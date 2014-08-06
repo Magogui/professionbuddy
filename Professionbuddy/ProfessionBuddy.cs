@@ -1,21 +1,16 @@
 ﻿//!CompilerOption:Optimize:On
 // Professionbuddy botbase by HighVoltz
 
+// SVN http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Linq;
 using CommonBehaviors.Actions;
@@ -25,16 +20,14 @@ using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
-using Styx.CommonBot.Frames;
+using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Profiles;
 using Styx.Helpers;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Action = System.Action;
-using Application = System.Windows.Application;
 using Color = System.Drawing.Color;
-using RichTextBox = System.Windows.Controls.RichTextBox;
 using Vector3 = Tripper.Tools.Math.Vector3;
 
 namespace HighVoltz.Professionbuddy
@@ -43,7 +36,6 @@ namespace HighVoltz.Professionbuddy
 	{
 		#region Static Members.
 
-		private const string PbSvnUrl = "http://professionbuddy.googlecode.com/svn/trunk/Professionbuddy/";
 		public static readonly string BotPath = GetProfessionbuddyPath();
 		public static readonly Svn Svn = new Svn();
 		public static readonly string ProfilePath = Path.Combine(BotPath, "Profiles");
@@ -61,7 +53,6 @@ namespace HighVoltz.Professionbuddy
 
 		// Used as a fix when profile is loaded before Inititialize is called
 		private static string _profileToLoad = "";
-		private static string _lastProfilePath = "";
 
 		#endregion
 
@@ -76,6 +67,7 @@ namespace HighVoltz.Professionbuddy
 				BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
 				Profile.OnUnknownProfileElement += Profile_OnUnknownProfileElement;
 				_ctorRunOnce = true;
+				CurrentProfile = PbProfile.EmptyProfile;
 			}
 		}
 		#endregion
@@ -192,7 +184,7 @@ namespace HighVoltz.Professionbuddy
 
 		public override void Start()
 		{
-			Debug("Start Called");
+			PBLog.Debug("Start Called");
 			IsRunning = true;
 			AttachEvents();
 			// make sure bank frame is closed on start to ensure Util.IsGBankFrameOpen is synced
@@ -201,12 +193,12 @@ namespace HighVoltz.Professionbuddy
 			if (IsExecutingActionWhileHonorbuddyIsStopped)
 			{
 				IsExecutingActionWhileHonorbuddyIsStopped = false;
-				RootComposite.ResetSecondaryBot();
+				ResetSecondaryBot();
 			}
 			else
 			{
 				// reset all actions 
-				RootComposite.Reset();
+				Reset();
 				if (DynamicCodeCompiler.CodeIsModified)
 				{
 					DynamicCodeCompiler.GenorateDynamicCode();
@@ -225,7 +217,7 @@ namespace HighVoltz.Professionbuddy
 			IsRunning = false;
 			DetachEvents();
 
-			Debug("Stop Called");
+			PBLog.Debug("Stop Called");
 			if (MainForm.IsValid)
 				MainForm.Instance.UpdateControls();
 			if (SecondaryBot != null)
@@ -245,7 +237,7 @@ namespace HighVoltz.Professionbuddy
 			{
 				if (!_init)
 				{
-					Debug("Initializing ...");
+					PBLog.Debug("Initializing ...");
 					Util.ScanForOffsets();
 					if (!Directory.Exists(BotPath))
 						Directory.CreateDirectory(BotPath);
@@ -280,7 +272,7 @@ namespace HighVoltz.Professionbuddy
 						MySettings.LastBotBase = bot.Name;
 						MySettings.Save();
 					}
-					RootComposite = new PBRootComposite(new PBBranch(),  bot);
+					SecondaryBot = bot;
 
 					bot.DoInitialize();
 
@@ -297,7 +289,7 @@ namespace HighVoltz.Professionbuddy
 					}
 					catch (Exception ex)
 					{
-						Warn(ex.ToString());
+						PBLog.Warn(ex.ToString());
 					}
 
 					_init = true;
@@ -339,7 +331,7 @@ namespace HighVoltz.Professionbuddy
 				}
 				catch (Exception ex)
 				{
-					Warn(ex.ToString());
+					PBLog.Warn(ex.ToString());
 				}
 				_onBagUpdateTimer.Reset();
 			}
@@ -367,13 +359,13 @@ namespace HighVoltz.Professionbuddy
 										skills.Length != TradeSkillList.Count;
 						if (changed)
 						{
-							Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
+							PBLog.Debug("A profession was added or removed. Reloading Tradeskills (OnSkillUpdateTimerCB)");
 							OnTradeSkillsLoaded += Professionbuddy_OnTradeSkillsLoaded;
 							LoadTradeSkills();
 						}
 						else
 						{
-							Debug("Updated tradeskills from OnSkillUpdateTimerCB");
+							PBLog.Debug("Updated tradeskills from OnSkillUpdateTimerCB");
 							foreach (TradeSkill ts in TradeSkillList)
 							{
 								ts.PulseSkill();
@@ -388,7 +380,7 @@ namespace HighVoltz.Professionbuddy
 				}
 				catch (Exception ex)
 				{
-					Warn(ex.ToString());
+					PBLog.Warn(ex.ToString());
 				}
 				_onSkillUpdateTimer.Reset();
 			}
@@ -477,7 +469,7 @@ namespace HighVoltz.Professionbuddy
 				}
 				catch (Exception ex)
 				{
-					Warn(ex.ToString());
+					PBLog.Warn(ex.ToString());
 				}
 				_onSpellsChangedTimer.Reset();
 			}
@@ -489,32 +481,71 @@ namespace HighVoltz.Professionbuddy
 
 		#region Behavior Tree
 
-		private readonly PbProfile _currentProfile = new PbProfile();
-
-		//	private readonly PbRootComposite _root = new PbRootComposite(new PbDecorator(), null);
 		private Composite _root;
+		private BotBase _secondaryBot;
+		private bool _calledStart;
 
-		public PbProfile CurrentProfile
-		{
-			get { return _currentProfile; }
-		}
+		public PbProfile CurrentProfile { get; private set; }
 
 		public override Composite Root
 		{
-			get { return _root ?? (_root = new ActionRunCoroutine(ctx => RootComposite)); }
+			get { return _root ?? 
+				(_root = new ActionRunCoroutine(
+					async ctx => await Branch || await ExecuteSecondaryBot())); }
 		}
 
-		public PBRootComposite RootComposite { get; private set; }
 
 		public PBBranch Branch
 		{
-			get { return RootComposite.Branch; }
-			set { RootComposite.Branch = value; }
+			get { return CurrentProfile.Branch; }
 		}
+
 		public BotBase SecondaryBot
 		{
-			get { return RootComposite.SecondaryBot; }
-			set { RootComposite.SecondaryBot = value; }
+			get { return _secondaryBot; }
+			set
+			{
+				if (_secondaryBot == value)
+					return;
+
+				_secondaryBot = value;
+				_calledStart = false;
+			}
+		}
+
+		public async Task<bool> ExecuteSecondaryBot()
+		{
+			if (_secondaryBot == null || _secondaryBot.Root == null)
+				return false;
+
+			if (!_calledStart)
+			{
+				try
+				{
+					_secondaryBot.Start();
+				}
+				finally
+				{
+					_calledStart = true;
+				}
+			}
+			return await _secondaryBot.Root.ExecuteCoroutine();
+		}
+
+		public void Reset()
+		{
+			ResetBranch();
+			ResetSecondaryBot();
+		}
+
+		public void ResetBranch()
+		{
+			Branch.Reset();
+		}
+
+		public void ResetSecondaryBot()
+		{
+			_calledStart = false;
 		}
 
 		#endregion
@@ -552,12 +583,12 @@ namespace HighVoltz.Professionbuddy
 				"Strings." + Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName + ".xml");
 			if (File.Exists(langAndCountryFile))
 			{
-				Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.Name);
+				PBLog.Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.Name);
 				LoadStringsFromXml(langAndCountryFile);
 			}
 			else if (File.Exists(langOnlyFile))
 			{
-				Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName);
+				PBLog.Log("Loading strings for language {0}", Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName);
 				LoadStringsFromXml(langOnlyFile);
 			}
 		}
@@ -606,7 +637,7 @@ namespace HighVoltz.Professionbuddy
 				{
 					foreach (WoWSkill skill in SupportedTradeSkills)
 					{
-						Log("Adding TradeSkill {0}", skill.Name);
+						PBLog.Log("Adding TradeSkill {0}", skill.Name);
 						TradeSkill ts = TradeSkill.GetTradeSkill((SkillLine)skill.Id);
 						if (ts != null)
 						{
@@ -615,7 +646,7 @@ namespace HighVoltz.Professionbuddy
 						else
 						{
 							IsTradeSkillsLoaded = false;
-							Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
+							PBLog.Log("Unable to load tradeskill {0}", (SkillLine)skill.Id);
 							return;
 						}
 					}
@@ -632,7 +663,7 @@ namespace HighVoltz.Professionbuddy
 				{
 					TradeSkillList = newTradeSkills;
 				}
-				Log("Done Loading Tradeskills.");
+				PBLog.Log("Done Loading Tradeskills.");
 				IsTradeSkillsLoaded = true;
 				if (OnTradeSkillsLoaded != null)
 				{
@@ -650,7 +681,7 @@ namespace HighVoltz.Professionbuddy
 				lock (materialLocker)
 				{
 					_materialList.Clear();
-					List<CastSpellAction> castSpellList = CastSpellAction.GetCastSpellActionList(RootComposite);
+					List<CastSpellAction> castSpellList = CastSpellAction.GetCastSpellActionList(Branch);
 					if (castSpellList != null)
 					{
 						foreach (CastSpellAction ca in castSpellList)
@@ -671,37 +702,38 @@ namespace HighVoltz.Professionbuddy
 			}
 			catch (Exception ex)
 			{
-				Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 			}
 		}
 
 		public static void LoadPBProfile(string path, XElement element = null)
 		{
-			PBBranch branch = null;
+			PbProfile profile = null;
 			if (!string.IsNullOrEmpty(path))
 			{
 				if (File.Exists(path))
 				{
-					Log("Loading profile {0} from file", Path.GetFileName(path));
-					branch = Instance.CurrentProfile.LoadFromFile(path);
+					PBLog.Log("Loading profile {0} from file", Path.GetFileName(path));
+					profile = PbProfile.LoadFromFile(path);
 					Instance.MySettings.LastProfile = path;
 				}
 				else
 				{
-					Warn("Profile: {0} does not exist", path);
+					PBLog.Warn("Profile: {0} does not exist", path);
 					Instance.MySettings.LastProfile = path;
 					return;
 				}
 			}
 			else if (element != null)
 			{
-				Log("Loading profile from Xml element");
-				branch = Instance.CurrentProfile.LoadFromXml(element);
+				PBLog.Log("Loading profile from Xml element");
+				profile = PbProfile.LoadFromXml(element);
 			}
-			if (branch == null)
-				return;
 
-			Instance.Branch = branch;
+			if (profile == null)
+				return;
+			Instance.CurrentProfile = profile;
+
 			Instance.MySettings.LastProfile = path;
 			Instance.ProfileSettings.Load();
 			DynamicCodeCompiler.GenorateDynamicCode();
@@ -743,7 +775,7 @@ namespace HighVoltz.Professionbuddy
 			if (bot != null)
 				ChangeSecondaryBot(bot);
 			else
-				Warn("Bot with name: {0} was not found", botName);
+				PBLog.Warn("Bot with name: {0} was not found", botName);
 		}
 
 		public static void ChangeSecondaryBot(BotBase bot)
@@ -797,13 +829,6 @@ namespace HighVoltz.Professionbuddy
 		#region Logging
 
 		// ToDO Move these into a PBLog class.
-		private static string _logHeader;
-		private static RichTextBox _rtbLog;
-
-		private static string Header
-		{
-			get { return _logHeader ?? (_logHeader = string.Format("PB {0}: ", Instance.Version)); }
-		}
 
 		[Obsolete("Use the PBLog class functions instead")]
 		public static void Warn(string format, params object[] args)

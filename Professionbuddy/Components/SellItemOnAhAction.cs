@@ -427,7 +427,7 @@ namespace HighVoltz.Professionbuddy.Components
 							_toSellItemList.Add(ae);
 						}
 						else
-							ProfessionbuddyBot.Log(
+							PBLog.Log(
 								"Skipping {0} since {1}",
 								ae.Name,
 								tooLowBuyout
@@ -442,7 +442,7 @@ namespace HighVoltz.Professionbuddy.Components
 				{
 					if (SellOnAh(_toSellItemList[0]))
 					{
-						ProfessionbuddyBot.Log(
+						PBLog.Log(
 							"Selling {0} for {1}. {2}",
 							_toSellItemList[0].Name,
 							AuctionEntry.GoldString(_toSellItemList[0].Buyout),
@@ -545,7 +545,7 @@ namespace HighVoltz.Professionbuddy.Components
 				movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
 			if (movetoPoint == WoWPoint.Zero)
 			{
-				ProfessionbuddyBot.Warn(Strings["Error_UnableToFindAuctioneer"]);
+				PBLog.Warn(Strings["Error_UnableToFindAuctioneer"]);
 			}
 			if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
 			{
@@ -591,7 +591,7 @@ namespace HighVoltz.Professionbuddy.Components
 						uint itemID;
 						if (!uint.TryParse(entry.Trim(), out itemID))
 						{
-							ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+							PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 							continue;
 						}
 						List<WoWItem> itemList = StyxWoW.Me.BagItems.Where(i => !i.IsSoulbound && !i.IsConjured && i.Entry == itemID).ToList();
@@ -602,7 +602,7 @@ namespace HighVoltz.Professionbuddy.Components
 				}
 				else
 				{
-					ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+					PBLog.Warn(Strings["Error_NoItemEntries"]);
 					IsDone = true;
 				}
 			}

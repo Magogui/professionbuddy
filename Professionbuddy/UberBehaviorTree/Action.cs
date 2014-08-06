@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Buddy.Coroutines;
 
-namespace HighVoltz.UberBehaviorTree
+namespace HighVoltz.BehaviorTree
 {
 	public class Action : Component
 	{

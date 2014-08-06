@@ -158,7 +158,7 @@ namespace HighVoltz.Professionbuddy.Components
                     }
                 }
                 if (IsDone)
-					ProfessionbuddyBot.Log("InteractAction complete");
+					PBLog.Log("InteractAction complete");
             }
         }
 

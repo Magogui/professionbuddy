@@ -74,14 +74,14 @@ namespace HighVoltz.Professionbuddy.Components
 				catch (Exception ex)
 				{
 					if (ex.GetType() != typeof (ThreadAbortException))
-						ProfessionbuddyBot.Warn("{0}:({1})\n{2}", Strings["Action_CustomAction_Name"], Code, ex);
+						PBLog.Warn("{0}:({1})\n{2}", Strings["Action_CustomAction_Name"], Code, ex);
 				}
 				IsDone = true;
 			}
 			catch (Exception ex)
 			{
 				if (ex.GetType() != typeof (ThreadAbortException))
-					ProfessionbuddyBot.Warn("There was an exception while executing a CustomAction\n{0}", ex);
+					PBLog.Warn("There was an exception while executing a CustomAction\n{0}", ex);
 			}
 		}
 

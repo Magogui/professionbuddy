@@ -205,7 +205,7 @@ return 0";
             _isSwitchingToons = true;
             // reset all actions 
             ProfessionbuddyBot.Instance.IsRunning = false;
-            ProfessionbuddyBot.Instance.RootComposite.Reset();
+            ProfessionbuddyBot.Instance.Reset();
 
 			Application.Current.Dispatcher.BeginInvoke(
 				new Action(

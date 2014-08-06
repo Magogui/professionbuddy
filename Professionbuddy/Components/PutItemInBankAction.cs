@@ -409,7 +409,7 @@ namespace HighVoltz.Professionbuddy.Components
 			}
 			if (IsDone)
 			{
-				ProfessionbuddyBot.Log("Deposited Items:[{0}] to {1} Bank", ItemID, Bank);
+				PBLog.Log("Deposited Items:[{0}] to {1} Bank", ItemID, Bank);
 			}
 		}
 
@@ -431,7 +431,7 @@ namespace HighVoltz.Professionbuddy.Components
 			if (movetoPoint == WoWPoint.Zero)
 			{
 				IsDone = true;
-				ProfessionbuddyBot.Warn("Unable to find bank");
+				PBLog.Warn("Unable to find bank");
 			}
 			if (movetoPoint.Distance(StyxWoW.Me.Location) > 4)
 			{
@@ -445,7 +445,7 @@ namespace HighVoltz.Professionbuddy.Components
 			else
 			{
 				IsDone = true;
-				ProfessionbuddyBot.Warn(Strings["Error_UnableToFindBank"]);
+				PBLog.Warn(Strings["Error_UnableToFindBank"]);
 			}
 		}
 
@@ -478,7 +478,7 @@ namespace HighVoltz.Professionbuddy.Components
 						uint itemID;
 						if (!uint.TryParse(entry.Trim(), out itemID))
 						{
-							ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+							PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 							continue;
 						}
 						itemList.Add(
@@ -490,7 +490,7 @@ namespace HighVoltz.Professionbuddy.Components
 				}
 				else
 				{
-					ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+					PBLog.Warn(Strings["Error_NoItemEntries"]);
 					IsDone = true;
 				}
 			}
@@ -644,7 +644,7 @@ namespace HighVoltz.Professionbuddy.Components
 					Lua.DoString(
 						"for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end SetCurrentGuildBankTab({0}) ",
 						tab == 0 ? 1 : tab);
-					ProfessionbuddyBot.Log("Querying server for gbank info");
+					PBLog.Log("Querying server for gbank info");
 					return 0;
 				}
 				if (_queryServerSW.ElapsedMilliseconds < 2000)
@@ -695,7 +695,7 @@ namespace HighVoltz.Professionbuddy.Components
 					}
 					if (tab > 0 || currentTab == tabCnt)
 					{
-						ProfessionbuddyBot.Log("Guild Tab: {0} is full", tab);
+						PBLog.Log("Guild Tab: {0} is full", tab);
 						return -1;
 					}
 					if (tab == 0 && currentTab < tabCnt)

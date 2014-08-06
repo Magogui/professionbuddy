@@ -458,7 +458,7 @@ namespace HighVoltz.Professionbuddy.Components
 							uint itemID;
 							if (!uint.TryParse(entry.Trim(), out itemID))
 							{
-								ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+								PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 								continue;
 							}
 							itemList.Add(
@@ -470,7 +470,7 @@ namespace HighVoltz.Professionbuddy.Components
 					}
 					else
 					{
-						ProfessionbuddyBot.Warn("No ItemIDs are specified");
+						PBLog.Warn("No ItemIDs are specified");
 						IsDone = true;
 					}
 					break;

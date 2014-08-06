@@ -244,7 +244,7 @@ namespace HighVoltz.Professionbuddy.Components
 							uint itemID;
 							if (!uint.TryParse(entry.Trim(), out itemID))
 							{
-								ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+								PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 								continue;
 							}
 							idList.Add(itemID);
@@ -252,7 +252,7 @@ namespace HighVoltz.Professionbuddy.Components
 					}
 					else
 					{
-						ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+						PBLog.Warn(Strings["Error_NoItemEntries"]);
 						IsDone = true;
 						return;
 					}
@@ -297,7 +297,7 @@ namespace HighVoltz.Professionbuddy.Components
 						}
 					}
 				}
-				ProfessionbuddyBot.Log("SellItemAction Completed for {0}", ItemID);
+				PBLog.Log("SellItemAction Completed for {0}", ItemID);
 				IsDone = true;
 			}
 		}

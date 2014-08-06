@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
 using Styx;
 using Styx.Common;
 using Styx.WoWInternals.WoWObjects;
@@ -50,8 +50,6 @@ namespace HighVoltz.Professionbuddy.ComponentBase
 		public abstract IPBComponent DeepCopy();
 
 		#endregion
-
-		protected IPBComponent Selection { get; set; }
 
 		#region Utility
 

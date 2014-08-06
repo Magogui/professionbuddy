@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfessionBuddy", "Professi
 		{E0206E55-5441-4978-AA5B-D69358E48437} = {E0206E55-5441-4978-AA5B-D69358E48437}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UberBehaviorTree", "UberBehaviorTree\UberBehaviorTree.csproj", "{E0206E55-5441-4978-AA5B-D69358E48437}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BehaviorTree", "UberBehaviorTree\BehaviorTree.csproj", "{E0206E55-5441-4978-AA5B-D69358E48437}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

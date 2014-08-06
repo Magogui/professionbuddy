@@ -271,7 +271,7 @@ namespace HighVoltz.Professionbuddy
             IEnumerable<KeyValuePair<uint, Recipe>> newRecipies = KnownRecipes.Except(oldList);
             foreach (var kv in newRecipies)
             {
-                ProfessionbuddyBot.Log("Leaned a new recipe {0}", kv.Value.Name);
+                PBLog.Log("Leaned a new recipe {0}", kv.Value.Name);
                 using (StyxWoW.Memory.AcquireFrame())
                 {
                     kv.Value.UpdateHeader();

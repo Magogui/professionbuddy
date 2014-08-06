@@ -3,17 +3,18 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy.Components
 {
 	[PBXmlElement("SubRoutine")]
     public sealed class SubRoutineComposite : PBComposite
 	{
-		public SubRoutineComposite() : this(new UberBehaviorTree.Component[0]) { }
-        public SubRoutineComposite(params UberBehaviorTree.Component[] children): base(children)
+		public SubRoutineComposite() : this(new Component[0]) { }
+        public SubRoutineComposite(params Component[] children): base(children)
         {		
             Properties["SubRoutineName"] = new MetaProp("SubRoutineName", typeof (string),
                                                         new DisplayNameAttribute(
@@ -69,7 +70,7 @@ namespace HighVoltz.Professionbuddy.Components
 				var pbComp = child as IPBComponent;
 				if (pbComp == null || pbComp.IsDone)
 					continue;
-				Selection = (IPBComponent)child;				
+				Selection = child;				
 				if (await child)
 					return true;
 			}
@@ -107,7 +108,7 @@ namespace HighVoltz.Professionbuddy.Components
 			return subRoutine != null;
 		}
 
-		private static SubRoutineComposite GetSubRoutineMyNameInternal(string subRoutineName, UberBehaviorTree.Component comp)
+		private static SubRoutineComposite GetSubRoutineMyNameInternal(string subRoutineName, Component comp)
 		{
 			if (comp is SubRoutineComposite && ((SubRoutineComposite)comp).SubRoutineName == subRoutineName)
 				return (SubRoutineComposite)comp;

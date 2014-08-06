@@ -243,9 +243,11 @@
     <Action_WaitAction_Condition>Until Condition</Action_WaitAction_Condition>
 	
     <!-- While -->
-    <FlowControl_While_Name>While</FlowControl_While_Name>
-    <FlowControl_While_LongName>While Condition</FlowControl_While_LongName>
-    <FlowControl_While_Help>'While Condition' will repeatedly execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running. The difference between this and the 'If Condition' is that this will auto reset all actions within it and all nested 'If/While' Conditions</FlowControl_While_Help>
-
-
+    <Composite_While_Name>While</Composite_While_Name>
+    <Composite_While_LongName>While Condition</Composite_While_LongName>
+    <Composite_While_Help>
+        'While Condition' will repeatedly execute the actions it contains if the specified condition is true. 'Ignore Condition until done' basically will ignore the Condition if any of the actions it contains is running. The difference between this and the 'If Condition' is that this will auto reset all actions within it and all nested 'If/While' Conditions
+        If the 'Pulse Secondary Bot' property is enabled the secondary bot is pulsed after the 'While Condition' is done executing last child and only if the 'Condition' still evaluates to 'true'
+    </Composite_While_Help>
+    <Composite_While_PulseSecondaryBot>Pulse Secondary Bot</Composite_While_PulseSecondaryBot>
 </Localization>

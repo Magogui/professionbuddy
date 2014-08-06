@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using HighVoltz.Professionbuddy.Dynamic;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy.ComponentBase
 {
@@ -11,7 +12,7 @@ namespace HighVoltz.Professionbuddy.ComponentBase
 
 	    protected DynamicallyCompiledCodeComposite() : this(CsharpCodeType.BoolExpression) {}
 
-		protected DynamicallyCompiledCodeComposite(CsharpCodeType codeType, params UberBehaviorTree.Component[] children)
+		protected DynamicallyCompiledCodeComposite(CsharpCodeType codeType, params Component[] children)
 			:base(children)
 	    {
 		    CodeType = codeType;

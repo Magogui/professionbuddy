@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Buddy.Coroutines;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
-using HighVoltz.UberBehaviorTree;
 
 namespace HighVoltz.Professionbuddy.Components
 {
@@ -26,7 +26,7 @@ namespace HighVoltz.Professionbuddy.Components
 				var pbComp = child as IPBComponent;
 				if (pbComp == null || pbComp.IsDone)
 					continue;
-				Selection = pbComp;
+				Selection = child;
 
 				var coroutine = new Coroutine(async () => await child.Run());
 

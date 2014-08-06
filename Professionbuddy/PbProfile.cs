@@ -11,43 +11,138 @@ using System.Net.Mime;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.Components;
 using HighVoltz.Professionbuddy.Dynamic;
-using HighVoltz.UberBehaviorTree;
-using Component = HighVoltz.UberBehaviorTree.Component;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy
 {
 	public class PbProfile
 	{
-		public PbProfile()
+		protected PbProfile(PBBranch branch, int version, string xmlPath = "")
 		{
-			ProfilePath = XmlPath = "";
+			Branch = branch ?? new PBBranch();
+			Version = version;
+			XmlPath = xmlPath ?? "";
 		}
-
-		public PbProfile(string path)
-		{
-			ProfilePath = path;
-			LoadFromFile(ProfilePath);
-		}
-
-		/// <summary>Path to a .xml or .package PB profile</summary>
-		public string ProfilePath { get; protected set; }
 
 		/// <summary>Path to a .xml PB profile</summary>
 		public string XmlPath { get; protected set; }
 
+		/// <summary>Gets or sets the branch.</summary>
+		public PBBranch Branch { get; protected set; }
+
+		public int Version { get; protected set; }
+
+		public void SaveXml(string file = null)
+		{
+			var path = file ?? XmlPath;
+			ToXml(
+				new XElement("Professionbuddy", new XAttribute("version", ProfessionbuddyBot.Svn.Revision)),
+				ProfessionbuddyBot.Instance.Branch).Save(path);
+			XmlPath = path;
+		}		
+
+		#region Static members
+
+		public static PbProfile EmptyProfile { get { return new PbProfile(null, ProfessionbuddyBot.Svn.Revision); } }
+
+		private static XElement ToXml(XElement xml, Composite comp)
+		{
+			foreach (var pbComp in comp.Children.OfType<IPBComponent>())
+			{
+				var comment = pbComp as CommentAction;
+				if (comment != null)
+				{
+					xml.Add(new XComment(comment.Text));
+				}
+				else
+				{
+					var elementAttr =
+						(PBXmlElementAttribute)pbComp.GetType()
+							.GetCustomAttributes(typeof(PBXmlElementAttribute), true)
+							.FirstOrDefault();
+
+					if (elementAttr == null)
+					{
+						PBLog.Warn("{0} does not have a PBXmlElementAttribute attached", pbComp.GetType().Name);
+						continue;
+					}
+
+					var eleName = !string.IsNullOrEmpty(elementAttr.Name) ? elementAttr.Name : pbComp.GetType().Name;
+					var newElement = new XElement(eleName);
+
+					pbComp.OnProfileSave(newElement);
+					List<PropertyInfo> propInfoList =
+						pbComp.GetType()
+							.GetProperties()
+							.Where(p => p.GetCustomAttributes(typeof(PBXmlAttributeAttribute), true).Any())
+							.ToList();
+
+					foreach (PropertyInfo propInfo in propInfoList)
+					{
+						var xmlAttr =
+							propInfo.GetCustomAttributes(typeof(PBXmlAttributeAttribute), true)
+								.OfType<PBXmlAttributeAttribute>().FirstOrDefault();
+
+						if (xmlAttr == null) continue;
+
+						string attrName = !string.IsNullOrEmpty(xmlAttr.Name)
+							? xmlAttr.Name
+							: propInfo.Name;
+
+						if (newElement.Attribute(attrName) != null)
+							continue;
+						string value = "";
+						var typeConverterAttr =
+							(TypeConverterAttribute)propInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
+						if (typeConverterAttr != null)
+						{
+							try
+							{
+								var typeConverter = (TypeConverter)Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
+								if (typeConverter.CanConvertTo(typeof(string)))
+								{
+									value =
+										(string)
+											typeConverter.ConvertTo(null, CultureInfo.InvariantCulture, propInfo.GetValue(pbComp, null), typeof(string));
+								}
+								else
+								{
+									PBLog.Warn("The TypeConvert {0} can not convert to string.", typeConverterAttr.ConverterTypeName);
+								}
+							}
+							catch (Exception ex)
+							{
+								PBLog.Warn("Type conversion for {0}->{1} has failed.\n{2}", comp.GetType().Name, propInfo.Name, ex);
+							}
+						}
+						else
+						{
+							value = Convert.ToString(propInfo.GetValue(pbComp, null), CultureInfo.InvariantCulture);
+						}
+						newElement.Add(new XAttribute(attrName, value));
+					}
+					var composite = pbComp as Composite;
+					if (composite != null)
+						ToXml(newElement, composite);
+
+					xml.Add(newElement);
+				}
+			}
+			return xml;
+		}
+
 		/// <summary>Profile behavior.</summary>
 		//public PrioritySelector Branch { get; protected set; }
-		public PBBranch LoadFromFile(string path)
+		public static PbProfile LoadFromFile(string path)
 		{
 			try
 			{
 				if (File.Exists(path))
 				{
-					ProfilePath = path;
-
 					string extension = Path.GetExtension(path);
 					if (extension != null && extension.Equals(".package", StringComparison.InvariantCultureIgnoreCase))
 					{
@@ -56,7 +151,7 @@ namespace HighVoltz.Professionbuddy
 							PackageRelationship packageRelation = zipFile.GetRelationships().FirstOrDefault();
 							if (packageRelation == null)
 							{
-								ProfessionbuddyBot.Warn("{0} contains no usable profiles", path);
+								PBLog.Warn("{0} contains no usable profiles", path);
 								return null;
 							}
 							PackagePart pbProfilePart = zipFile.GetPart(packageRelation.TargetUri);
@@ -69,38 +164,44 @@ namespace HighVoltz.Professionbuddy
 							}
 						}
 					}
-					XmlPath = path;
-					return (PBBranch) FromXml(XElement.Load(path), new PBBranch());
+					var element = XElement.Load(path);
+					var versionAttr = element.Attribute("version");
+					var version = versionAttr != null ? int.Parse(versionAttr.Value) : 0;
+					var branch = (PBBranch)FromXml(element, new PBBranch());
+					return new PbProfile(branch, version, path);
 				}
-				ProfessionbuddyBot.Warn("Profile: {0} does not exist", path);
+				PBLog.Warn("Profile: {0} does not exist", path);
 				return null;
 			}
 			catch (Exception ex)
 			{
-				ProfessionbuddyBot.Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 				return null;
 			}
 		}
 
-		public PBBranch LoadFromXml(XElement element)
+		public static PbProfile LoadFromXml(XElement element)
 		{
 			if (element == null)
 			{
-				ProfessionbuddyBot.Warn("FromXml: element is null");
+				PBLog.Warn("FromXml: element is null");
 				return null;
 			}
 			try
 			{
-				return (PBBranch) FromXml(element, new PBBranch());
+				var branch = (PBBranch) FromXml(element, new PBBranch());
+				var versionAttr = element.Attribute("version");
+				var version = versionAttr != null ? int.Parse(versionAttr.Value) : 0;
+				return new PbProfile(branch, version);
 			}
 			catch (Exception ex)
 			{
-				ProfessionbuddyBot.Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 				return null;
 			}
 		}
 
-		private Composite FromXml(XElement xml, Composite comp)
+		private static Composite FromXml(XElement xml, Composite comp)
 		{
 			var pbComponentTypes = (from type in Assembly.GetExecutingAssembly().GetTypes()
 				where (typeof (IPBComponent)).IsAssignableFrom(type) && !type.IsAbstract
@@ -139,13 +240,14 @@ namespace HighVoltz.Professionbuddy
 					select new {PropInfo = pi, AttrAttr = attrAttr}).ToList();
 
 				Dictionary<string, string> attributes = element.Attributes().ToDictionary(k => k.Name.ToString(), v => v.Value);
-			
+
 				// use legacy X,Y,Z location for backwards compatability
 				if (attributes.ContainsKey("X"))
 				{
 					string location = string.Format("{0},{1},{2}", attributes["X"], attributes["Y"], attributes["Z"]);
 					var prop =
-						pbXmlAttrs.Where(p => (string.IsNullOrEmpty(p.AttrAttr.Name) && p.PropInfo.Name == "Location") || p.AttrAttr.Matches("Location"))
+						pbXmlAttrs.Where(
+							p => (string.IsNullOrEmpty(p.AttrAttr.Name) && p.PropInfo.Name == "Location") || p.AttrAttr.Matches("Location"))
 							.Select(p => p.PropInfo)
 							.FirstOrDefault();
 
@@ -167,12 +269,12 @@ namespace HighVoltz.Professionbuddy
 
 					if (propInfo == null)
 					{
-						ProfessionbuddyBot.Log("{0}->{1} appears to be unused", elementName, attr.Key);
+						PBLog.Log("{0}->{1} appears to be unused", elementName, attr.Key);
 						continue;
 					}
 					// check if there is a type converter attached
 					var typeConverterAttr =
-						(TypeConverterAttribute)propInfo.GetCustomAttributes(typeof(TypeConverterAttribute), true).FirstOrDefault();
+						(TypeConverterAttribute) propInfo.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
 					if (typeConverterAttr != null)
 					{
 						try
@@ -184,12 +286,12 @@ namespace HighVoltz.Professionbuddy
 							}
 							else
 							{
-								ProfessionbuddyBot.Warn("The Type Converter {0} can not convert from string.", typeConverterAttr.ConverterTypeName);
+								PBLog.Warn("The Type Converter {0} can not convert from string.", typeConverterAttr.ConverterTypeName);
 							}
 						}
 						catch (Exception ex)
 						{
-							ProfessionbuddyBot.Warn("Type conversion for {0} has failed.\n{1}", typeInfo.Type.Name + attr.Key, ex);
+							PBLog.Warn("Type conversion for {0} has failed.\n{1}", typeInfo.Type.Name + attr.Key, ex);
 						}
 					}
 					else
@@ -227,111 +329,20 @@ namespace HighVoltz.Professionbuddy
 			}
 		}
 
-		public void SaveXml(string file)
-		{
-			ToXml(new XElement("Professionbuddy"), ProfessionbuddyBot.Instance.Branch).Save(file);
-			XmlPath = file;
-		}
-
-		private XElement ToXml(XElement xml, Composite comp)
-		{
-			foreach (var pbComp in comp.Children.OfType<IPBComponent>())
-			{
-				var comment = pbComp as CommentAction;
-				if (comment != null)
-				{
-					xml.Add(new XComment(comment.Text));
-				}
-				else
-				{
-
-					var elementAttr =
-						(PBXmlElementAttribute) pbComp.GetType()
-							.GetCustomAttributes(typeof (PBXmlElementAttribute), true)
-							.FirstOrDefault();
-
-					if (elementAttr == null)
-					{
-						ProfessionbuddyBot.Warn("{0} does not have a PBXmlElementAttribute attached", pbComp.GetType().Name);
-						continue;
-					}
-
-					var eleName = !string.IsNullOrEmpty(elementAttr.Name) ? elementAttr.Name : pbComp.GetType().Name;
-					var newElement = new XElement(eleName);
-
-					pbComp.OnProfileSave(newElement);
-					List<PropertyInfo> propInfoList =
-						pbComp.GetType()
-							.GetProperties()
-							.Where(p => p.GetCustomAttributes(typeof (PBXmlAttributeAttribute), true).Any())
-							.ToList();
-
-					foreach (PropertyInfo propInfo in propInfoList)
-					{
-						var xmlAttr =
-							propInfo.GetCustomAttributes(typeof (PBXmlAttributeAttribute), true)
-								.OfType<PBXmlAttributeAttribute>().FirstOrDefault();
-
-						if (xmlAttr == null) continue;
-
-						string attrName = !string.IsNullOrEmpty(xmlAttr.Name)
-							? xmlAttr.Name
-							: propInfo.Name;
-
-						if (newElement.Attribute(attrName) != null)
-							continue;
-						string value = "";
-						var typeConverterAttr =
-							(TypeConverterAttribute) propInfo.GetCustomAttributes(typeof (TypeConverterAttribute), true).FirstOrDefault();
-						if (typeConverterAttr != null)
-						{
-							try
-							{
-								var typeConverter = (TypeConverter) Activator.CreateInstance(Type.GetType(typeConverterAttr.ConverterTypeName));
-								if (typeConverter.CanConvertTo(typeof (string)))
-								{
-									value =
-										(string)
-											typeConverter.ConvertTo(null, CultureInfo.InvariantCulture, propInfo.GetValue(pbComp, null), typeof (string));
-								}
-								else
-									ProfessionbuddyBot.Warn("The TypeConvert {0} can not convert to string.", typeConverterAttr.ConverterTypeName);
-							}
-							catch (Exception ex)
-							{
-								ProfessionbuddyBot.Warn("Type conversion for {0}->{1} has failed.\n{2}", comp.GetType().Name, propInfo.Name, ex);
-							}
-						}
-						else
-						{
-							value = Convert.ToString(propInfo.GetValue(pbComp, null), CultureInfo.InvariantCulture);
-						}
-						newElement.Add(new XAttribute(attrName, value));
-					}
-					var composite = pbComp as Composite;
-					if (composite != null)
-						ToXml(newElement, composite);
-
-					xml.Add(newElement);
-				}
-			}
-			return xml;
-		}
-
 		#region Package
 
 		private const string PackageRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/document";
 
 		private const string ResourceRelationshipType = @"http://schemas.microsoft.com/opc/2006/sample/required-resource";
 
-		public void CreatePackage(string path, string profilePath)
+		public static void CreatePackage(string path, string profilePath)
 		{
 			try
 			{
 				Uri partUriProfile = PackUriHelper.CreatePartUri(new Uri(Path.GetFileName(profilePath), UriKind.Relative));
 				var hbProfiles = new List<LoadProfileAction>();
 
-				GetHbprofiles(profilePath, ProfessionbuddyBot.Instance.RootComposite, hbProfiles);
+				GetHbprofiles(profilePath, ProfessionbuddyBot.Instance.Branch, hbProfiles);
 				var hbProfileUrls = hbProfiles.ToDictionary(
 					l =>
 					{
@@ -364,11 +375,11 @@ namespace HighVoltz.Professionbuddy
 			}
 			catch (Exception ex)
 			{
-				ProfessionbuddyBot.Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 			}
 		}
 
-		private void CopyStream(Stream source, Stream target)
+		private static void CopyStream(Stream source, Stream target)
 		{
 			const int bufSize = 0x1000;
 			var buf = new byte[bufSize];
@@ -377,7 +388,7 @@ namespace HighVoltz.Professionbuddy
 				target.Write(buf, 0, bytesRead);
 		}
 
-		private string ExtractPart(PackagePart packagePart, string targetDirectory)
+		private static string ExtractPart(PackagePart packagePart, string targetDirectory)
 		{
 			string packageRelative = Uri.UnescapeDataString(packagePart.Uri.ToString().TrimStart('/'));
 			string fullPath = Path.Combine(targetDirectory, packageRelative);
@@ -390,12 +401,14 @@ namespace HighVoltz.Professionbuddy
 		}
 
 		#endregion
+
+		#endregion
 	}
 
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public class PBXmlAttributeAttribute : Attribute
 	{
-		public PBXmlAttributeAttribute() : this(null) { }
+		public PBXmlAttributeAttribute() : this(null) {}
 
 		public PBXmlAttributeAttribute(string name, string[] aliases = null)
 		{
@@ -406,8 +419,7 @@ namespace HighVoltz.Professionbuddy
 		public string Name { get; private set; }
 		private string[] Aliases { get; set; }
 
-		/// <summary>
-		///     Returns true if <paramref name="name" /> matches <see cref="Name" /> or a name inside
+		/// <summary>Returns true if <paramref name="name" /> matches <see cref="Name" /> or a name inside
 		///     <see cref="Aliases" />
 		/// </summary>
 		/// <param name="name">The name.</param>
@@ -435,8 +447,7 @@ namespace HighVoltz.Professionbuddy
 		public string Name { get; private set; }
 		private string[] Aliases { get; set; }
 
-		/// <summary>
-		///     Returns true if <paramref name="name" /> matches <see cref="Name" /> or a name inside
+		/// <summary>Returns true if <paramref name="name" /> matches <see cref="Name" /> or a name inside
 		///     <see cref="Aliases" />
 		/// </summary>
 		/// <param name="name">The name.</param>

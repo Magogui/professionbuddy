@@ -104,7 +104,7 @@ namespace HighVoltz.Professionbuddy.Components
 				// check if profile exists
 				if (!emptyProfile && !File.Exists(absPath))
 				{
-					ProfessionbuddyBot.Warn("{0}: {1}", ProfessionbuddyBot.Instance.Strings["Error_UnableToFindProfile"], Path);
+					PBLog.Warn("{0}: {1}", ProfessionbuddyBot.Instance.Strings["Error_UnableToFindProfile"], Path);
 					IsDone = true;
 					return;
 				}

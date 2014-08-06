@@ -5,12 +5,13 @@ using System.Drawing.Design;
 using System.Threading;
 using HighVoltz.Professionbuddy.Dynamic;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy.ComponentBase
 {
 	public abstract class FlowControlComposite : DynamicallyCompiledCodeComposite
 	{
-		protected FlowControlComposite(params UberBehaviorTree.Component[] children)
+		protected FlowControlComposite(params Component[] children)
 			: base(CsharpCodeType.BoolExpression, children)
 		{
 			Properties["IgnoreCanRun"] = new MetaProp(
@@ -98,7 +99,7 @@ namespace HighVoltz.Professionbuddy.ComponentBase
 			catch (Exception ex)
 			{
 				if (ex.GetType() != typeof (ThreadAbortException))
-					ProfessionbuddyBot.Warn("{0}\nErr:{1}", Title, ex);
+					PBLog.Warn("{0}\nErr:{1}", Title, ex);
 				return false;
 			}
 		}

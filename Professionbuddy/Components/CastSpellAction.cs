@@ -6,16 +6,16 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.Dynamic;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using Component = HighVoltz.UberBehaviorTree.Component;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy.Components
 {
@@ -309,7 +309,7 @@ namespace HighVoltz.Professionbuddy.Components
 					WoWSpell spell = WoWSpell.FromId((int)Entry.Value);
 					if (spell == null)
 					{
-						ProfessionbuddyBot.Warn("{0}: {1}", Strings["Error_UnableToFindSpellWithEntry"], Entry.Value.ToString(CultureInfo.InvariantCulture));
+						PBLog.Warn("{0}: {1}", Strings["Error_UnableToFindSpellWithEntry"], Entry.Value.ToString(CultureInfo.InvariantCulture));
 						return;
 					}
 
@@ -322,7 +322,7 @@ namespace HighVoltz.Professionbuddy.Components
 							spell.CastOnItem(item);
 						else
 						{
-							ProfessionbuddyBot.Warn(
+							PBLog.Warn(
 								"{0}: {1}",
 								Strings["Error_UnableToFindItemToCastOn"],
 								IsRecipe
@@ -376,7 +376,7 @@ namespace HighVoltz.Professionbuddy.Components
             }
             catch (Exception ex)
             {
-                ProfessionbuddyBot.Warn(ex.ToString());
+                PBLog.Warn(ex.ToString());
             }
         }
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
 
 namespace HighVoltz.Professionbuddy.Components
 {

@@ -118,7 +118,7 @@ namespace HighVoltz.Professionbuddy.Components
 							return;
 						}
 					}
-					ProfessionbuddyBot.Warn("NPC does not provide a train gossip option");
+					PBLog.Warn("NPC does not provide a train gossip option");
 					// we should not continue at this point.
 					TreeRoot.Stop();
 					return;
@@ -157,7 +157,7 @@ namespace HighVoltz.Professionbuddy.Components
 					if (numOfAvailableAbilities == 0)
 					{
 						IsDone = true;
-						ProfessionbuddyBot.Log("Done training");
+						PBLog.Log("Done training");
 						return;
 					}
 					Lua.DoString("BuyTrainerService(0) ");

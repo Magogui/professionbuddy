@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Buddy.Coroutines;
 using HighVoltz.Professionbuddy.ComponentBase;
-using HighVoltz.UberBehaviorTree;
+using HighVoltz.Professionbuddy.PropertyGridUtilities;
+using Component = HighVoltz.BehaviorTree.Component;
 
 namespace HighVoltz.Professionbuddy.Components
 {
@@ -11,13 +13,29 @@ namespace HighVoltz.Professionbuddy.Components
 	public sealed class WhileComposite : FlowControlComposite
 	{
 		public WhileComposite() : this(new Component[0]) { }
-		private WhileComposite(Component[] children) : base(children) { }
+
+		private WhileComposite(Component[] children) : base(children)
+		{
+			Properties["PulseSecondaryBot"] = new MetaProp(
+				"PulseSecondaryBot",
+				typeof(bool),
+				new DisplayNameAttribute(Strings["Composite_While_PulseSecondaryBot"]));
+
+			PulseSecondaryBot = true;
+		}
 
 		#region IPBComponent Members
 
+		[PBXmlAttribute]
+		public bool PulseSecondaryBot
+		{
+			get { return Properties.GetValue<bool>("PulseSecondaryBot"); }
+			set { Properties["PulseSecondaryBot"].Value = value; }
+		}
+
 		public override string Name
 		{
-			get { return ProfessionbuddyBot.Instance.Strings["FlowControl_While_LongName"]; }
+			get { return ProfessionbuddyBot.Instance.Strings["Composite_While_LongName"]; }
 		}
 
 		public override string Title
@@ -25,15 +43,16 @@ namespace HighVoltz.Professionbuddy.Components
 			get
 			{
 				return string.IsNullOrEmpty(Condition)
-						   ? ProfessionbuddyBot.Instance.Strings["FlowControl_While_LongName"]
-						   : (ProfessionbuddyBot.Instance.Strings["FlowControl_While_Name"] + " (" + Condition + ")");
+						   ? ProfessionbuddyBot.Instance.Strings["Composite_While_LongName"]
+						   : (ProfessionbuddyBot.Instance.Strings["Composite_While_Name"] + " (" + Condition + ")");
 			}
 		}
 
 		public override string Help
 		{
-			get { return ProfessionbuddyBot.Instance.Strings["FlowControl_While_Help"]; }
+			get { return ProfessionbuddyBot.Instance.Strings["Composite_While_Help"]; }
 		}
+
 
 		public override async Task<bool> Run()
 		{
@@ -49,7 +68,7 @@ namespace HighVoltz.Professionbuddy.Components
 				var pbComp = child as IPBComponent;
 				if (pbComp == null || pbComp.IsDone)
 					continue;
-				Selection = pbComp;
+				Selection = child;
 
 				var coroutine = new Coroutine(async () => await child.Run());
 				try
@@ -80,10 +99,12 @@ namespace HighVoltz.Professionbuddy.Components
 
 			if (CanRun())
 			{
-				PB.Branch.YieldToSecondaryBot = true;
+				if (PulseSecondaryBot)
+					await PB.ExecuteSecondaryBot();
 				Reset();
 				return true;
 			}
+
 			IsDone = true;
 			return false;
 		}

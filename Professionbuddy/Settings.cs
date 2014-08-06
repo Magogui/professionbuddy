@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
-using HighVoltz.UberBehaviorTree;
+using HighVoltz.BehaviorTree;
 using Styx;
 using Styx.Common;
 using Styx.Helpers;
@@ -162,7 +162,7 @@ namespace HighVoltz.Professionbuddy
                     }
                     catch (Exception ex)
                     {
-                        ProfessionbuddyBot.Warn(ex.ToString());
+                        PBLog.Warn(ex.ToString());
                     }
                 }
             }
@@ -188,7 +188,7 @@ namespace HighVoltz.Professionbuddy
                     }
                     catch (Exception ex)
                     {
-                        ProfessionbuddyBot.Warn(ex.ToString());
+                        PBLog.Warn(ex.ToString());
                     }
                 }
             }

@@ -188,7 +188,7 @@ namespace HighVoltz.Professionbuddy.Components
 				}
 				if (_loc == WoWPoint.Zero)
 				{
-					ProfessionbuddyBot.Warn(Strings["Error_UnableToFindLocationFromDB"]);
+					PBLog.Warn(Strings["Error_UnableToFindLocationFromDB"]);
 					IsDone = true;
 					return;
 				}
@@ -215,7 +215,7 @@ namespace HighVoltz.Professionbuddy.Components
 				else if (_concludingSw.ElapsedMilliseconds >= 2000)
 				{
 					IsDone = true;
-					ProfessionbuddyBot.Log("MoveTo Action completed for type {0}", MoveType);
+					PBLog.Log("MoveTo Action completed for type {0}", MoveType);
 					_concludingSw.Stop();
 					_concludingSw.Reset();
 				}

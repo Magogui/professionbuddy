@@ -288,7 +288,7 @@ namespace HighVoltz.Professionbuddy.Components
 	        }
 	        catch (Exception ex)
 	        {
-		        ProfessionbuddyBot.Warn(ex.ToString());
+		        PBLog.Warn(ex.ToString());
 	        }
         }
 
@@ -313,7 +313,7 @@ namespace HighVoltz.Professionbuddy.Components
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
             {
-                ProfessionbuddyBot.Warn(Strings["Error_UnableToFindAuctioneer"]);
+                PBLog.Warn(Strings["Error_UnableToFindAuctioneer"]);
             }
             if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
             {
@@ -345,7 +345,7 @@ namespace HighVoltz.Professionbuddy.Components
                             }
                         }
                         else
-                            ProfessionbuddyBot.Warn("item cache of {0} is null", aucKV.Value);
+                            PBLog.Warn("item cache of {0} is null", aucKV.Value);
                     }
                 }
             }
@@ -365,7 +365,7 @@ namespace HighVoltz.Professionbuddy.Components
                             uint itemID;
                             if (!uint.TryParse(entry.Trim(), out itemID))
                             {
-                                ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+                                PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
                                 continue;
                             }
                             if (myAucs.ContainsKey(itemID))
@@ -474,7 +474,7 @@ return soldCnt";
             var numCanceled = Lua.GetReturnVal<int>(lua, 0);
             if (numCanceled > 0)
             {
-                ProfessionbuddyBot.Log("Canceled {0} x{1}", ae.Name, numCanceled);
+                PBLog.Log("Canceled {0} x{1}", ae.Name, numCanceled);
             }
             return true;
         }

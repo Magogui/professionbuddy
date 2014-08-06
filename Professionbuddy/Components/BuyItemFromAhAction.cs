@@ -346,7 +346,7 @@ namespace HighVoltz.Professionbuddy.Components
                 movetoPoint = MoveToAction.GetLocationFromDB(MoveToAction.MoveToType.NearestAH, 0);
             if (movetoPoint == WoWPoint.Zero)
             {
-                ProfessionbuddyBot.Warn(Strings["Error_UnableToFindAuctioneer"]);
+                PBLog.Warn(Strings["Error_UnableToFindAuctioneer"]);
             }
             if (movetoPoint.Distance(StyxWoW.Me.Location) > 4.5)
             {
@@ -376,7 +376,7 @@ namespace HighVoltz.Professionbuddy.Components
                     uint itemID;
                     if (!uint.TryParse(entry.Trim(), out itemID))
                     {
-                        ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+                        PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
                         continue;
                     }
                     idList.Add(itemID);
@@ -384,7 +384,7 @@ namespace HighVoltz.Professionbuddy.Components
             }
             else
             {
-                ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+                PBLog.Warn(Strings["Error_NoItemEntries"]);
                 IsDone = true;
             }
 

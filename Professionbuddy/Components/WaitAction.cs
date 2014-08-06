@@ -100,7 +100,7 @@ namespace HighVoltz.Professionbuddy.Components
 			catch (Exception ex)
 			{
 				if (ex.GetType() != typeof(ThreadAbortException))
-					ProfessionbuddyBot.Warn("{0}:({1})\n{2}", Strings["Action_WaitAction_Name"], Condition, ex);
+					PBLog.Warn("{0}:({1})\n{2}", Strings["Action_WaitAction_Name"], Condition, ex);
 			}
 		}
 

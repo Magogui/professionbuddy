@@ -378,9 +378,9 @@ namespace HighVoltz.Professionbuddy.Components
 					if (done)
 					{
 						if (itemID == 0)
-							ProfessionbuddyBot.Log("Done withdrawing all items from {0} Bank", Bank);
+							PBLog.Log("Done withdrawing all items from {0} Bank", Bank);
 						else
-							ProfessionbuddyBot.Log("Done withdrawing {0} itemID:{1} from {2} Bank", _withdrawCnt, itemID, Bank);
+							PBLog.Log("Done withdrawing {0} itemID:{1} from {2} Bank", _withdrawCnt, itemID, Bank);
 						_itemList.Remove(itemID);
 						_withdrawCnt = 0;
 					}
@@ -443,7 +443,7 @@ namespace HighVoltz.Professionbuddy.Components
             if (movetoPoint == WoWPoint.Zero)
             {
                 IsDone = true;
-                ProfessionbuddyBot.Warn(Strings["Error_UnableToFindBank"]);
+                PBLog.Warn(Strings["Error_UnableToFindBank"]);
             }
             if (movetoPoint.Distance(StyxWoW.Me.Location) > 4)
             {
@@ -457,7 +457,7 @@ namespace HighVoltz.Professionbuddy.Components
             else
             {
                 IsDone = true;
-                ProfessionbuddyBot.Warn(Strings["Error_UnableToFindBank"]);
+                PBLog.Warn(Strings["Error_UnableToFindBank"]);
             }
         }
 
@@ -476,7 +476,7 @@ namespace HighVoltz.Professionbuddy.Components
                             uint itemID;
                             if (!uint.TryParse(entry.Trim(), out itemID))
                             {
-                                ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+                                PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
                                 continue;
                             }
                             if (WithdrawAdditively)
@@ -509,7 +509,7 @@ namespace HighVoltz.Professionbuddy.Components
                 _queueServerSW = new Stopwatch();
                 _queueServerSW.Start();
                 Lua.DoString("for i=GetNumGuildBankTabs(), 1, -1 do QueryGuildBankTab(i) end ");
-                ProfessionbuddyBot.Log("Queuing server for gbank info");
+                PBLog.Log("Queuing server for gbank info");
                 return 0;
             }
             if (_queueServerSW.ElapsedMilliseconds < 2000)

@@ -79,11 +79,11 @@ namespace HighVoltz.Professionbuddy.Components
 			if (IsDone)
 			{
 				if (_bot == null)
-					ProfessionbuddyBot.Warn("No bot with name: {0} could be found", BotName);
+					PBLog.Warn("No bot with name: {0} could be found", BotName);
 				else if (ProfessionbuddyBot.Instance.SecondaryBot == _bot)
-					ProfessionbuddyBot.Log("Successfuly changed secondary bot to: {0}", BotName);
+					PBLog.Log("Successfuly changed secondary bot to: {0}", BotName);
 				else
-					ProfessionbuddyBot.Warn("Unable to switch secondary bot to: {0}", BotName);
+					PBLog.Warn("Unable to switch secondary bot to: {0}", BotName);
 			}
 		}
 

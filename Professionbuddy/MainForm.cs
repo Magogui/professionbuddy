@@ -9,15 +9,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
 using HighVoltz.Professionbuddy.Components;
 using HighVoltz.Professionbuddy.Dynamic;
 using HighVoltz.Professionbuddy.PropertyGridUtilities;
-using HighVoltz.UberBehaviorTree;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Component = HighVoltz.UberBehaviorTree.Component;
+using Component = HighVoltz.BehaviorTree.Component;
 using PBAction = HighVoltz.Professionbuddy.ComponentBase.PBAction;
 
 namespace HighVoltz.Professionbuddy
@@ -251,12 +251,12 @@ namespace HighVoltz.Professionbuddy
 							? Path.ChangeExtension(saveFileDialog.FileName, ".xml")
 							: ProfessionbuddyBot.Instance.CurrentProfile.XmlPath)
 						: saveFileDialog.FileName;
-					ProfessionbuddyBot.Log("Saving profile to {0}", saveFileDialog.FileName);
+					PBLog.Log("Saving profile to {0}", saveFileDialog.FileName);
 					if (ProfessionbuddyBot.Instance.CurrentProfile != null)
 					{
 						ProfessionbuddyBot.Instance.CurrentProfile.SaveXml(xmlfile);
 						if (zip)
-							ProfessionbuddyBot.Instance.CurrentProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
+							PbProfile.CreatePackage(saveFileDialog.FileName, xmlfile);
 					}
 				}
 				ProfessionbuddyBot.Instance.MySettings.LastProfile = saveFileDialog.FileName;
@@ -282,8 +282,7 @@ namespace HighVoltz.Professionbuddy
 						Recipe recipe = ProfessionbuddyBot.Instance.TradeSkillList[tv.TradeIndex].KnownRecipes[cell.RecipeID];
 						int repeat;
 						int.TryParse(toolStripAddNum.Text, out repeat);
-						CastSpellAction.RepeatCalculationType repeatType =
-							CastSpellAction.RepeatCalculationType.Specific;
+						var repeatType = CastSpellAction.RepeatCalculationType.Specific;
 						switch (toolStripAddCombo.SelectedIndex)
 						{
 							case 1:
@@ -353,7 +352,7 @@ namespace HighVoltz.Professionbuddy
 		private void ToolStripSecretButtonClick(object sender, EventArgs e)
 		{
 			Logging.Write("** ActionSelector **");
-			PrintComposite(ProfessionbuddyBot.Instance.RootComposite, 0);
+			PrintComposite(ProfessionbuddyBot.Instance.Branch, 0);
 		}
 
 		private void PrintComposite(Component comp, int cnt)
@@ -406,7 +405,7 @@ namespace HighVoltz.Professionbuddy
 			}
 			catch (Exception ex)
 			{
-				ProfessionbuddyBot.Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 			}
 		}
 
@@ -499,7 +498,7 @@ namespace HighVoltz.Professionbuddy
 			}
 			catch (Exception ex)
 			{
-				ProfessionbuddyBot.Warn(ex.ToString());
+				PBLog.Warn(ex.ToString());
 			}
 		}
 
@@ -681,7 +680,7 @@ namespace HighVoltz.Professionbuddy
 			}
 			RightSideTab.TabPages.Add("ProfileSettings", ProfessionbuddyBot.Instance.Strings["UI_ProfileSettings"]);
 
-			_settingsPropertyGrid = new PropertyGrid() {Dock = DockStyle.Fill};
+			_settingsPropertyGrid = new PropertyGrid {Dock = DockStyle.Fill};
 			RightSideTab.TabPages["ProfileSettings"].Controls.Add(_settingsPropertyGrid);
 
 			_profilePropertyBag = new PropertyBag();

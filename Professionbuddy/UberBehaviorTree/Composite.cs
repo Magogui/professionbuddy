@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace HighVoltz.UberBehaviorTree
+namespace HighVoltz.BehaviorTree
 {
 	public abstract class Composite : Component
 	{

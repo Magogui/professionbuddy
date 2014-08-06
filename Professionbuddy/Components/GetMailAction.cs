@@ -290,7 +290,7 @@ namespace HighVoltz.Professionbuddy.Components
 					movetoPoint = _mailbox.Location;
 				if (movetoPoint == WoWPoint.Zero)
 				{
-					ProfessionbuddyBot.Warn(Strings["Error_UnableToFindMailbox"]);
+					PBLog.Warn(Strings["Error_UnableToFindMailbox"]);
 					return;
 				}
 
@@ -358,7 +358,7 @@ namespace HighVoltz.Professionbuddy.Components
 				IsDone = true;
 			if (IsDone)
 			{
-				ProfessionbuddyBot.Log("Mail retrieval of items:{0} finished", GetMailType);
+				PBLog.Log("Mail retrieval of items:{0} finished", GetMailType);
 			}
 		}
 
@@ -373,7 +373,7 @@ namespace HighVoltz.Professionbuddy.Components
 					uint itemID;
 					if (!uint.TryParse(entry.Trim(), out itemID))
 					{
-						ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+						PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 						continue;
 					}
 					idList.Add(itemID);
@@ -381,7 +381,7 @@ namespace HighVoltz.Professionbuddy.Components
 			}
 			else
 			{
-				ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+				PBLog.Warn(Strings["Error_NoItemEntries"]);
 				IsDone = true;
 			}
 			return idList;

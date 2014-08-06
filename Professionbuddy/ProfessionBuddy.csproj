@@ -270,9 +270,9 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="UberBehaviorTree\UberBehaviorTree.csproj">
+    <ProjectReference Include="UberBehaviorTree\BehaviorTree.csproj">
       <Project>{e0206e55-5441-4978-aa5b-d69358e48437}</Project>
-      <Name>UberBehaviorTree</Name>
+      <Name>BehaviorTree</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

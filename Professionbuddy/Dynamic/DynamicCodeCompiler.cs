@@ -6,9 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
+using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
-using HighVoltz.UberBehaviorTree;
 using Microsoft.CSharp;
 using System.Threading.Tasks;
 using Styx.CommonBot.Coroutines;
@@ -273,7 +272,7 @@ namespace HighVoltz.Professionbuddy.Dynamic
 						{
 							if (dynamicProperty != null)
 							{
-								ProfessionbuddyBot.Warn(
+								PBLog.Warn(
 									"{0}->{1}\nCompile Error : {2}\n",
 									icsc.AttachedComponent.Name,
 									dynamicProperty.Name,
@@ -282,7 +281,7 @@ namespace HighVoltz.Professionbuddy.Dynamic
 							}
 							else
 							{
-								ProfessionbuddyBot.Warn("{0}\nCompile Error : {1}\n", icsc.AttachedComponent.Title, error.ErrorText);
+								PBLog.Warn("{0}\nCompile Error : {1}\n", icsc.AttachedComponent.Title, error.ErrorText);
 							}
 							if (!compositesToRefreshList.Contains(icsc.AttachedComponent))
 								compositesToRefreshList.Add(icsc.AttachedComponent);
@@ -290,7 +289,7 @@ namespace HighVoltz.Professionbuddy.Dynamic
 						}
 						else
 						{
-							ProfessionbuddyBot.Warn("Unable to link action that produced Error: {0}", error.ErrorText);
+							PBLog.Warn("Unable to link action that produced Error: {0}", error.ErrorText);
 						}
 					}
 				}

@@ -261,7 +261,7 @@ namespace HighVoltz.Professionbuddy.Components
 								uint itemID;
 								if (!uint.TryParse(entry.Trim(), out itemID))
 								{
-									ProfessionbuddyBot.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
+									PBLog.Warn(Strings["Error_NotAValidItemEntry"], entry.Trim());
 									continue;
 								}
 								idList.Add(itemID);
@@ -269,7 +269,7 @@ namespace HighVoltz.Professionbuddy.Components
 						}
 						else
 						{
-							ProfessionbuddyBot.Warn(Strings["Error_NoItemEntries"]);
+							PBLog.Warn(Strings["Error_NoItemEntries"]);
 							IsDone = true;
 							return;
 						}
@@ -294,7 +294,7 @@ namespace HighVoltz.Professionbuddy.Components
 				}
 				if (_concludingSw.ElapsedMilliseconds >= 2000)
 				{
-					ProfessionbuddyBot.Log("BuyItemAction Completed");
+					PBLog.Log("BuyItemAction Completed");
 					IsDone = true;
 				}
 			}
@@ -308,7 +308,7 @@ namespace HighVoltz.Professionbuddy.Components
 		{
 			string lua = string.Format(BuyItemFormat, id, count);
 			bool found = Lua.GetReturnVal<int>(lua, 0) == 1;
-			ProfessionbuddyBot.Log("item {0} {1}", id, found ? "bought " : "not found");
+			PBLog.Log("item {0} {1}", id, found ? "bought " : "not found");
 		}
 
 		public override void Reset()
