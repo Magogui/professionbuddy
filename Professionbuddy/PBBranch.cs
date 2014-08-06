@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using Buddy.Coroutines;
 using HighVoltz.BehaviorTree;
 using HighVoltz.Professionbuddy.ComponentBase;
+using HighVoltz.Professionbuddy.Components;
 using Styx;
 using Styx.Common;
 
@@ -10,11 +13,21 @@ namespace HighVoltz.Professionbuddy
 {
 	[PBXmlElement("Professionbuddy")]
     public class PBBranch : Composite
-    {
+	{
+		private bool _attachedTreehooks;
 		public PBBranch(params Component[] children): base(children){}
 
 		public async override Task<bool> Run()
 		{
+			if (!_attachedTreehooks)
+			{
+				var attachToTreeHookActions = new List<AttachToTreeHookAction>();
+				Util.GetListOfComponentsByType(this, attachToTreeHookActions);
+				foreach (var action in attachToTreeHookActions.Where(a => !a.IsDone && a.AttachOnStart))
+					await action;
+				_attachedTreehooks = true;
+			}
+
 			if (!CanExecuteChildren())
 				return false;
 
@@ -55,6 +68,7 @@ namespace HighVoltz.Professionbuddy
 
 		public void Reset()
 		{
+			_attachedTreehooks = false;
 			Selection = null;
 			Children.OfType<IPBComponent>().ForEach(c => c.Reset());
 		}

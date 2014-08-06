@@ -26,13 +26,6 @@ namespace HighVoltz.Professionbuddy.Components
 
 		#region IPBComponent Members
 
-		[PBXmlAttribute]
-		public bool PulseSecondaryBot
-		{
-			get { return Properties.GetValue<bool>("PulseSecondaryBot"); }
-			set { Properties["PulseSecondaryBot"].Value = value; }
-		}
-
 		public override string Name
 		{
 			get { return ProfessionbuddyBot.Instance.Strings["Composite_While_LongName"]; }
@@ -120,6 +113,13 @@ namespace HighVoltz.Professionbuddy.Components
 		}
 
 		#endregion
+
+		[PBXmlAttribute]
+		public bool PulseSecondaryBot
+		{
+			get { return Properties.GetValue<bool>("PulseSecondaryBot"); }
+			set { Properties["PulseSecondaryBot"].Value = value; }
+		}
 
     }
 }

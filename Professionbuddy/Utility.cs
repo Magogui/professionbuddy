@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using HighVoltz.BehaviorTree;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
@@ -21,6 +22,7 @@ using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWCache;
 using Styx.WoWInternals.WoWObjects;
+using Action = System.Action;
 
 namespace HighVoltz.Professionbuddy
 {
@@ -415,6 +417,25 @@ namespace HighVoltz.Professionbuddy
 		public static bool IsProfessionbuddyProfile(XElement rootElement)
 		{
 			return rootElement != null && rootElement.Name == "Professionbuddy";
+		}
+
+		public static List<T> GetListOfComponentsByType<T>(Component comp, List<T> list) where T : Component
+		{
+			if (list == null)
+				list = new List<T>();
+			if (comp.GetType() == typeof(T))
+			{
+				list.Add((T)comp);
+			}
+			var groupComposite = comp as Composite;
+			if (groupComposite != null)
+			{
+				foreach (Component c in groupComposite.Children)
+				{
+					GetListOfComponentsByType(c, list);
+				}
+			}
+			return list;
 		}
 
 	}

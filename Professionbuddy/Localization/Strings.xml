@@ -97,8 +97,9 @@
     <!-- AttachToTreehook -->
     <Action_AttachToTreehook_TreeHookName>TreeHook Name</Action_AttachToTreehook_TreeHookName>
     <Action_AttachToTreehook_Name>Attach to Treehook</Action_AttachToTreehook_Name>
-    <Action_AttachToTreehook_Help>This action will attach a SubRoutine to a Treehook. The Subroutine is automatically detached from the TreeHook when bot is stopped or a new Professionbuddy profile is loaded. Calling this action more than once has no effect, the TreeHook is only attached the first time it is executed.</Action_AttachToTreehook_Help>
-    
+    <Action_AttachToTreehook_Help>This action will attach a SubRoutine to a Treehook. The Subroutine is automatically detached from the TreeHook when bot is stopped or a new Professionbuddy profile is loaded. Calling this action more than once has no effect, the TreeHook is only attached the first time it is executed. The TreeHook will be attached to on profile startup if the 'Attach on Start' property value is set to 'true'</Action_AttachToTreehook_Help>
+    <Action_AttachToTreehook_AttachOnStart>Attach on Start</Action_AttachToTreehook_AttachOnStart>
+ 
     <!-- BuyItemAction-->
     <Action_BuyItemAction_Help>This action will buy items from a merchant, either a specific item or any materials the merchant has that are needed for recipes in the action tree. If 'Buy Additively' is set to true this will buy the axact amount of items regardless of the item count player has in bags</Action_BuyItemAction_Help>
     <Action_BuyItemAction_Name>Buy Item</Action_BuyItemAction_Name>

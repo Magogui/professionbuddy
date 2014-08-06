@@ -30,7 +30,14 @@ namespace HighVoltz.Professionbuddy.Components
 				new DisplayNameAttribute(
 					ProfessionbuddyBot.Instance.Strings["Action_AttachToTreehook_TreeHookName"]));
 
+			Properties["AttachOnStart"] = new MetaProp(
+			"AttachOnStart",
+				typeof(bool),
+				new DisplayNameAttribute(
+					ProfessionbuddyBot.Instance.Strings["Action_AttachToTreehook_AttachOnStart"]));
+
 			SubRoutineName = TreeHookName = "";
+			AttachOnStart = false;
 	    }
 
 		[PBXmlAttribute]
@@ -45,6 +52,13 @@ namespace HighVoltz.Professionbuddy.Components
 		{
 			get { return Properties.GetValue<string>("TreeHookName"); }
 			set { Properties["TreeHookName"].Value = value; }
+		}
+
+		[PBXmlAttribute]
+		public bool AttachOnStart
+		{
+			get { return Properties.GetValue<bool>("AttachOnStart"); }
+			set { Properties["AttachOnStart"].Value = value; }
 		}
 
         public override string Name
@@ -62,28 +76,28 @@ namespace HighVoltz.Professionbuddy.Components
 			get { return ProfessionbuddyBot.Instance.Strings["Action_AttachToTreehook_Help"]; }
         }
 
+		public override bool IsDone { get { return _ranonce; } }
+
 		protected async override Task Run()
 		{
-			if (_ranonce)
+			try
 			{
-				IsDone = true;
-				return;
-			}
+				if (!SubRoutineComposite.GetSubRoutineMyName(SubRoutineName, out _sub))
+				{
+					PBLog.Warn("{0}: {1}.", ProfessionbuddyBot.Instance.Strings["Error_SubroutineNotFound"], SubRoutineName);
+					return;
+				}
 
-			if (!SubRoutineComposite.GetSubRoutineMyName(SubRoutineName, out _sub))
+				_treeHookStub = new ActionRunCoroutine(ctx => SubRoutineExecutor());
+				TreeHooks.Instance.InsertHook(TreeHookName, 0, _treeHookStub);
+				BotEvents.Profile.OnNewOuterProfileLoaded += ProfileOnOnNewOuterProfileLoaded;
+				BotEvents.OnBotStopped += BotEvents_OnBotStopped;
+				PBLog.Debug("Attached the '{0}' SubRoutine to the {1} TreeHook", SubRoutineName, TreeHookName);
+			}
+			finally
 			{
-				PBLog.Warn("{0}: {1}.", ProfessionbuddyBot.Instance.Strings["Error_SubroutineNotFound"], SubRoutineName);
-				IsDone = true;
-				return;
+				_ranonce = true;
 			}
-
-			_treeHookStub = new ActionRunCoroutine(ctx => SubRoutineExecutor());
-			TreeHooks.Instance.InsertHook(TreeHookName, 0, _treeHookStub);
-			BotEvents.Profile.OnNewOuterProfileLoaded += ProfileOnOnNewOuterProfileLoaded;
-			BotEvents.OnBotStopped += BotEvents_OnBotStopped;
-			PBLog.Debug("Attached the '{0}' SubRoutine to the {1} TreeHook", SubRoutineName, TreeHookName);
-			_ranonce = true;
-			IsDone = true;
 		}
 
 		private async Task<bool> SubRoutineExecutor()

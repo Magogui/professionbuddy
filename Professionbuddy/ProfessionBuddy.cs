@@ -802,26 +802,6 @@ namespace HighVoltz.Professionbuddy
 				},"Changing SecondaryBot");
 		}
 
-		internal static List<T> GetListOfActionsByType<T>(Composite comp, List<T> list) where T : Composite
-		{
-			if (list == null)
-				list = new List<T>();
-			if (comp.GetType() == typeof(T))
-			{
-				list.Add((T)comp);
-			}
-			var groupComposite = comp as GroupComposite;
-			if (groupComposite != null)
-			{
-				foreach (Composite c in groupComposite.Children)
-				{
-					GetListOfActionsByType(c, list);
-				}
-			}
-			return list;
-		}
-
-
 		#endregion
 
 		#region Utilies
